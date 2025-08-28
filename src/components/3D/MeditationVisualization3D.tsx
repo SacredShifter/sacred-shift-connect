@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, Stars, Sphere, Box, Torus, Icosahedron } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Environment, Stars } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
@@ -27,8 +27,10 @@ function BreathingOrb() {
     }
   });
 
+  const sphereGeometry = useMemo(() => new THREE.SphereGeometry(1, 32, 32), []);
+
   return (
-    <Sphere ref={meshRef} args={[1, 32, 32]} position={[0, 0, 0]}>
+    <mesh ref={meshRef} geometry={sphereGeometry} position={[0, 0, 0]}>
       <meshPhongMaterial 
         color="#4ade80" 
         transparent 
@@ -36,7 +38,7 @@ function BreathingOrb() {
         emissive="#22c55e"
         emissiveIntensity={0.2}
       />
-    </Sphere>
+    </mesh>
   );
 }
 
@@ -68,10 +70,12 @@ function LovingKindnessHeart() {
     }
   });
 
+  const icosahedronGeometry = useMemo(() => new THREE.IcosahedronGeometry(0.3), []);
+
   return (
     <group ref={groupRef}>
       {hearts.map((heart) => (
-        <Icosahedron key={heart.id} args={[0.3]} position={[heart.radius, 0, 0]}>
+        <mesh key={heart.id} geometry={icosahedronGeometry} position={[heart.radius, 0, 0]}>
           <meshPhongMaterial 
             color="#f472b6" 
             transparent 
@@ -79,7 +83,7 @@ function LovingKindnessHeart() {
             emissive="#ec4899"
             emissiveIntensity={0.3}
           />
-        </Icosahedron>
+        </mesh>
       ))}
     </group>
   );
@@ -101,10 +105,12 @@ function ChakraWheels() {
     }
   });
 
+  const torusGeometry = useMemo(() => new THREE.TorusGeometry(0.5, 0.1, 16, 32), []);
+
   return (
     <group ref={groupRef}>
       {chakraColors.map((color, i) => (
-        <Torus key={i} args={[0.5, 0.1, 16, 32]} position={[0, -3 + i, 0]}>
+        <mesh key={i} geometry={torusGeometry} position={[0, -3 + i, 0]}>
           <meshPhongMaterial 
             color={color} 
             transparent 
@@ -112,7 +118,7 @@ function ChakraWheels() {
             emissive={color}
             emissiveIntensity={0.4}
           />
-        </Torus>
+        </mesh>
       ))}
     </group>
   );
@@ -128,8 +134,8 @@ function MindfulnessGeometry() {
         (Math.random() - 0.5) * 6,
         (Math.random() - 0.5) * 4,
         (Math.random() - 0.5) * 6
-      ],
-      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI],
+      ] as [number, number, number],
+      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI] as [number, number, number],
       type: i % 3
     })), 
   []);
@@ -146,37 +152,22 @@ function MindfulnessGeometry() {
     }
   });
 
-  const ShapeComponent = ({ type, position, rotation }: any) => {
+  const boxGeometry = useMemo(() => new THREE.BoxGeometry(0.3, 0.3, 0.3), []);
+  const sphereGeometry = useMemo(() => new THREE.SphereGeometry(0.2, 16, 16), []);
+  const icosahedronGeometry = useMemo(() => new THREE.IcosahedronGeometry(0.2), []);
+
+  const ShapeComponent = ({ type, position, rotation }: { type: number; position: [number, number, number]; rotation: [number, number, number] }) => {
+    let geometry;
     if (type === 0) {
-      return (
-        <Box args={[0.3, 0.3, 0.3]} position={position} rotation={rotation}>
-          <meshPhongMaterial 
-            color="#06b6d4" 
-            transparent 
-            opacity={0.6}
-            emissive="#0891b2"
-            emissiveIntensity={0.2}
-          />
-        </Box>
-      );
+      geometry = boxGeometry;
+    } else if (type === 1) {
+      geometry = sphereGeometry;
+    } else {
+      geometry = icosahedronGeometry;
     }
-    
-    if (type === 1) {
-      return (
-        <Sphere args={[0.2, 16, 16]} position={position} rotation={rotation}>
-          <meshPhongMaterial 
-            color="#06b6d4" 
-            transparent 
-            opacity={0.6}
-            emissive="#0891b2"
-            emissiveIntensity={0.2}
-          />
-        </Sphere>
-      );
-    }
-    
+
     return (
-      <Icosahedron args={[0.2]} position={position} rotation={rotation}>
+      <mesh geometry={geometry} position={position} rotation={rotation}>
         <meshPhongMaterial 
           color="#06b6d4" 
           transparent 
@@ -184,7 +175,7 @@ function MindfulnessGeometry() {
           emissive="#0891b2"
           emissiveIntensity={0.2}
         />
-      </Icosahedron>
+      </mesh>
     );
   };
 
