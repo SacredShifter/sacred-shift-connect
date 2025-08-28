@@ -34,6 +34,7 @@ import Grove from "./pages/Grove";
 import Liberation from "./pages/Liberation";
 import Shift from './pages/Shift';
 import Meditation from './pages/Meditation';
+import Learning3D from './pages/Learning3D';
 
 
 function App() {
@@ -70,6 +71,7 @@ function App() {
                 <Route path="/grove" element={<Grove />} />
                 <Route path="/liberation" element={<Liberation />} />
                 <Route path="/guidebook" element={<Guidebook />} />
+                <Route path="/learning-3d" element={<Learning3D />} />
                 <Route path="/constellation" element={<ConstellationMapper />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/profile" element={<Profile />} />
