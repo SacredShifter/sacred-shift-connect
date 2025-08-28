@@ -443,6 +443,12 @@ export function GroupMeditationSession({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  console.log('GroupMeditationSession render:', { 
+    isPlaying: sessionState.is_playing, 
+    sessionType: sessionState.session_type,
+    participantCount: participants.length 
+  });
+
   const progress = ((sessionState.session_duration * 60 - timeRemaining) / (sessionState.session_duration * 60)) * 100;
   const selectedMeditation = meditationTypes.find(t => t.id === sessionState.session_type);
 
@@ -493,32 +499,21 @@ export function GroupMeditationSession({
         )}
       </AnimatePresence>
 
-      {/* Floating Session Timer (when active) */}
+      {/* Floating Session Timer (when active) - Minimized */}
       <AnimatePresence>
         {sessionState.is_playing && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50"
+            className="fixed top-4 left-4 z-50"
           >
-            <Card className="bg-black/20 backdrop-blur-md border-white/10 text-white">
-              <CardContent className="p-6 text-center space-y-4">
-                <motion.div 
-                  className="text-4xl font-light tracking-wider"
-                  animate={{ opacity: [0.7, 1, 0.7] }}
-                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                >
-                  {formatTime(timeRemaining)}
-                </motion.div>
-                <Progress 
-                  value={progress} 
-                  className="h-1 bg-white/20"
-                />
-                <p className="text-sm text-white/80">{selectedMeditation?.guidance}</p>
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <Users className="h-3 w-3" />
-                  {participants.length} souls in circle
+            <Card className="bg-black/30 backdrop-blur-sm border-white/20 text-white">
+              <CardContent className="p-3 flex items-center gap-3 text-sm">
+                <div className="font-mono">{formatTime(timeRemaining)}</div>
+                <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
+                  <Users className="h-3 w-3 mr-1" />
+                  {participants.length}
                 </Badge>
               </CardContent>
             </Card>
@@ -978,22 +973,22 @@ export function GroupMeditationSession({
         )}
       </AnimatePresence>
 
-      {/* Minimized Controls During Meditation */}
+      {/* Minimized Host Controls During Meditation */}
       <AnimatePresence>
         {sessionState.is_playing && isHost && (
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-8 right-8 z-50"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+            className="fixed bottom-4 right-4 z-50"
           >
-            <Card className="bg-black/20 backdrop-blur-md border-white/10">
-              <CardContent className="p-3 flex items-center gap-2">
+            <Card className="bg-black/30 backdrop-blur-sm border-white/20">
+              <CardContent className="p-2 flex items-center gap-1">
                 <Button
                   variant="ghost" 
                   size="sm" 
                   onClick={pauseSession}
-                  className="text-white/80 hover:text-white hover:bg-white/10"
+                  className="text-white/70 hover:text-white hover:bg-white/10 p-2"
                 >
                   <Pause className="h-4 w-4" />
                 </Button>
@@ -1001,7 +996,7 @@ export function GroupMeditationSession({
                   variant="ghost" 
                   size="sm" 
                   onClick={stopSession}
-                  className="text-white/80 hover:text-white hover:bg-white/10"
+                  className="text-white/70 hover:text-white hover:bg-white/10 p-2"
                 >
                   <Square className="h-4 w-4" />
                 </Button>
