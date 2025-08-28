@@ -205,7 +205,23 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
   };
 
   const createPost = async () => {
-    if (!user || !newPost.trim()) return;
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be signed in to create a post",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!newPost.trim()) {
+      toast({
+        title: "Post Content Required",
+        description: "Please write something before sharing your sacred energy",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
       const consciousnessMetadata = {
