@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Camera, Video, Mic, Sparkles, Heart, MessageCircle, Share2, Zap, Star } from 'lucide-react';
 import { ImageUploader } from '@/components/ImageUploader';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
+import { VideoRecorder } from '@/components/VideoRecorder';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -74,7 +75,9 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
   const [chakraTag, setChakraTag] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
+  const [recordedVideo, setRecordedVideo] = useState<Blob | null>(null);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+  const [showVideoRecorder, setShowVideoRecorder] = useState(false);
 
   const consciousnessStates = [
     { value: 'elevated', label: '✨ Elevated', color: 'hsl(var(--primary))' },
@@ -169,6 +172,15 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
     });
   };
 
+  const handleVideoRecording = (videoBlob: Blob) => {
+    setRecordedVideo(videoBlob);
+    setShowVideoRecorder(false);
+    toast({
+      title: "Video Recorded",
+      description: "Sacred moments captured and ready to share 🎬"
+    });
+  };
+
   const handleMagicEnhancement = () => {
     if (newPost.trim()) {
       const magicPhrases = [
@@ -227,6 +239,7 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
       setChakraTag('');
       setSelectedImage(null);
       setRecordedAudio(null);
+      setRecordedVideo(null);
       fetchPosts();
 
       toast({
@@ -350,13 +363,17 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex space-x-2">
               <ImageUploader onImageSelect={handleImageSelect} />
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => toast({ description: 'Video recording coming soon! 🎥' })}
-              >
-                <Video className="w-4 h-4" />
-              </Button>
+              {showVideoRecorder ? (
+                <VideoRecorder onVideoComplete={handleVideoRecording} />
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowVideoRecorder(true)}
+                >
+                  <Video className="w-4 h-4" />
+                </Button>
+              )}
               {showVoiceRecorder ? (
                 <VoiceRecorder onRecordingComplete={handleVoiceRecording} />
               ) : (
@@ -379,7 +396,7 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
           </div>
           
           {/* File previews */}
-          {(selectedImage || recordedAudio) && (
+          {(selectedImage || recordedAudio || recordedVideo) && (
             <div className="flex gap-2 flex-wrap">
               {selectedImage && (
                 <div className="flex items-center gap-2 bg-accent rounded-lg px-3 py-2">
@@ -403,6 +420,20 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
                     variant="ghost" 
                     size="sm" 
                     onClick={() => setRecordedAudio(null)}
+                    className="h-6 w-6 p-0"
+                  >
+                    ×
+                  </Button>
+                </div>
+              )}
+              {recordedVideo && (
+                <div className="flex items-center gap-2 bg-accent rounded-lg px-3 py-2">
+                  <Video className="w-4 h-4" />
+                  <span className="text-sm">Video recording ready</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setRecordedVideo(null)}
                     className="h-6 w-6 p-0"
                   >
                     ×
