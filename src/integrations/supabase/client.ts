@@ -1,5 +1,5 @@
-// Supabase client configuration
-// Using direct URLs as required by Lovable
+// Supabase client configuration - Updated to fix VITE env error
+// Using direct URLs as required by Lovable - No env variables needed
 
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from './types'
