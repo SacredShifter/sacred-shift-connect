@@ -2278,6 +2278,41 @@ export type Database = {
         }
         Relationships: []
       }
+      circle_intentions: {
+        Row: {
+          circle_id: string | null
+          created_at: string | null
+          id: string
+          intention_tags: string[] | null
+          sigil_color: string | null
+          sigil_symbol: string | null
+        }
+        Insert: {
+          circle_id?: string | null
+          created_at?: string | null
+          id?: string
+          intention_tags?: string[] | null
+          sigil_color?: string | null
+          sigil_symbol?: string | null
+        }
+        Update: {
+          circle_id?: string | null
+          created_at?: string | null
+          id?: string
+          intention_tags?: string[] | null
+          sigil_color?: string | null
+          sigil_symbol?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "circle_intentions_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "sacred_circles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       circle_member_profiles: {
         Row: {
           bio: string | null
@@ -7826,8 +7861,11 @@ export type Database = {
           id: string
           is_draft: boolean | null
           mirror_back: string | null
+          mirror_reading: Json | null
           mood_tag: string | null
+          resonance_sigil: string | null
           resonance_tags: string[] | null
+          sealed_truth: Json | null
           title: string | null
           updated_at: string | null
           user_id: string
@@ -7841,8 +7879,11 @@ export type Database = {
           id?: string
           is_draft?: boolean | null
           mirror_back?: string | null
+          mirror_reading?: Json | null
           mood_tag?: string | null
+          resonance_sigil?: string | null
           resonance_tags?: string[] | null
+          sealed_truth?: Json | null
           title?: string | null
           updated_at?: string | null
           user_id: string
@@ -7856,8 +7897,11 @@ export type Database = {
           id?: string
           is_draft?: boolean | null
           mirror_back?: string | null
+          mirror_reading?: Json | null
           mood_tag?: string | null
+          resonance_sigil?: string | null
           resonance_tags?: string[] | null
+          sealed_truth?: Json | null
           title?: string | null
           updated_at?: string | null
           user_id?: string
@@ -12660,6 +12704,30 @@ export type Database = {
         }
         Relationships: []
       }
+      synchronicity_context: {
+        Row: {
+          astrological_themes: Json | null
+          created_at: string | null
+          date_pattern: string | null
+          historical_events: Json | null
+          id: string
+        }
+        Insert: {
+          astrological_themes?: Json | null
+          created_at?: string | null
+          date_pattern?: string | null
+          historical_events?: Json | null
+          id?: string
+        }
+        Update: {
+          astrological_themes?: Json | null
+          created_at?: string | null
+          date_pattern?: string | null
+          historical_events?: Json | null
+          id?: string
+        }
+        Relationships: []
+      }
       synchronicity_events: {
         Row: {
           acknowledged: boolean | null
@@ -16098,6 +16166,14 @@ export type Database = {
           f_table_schema?: unknown | null
           srid?: number | null
           type?: string | null
+        }
+        Relationships: []
+      }
+      resonance_counts: {
+        Row: {
+          count: number | null
+          day: string | null
+          tag: string | null
         }
         Relationships: []
       }
