@@ -13,7 +13,7 @@ interface BreathCycleManagerProps {
 
 const breathPresets = {
   basic: { inhale: 4, holdIn: 4, exhale: 4, holdOut: 4 },
-  liberation: { inhale: 4, holdIn: 1, exhale: 6, holdOut: 1 },
+  liberation: { inhale: 6, holdIn: 6, exhale: 8, holdOut: 4 },
   sovereignty: { inhale: 5, holdIn: 5, exhale: 8, holdOut: 5 }
 };
 

@@ -224,10 +224,10 @@ export default function BreathOfSource3D() {
 
       {/* Audio System */}
       <BreathAudio 
-        isActive={currentLesson >= 1}
-        currentPhase={context.breathPreset === 'liberation' ? 'inhale' : 'exhale'}
+        isActive={isBreathingActive}
+        currentPhase={currentBreathPhase}
         trustSpeed={context.trustSpeed}
-        preset={context.breathPreset}
+        preset={getBreathPreset()}
       />
 
       {/* UI Overlays */}

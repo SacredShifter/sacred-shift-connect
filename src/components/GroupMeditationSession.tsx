@@ -17,11 +17,13 @@ import {
   Share2,
   RotateCcw,
   Timer,
-  Music
+  Music,
+  X
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { YouTubeVideo } from '@/types/youtube';
+import { useToast } from '@/hooks/use-toast';
 
 interface GroupMeditationSessionProps {
   sessionId: string;
@@ -56,6 +58,7 @@ export function GroupMeditationSession({
   onLeave 
 }: GroupMeditationSessionProps) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [sessionState, setSessionState] = useState<SessionState>({
     is_playing: false,
@@ -64,8 +67,7 @@ export function GroupMeditationSession({
   });
   const [timeRemaining, setTimeRemaining] = useState(duration * 60);
   const [isHost, setIsHost] = useState(false);
-  const [showChat, setShowChat] = useState(false);
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [showBreathingGuide, setShowBreathingGuide] = useState(true);
   const channelRef = useRef<any>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -121,9 +123,6 @@ export function GroupMeditationSession({
           synchronizeTimer(payload.synchronized_start);
         }
       })
-      .on('broadcast', { event: 'chat_message' }, ({ payload }) => {
-        setChatMessages(prev => [...prev, payload]);
-      })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           // Track current user presence
@@ -161,6 +160,10 @@ export function GroupMeditationSession({
           const newTime = Math.max(0, prev - 1);
           if (newTime === 0) {
             clearInterval(timerRef.current!);
+            toast({
+              title: "Collective Meditation Complete! 🧘",
+              description: "The group session has ended. Well done!",
+            });
           }
           return newTime;
         });
@@ -188,6 +191,11 @@ export function GroupMeditationSession({
       synchronized_start: startTime 
     });
     synchronizeTimer(startTime);
+    
+    toast({
+      title: "Group Session Started",
+      description: `Meditating together for ${duration} minutes`,
+    });
   };
 
   const pauseSession = () => {
@@ -195,10 +203,17 @@ export function GroupMeditationSession({
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
+    
+    toast({
+      title: "Session Paused",
+      description: "Group meditation has been paused",
+    });
   };
 
   const adjustVolume = (newVolume: number[]) => {
-    broadcastSessionState({ volume: newVolume[0] });
+    if (isHost) {
+      broadcastSessionState({ volume: newVolume[0] });
+    }
   };
 
   const sendHeartbeat = () => {
@@ -243,7 +258,7 @@ export function GroupMeditationSession({
                 {participants.length}
               </Badge>
               <Button variant="ghost" size="sm" onClick={onLeave}>
-                Leave Session
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -262,64 +277,12 @@ export function GroupMeditationSession({
                     {formatTime(timeRemaining)}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {sessionState.is_playing ? 'Session in progress' : 'Paused'}
+                    {sessionState.is_playing ? 'Session in progress' : 'Ready to begin'}
                   </p>
                 </div>
                 
-                <Progress value={progress} className="h-2 animate-pulse" />
+                <Progress value={progress} className="h-2" />
               </div>
-
-              {/* Music Player */}
-              {backgroundAudio && (
-                <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <img 
-                        src={backgroundAudio.thumbnail} 
-                        alt={backgroundAudio.title}
-                        className="w-16 h-12 object-cover rounded"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium line-clamp-1">{backgroundAudio.title}</h4>
-                        <p className="text-sm text-muted-foreground">Background Audio</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Music className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-medium">{sessionState.volume}%</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-4 mt-4">
-                      <div className="flex items-center gap-2">
-                        <VolumeX className="h-4 w-4" />
-                        <Slider
-                          value={[sessionState.volume]}
-                          onValueChange={adjustVolume}
-                          max={100}
-                          step={1}
-                          className="w-20"
-                          disabled={!isHost}
-                        />
-                        <Volume2 className="h-4 w-4" />
-                      </div>
-                      
-                      {isHost && (
-                        <div className="flex gap-2">
-                          {sessionState.is_playing ? (
-                            <Button size="sm" onClick={pauseSession} variant="outline">
-                              <Pause className="h-4 w-4" />
-                            </Button>
-                          ) : (
-                            <Button size="sm" onClick={startSession}>
-                              <Play className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
               {/* Host Controls */}
               {isHost && (
@@ -351,16 +314,60 @@ export function GroupMeditationSession({
               )}
 
               {/* Breathing Guide */}
-              <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
-                <CardContent className="p-6 text-center">
-                  <div className="animate-pulse">
-                    <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-r from-primary to-secondary opacity-30 animate-[pulse_4s_ease-in-out_infinite]" />
-                    <p className="mt-4 text-sm text-muted-foreground">
-                      Breathe in harmony with the group
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              {showBreathingGuide && (
+                <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+                  <CardContent className="p-6 text-center">
+                    <div className="animate-pulse">
+                      <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-r from-primary to-secondary opacity-30 animate-[pulse_4s_ease-in-out_infinite]" />
+                      <p className="mt-4 text-sm text-muted-foreground">
+                        Breathe in harmony with the collective consciousness
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Inhale life • Hold integration • Exhale death • Rest in source
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Background Audio */}
+              {backgroundAudio && (
+                <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={backgroundAudio.thumbnail} 
+                        alt={backgroundAudio.title}
+                        className="w-16 h-12 object-cover rounded"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium line-clamp-1">{backgroundAudio.title}</h4>
+                        <p className="text-sm text-muted-foreground">Background Audio</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Music className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">{sessionState.volume}%</span>
+                      </div>
+                    </div>
+                    
+                    {isHost && (
+                      <div className="flex items-center gap-4 mt-4">
+                        <div className="flex items-center gap-2">
+                          <VolumeX className="h-4 w-4" />
+                          <Slider
+                            value={[sessionState.volume]}
+                            onValueChange={adjustVolume}
+                            max={100}
+                            step={1}
+                            className="w-32"
+                          />
+                          <Volume2 className="h-4 w-4" />
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Participants Sidebar */}
@@ -370,13 +377,6 @@ export function GroupMeditationSession({
                   <Users className="h-4 w-4" />
                   Participants ({participants.length})
                 </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowChat(!showChat)}
-                >
-                  <MessageCircle className="h-4 w-4" />
-                </Button>
               </div>
 
               <div className="space-y-3">
@@ -395,7 +395,7 @@ export function GroupMeditationSession({
                       <p className="text-sm font-medium line-clamp-1">
                         {participant.name}
                         {participant.user_id === user?.id && ' (You)'}
-                        {isHost && participant.user_id !== user?.id && ' 👑'}
+                        {isHost && participant.user_id === participants.find(p => p.user_id === participants.sort((a, b) => new Date(a.joined_at).getTime() - new Date(b.joined_at).getTime())[0]?.user_id)?.user_id && ' 👑'}
                       </p>
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${
@@ -431,13 +431,23 @@ export function GroupMeditationSession({
                   variant="ghost"
                   size="sm"
                   className="w-full justify-start hover-scale"
-                  onClick={() => navigator.share?.({ 
-                    title: 'Join our meditation session',
-                    url: window.location.href 
-                  })}
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({ 
+                        title: 'Join our meditation session',
+                        url: window.location.href 
+                      });
+                    } else {
+                      navigator.clipboard?.writeText(window.location.href);
+                      toast({
+                        title: "Link Copied",
+                        description: "Session link copied to clipboard",
+                      });
+                    }
+                  }}
                 >
                   <Share2 className="h-4 w-4 mr-2" />
-                  Invite Others
+                  Share Session
                 </Button>
               </div>
             </div>
