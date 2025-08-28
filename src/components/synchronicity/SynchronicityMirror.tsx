@@ -54,7 +54,7 @@ export const SynchronicityMirror: React.FC<SynchronicityMirrorProps> = ({
         variant="ghost"
         size="sm"
         onClick={onToggle}
-        className="fixed top-20 right-4 z-50 bg-background/80 backdrop-blur-sm border border-border hover:bg-accent"
+        className="fixed top-4 right-4 z-[60] bg-background/80 backdrop-blur-sm border border-border hover:bg-accent shadow-lg"
       >
         <Eye className="h-4 w-4 mr-2" />
         Mirror
