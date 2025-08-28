@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Search, Plus, Users, Lock, Globe, Filter, TrendingUp, Clock, Star } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, Plus, Users, Lock, Globe, Filter, TrendingUp, Clock, Star, Calendar, Heart, Sparkles, User, Zap } from 'lucide-react';
 import { CreateCircleModal } from '@/components/CreateCircleModal';
 import { SacredCircleInterface } from '@/components/SacredCircleInterface';
+import { SacredSocialFeed } from '@/components/SacredSocialFeed';
+import { SacredProfile } from '@/components/SacredProfile';
 import { useToast } from '@/hooks/use-toast';
 import { Slogan } from '@/components/ui/Slogan';
 
@@ -122,71 +125,107 @@ const Circles = () => {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-4">
+    <div className="h-full overflow-y-auto">
       <Slogan variant="watermark" />
-      <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Sacred Circles
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Discover and join circles of consciousness and shared wisdom
-          </p>
-        </div>
-        
-        <Button 
-          onClick={() => setCreateModalOpen(true)}
-          className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Circle
-        </Button>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Search circles..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 border-primary/20 focus:border-primary"
-          />
-        </div>
-        
-        <div className="flex gap-2 overflow-x-auto">
-          {filterOptions.map((option) => {
-            const IconComponent = option.icon;
-            const isActive = activeFilter === option.id;
-            return (
-              <Button
-                key={option.id}
-                variant={isActive ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveFilter(option.id)}
-                className={`whitespace-nowrap ${
-                  isActive 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'border-primary/20 hover:border-primary/50'
-                }`}
+      
+      {/* Revolutionary Sacred Social Platform */}
+      <Tabs defaultValue="feed" className="h-full">
+        <div className="border-b border-primary/10 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-center justify-between py-3">
+              <div className="flex items-center space-x-6">
+                <div>
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                    Sacred Shifter
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    Consciousness-Powered Social Evolution
+                  </p>
+                </div>
+                
+                <TabsList className="bg-background/50 border border-primary/20">
+                  <TabsTrigger value="feed" className="flex items-center space-x-2">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Sacred Feed</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="circles" className="flex items-center space-x-2">
+                    <Users className="w-4 h-4" />
+                    <span>Circles</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="events" className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>Events</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="profile" className="flex items-center space-x-2">
+                    <User className="w-4 h-4" />
+                    <span>Profile</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              
+              <Button 
+                onClick={() => setCreateModalOpen(true)}
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
               >
-                <IconComponent className="w-4 h-4 mr-2" />
-                {option.label}
+                <Plus className="w-4 h-4 mr-2" />
+                Create
               </Button>
-            );
-          })}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Results Summary */}
-      <div className="text-sm text-muted-foreground">
-        {filteredCircles.length} circle{filteredCircles.length !== 1 ? 's' : ''} found
-      </div>
+        {/* Sacred Social Feed */}
+        <TabsContent value="feed" className="mt-0">
+          <div className="max-w-4xl mx-auto p-4">
+            <SacredSocialFeed feedType="global" />
+          </div>
+        </TabsContent>
 
-      {/* Circles Grid */}
+        {/* Enhanced Circles View */}
+        <TabsContent value="circles" className="mt-0">
+          <div className="max-w-7xl mx-auto p-4 space-y-6">
+            {/* Search and Filters */}
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search sacred circles..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 border-primary/20 focus:border-primary"
+                />
+              </div>
+              
+              <div className="flex gap-2 overflow-x-auto">
+                {filterOptions.map((option) => {
+                  const IconComponent = option.icon;
+                  const isActive = activeFilter === option.id;
+                  return (
+                    <Button
+                      key={option.id}
+                      variant={isActive ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setActiveFilter(option.id)}
+                      className={`whitespace-nowrap ${
+                        isActive 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'border-primary/20 hover:border-primary/50'
+                      }`}
+                    >
+                      <IconComponent className="w-4 h-4 mr-2" />
+                      {option.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Results Summary */}
+            <div className="text-sm text-muted-foreground">
+              {filteredCircles.length} circle{filteredCircles.length !== 1 ? 's' : ''} found
+            </div>
+
+            {/* Circles Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCircles.map((circle) => {
           const isJoined = joinedCircleIds.has(circle.id);
@@ -336,12 +375,30 @@ const Circles = () => {
         </div>
       )}
 
-      {/* Create Circle Modal */}
-      <CreateCircleModal 
-        open={createModalOpen}
-        onOpenChange={setCreateModalOpen}
-      />
-      </div>
+            {/* Create Circle Modal */}
+            <CreateCircleModal 
+              open={createModalOpen}
+              onOpenChange={setCreateModalOpen}
+            />
+          </div>
+        </TabsContent>
+
+        {/* Sacred Events */}
+        <TabsContent value="events" className="mt-0">
+          <div className="max-w-4xl mx-auto p-4 text-center py-12">
+            <Calendar className="w-16 h-16 mx-auto mb-4 text-primary/50" />
+            <h3 className="text-lg font-medium mb-2">Sacred Events Coming Soon</h3>
+            <p className="text-muted-foreground">Consciousness-synchronized gatherings await...</p>
+          </div>
+        </TabsContent>
+
+        {/* Sacred Profile */}
+        <TabsContent value="profile" className="mt-0">
+          <div className="max-w-6xl mx-auto p-4">
+            <SacredProfile isOwnProfile={true} />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
