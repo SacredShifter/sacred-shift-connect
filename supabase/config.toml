@@ -1,5 +1,8 @@
 project_id = "mikltjgbvxrxndtszorb"
 
+[functions.send-feedback]
+verify_jwt = false
+
 [functions.create-donation-payment]
 verify_jwt = false
 

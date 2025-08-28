@@ -1,7 +1,14 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Circle, 
   Users, 
@@ -19,10 +26,57 @@ import {
   Waves,
   Eye,
   Crown,
-  Shield
+  Shield,
+  Send,
+  MessageSquare
 } from "lucide-react";
+import { useState } from "react";
 
 export default function FeaturesComingSoon() {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+    type: 'suggestion' as 'suggestion' | 'feedback'
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase.functions.invoke('send-feedback', {
+        body: formData
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Thank you for your feedback!",
+        description: "Your message has been sent to our team. We appreciate your input!",
+      });
+
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+        type: 'suggestion'
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error sending feedback",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const circleFeatures = [
     {
       title: "Sacred Circle Analytics",
@@ -313,25 +367,126 @@ export default function FeaturesComingSoon() {
           </TabsContent>
         </Tabs>
 
-        {/* Call to Action */}
-        <div className="mt-12 text-center p-8 bg-gradient-to-r from-primary/10 to-purple-600/10 rounded-lg border border-primary/20">
-          <h3 className="text-2xl font-bold mb-4">Stay Connected</h3>
-          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            These features are actively in development. Your feedback and suggestions 
-            help shape the future of Sacred Shifter. Join our community to influence 
-            what gets built next.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Badge variant="outline" className="text-sm px-3 py-1">
-              Community Driven
-            </Badge>
-            <Badge variant="outline" className="text-sm px-3 py-1">
-              Open Source Spirit
-            </Badge>
-            <Badge variant="outline" className="text-sm px-3 py-1">
-              Sacred Technology
-            </Badge>
-          </div>
+        {/* Feedback Section */}
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Info Card */}
+          <Card className="border-primary/20 bg-gradient-to-br from-background to-muted/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="w-6 h-6 text-primary" />
+                Shape the Future
+              </CardTitle>
+              <CardDescription>
+                Your voice matters in building Sacred Shifter. Share your ideas and feedback to help us create the most meaningful spiritual technology platform.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="text-xs">
+                  Community Driven
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  Open Source Spirit
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  Sacred Technology
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Every suggestion and piece of feedback is carefully reviewed by our development team. 
+                Together, we're building something truly transformative.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Feedback Form */}
+          <Card className="border-primary/20 bg-gradient-to-br from-background to-muted/20">
+            <CardHeader>
+              <CardTitle>Send Feedback</CardTitle>
+              <CardDescription>
+                Have a suggestion or feedback? We'd love to hear from you!
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <Label>Type</Label>
+                  <RadioGroup
+                    value={formData.type}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as 'suggestion' | 'feedback' }))}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="suggestion" id="suggestion" />
+                      <Label htmlFor="suggestion">Feature Suggestion</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="feedback" id="feedback" />
+                      <Label htmlFor="feedback">General Feedback</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Subject (Optional)</Label>
+                  <Input
+                    id="subject"
+                    value={formData.subject}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                    placeholder="Brief description of your suggestion or feedback"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="message">Message</Label>
+                  <Textarea
+                    id="message"
+                    value={formData.message}
+                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                    placeholder="Tell us your thoughts, ideas, or feedback..."
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full"
+                >
+                  {isSubmitting ? (
+                    <>Sending...</>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Message
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
