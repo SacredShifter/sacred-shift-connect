@@ -111,6 +111,13 @@ export function MeditationSession({
   };
 
   const startSession = useCallback(() => {
+    console.log('Starting meditation session:', { 
+      audioPreloaded, 
+      visualPreloaded, 
+      practiceType: practice.visualType,
+      audioEnabled 
+    });
+
     if (!audioPreloaded || !visualPreloaded) {
       toast({
         title: "Loading Resources",
@@ -366,7 +373,7 @@ export function MeditationSession({
       {isActive && (
         <>
           {/* Fullscreen Visual Layer */}
-          <div className="fixed inset-0 z-40">
+          <div className="fixed inset-0 z-30 bg-black">
             <MeditationVisuals 
               type={practice.visualType}
               isActive={!isPaused}
@@ -374,7 +381,7 @@ export function MeditationSession({
           </div>
 
           {/* Session Controls Overlay */}
-          <div className="fixed inset-0 z-50 pointer-events-none">
+          <div className="fixed inset-0 z-40 pointer-events-none">
             
             {/* Timer Display */}
             <motion.div

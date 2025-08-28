@@ -549,6 +549,8 @@ function ChakraVisual({ isActive }: { isActive?: boolean }) {
 }
 
 export default function MeditationVisuals({ type, isActive }: MeditationVisualsProps) {
+  console.log('MeditationVisuals rendering:', { type, isActive });
+  
   const visualComponents = {
     breathing: BreathingVisual,
     'loving-kindness': LovingKindnessVisual,
@@ -558,16 +560,24 @@ export default function MeditationVisuals({ type, isActive }: MeditationVisualsP
   };
 
   const VisualComponent = visualComponents[type];
+  
+  if (!VisualComponent) {
+    console.error('No visual component found for type:', type);
+    return <div className="w-full h-full bg-slate-900 flex items-center justify-center text-white">
+      <p>Visual type "{type}" not found</p>
+    </div>;
+  }
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={type}
-        className="w-full h-full"
+        className="w-full h-full relative"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.8 }}
         transition={{ duration: 0.8, ease: "easeInOut" }}
+        style={{ zIndex: 1 }}
       >
         <VisualComponent isActive={isActive} />
       </motion.div>
