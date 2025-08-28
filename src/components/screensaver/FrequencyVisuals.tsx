@@ -393,9 +393,6 @@ function EnhancedLogoOverlay({ isActive }: { isActive: boolean }) {
     </mesh>
   );
 }
-    </group>
-  );
-}
 
 // Enhanced Heart Opening Visual with Radiant Heart Shader
 function HeartOpening({ isActive }: { isActive: boolean }) {
