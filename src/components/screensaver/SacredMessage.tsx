@@ -22,6 +22,8 @@ export function SacredMessage({ message, isVisible, className = '' }: SacredMess
         return 'text-purple-200 drop-shadow-[0_0_8px_rgba(196,181,253,0.7)]';
       case 'sacred_shifter_identity':
         return 'text-yellow-200 drop-shadow-[0_0_8px_rgba(254,240,138,0.8)]';
+      case 'subtle_micro_teachings':
+        return 'text-green-200 drop-shadow-[0_0_8px_rgba(134,239,172,0.7)]';
       default:
         return 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]';
     }
