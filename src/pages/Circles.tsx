@@ -129,8 +129,8 @@ const Circles = () => {
     <div className="h-full overflow-y-auto">
       <Slogan variant="watermark" />
       
-      {/* Revolutionary Sacred Social Platform */}
-      <Tabs defaultValue="feed" className="h-full">
+        {/* Revolutionary Sacred Social Platform */}
+        <Tabs defaultValue="circles" className="h-full">
         <div className="border-b border-primary/10 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center justify-between py-3">

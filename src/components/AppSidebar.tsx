@@ -20,15 +20,15 @@ import { HelpTooltips } from "@/components/HelpSystem/ContextualHelp";
 
 const coreNavItems = [
   { title: "Home", url: "/", icon: Home, tooltip: HelpTooltips.home },
-  { title: "Feed", url: "/feed", icon: Rss, tooltip: HelpTooltips.feed },
-  { title: "Messages", url: "/messages", icon: MessageCircle, tooltip: "Direct Messages - Connect with other Sacred Shifters privately" },
+  { title: "Sacred Social", url: "/feed", icon: Rss, tooltip: "Sacred Social Hub - Feed, Messages, and Community Connection" },
 ];
 
 const sacredToolsItems = [
   { title: "Sacred Grove", url: "/grove", icon: TreePine, tooltip: "Sacred Grove - Your living wisdom ecosystem for consciousness exploration" },
   { title: "Meditation", url: "/meditation", icon: Sparkles, tooltip: "Sacred Meditation - Individual practice and collective consciousness expansion" },
   { title: "Journal", url: "/journal", icon: BookOpen, tooltip: HelpTooltips.journal },
-  { title: "Circles", url: "/circles", icon: Users, tooltip: HelpTooltips.circles },
+  { title: "Sacred Circles", url: "/circles", icon: Users, tooltip: "Sacred Circles - Deep community engagement and consciousness evolution" },
+  { title: "Direct Messages", url: "/messages", icon: MessageCircle, tooltip: "Direct Messages - Private consciousness communication" },
   { title: "Personal Codex", url: "/codex", icon: Archive, tooltip: HelpTooltips.akashicConstellation },
   { title: "Consciousness Mapper", url: "/constellation", icon: Stars, tooltip: "Consciousness Constellation Mapper - AI-powered consciousness cartography and pattern recognition" },
 ];
