@@ -1159,38 +1159,6 @@ export function GroupMeditationSession({
         )}
       </AnimatePresence>
 
-      {/* Minimized Host Controls During Meditation */}
-      <AnimatePresence>
-        {sessionState.is_playing && isHost && (
-          <motion.div
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 100 }}
-            className="fixed bottom-4 right-4 z-50"
-          >
-            <Card className="bg-black/30 backdrop-blur-sm border-white/20">
-              <CardContent className="p-2 flex items-center gap-1">
-                <Button
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={pauseSession}
-                  className="text-white/70 hover:text-white hover:bg-white/10 p-2"
-                >
-                  <Pause className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={stopSession}
-                  className="text-white/70 hover:text-white hover:bg-white/10 p-2"
-                >
-                  <Square className="h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }
