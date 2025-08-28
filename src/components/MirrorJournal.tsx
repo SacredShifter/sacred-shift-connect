@@ -382,32 +382,44 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
         {entries.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <BookOpen className="w-4 h-4" />
-                {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <BookOpen className="w-4 h-4" />
+              {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+            </div>
+            
+            {/* Action buttons including Mirror */}
+            {!isCreating && !editingId && (
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowSynchronicityMirror(prev => !prev)}
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-3 rounded-full border-primary/30 text-primary hover:bg-primary/10"
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  <span className="text-xs">Mirror</span>
+                  {showSynchronicityMirror && (
+                    <Sparkles className="w-3 h-3 ml-1" />
+                  )}
+                </Button>
+                <Button
+                  onClick={() => setShowDreamAnalyzer(true)}
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-3 rounded-full border-purple-200 text-purple-600 hover:bg-purple-50"
+                >
+                  <Brain className="w-4 h-4 mr-1" />
+                  <span className="text-xs">Dream</span>
+                </Button>
+                <Button
+                  onClick={handleCreateNew}
+                  size="sm"
+                  className="h-8 w-8 rounded-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
-              
-              {/* Add Entry Button - positioned above entries */}
-              {!isCreating && !editingId && (
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => setShowDreamAnalyzer(true)}
-                    size="sm"
-                    variant="outline"
-                    className="h-8 px-3 rounded-full border-purple-200 text-purple-600 hover:bg-purple-50"
-                  >
-                    <Brain className="w-4 h-4 mr-1" />
-                    <span className="text-xs">Dream</span>
-                  </Button>
-                  <Button
-                    onClick={handleCreateNew}
-                    size="sm"
-                    className="h-8 w-8 rounded-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
+            )}
             </div>
             
                    <ScrollArea className="h-[400px] md:h-[600px]">
@@ -510,31 +522,13 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
           />
         )}
 
-        {/* Synchronicity Mirror - Move inside container */}
-        <div className="relative">
-          {/* Mirror Toggle Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowSynchronicityMirror(prev => !prev)}
-            className="absolute top-4 right-4 z-10 bg-primary/10 border-primary/30 hover:bg-primary/20"
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Mirror
-            {showSynchronicityMirror && (
-              <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 rounded-full">
-                <Sparkles className="h-3 w-3" />
-              </Badge>
-            )}
-          </Button>
-
-          <SynchronicityMirror
-            isVisible={showSynchronicityMirror}
-            onToggle={() => setShowSynchronicityMirror(prev => !prev)}
-            journalContent={currentEntry.content || ''}
-            intention={currentEntry.title || ''}
-          />
-        </div>
+        {/* Synchronicity Mirror Component */}
+        <SynchronicityMirror
+          isVisible={showSynchronicityMirror}
+          onToggle={() => setShowSynchronicityMirror(prev => !prev)}
+          journalContent={currentEntry.content || ''}
+          intention={currentEntry.title || ''}
+        />
       </div>
     </div>
   );
