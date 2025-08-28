@@ -91,6 +91,21 @@ const sections = [
     ]
   },
   {
+    title: "Meditation & Consciousness Practices",
+    icon: Sparkles,
+    topics: [
+      "Individual meditation sessions with guided practices and timer functionality",
+      "Collective consciousness expansion through synchronized group meditation sessions",
+      "Integration with Sacred Grove paths for deepening meditation experiences",
+      "Binaural beats and healing frequency integration for enhanced consciousness states",
+      "Sacred geometry meditation with visual focus points and geometric breathing patterns",
+      "Breath work practices synchronized with sacred mathematics and golden ratio timing",
+      "Progress tracking for meditation consistency and consciousness evolution metrics",
+      "Community meditation scheduling and group consciousness experiments",
+      "Integration with 3D learning modules for immersive meditative experiences"
+    ]
+  },
+  {
     title: "Sacred Circles",
     icon: Infinity,
     topics: [
