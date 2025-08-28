@@ -8,7 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, MessageCircle, Share2, Zap, Camera, Video, Mic, Sparkles, Users, Calendar, Star } from 'lucide-react';
+import { Camera, Video, Mic, Sparkles, Heart, MessageCircle, Share2, Zap, Star } from 'lucide-react';
+import { ImageUploader } from '@/components/ImageUploader';
+import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -70,6 +72,9 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
   const [postType, setPostType] = useState<'text' | 'image' | 'video' | 'audio' | 'sacred_sigil'>('text');
   const [consciousnessState, setConsciousnessState] = useState('balanced');
   const [chakraTag, setChakraTag] = useState('');
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
 
   const consciousnessStates = [
     { value: 'elevated', label: '✨ Elevated', color: 'hsl(var(--primary))' },
@@ -147,6 +152,46 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
     }
   };
 
+  const handleImageSelect = (file: File) => {
+    setSelectedImage(file);
+    toast({
+      title: "Image Selected",
+      description: "Image ready to share with your post ✨"
+    });
+  };
+
+  const handleVoiceRecording = (audioBlob: Blob) => {
+    setRecordedAudio(audioBlob);
+    setShowVoiceRecorder(false);
+    toast({
+      title: "Voice Recorded",
+      description: "Sacred sounds captured and ready to share 🎵"
+    });
+  };
+
+  const handleMagicEnhancement = () => {
+    if (newPost.trim()) {
+      const magicPhrases = [
+        "✨ Sacred energy flows through these words ✨",
+        "🌟 Consciousness expands with this intention 🌟", 
+        "💫 Divine wisdom speaks through this message 💫",
+        "🔮 Universal love radiates from this thought 🔮"
+      ];
+      const randomPhrase = magicPhrases[Math.floor(Math.random() * magicPhrases.length)];
+      setNewPost(prev => `${prev}\n\n${randomPhrase}`);
+      toast({
+        title: "Sacred Enhancement Applied",
+        description: "Your message has been blessed with divine energy 🪄"
+      });
+    } else {
+      toast({
+        title: "Add Some Text First",
+        description: "Write your message for magical enhancement ✨",
+        variant: "destructive"
+      });
+    }
+  };
+
   const createPost = async () => {
     if (!user || !newPost.trim()) return;
 
@@ -180,6 +225,8 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
 
       setNewPost('');
       setChakraTag('');
+      setSelectedImage(null);
+      setRecordedAudio(null);
       fetchPosts();
 
       toast({
@@ -302,45 +349,77 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
 
           <div className="flex items-center justify-between">
             <div className="flex space-x-2">
+              <ImageUploader onImageSelect={handleImageSelect} />
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => toast({ description: 'Camera feature coming soon!' })}
-              >
-                <Camera className="w-4 h-4" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => toast({ description: 'Video feature coming soon!' })}
+                onClick={() => toast({ description: 'Video recording coming soon! 🎥' })}
               >
                 <Video className="w-4 h-4" />
               </Button>
+              {showVoiceRecorder ? (
+                <VoiceRecorder onRecordingComplete={handleVoiceRecording} />
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowVoiceRecorder(true)}
+                >
+                  <Mic className="w-4 h-4" />
+                </Button>
+              )}
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => toast({ description: 'Voice recording coming soon!' })}
-              >
-                <Mic className="w-4 h-4" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => toast({ description: 'Magic consciousness features coming soon!' })}
+                onClick={handleMagicEnhancement}
               >
                 <Sparkles className="w-4 h-4" />
               </Button>
             </div>
-            
-            <Button 
-              onClick={createPost}
-              disabled={!newPost.trim()}
-              className="bg-gradient-to-r from-primary to-primary/80"
-            >
-              <Zap className="w-4 h-4 mr-2" />
-              Share Sacred Energy
-            </Button>
           </div>
+          
+          {/* File previews */}
+          {(selectedImage || recordedAudio) && (
+            <div className="flex gap-2 flex-wrap">
+              {selectedImage && (
+                <div className="flex items-center gap-2 bg-accent rounded-lg px-3 py-2">
+                  <Camera className="w-4 h-4" />
+                  <span className="text-sm">{selectedImage.name}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setSelectedImage(null)}
+                    className="h-6 w-6 p-0"
+                  >
+                    ×
+                  </Button>
+                </div>
+              )}
+              {recordedAudio && (
+                <div className="flex items-center gap-2 bg-accent rounded-lg px-3 py-2">
+                  <Mic className="w-4 h-4" />
+                  <span className="text-sm">Voice recording ready</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setRecordedAudio(null)}
+                    className="h-6 w-6 p-0"
+                  >
+                    ×
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <Button 
+            onClick={createPost}
+            disabled={!newPost.trim()}
+            className="bg-gradient-to-r from-primary to-primary/80"
+          >
+            <Zap className="w-4 h-4 mr-2" />
+            Share Sacred Energy
+          </Button>
         </CardContent>
       </Card>
 
