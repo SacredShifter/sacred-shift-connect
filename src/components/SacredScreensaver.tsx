@@ -44,6 +44,19 @@ export default function SacredScreensaver({
     setIsInitialized(true);
   }, []);
 
+  // Listen for force screensaver event
+  useEffect(() => {
+    const handleForceScreensaver = () => {
+      if (enabled && isInitialized && !isActive) {
+        setIsActive(true);
+        sessionStartRef.current = new Date();
+      }
+    };
+
+    window.addEventListener('forceScreensaver', handleForceScreensaver);
+    return () => window.removeEventListener('forceScreensaver', handleForceScreensaver);
+  }, [enabled, isInitialized, isActive]);
+
   // Idle detection - only initialize after component is mounted
   const idleTimerResult = useIdleTimer({
     timeout,

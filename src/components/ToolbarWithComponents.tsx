@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Brain, Wind, Waves, X } from 'lucide-react';
+import { Brain, Wind, Waves, X, Monitor } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToolbarAIInterface } from '@/components/ToolbarAIInterface';
 import { ToolbarBreathingInterface } from '@/components/ToolbarBreathingInterface';
@@ -28,10 +28,21 @@ export const ToolbarWithComponents = () => {
       name: 'Sacred Frequencies',
       icon: Waves,
       color: 'from-purple-500 to-pink-600'
+    },
+    {
+      id: 'screensaver',
+      name: 'Force Screensaver',
+      icon: Monitor,
+      color: 'from-slate-500 to-gray-600'
     }
   ];
 
   const toggleComponent = (toolId: string) => {
+    if (toolId === 'screensaver') {
+      // Force screensaver activation via custom event
+      window.dispatchEvent(new CustomEvent('forceScreensaver'));
+      return;
+    }
     setActiveComponent(activeComponent === toolId ? null : toolId);
   };
 
