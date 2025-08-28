@@ -1,6 +1,6 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, Stars } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Environment, Stars, Sphere, Box, Torus, Icosahedron } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
@@ -27,10 +27,8 @@ function BreathingOrb() {
     }
   });
 
-  const sphereGeometry = useMemo(() => new THREE.SphereGeometry(1, 32, 32), []);
-
   return (
-    <mesh ref={meshRef} geometry={sphereGeometry} position={[0, 0, 0]}>
+    <Sphere ref={meshRef} args={[1, 32, 32]} position={[0, 0, 0]}>
       <meshPhongMaterial 
         color="#4ade80" 
         transparent 
@@ -38,24 +36,13 @@ function BreathingOrb() {
         emissive="#22c55e"
         emissiveIntensity={0.2}
       />
-    </mesh>
+    </Sphere>
   );
 }
 
 // Loving-kindness meditation - Pulsing heart energy
 function LovingKindnessHeart() {
   const groupRef = useRef<THREE.Group>(null);
-  const hearts = useMemo(() => {
-    console.log('Creating hearts array');
-    const heartsArray = Array.from({ length: 8 }, (_, i) => ({
-      id: i,
-      angle: (i / 8) * Math.PI * 2,
-      radius: 2 + Math.random() * 1.5,
-      speed: 0.3 + Math.random() * 0.4
-    }));
-    console.log('Hearts array created:', heartsArray);
-    return heartsArray;
-  }, []);
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -63,22 +50,23 @@ function LovingKindnessHeart() {
       groupRef.current.rotation.y = time * 0.1;
       
       groupRef.current.children.forEach((child, i) => {
-        const heart = hearts[i];
-        const pulsing = Math.sin(time * heart.speed + i) * 0.5 + 1;
+        const angle = (i / 8) * Math.PI * 2;
+        const radius = 2 + Math.sin(i) * 0.5;
+        const speed = 0.3 + (i * 0.1);
+        const pulsing = Math.sin(time * speed + i) * 0.5 + 1;
+        
         child.scale.setScalar(pulsing);
-        child.position.x = Math.cos(heart.angle + time * 0.2) * heart.radius;
-        child.position.z = Math.sin(heart.angle + time * 0.2) * heart.radius;
+        child.position.x = Math.cos(angle + time * 0.2) * radius;
+        child.position.z = Math.sin(angle + time * 0.2) * radius;
         child.position.y = Math.sin(time * 0.5 + i) * 0.5;
       });
     }
   });
 
-  const icosahedronGeometry = useMemo(() => new THREE.IcosahedronGeometry(0.3), []);
-
   return (
     <group ref={groupRef}>
-      {hearts.map((heart) => (
-        <mesh key={heart.id} geometry={icosahedronGeometry} position={[heart.radius, 0, 0]}>
+      {Array.from({ length: 8 }, (_, i) => (
+        <Icosahedron key={i} args={[0.3]} position={[2, 0, 0]}>
           <meshPhongMaterial 
             color="#f472b6" 
             transparent 
@@ -86,7 +74,7 @@ function LovingKindnessHeart() {
             emissive="#ec4899"
             emissiveIntensity={0.3}
           />
-        </mesh>
+        </Icosahedron>
       ))}
     </group>
   );
@@ -108,12 +96,10 @@ function ChakraWheels() {
     }
   });
 
-  const torusGeometry = useMemo(() => new THREE.TorusGeometry(0.5, 0.1, 16, 32), []);
-
   return (
     <group ref={groupRef}>
       {chakraColors.map((color, i) => (
-        <mesh key={i} geometry={torusGeometry} position={[0, -3 + i, 0]}>
+        <Torus key={i} args={[0.5, 0.1, 16, 32]} position={[0, -3 + i, 0]}>
           <meshPhongMaterial 
             color={color} 
             transparent 
@@ -121,7 +107,7 @@ function ChakraWheels() {
             emissive={color}
             emissiveIntensity={0.4}
           />
-        </mesh>
+        </Torus>
       ))}
     </group>
   );
@@ -130,71 +116,64 @@ function ChakraWheels() {
 // Mindfulness meditation - Floating geometric forms
 function MindfulnessGeometry() {
   const groupRef = useRef<THREE.Group>(null);
-  const shapes = useMemo(() => {
-    console.log('Creating shapes array');
-    const shapesArray = Array.from({ length: 12 }, (_, i) => ({
-      id: i,
-      position: [
-        (Math.random() - 0.5) * 6,
-        (Math.random() - 0.5) * 4,
-        (Math.random() - 0.5) * 6
-      ] as [number, number, number],
-      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI] as [number, number, number],
-      type: i % 3
-    }));
-    console.log('Shapes array created:', shapesArray);
-    return shapesArray;
-  }, []);
 
   useFrame((state) => {
     if (groupRef.current) {
       const time = state.clock.elapsedTime;
       groupRef.current.children.forEach((child, i) => {
-        const shape = shapes[i];
         child.rotation.x += 0.005;
         child.rotation.y += 0.007;
-        child.position.y = shape.position[1] + Math.sin(time * 0.3 + i) * 0.2;
+        const originalY = ((i % 4) - 2) * 1.5;
+        child.position.y = originalY + Math.sin(time * 0.3 + i) * 0.2;
       });
     }
   });
 
-  const boxGeometry = useMemo(() => new THREE.BoxGeometry(0.3, 0.3, 0.3), []);
-  const sphereGeometry = useMemo(() => new THREE.SphereGeometry(0.2, 16, 16), []);
-  const icosahedronGeometry = useMemo(() => new THREE.IcosahedronGeometry(0.2), []);
-
-  const ShapeComponent = ({ type, position, rotation }: { type: number; position: [number, number, number]; rotation: [number, number, number] }) => {
-    let geometry;
-    if (type === 0) {
-      geometry = boxGeometry;
-    } else if (type === 1) {
-      geometry = sphereGeometry;
-    } else {
-      geometry = icosahedronGeometry;
-    }
-
-    return (
-      <mesh geometry={geometry} position={position} rotation={rotation}>
-        <meshPhongMaterial 
-          color="#06b6d4" 
-          transparent 
-          opacity={0.6}
-          emissive="#0891b2"
-          emissiveIntensity={0.2}
-        />
-      </mesh>
-    );
-  };
-
   return (
     <group ref={groupRef}>
-      {shapes.map((shape) => (
-        <ShapeComponent 
-          key={shape.id}
-          type={shape.type}
-          position={shape.position}
-          rotation={shape.rotation}
-        />
-      ))}
+      {Array.from({ length: 12 }, (_, i) => {
+        const x = ((i % 4) - 1.5) * 2;
+        const z = (Math.floor(i / 4) - 1) * 2;
+        const y = ((i % 4) - 2) * 1.5;
+        
+        if (i % 3 === 0) {
+          return (
+            <Box key={i} args={[0.3, 0.3, 0.3]} position={[x, y, z]}>
+              <meshPhongMaterial 
+                color="#06b6d4" 
+                transparent 
+                opacity={0.6}
+                emissive="#0891b2"
+                emissiveIntensity={0.2}
+              />
+            </Box>
+          );
+        } else if (i % 3 === 1) {
+          return (
+            <Sphere key={i} args={[0.2, 16, 16]} position={[x, y, z]}>
+              <meshPhongMaterial 
+                color="#06b6d4" 
+                transparent 
+                opacity={0.6}
+                emissive="#0891b2"
+                emissiveIntensity={0.2}
+              />
+            </Sphere>
+          );
+        } else {
+          return (
+            <Icosahedron key={i} args={[0.2]} position={[x, y, z]}>
+              <meshPhongMaterial 
+                color="#06b6d4" 
+                transparent 
+                opacity={0.6}
+                emissive="#0891b2"
+                emissiveIntensity={0.2}
+              />
+            </Icosahedron>
+          );
+        }
+      })}
     </group>
   );
 }
@@ -202,11 +181,6 @@ function MindfulnessGeometry() {
 // Body scan meditation - Flowing energy waves
 function BodyScanWaves() {
   const meshRef = useRef<THREE.Mesh>(null);
-  
-  const geometry = useMemo(() => {
-    const geo = new THREE.PlaneGeometry(4, 6, 32, 32);
-    return geo;
-  }, []);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -226,7 +200,8 @@ function BodyScanWaves() {
   });
 
   return (
-    <mesh ref={meshRef} geometry={geometry} rotation={[-Math.PI / 4, 0, 0]}>
+    <mesh ref={meshRef} rotation={[-Math.PI / 4, 0, 0]}>
+      <planeGeometry args={[4, 6, 32, 32]} />
       <meshPhongMaterial 
         color="#a855f7" 
         transparent 
@@ -246,7 +221,6 @@ function MeditationScene({ type }: { type: MeditationType }) {
       <directionalLight position={[5, 5, 5]} intensity={0.8} />
       <pointLight position={[0, 0, 5]} intensity={0.5} color="#ffffff" />
       
-      {/* Environment based on meditation type */}
       {type === 'breathing' && (
         <>
           <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={0.5} />
@@ -297,8 +271,6 @@ function MeditationScene({ type }: { type: MeditationType }) {
 }
 
 export default function MeditationVisualization3D({ type, isActive = false }: MeditationVisualization3DProps) {
-  console.log('MeditationVisualization3D render:', { type, isActive });
-  
   if (!isActive) return null;
 
   return (
