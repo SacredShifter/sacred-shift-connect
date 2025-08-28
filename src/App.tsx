@@ -36,6 +36,7 @@ import Liberation from "./pages/Liberation";
 import Shift from './pages/Shift';
 import Meditation from './pages/Meditation';
 import Learning3D from './pages/Learning3D';
+import FeaturesComingSoon from './pages/FeaturesComingSoon';
 
 
 function App() {
@@ -84,6 +85,7 @@ function App() {
                   <Route path="/ai-admin" element={<AdminRoute><AuraQuantumCommandNexus /></AdminRoute>} />
                   <Route path="/shift" element={<Shift />} />
                   <Route path="/meditation" element={<Meditation />} />
+                  <Route path="/features-coming-soon" element={<FeaturesComingSoon />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
