@@ -15,7 +15,7 @@ const SacredGeometry = ({ isActive }: { isActive: boolean }) => (
     className="absolute inset-0 w-full h-full opacity-10"
     viewBox="0 0 400 400"
     animate={isActive ? { rotate: [0, 360] } : {}}
-    transition={{ duration: 120, repeat: -1, ease: "linear" }}
+    transition={{ duration: 120, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
   >
     {Array.from({ length: 19 }).map((_, i) => {
       const angle = (i / 19) * Math.PI * 2;
@@ -38,7 +38,7 @@ const SacredGeometry = ({ isActive }: { isActive: boolean }) => (
           } : {}}
           transition={{
             duration: 8,
-            repeat: -1,
+            repeat: Number.POSITIVE_INFINITY,
             delay: i * 0.2,
             ease: "easeInOut"
           }}
@@ -67,7 +67,7 @@ const AuroraWaves = ({ isActive, colors }: { isActive: boolean; colors: string[]
         } : {}}
         transition={{
           duration: 20 + i * 5,
-          repeat: -1,
+          repeat: Number.POSITIVE_INFINITY,
           delay: i * 3,
           ease: "easeInOut"
         }}
@@ -96,7 +96,7 @@ const QuantumParticleField = ({ isActive, particleColor }: { isActive: boolean; 
           } : {}}
           transition={{
             duration: 12 + Math.random() * 8,
-            repeat: -1,
+            repeat: Number.POSITIVE_INFINITY,
             delay: Math.random() * 10,
             ease: "easeInOut"
           }}
@@ -148,7 +148,7 @@ function BreathingVisual({ isActive }: { isActive?: boolean }) {
             } : {}}
             transition={{
               duration: 12 + ring * 2,
-              repeat: -1,
+              repeat: Number.POSITIVE_INFINITY,
               delay: ring * 0.5,
               ease: "easeInOut"
             }}
@@ -172,9 +172,9 @@ function BreathingVisual({ isActive }: { isActive?: boolean }) {
             ]
           } : {}}
           transition={{
-            scale: { duration: 6, repeat: -1, ease: "easeInOut" },
-            rotate: { duration: 30, repeat: -1, ease: "linear" },
-            boxShadow: { duration: 4, repeat: -1, ease: "easeInOut" }
+            scale: { duration: 6, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" },
+            rotate: { duration: 30, repeat: Number.POSITIVE_INFINITY, ease: "linear" },
+            boxShadow: { duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }
           }}
         >
           <motion.div
@@ -188,8 +188,8 @@ function BreathingVisual({ isActive }: { isActive?: boolean }) {
               ]
             } : {}}
             transition={{
-              rotate: { duration: 20, repeat: -1, ease: "linear" },
-              borderColor: { duration: 6, repeat: -1, ease: "easeInOut" }
+              rotate: { duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" },
+              borderColor: { duration: 6, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }
             }}
           >
             <motion.div
@@ -199,7 +199,7 @@ function BreathingVisual({ isActive }: { isActive?: boolean }) {
               } : {}}
               transition={{
                 duration: 4,
-                repeat: -1,
+                repeat: Number.POSITIVE_INFINITY,
                 ease: "easeInOut"
               }}
             >
@@ -213,7 +213,7 @@ function BreathingVisual({ isActive }: { isActive?: boolean }) {
       <motion.div
         className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-center px-8"
         animate={isActive ? { opacity: [0.7, 1, 0.7] } : {}}
-        transition={{ duration: 4, repeat: -1 }}
+        transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
       >
         <p className="text-xl font-light text-emerald-200 tracking-wide leading-relaxed">
           {complexityLevel === 0 && "Breathe into the infinite cosmos within"}
@@ -265,7 +265,7 @@ function LovingKindnessVisual({ isActive }: { isActive?: boolean }) {
             } : {}}
             transition={{
               duration: 8 + Math.random() * 6,
-              repeat: -1,
+              repeat: Number.POSITIVE_INFINITY,
               delay: Math.random() * 10,
               ease: "easeInOut"
             }}
@@ -295,7 +295,7 @@ function LovingKindnessVisual({ isActive }: { isActive?: boolean }) {
             } : {}}
             transition={{
               duration: 6 + ring * 0.8,
-              repeat: -1,
+              repeat: Number.POSITIVE_INFINITY,
               delay: ring * 0.3,
               ease: "easeInOut"
             }}
@@ -317,9 +317,9 @@ function LovingKindnessVisual({ isActive }: { isActive?: boolean }) {
             ]
           } : {}}
           transition={{
-            scale: { duration: 4, repeat: -1, ease: "easeInOut" },
-            rotate: { duration: 40, repeat: -1, ease: "linear" },
-            boxShadow: { duration: 3, repeat: -1, ease: "easeInOut" }
+            scale: { duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" },
+            rotate: { duration: 40, repeat: Number.POSITIVE_INFINITY, ease: "linear" },
+            boxShadow: { duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }
           }}
         >
           <motion.div
@@ -329,7 +329,7 @@ function LovingKindnessVisual({ isActive }: { isActive?: boolean }) {
             } : {}}
             transition={{
               duration: 2.5,
-              repeat: -1,
+              repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut"
             }}
           >
@@ -341,7 +341,7 @@ function LovingKindnessVisual({ isActive }: { isActive?: boolean }) {
       <motion.div
         className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-center px-8"
         animate={isActive ? { opacity: [0.8, 1, 0.8] } : {}}
-        transition={{ duration: 5, repeat: -1 }}
+        transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY }}
       >
         <p className="text-xl font-light text-pink-200 tracking-wide leading-relaxed">
           {complexityLevel === 0 && "May I be filled with loving kindness"}
@@ -367,7 +367,7 @@ function MindfulnessVisual({ isActive }: { isActive?: boolean }) {
           } : {}}
           transition={{
             duration: 12,
-            repeat: -1,
+            repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut"
           }}
         >
@@ -378,7 +378,7 @@ function MindfulnessVisual({ isActive }: { isActive?: boolean }) {
             } : {}}
             transition={{
               duration: 3,
-              repeat: -1,
+              repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut"
             }}
           >
@@ -403,7 +403,7 @@ function BodyScanVisual({ isActive }: { isActive?: boolean }) {
           } : {}}
           transition={{
             duration: 8,
-            repeat: -1,
+            repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut"
           }}
         >
@@ -414,7 +414,7 @@ function BodyScanVisual({ isActive }: { isActive?: boolean }) {
             } : {}}
             transition={{
               duration: 4,
-              repeat: -1,
+              repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut"
             }}
           >
@@ -481,9 +481,9 @@ function ChakraVisual({ isActive }: { isActive?: boolean }) {
                     ]
                   } : {}}
                   transition={{
-                    rotate: { duration: 8 - i * 0.5, repeat: -1, ease: "linear" },
-                    scale: { duration: 4, repeat: -1, ease: "easeInOut" },
-                    boxShadow: { duration: 3, repeat: -1, ease: "easeInOut" }
+                    rotate: { duration: 8 - i * 0.5, repeat: Number.POSITIVE_INFINITY, ease: "linear" },
+                    scale: { duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" },
+                    boxShadow: { duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }
                   }}
                 >
                   <motion.div
@@ -492,7 +492,7 @@ function ChakraVisual({ isActive }: { isActive?: boolean }) {
                       rotate: [360, 0]
                     } : {}}
                     transition={{
-                      rotate: { duration: 6, repeat: -1, ease: "linear" }
+                      rotate: { duration: 6, repeat: Number.POSITIVE_INFINITY, ease: "linear" }
                     }}
                   >
                     <motion.span
@@ -503,7 +503,7 @@ function ChakraVisual({ isActive }: { isActive?: boolean }) {
                       } : {}}
                       transition={{
                         duration: 2,
-                        repeat: -1,
+                        repeat: Number.POSITIVE_INFINITY,
                         ease: "easeInOut"
                       }}
                     >
@@ -520,7 +520,7 @@ function ChakraVisual({ isActive }: { isActive?: boolean }) {
                   } : {}}
                   transition={{
                     duration: 2,
-                    repeat: -1,
+                    repeat: Number.POSITIVE_INFINITY,
                     ease: "easeInOut"
                   }}
                 >
@@ -535,7 +535,7 @@ function ChakraVisual({ isActive }: { isActive?: boolean }) {
       <motion.div
         className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-center px-8"
         animate={isActive ? { opacity: [0.8, 1, 0.8] } : {}}
-        transition={{ duration: 4, repeat: -1 }}
+        transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
       >
         <p className="text-xl font-light text-violet-200 tracking-wide leading-relaxed">
           {complexityLevel === 0 && `Activating ${chakras[activeChakra]?.name} Chakra`}
