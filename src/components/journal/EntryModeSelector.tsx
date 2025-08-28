@@ -6,7 +6,7 @@ export interface EntryMode {
   id: string;
   name: string;
   description: string;
-  icon: React.ReactNode;
+  icon: React.ComponentType<any>;
   color: string;
   prompt: string;
 }
@@ -41,7 +41,7 @@ export const EntryModeSelector: React.FC<EntryModeSelectorProps> = ({
             <CardContent className="p-4 text-center">
               <div className={`w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center bg-gradient-to-r ${mode.color}`}>
                 <div className="text-white">
-                  {mode.icon}
+                  <mode.icon className="w-5 h-5" />
                 </div>
               </div>
               <h3 className="font-medium mb-1">{mode.name}</h3>

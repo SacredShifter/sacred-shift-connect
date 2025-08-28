@@ -16,7 +16,7 @@ import {
   Search,
   Filter,
   Clock,
-  Infinity
+  Infinity as InfinityIcon
 } from 'lucide-react';
 import { useSacredJournal } from '@/hooks/useSacredJournal';
 import { EntryModeSelector } from './journal/EntryModeSelector';
@@ -54,7 +54,7 @@ export const SacredJournalInterface: React.FC = () => {
       id: 'stream' as EntryMode,
       name: 'Stream',
       description: 'Free-flow consciousness writing',
-      icon: <Feather className="w-5 h-5" />,
+      icon: Feather,
       color: 'from-blue-500 to-cyan-500',
       prompt: 'Let your consciousness flow freely onto the page...'
     },
@@ -62,7 +62,7 @@ export const SacredJournalInterface: React.FC = () => {
       id: 'reflection' as EntryMode,
       name: 'Reflection',
       description: 'Guided introspection and insight',
-      icon: <Eye className="w-5 h-5" />,
+      icon: Eye,
       color: 'from-purple-500 to-violet-500',
       prompt: 'What awareness arose during your practice today?'
     },
@@ -70,7 +70,7 @@ export const SacredJournalInterface: React.FC = () => {
       id: 'transmutation' as EntryMode,
       name: 'Transmutation',
       description: 'Shadow release and reframing',
-      icon: <Zap className="w-5 h-5" />,
+      icon: Zap,
       color: 'from-orange-500 to-red-500',
       prompt: 'What energy needs to be transformed within you?'
     },
@@ -78,7 +78,7 @@ export const SacredJournalInterface: React.FC = () => {
       id: 'integration' as EntryMode,
       name: 'Integration',
       description: 'Crystallize lessons into action',
-      icon: <Infinity className="w-5 h-5" />,
+      icon: InfinityIcon,
       color: 'from-green-500 to-emerald-500',
       prompt: 'How will you embody this wisdom in your daily life?'
     }
@@ -238,10 +238,10 @@ export const SacredJournalInterface: React.FC = () => {
                 <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        {currentModeData?.icon}
+                    <CardTitle className="flex items-center gap-2">
+                        {currentModeData?.icon && <currentModeData.icon className="w-5 h-5" />}
                         {currentModeData?.name} Entry
-                      </CardTitle>
+                    </CardTitle>
                       <VoiceJournalRecorder
                         onTranscription={(text) => {
                           setCurrentEntry(prev => prev + ' ' + text);
@@ -372,7 +372,10 @@ export const SacredJournalInterface: React.FC = () => {
                                 <div className={`p-2 rounded-full bg-gradient-to-r ${
                                   entryModes.find(m => m.id === entry.entry_mode)?.color || 'from-gray-400 to-gray-600'
                                 }`}>
-                                  {entryModes.find(m => m.id === entry.entry_mode)?.icon}
+                                  {(() => {
+                                    const IconComponent = entryModes.find(m => m.id === entry.entry_mode)?.icon;
+                                    return IconComponent ? <IconComponent className="w-4 h-4 text-white" /> : null;
+                                  })()}
                                 </div>
                                 <div>
                                   <h3 className="font-medium">{entry.title}</h3>
