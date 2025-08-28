@@ -7,7 +7,7 @@ export interface SacredJournalEntry {
   user_id: string;
   title: string;
   content: string;
-  entry_mode?: 'stream' | 'reflection' | 'transmutation' | 'integration';
+  entry_mode?: string;
   resonance_tags?: string[];
   voice_transcription?: boolean;
   is_draft?: boolean;
@@ -20,7 +20,7 @@ export interface SacredJournalEntry {
 export interface NewSacredJournalEntry {
   title: string;
   content: string;
-  entry_mode?: 'stream' | 'reflection' | 'transmutation' | 'integration';
+  entry_mode?: string;
   resonance_tags?: string[];
   voice_transcription?: boolean;
   is_draft?: boolean;
