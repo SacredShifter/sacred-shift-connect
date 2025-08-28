@@ -38,10 +38,7 @@ import { GroupMeditationSession } from '@/components/GroupMeditationSession';
 import { MEDITATION_MODULE_CONFIG } from '@/config/mediaMaps';
 import { Slogan } from '@/components/ui/Slogan';
 import { BreathingVisualizer } from '@/components/BreathingVisualizer';
-import ChakraLearning3D from '@/components/3D/ChakraLearning3D';
-import LivingMandala3D from '@/components/3D/LivingMandala3D';
-import SacredGeometry3D from '@/components/3D/SacredGeometry3D';
-import TorusFieldDynamics3D from '@/components/3D/TorusFieldDynamics3D';
+import BreathOfSource3D from '@/components/3D/BreathOfSource3D';
 
 type MeditationType = 'breathing' | 'loving-kindness' | 'chakra' | 'mindfulness' | 'body-scan';
 type SessionState = 'idle' | 'active' | 'paused' | 'completed';
@@ -884,19 +881,13 @@ export default function Meditation() {
             </div>
 
             {/* 3D Meditation Environment */}
-            {sessionState === 'active' && (
-              <Card className="mt-6 overflow-hidden animate-scale-in">
-                <CardContent className="p-0">
-                  <div className="h-96 w-full">
-                    {selectedType === 'chakra' && <ChakraLearning3D />}
-                    {selectedType === 'breathing' && <TorusFieldDynamics3D />}
-                    {selectedType === 'mindfulness' && <LivingMandala3D />}
-                    {selectedType === 'loving-kindness' && <SacredGeometry3D />}
-                    {selectedType === 'body-scan' && <LivingMandala3D />}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="mt-6 overflow-hidden animate-scale-in">
+              <CardContent className="p-0">
+                <div className="h-96 w-full">
+                  <BreathOfSource3D />
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Group Sessions Tab */}
