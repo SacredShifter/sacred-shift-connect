@@ -2470,6 +2470,10 @@ export type Database = {
           is_edited: boolean | null
           is_flagged: boolean | null
           is_system_message: boolean | null
+          media_filename: string | null
+          media_size: number | null
+          media_type: string | null
+          media_url: string | null
           message_type: string | null
           moderation_status: string | null
           sacred_symbols: string[] | null
@@ -2490,6 +2494,10 @@ export type Database = {
           is_edited?: boolean | null
           is_flagged?: boolean | null
           is_system_message?: boolean | null
+          media_filename?: string | null
+          media_size?: number | null
+          media_type?: string | null
+          media_url?: string | null
           message_type?: string | null
           moderation_status?: string | null
           sacred_symbols?: string[] | null
@@ -2510,6 +2518,10 @@ export type Database = {
           is_edited?: boolean | null
           is_flagged?: boolean | null
           is_system_message?: boolean | null
+          media_filename?: string | null
+          media_size?: number | null
+          media_type?: string | null
+          media_url?: string | null
           message_type?: string | null
           moderation_status?: string | null
           sacred_symbols?: string[] | null
