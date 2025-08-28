@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns/format';
+import ReactMarkdown from 'react-markdown';
 import { CodexEntry } from '@/hooks/useCodex';
 
 interface CodexEntryCardProps {
@@ -104,9 +105,17 @@ export function CodexEntryCard({ entry, onEdit, onDelete, compact = false }: Cod
           
           <CardContent className="relative">
             {entry.content && (
-              <p className={`text-muted-foreground ${compact ? 'text-sm line-clamp-2' : 'line-clamp-3'} mb-4`}>
-                {entry.content}
-              </p>
+              <div className={`text-muted-foreground ${compact ? 'text-sm' : ''} mb-4 ${compact ? 'line-clamp-2' : 'line-clamp-4'} overflow-hidden`}>
+                <ReactMarkdown 
+                  components={{
+                    h3: ({ children }) => <h3 className="text-sm font-medium text-primary/80 mb-2 mt-3 first:mt-0">{children}</h3>,
+                    p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
+                    em: ({ children }) => <em className="text-primary font-medium not-italic">{children}</em>,
+                  }}
+                >
+                  {entry.content}
+                </ReactMarkdown>
+              </div>
             )}
             
             {entry.resonance_tags.length > 0 && (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Tag } from 'lucide-react';
+import { X, Plus, Tag, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,7 +40,7 @@ const REFLECTION_PROMPTS = [
   "What sacred geometry appeared to you?"
 ];
 
-export function CodexEntryModal({ isOpen, onClose, onSubmit, initialData }: CodexEntryModalProps) {
+export function CodexEntryModalEnhanced({ isOpen, onClose, onSubmit, initialData }: CodexEntryModalProps) {
   const [formData, setFormData] = useState<NewCodexEntry>({
     title: '',
     content: '',
@@ -69,16 +69,38 @@ export function CodexEntryModal({ isOpen, onClose, onSubmit, initialData }: Code
         resonance_tags: [],
         source_module: 'Manual'
       });
-      // Show a random reflection prompt for new entries
       setCurrentPrompt(REFLECTION_PROMPTS[Math.floor(Math.random() * REFLECTION_PROMPTS.length)]);
     }
   }, [initialData, isOpen]);
 
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      content: '',
+      type: 'Fragment',
+      resonance_tags: [],
+      source_module: 'Manual'
+    });
+    setNewTag('');
+    setViewMode('edit');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim()) return;
-    
     onSubmit(formData);
+    resetForm();
+  };
+
+  const handleRestructure = () => {
+    if (formData.content) {
+      const restructured = restructureCodexEntry(
+        formData.content, 
+        formData.title, 
+        { resonanceTags: formData.resonance_tags }
+      );
+      setFormData(prev => ({ ...prev, content: restructured }));
+      setViewMode('preview');
+    }
   };
 
   const addTag = () => {
@@ -107,7 +129,7 @@ export function CodexEntryModal({ isOpen, onClose, onSubmit, initialData }: Code
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl h-[min(90vh,800px)] flex flex-col p-0 gap-0 data-[state=open]:overflow-hidden">
+      <DialogContent className="max-w-3xl h-[min(90vh,900px)] flex flex-col p-0 gap-0">
         <div className="flex-shrink-0 p-6 pb-4 border-b">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -126,66 +148,122 @@ export function CodexEntryModal({ isOpen, onClose, onSubmit, initialData }: Code
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title">Title *</Label>
-              <TooltipWrapper content={HelpTooltips.title}>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Enter a meaningful title..."
-                  required
-                  className="text-base"
-                />
-              </TooltipWrapper>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter a meaningful title..."
+                required
+                className="text-base"
+              />
             </div>
 
             {/* Type and Source */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="type">Entry Type</Label>
-                <TooltipWrapper content={HelpTooltips.type}>
-                  <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ENTRY_TYPES.map(type => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TooltipWrapper>
+                <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ENTRY_TYPES.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="source">Source Module</Label>
-                <TooltipWrapper content={HelpTooltips.source}>
-                  <Select value={formData.source_module} onValueChange={(value) => setFormData(prev => ({ ...prev, source_module: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select source" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SOURCE_MODULES.map(source => (
-                        <SelectItem key={source} value={source}>{source}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TooltipWrapper>
+                <Select value={formData.source_module} onValueChange={(value) => setFormData(prev => ({ ...prev, source_module: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SOURCE_MODULES.map(source => (
+                      <SelectItem key={source} value={source}>{source}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
-            {/* Content */}
+            {/* Content with Sacred Shifter Enhancement */}
             <div className="space-y-2">
-              <Label htmlFor="content">Content</Label>
-              <TooltipWrapper content={HelpTooltips.content}>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  placeholder="Describe your experience, insight, or memory..."
-                  rows={6}
-                  className="resize-none"
-                />
-              </TooltipWrapper>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="content">Sacred Content</Label>
+                <p className="text-xs text-muted-foreground">Use the Sacred Shifter voice: poetic, profound, structured</p>
+              </div>
+              
+              <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'edit' | 'preview')}>
+                <div className="flex items-center justify-between mb-2">
+                  <TabsList className="grid w-fit grid-cols-2">
+                    <TabsTrigger value="edit">Edit</TabsTrigger>
+                    <TabsTrigger value="preview">Preview</TabsTrigger>
+                  </TabsList>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleRestructure}
+                    disabled={!formData.content}
+                  >
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    Restructure Text
+                  </Button>
+                </div>
+                
+                <TabsContent value="edit" className="mt-0">
+                  <Textarea
+                    placeholder="Enter your sacred insight, vision, or revelation... 
+
+Use markdown for structure:
+### Soft Headings
+*Emphasized truths*
+Regular paragraphs flow naturally...
+
+Example structure:
+### The Essence of Kindness
+
+Kindness is the subtle gravity that curves the space of a room, inviting nervous systems to land.
+
+*It is not sentiment but physics.* Coherence arises where judgment loosens, and complexity feels safe enough to speak.
+
+### The Soft Technology of Practice
+
+In fractured times, kindness functions as a soft technology — micro-gestures that modulate the field: a slower tone, eyes that witness, the gift of unhurried replies.
+
+*These are not small. They are the architecture of trust.*
+
+*And so, kindness bends the field — holding us together in belonging.*"
+                    value={formData.content}
+                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                    rows={15}
+                    className="resize-none font-mono text-sm"
+                  />
+                </TabsContent>
+                
+                <TabsContent value="preview" className="mt-0">
+                  <div className="border rounded-md p-6 min-h-[400px] bg-muted/20">
+                    {formData.content ? (
+                      <div className="prose prose-zinc dark:prose-invert max-w-none">
+                        <ReactMarkdown 
+                          components={{
+                            h3: ({ children }) => <h3 className="text-lg font-medium text-primary/90 mb-3 mt-6 first:mt-0">{children}</h3>,
+                            p: ({ children }) => <p className="mb-4 leading-relaxed text-muted-foreground">{children}</p>,
+                            em: ({ children }) => <em className="text-primary font-medium not-italic bg-primary/10 px-1 rounded">{children}</em>,
+                          }}
+                        >
+                          {formData.content}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground italic">No content to preview...</p>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
 
             {/* Resonance Tags */}
@@ -211,22 +289,20 @@ export function CodexEntryModal({ isOpen, onClose, onSubmit, initialData }: Code
               )}
               
               <div className="flex gap-2">
-                <TooltipWrapper content={HelpTooltips.tags}>
-                  <Input
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Add resonance tags..."
-                    className="flex-1"
-                  />
-                </TooltipWrapper>
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Add resonance tags (kindness, coherence, boundaries, etc.)..."
+                  className="flex-1"
+                />
                 <Button type="button" onClick={addTag} variant="outline" size="sm">
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
               
               <p className="text-xs text-muted-foreground">
-                Tags help you cross-reference and find connections in your codex.
+                Tags help you cross-reference and find connections in your codex. They become part of the Sacred Shifter voice when restructuring.
               </p>
             </div>
           </form>
