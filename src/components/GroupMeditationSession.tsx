@@ -526,10 +526,17 @@ export function GroupMeditationSession({
         )}
       </AnimatePresence>
 
-      {/* Main Session Interface */}
-      <div className={`fixed inset-0 ${sessionState.is_playing ? 'bg-transparent' : 'bg-background/95 backdrop-blur-sm'} z-50 flex items-center justify-center p-4 animate-fade-in`}>
-        <Card className={`w-full max-w-6xl h-full max-h-[90vh] overflow-hidden animate-scale-in ${sessionState.is_playing ? 'bg-black/20 backdrop-blur-md border-white/10' : ''}`}>
-          <CardHeader className={`border-b ${sessionState.is_playing ? 'bg-black/10 border-white/10' : 'bg-gradient-to-r from-primary/5 to-secondary/5'}`}>
+      {/* Main Session Interface - Hidden during meditation */}
+      <AnimatePresence>
+        {!sessionState.is_playing && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+          >
+            <Card className="w-full max-w-6xl h-full max-h-[90vh] overflow-hidden animate-scale-in">
+              <CardHeader className="border-b bg-gradient-to-r from-primary/5 to-secondary/5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-full ${sessionState.is_playing ? 'bg-white/10' : 'bg-primary/10'}`}>
@@ -967,7 +974,42 @@ export function GroupMeditationSession({
             </Tabs>
           </CardContent>
         </Card>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Minimized Controls During Meditation */}
+      <AnimatePresence>
+        {sessionState.is_playing && isHost && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-8 right-8 z-50"
+          >
+            <Card className="bg-black/20 backdrop-blur-md border-white/10">
+              <CardContent className="p-3 flex items-center gap-2">
+                <Button
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={pauseSession}
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  <Pause className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={stopSession}
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  <Square className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
