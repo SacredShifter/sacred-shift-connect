@@ -302,16 +302,32 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
 
           <div className="flex items-center justify-between">
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => toast({ description: 'Camera feature coming soon!' })}
+              >
                 <Camera className="w-4 h-4" />
               </Button>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => toast({ description: 'Video feature coming soon!' })}
+              >
                 <Video className="w-4 h-4" />
               </Button>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => toast({ description: 'Voice recording coming soon!' })}
+              >
                 <Mic className="w-4 h-4" />
               </Button>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => toast({ description: 'Magic consciousness features coming soon!' })}
+              >
                 <Sparkles className="w-4 h-4" />
               </Button>
             </div>
