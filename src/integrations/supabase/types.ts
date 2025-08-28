@@ -3182,6 +3182,39 @@ export type Database = {
         }
         Relationships: []
       }
+      collective_field_echoes: {
+        Row: {
+          contributor_hash: string
+          created_at: string
+          echo_count: number | null
+          energy_signature: Json
+          id: string
+          last_echoed_at: string | null
+          resonance_level: number | null
+          resonance_phrase: string
+        }
+        Insert: {
+          contributor_hash: string
+          created_at?: string
+          echo_count?: number | null
+          energy_signature: Json
+          id?: string
+          last_echoed_at?: string | null
+          resonance_level?: number | null
+          resonance_phrase: string
+        }
+        Update: {
+          contributor_hash?: string
+          created_at?: string
+          echo_count?: number | null
+          energy_signature?: Json
+          id?: string
+          last_echoed_at?: string | null
+          resonance_level?: number | null
+          resonance_phrase?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_id: string
@@ -6112,6 +6145,42 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_threads: {
+        Row: {
+          consciousness_trajectory: string | null
+          created_at: string
+          id: string
+          insight_evolution: Json | null
+          pattern_recognition: Json | null
+          theme: string | null
+          thread_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consciousness_trajectory?: string | null
+          created_at?: string
+          id?: string
+          insight_evolution?: Json | null
+          pattern_recognition?: Json | null
+          theme?: string | null
+          thread_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consciousness_trajectory?: string | null
+          created_at?: string
+          id?: string
+          insight_evolution?: Json | null
+          pattern_recognition?: Json | null
+          theme?: string | null
+          thread_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           body: string
@@ -7456,6 +7525,57 @@ export type Database = {
         }
         Relationships: []
       }
+      meditation_sessions: {
+        Row: {
+          actual_duration: number
+          completed_at: string
+          created_at: string
+          id: string
+          intended_duration: number
+          metrics: Json | null
+          practice_name: string
+          practice_type: string
+          session_data: Json | null
+          session_id: string
+          started_at: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_duration: number
+          completed_at: string
+          created_at?: string
+          id?: string
+          intended_duration: number
+          metrics?: Json | null
+          practice_name: string
+          practice_type: string
+          session_data?: Json | null
+          session_id: string
+          started_at: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_duration?: number
+          completed_at?: string
+          created_at?: string
+          id?: string
+          intended_duration?: number
+          metrics?: Json | null
+          practice_name?: string
+          practice_type?: string
+          session_data?: Json | null
+          session_id?: string
+          started_at?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       message_delivery_status: {
         Row: {
           id: string
@@ -7702,6 +7822,7 @@ export type Database = {
           chakra_alignment: string | null
           content: string | null
           created_at: string | null
+          entry_mode: string | null
           id: string
           is_draft: boolean | null
           mood_tag: string | null
@@ -7713,6 +7834,7 @@ export type Database = {
           chakra_alignment?: string | null
           content?: string | null
           created_at?: string | null
+          entry_mode?: string | null
           id?: string
           is_draft?: boolean | null
           mood_tag?: string | null
@@ -7724,6 +7846,7 @@ export type Database = {
           chakra_alignment?: string | null
           content?: string | null
           created_at?: string | null
+          entry_mode?: string | null
           id?: string
           is_draft?: boolean | null
           mood_tag?: string | null
@@ -8962,6 +9085,7 @@ export type Database = {
           last_level_up: string | null
           light_level: number | null
           light_points: number | null
+          meditation_stats: Json | null
           onboarding_completed: boolean
           updated_at: string | null
           user_id: string
@@ -8981,6 +9105,7 @@ export type Database = {
           last_level_up?: string | null
           light_level?: number | null
           light_points?: number | null
+          meditation_stats?: Json | null
           onboarding_completed?: boolean
           updated_at?: string | null
           user_id: string
@@ -9000,6 +9125,7 @@ export type Database = {
           last_level_up?: string | null
           light_level?: number | null
           light_points?: number | null
+          meditation_stats?: Json | null
           onboarding_completed?: boolean
           updated_at?: string | null
           user_id?: string
@@ -10507,6 +10633,90 @@ export type Database = {
           started_at?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      sacred_journal_entries: {
+        Row: {
+          ai_confidence: number | null
+          ai_mirror_back: string | null
+          ai_shift_lever: string | null
+          chakra_alignment: string | null
+          collective_resonance_phrase: string | null
+          consciousness_expansion_level: number | null
+          content: string
+          created_at: string
+          dominant_emotion: string | null
+          emotional_resonance: number | null
+          energy_signature: Json | null
+          energy_state: string | null
+          entry_type: string
+          id: string
+          integration_thread_id: string | null
+          is_draft: boolean | null
+          resonance_tags: string[] | null
+          shared_to_collective: boolean | null
+          sketch_data: Json | null
+          title: string | null
+          updated_at: string
+          user_id: string
+          visual_theme: string | null
+          voice_recording_url: string | null
+          word_frequency_analysis: Json | null
+        }
+        Insert: {
+          ai_confidence?: number | null
+          ai_mirror_back?: string | null
+          ai_shift_lever?: string | null
+          chakra_alignment?: string | null
+          collective_resonance_phrase?: string | null
+          consciousness_expansion_level?: number | null
+          content: string
+          created_at?: string
+          dominant_emotion?: string | null
+          emotional_resonance?: number | null
+          energy_signature?: Json | null
+          energy_state?: string | null
+          entry_type: string
+          id?: string
+          integration_thread_id?: string | null
+          is_draft?: boolean | null
+          resonance_tags?: string[] | null
+          shared_to_collective?: boolean | null
+          sketch_data?: Json | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          visual_theme?: string | null
+          voice_recording_url?: string | null
+          word_frequency_analysis?: Json | null
+        }
+        Update: {
+          ai_confidence?: number | null
+          ai_mirror_back?: string | null
+          ai_shift_lever?: string | null
+          chakra_alignment?: string | null
+          collective_resonance_phrase?: string | null
+          consciousness_expansion_level?: number | null
+          content?: string
+          created_at?: string
+          dominant_emotion?: string | null
+          emotional_resonance?: number | null
+          energy_signature?: Json | null
+          energy_state?: string | null
+          entry_type?: string
+          id?: string
+          integration_thread_id?: string | null
+          is_draft?: boolean | null
+          resonance_tags?: string[] | null
+          shared_to_collective?: boolean | null
+          sketch_data?: Json | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          visual_theme?: string | null
+          voice_recording_url?: string | null
+          word_frequency_analysis?: Json | null
         }
         Relationships: []
       }
@@ -15685,6 +15895,42 @@ export type Database = {
         }
         Relationships: []
       }
+      word_resonance_patterns: {
+        Row: {
+          consciousness_themes: string[] | null
+          emotional_context: string | null
+          energy_associations: Json | null
+          first_appearance: string
+          frequency: number | null
+          id: string
+          last_appearance: string
+          user_id: string
+          word: string
+        }
+        Insert: {
+          consciousness_themes?: string[] | null
+          emotional_context?: string | null
+          energy_associations?: Json | null
+          first_appearance?: string
+          frequency?: number | null
+          id?: string
+          last_appearance?: string
+          user_id: string
+          word: string
+        }
+        Update: {
+          consciousness_themes?: string[] | null
+          emotional_context?: string | null
+          energy_associations?: Json | null
+          first_appearance?: string
+          frequency?: number | null
+          id?: string
+          last_appearance?: string
+          user_id?: string
+          word?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       active_user_count: {
@@ -16270,6 +16516,10 @@ export type Database = {
           p_frequency?: number
           p_title: string
         }
+        Returns: string
+      }
+      generate_contributor_hash: {
+        Args: { input_user_id: string }
         Returns: string
       }
       geography: {
