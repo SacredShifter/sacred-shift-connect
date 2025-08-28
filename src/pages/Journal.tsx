@@ -1,8 +1,8 @@
 import React from 'react';
-import { MirrorJournal } from '@/components/MirrorJournal';
+import { SacredJournalInterface } from '@/components/SacredJournalInterface';
 
 const Journal = () => {
-  return <MirrorJournal />;
+  return <SacredJournalInterface />;
 };
 
 export default Journal;
