@@ -5,6 +5,10 @@ import * as THREE from 'three';
 import type { ScreensaverVisualType } from '../SacredScreensaver';
 import { SacredMessage } from './SacredMessage';
 import { useScreensaverMessages } from '@/hooks/useScreensaverMessages';
+import { useCollectiveResonance } from '@/hooks/useCollectiveResonance';
+import { FlowerOfLife, MerkabaField, TorusField } from './SacredGeometry';
+import { EnhancedFrequencyWaves } from './EnhancedFrequencyWaves';
+import { ResonanceMessaging } from './ResonanceMessaging';
 
 // Custom shader materials for enhanced visuals
 const createEnergyShaderMaterial = (color: THREE.Color, time: number = 0) => {
@@ -128,7 +132,7 @@ export function FrequencyVisuals({ type, isActive, showMessages = true }: Freque
       {(() => {
         switch (type) {
           case "breath_orb":
-            return <BreathOrb isActive={isActive} />;
+            return <EnhancedBreathOrb isActive={isActive} />;
           case "heart_opening":
             return <HeartOpening isActive={isActive} />;
           case "chakra_column":
@@ -140,7 +144,7 @@ export function FrequencyVisuals({ type, isActive, showMessages = true }: Freque
           case "energy_alignment":
             return <EnergyAlignment isActive={isActive} />;
           default:
-            return <BreathOrb isActive={isActive} />;
+            return <EnhancedBreathOrb isActive={isActive} />;
         }
       })()}
       
@@ -151,172 +155,116 @@ export function FrequencyVisuals({ type, isActive, showMessages = true }: Freque
             message={currentMessage}
             isVisible={isVisible}
           />
+          <ResonanceMessaging 
+            isActive={isActive}
+            phase="frequency"
+          />
         </div>
       )}
     </>
   );
 }
 
-// Enhanced Breath Orb Visual with Shader-Driven Effects
-function BreathOrb({ isActive }: { isActive: boolean }) {
+// Enhanced Breath Orb with Sacred Geometry and Collective Resonance
+function EnhancedBreathOrb({ isActive }: { isActive: boolean }) {
   const orbRef = useRef<THREE.Mesh>(null);
-  const particlesRef = useRef<THREE.Points>(null);
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
-  const particleMaterialRef = useRef<THREE.ShaderMaterial>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const [geometryType, setGeometryType] = useState<'flower' | 'merkaba' | 'torus'>('flower');
   
-  // Enhanced instanced particle system
-  const { positions, colors, sizes, particleMaterial } = useMemo(() => {
-    const particleCount = 8000;
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-    const sizes = new Float32Array(particleCount);
+  // Collective resonance integration
+  const { getDominantFrequency } = useCollectiveResonance();
+  const { color: dominantColor, strength: resonanceStrength } = getDominantFrequency();
+  
+  // Breathing cycle state
+  const breathPhase = useRef(0);
+  
+  useFrame(({ clock }) => {
+    if (!isActive) return;
     
-    const sacredColors = [
-      new THREE.Color(0.2, 0.4, 1.0), // Deep Blue
-      new THREE.Color(0.8, 0.2, 1.0), // Purple
-      new THREE.Color(1.0, 0.8, 0.2), // Gold
-      new THREE.Color(0.2, 1.0, 0.8), // Cyan
-    ];
+    const time = clock.getElapsedTime();
     
-    for (let i = 0; i < particleCount; i++) {
-      // Spherical distribution with sacred geometry ratios
-      const radius = Math.pow(Math.random(), 0.5) * 4 + 1;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const theta = Math.random() * Math.PI * 2;
+    // Slow breath cycle (4 seconds inhale, 4 seconds exhale)
+    breathPhase.current = Math.sin(time * Math.PI / 4) * 0.5 + 0.5;
+    
+    // Update orb based on collective resonance
+    if (orbRef.current) {
+      const breathScale = 1 + breathPhase.current * 0.3;
+      const resonanceScale = 1 + (resonanceStrength / 10) * 0.2;
+      orbRef.current.scale.setScalar(breathScale * resonanceScale);
       
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = radius * Math.cos(phi);
-      
-      // Sacred color palette with golden ratio distribution
-      const colorIndex = Math.floor(Math.random() * sacredColors.length);
-      const color = sacredColors[colorIndex];
-      colors[i * 3] = color.r;
-      colors[i * 3 + 1] = color.g;
-      colors[i * 3 + 2] = color.b;
-      
-      sizes[i] = Math.random() * 0.03 + 0.02;
+      // Gentle rotation
+      orbRef.current.rotation.y = time * 0.05;
+      orbRef.current.rotation.x = Math.sin(time * 0.3) * 0.1;
     }
     
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0 },
-        breathPhase: { value: 0 }
-      },
-      vertexShader: `
-        uniform float time;
-        uniform float breathPhase;
-        attribute float size;
-        attribute vec3 color;
-        varying vec3 vColor;
-        varying float vAlpha;
-        
-        vec3 noise3D(vec3 p) {
-          return vec3(
-            sin(p.x * 7.13 + p.y * 5.17 + time * 0.5),
-            sin(p.x * 3.67 + p.y * 9.23 + time * 0.7),
-            sin(p.x * 2.41 + p.y * 7.89 + time * 0.3)
-          ) * 0.5;
-        }
-        
-        void main() {
-          vColor = color;
-          
-          vec3 noiseOffset = noise3D(position) * 0.3;
-          vec3 breathOffset = position * breathPhase * 0.2;
-          vec3 newPosition = position + noiseOffset + breathOffset;
-          
-          float distanceFromCenter = length(position);
-          vAlpha = 1.0 - smoothstep(1.0, 5.0, distanceFromCenter);
-          
-          vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
-          gl_PointSize = size * (800.0 / -mvPosition.z) * (1.0 + breathPhase);
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vColor;
-        varying float vAlpha;
-        
-        void main() {
-          float r = length(gl_PointCoord - vec2(0.5));
-          if (r > 0.5) discard;
-          
-          float glow = exp(-r * 4.0);
-          float alpha = glow * vAlpha * 0.9;
-          
-          vec3 finalColor = vColor * (1.0 + glow * 0.5);
-          gl_FragColor = vec4(finalColor, alpha);
-        }
-      `,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      vertexColors: true
-    });
-    
-    return { 
-      positions, 
-      colors, 
-      sizes, 
-      particleMaterial: material 
-    };
-  }, []);
+    // Cycle through sacred geometry every 30 seconds
+    const geometryCycle = Math.floor(time / 30) % 3;
+    const newGeometry = ['flower', 'merkaba', 'torus'][geometryCycle] as 'flower' | 'merkaba' | 'torus';
+    if (newGeometry !== geometryType) {
+      setGeometryType(newGeometry);
+    }
+  });
   
-  // Enhanced energy orb shader material
+  // Enhanced orb material with resonance reactivity
   const orbMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
         breathPhase: { value: 0 },
-        color: { value: new THREE.Color(0.2, 0.4, 1.0) }
+        dominantColor: { value: new THREE.Color(...dominantColor) },
+        resonanceStrength: { value: resonanceStrength }
       },
       vertexShader: `
         uniform float time;
         uniform float breathPhase;
+        uniform float resonanceStrength;
         varying vec3 vPosition;
         varying vec3 vNormal;
         varying vec3 vWorldPosition;
         
-        vec3 noise3D(vec3 p) {
-          return vec3(
-            sin(p.x * 4.13 + p.y * 3.17 + time),
-            sin(p.x * 2.67 + p.y * 5.23 + time),
-            sin(p.x * 3.41 + p.y * 4.89 + time)
-          ) * 0.5;
+        // Subtle energy displacement
+        vec3 energyDisplacement(vec3 pos, float time, float breath) {
+          float noise = sin(pos.x * 4.0 + time) * sin(pos.y * 3.0 + time * 0.7) * sin(pos.z * 5.0 + time * 0.5);
+          return pos + normalize(pos) * noise * 0.03 * (1.0 + breath * 0.5);
         }
         
         void main() {
           vPosition = position;
           vNormal = normal;
           
-          vec3 noiseOffset = noise3D(position + time * 0.3) * 0.05 * (1.0 + breathPhase);
-          vec3 newPosition = position + noiseOffset;
+          // Apply energy displacement
+          vec3 displaced = energyDisplacement(position, time, breathPhase);
           
-          vec4 worldPosition = modelMatrix * vec4(newPosition, 1.0);
+          vec4 worldPosition = modelMatrix * vec4(displaced, 1.0);
           vWorldPosition = worldPosition.xyz;
           
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
         }
       `,
       fragmentShader: `
         uniform float time;
         uniform float breathPhase;
-        uniform vec3 color;
+        uniform vec3 dominantColor;
+        uniform float resonanceStrength;
         varying vec3 vPosition;
         varying vec3 vNormal;
         varying vec3 vWorldPosition;
         
         void main() {
           vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
-          float fresnel = pow(1.0 - dot(viewDirection, vNormal), 3.0);
+          float fresnel = pow(1.0 - dot(viewDirection, vNormal), 2.0);
           
-          float pulse = sin(time * 2.0) * 0.3 + 0.7;
-          float breathGlow = 1.0 + breathPhase * 0.5;
+          // Breathing pulse
+          float pulse = 0.7 + breathPhase * 0.3;
           
-          float energy = fresnel * pulse * breathGlow;
-          vec3 finalColor = color * energy * 2.0;
+          // Resonance intensity
+          float resonanceGlow = 1.0 + (resonanceStrength / 10.0) * 0.5;
           
-          float alpha = fresnel * 0.6 * breathGlow;
+          // Color mixing with dominant resonance
+          vec3 baseColor = vec3(0.4, 0.6, 1.0); // Default blue
+          vec3 finalColor = mix(baseColor, dominantColor, 0.6) * fresnel * pulse * resonanceGlow;
+          
+          float alpha = fresnel * 0.4 * pulse;
           gl_FragColor = vec4(finalColor, alpha);
         }
       `,
@@ -324,67 +272,127 @@ function BreathOrb({ isActive }: { isActive: boolean }) {
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide
     });
-  }, []);
-
+  }, [dominantColor, resonanceStrength]);
+  
   useFrame(({ clock }) => {
     if (!isActive) return;
     
     const time = clock.getElapsedTime();
-    const breathCycle = Math.sin(time * 0.4) * 0.5 + 0.5; // Slow breath cycle
-    
-    // Update orb
-    if (orbRef.current && orbMaterial) {
-      const breathScale = 1 + breathCycle * 0.4;
-      orbRef.current.scale.setScalar(breathScale);
-      orbRef.current.rotation.y = time * 0.05;
-      
-      orbMaterial.uniforms.time.value = time;
-      orbMaterial.uniforms.breathPhase.value = breathCycle;
-    }
-    
-    // Update particles
-    if (particleMaterial) {
-      particleMaterial.uniforms.time.value = time;
-      particleMaterial.uniforms.breathPhase.value = breathCycle;
-    }
+    orbMaterial.uniforms.time.value = time;
+    orbMaterial.uniforms.breathPhase.value = breathPhase.current;
+    orbMaterial.uniforms.dominantColor.value.setRGB(...dominantColor);
+    orbMaterial.uniforms.resonanceStrength.value = resonanceStrength;
   });
 
   return (
-    <group>
-      {/* Enhanced Central Energy Orb */}
+    <group ref={groupRef}>
+      {/* Central Resonance Orb */}
       <mesh ref={orbRef} material={orbMaterial}>
-        <icosahedronGeometry args={[1, 2]} />
+        <icosahedronGeometry args={[1.2, 3]} />
       </mesh>
       
-      {/* Enhanced Particle Field */}
-      <points ref={particlesRef} material={particleMaterial}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={positions.length / 3}
-            array={positions}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={colors.length / 3}
-            array={colors}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-size"
-            count={sizes.length}
-            array={sizes}
-            itemSize={1}
-          />
-        </bufferGeometry>
-      </points>
+      {/* Sacred Geometry Layer */}
+      {geometryType === 'flower' && (
+        <FlowerOfLife isActive={isActive} breathPhase={breathPhase.current} />
+      )}
+      {geometryType === 'merkaba' && (
+        <MerkabaField isActive={isActive} breathPhase={breathPhase.current} />
+      )}
+      {geometryType === 'torus' && (
+        <TorusField isActive={isActive} breathPhase={breathPhase.current} />
+      )}
       
-      {/* Enhanced Energy Waves */}
-      <EnergyWaves isActive={isActive} />
+      {/* Enhanced Frequency Waves */}
+      <EnhancedFrequencyWaves 
+        isActive={isActive}
+        breathPhase={breathPhase.current}
+        dominantColor={dominantColor}
+        resonanceStrength={resonanceStrength}
+      />
       
-      {/* Sacred Shifter Logo Overlay */}
-      <LogoOverlay isActive={isActive} />
+      {/* Enhanced Logo Display */}
+      <EnhancedLogoOverlay isActive={isActive} />
+    </group>
+  );
+}
+
+// Enhanced Logo Overlay with Better Visibility
+function EnhancedLogoOverlay({ isActive }: { isActive: boolean }) {
+  const logoRef = useRef<THREE.Mesh>(null);
+  const [logoTexture, setLogoTexture] = useState<THREE.Texture | null>(null);
+
+  // Load logo texture with better error handling
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    loader.load(
+      'https://mikltjgbvxrxndtszorb.supabase.co/storage/v1/object/public/sacred-assets/uploads/Logo-MainSacredShifter-removebg-preview%20(1).png',
+      (texture) => {
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        setLogoTexture(texture);
+      },
+      undefined,
+      (error) => {
+        console.warn('Logo texture failed to load:', error);
+      }
+    );
+  }, []);
+
+  // Enhanced logo material with better visibility and glow
+  const logoMaterial = useMemo(() => {
+    if (!logoTexture) return null;
+    
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        logoTexture: { value: logoTexture },
+        opacity: { value: 0.9 }
+      },
+      vertexShader: `
+        uniform float time;
+        varying vec2 vUv;
+        
+        void main() {
+          vUv = uv;
+          vec3 pos = position;
+          pos.z += sin(time * 0.5) * 0.02;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform sampler2D logoTexture;
+        uniform float opacity;
+        varying vec2 vUv;
+        
+        void main() {
+          vec4 logoColor = texture2D(logoTexture, vUv);
+          float glow = 1.0 + sin(time * 1.5) * 0.3;
+          vec3 finalColor = max(logoColor.rgb * glow, vec3(0.3));
+          gl_FragColor = vec4(finalColor, logoColor.a * opacity * glow);
+        }
+      `,
+      transparent: true,
+      blending: THREE.NormalBlending
+    });
+  }, [logoTexture]);
+
+  useFrame(({ clock }) => {
+    if (!isActive || !logoMaterial || !logoRef.current) return;
+    const time = clock.getElapsedTime();
+    logoMaterial.uniforms.time.value = time;
+    logoRef.current.rotation.z = Math.sin(time * 0.3) * 0.02;
+    logoRef.current.position.y = Math.sin(time * 0.4) * 0.1;
+  });
+
+  if (!logoMaterial) return null;
+
+  return (
+    <mesh ref={logoRef} material={logoMaterial} position={[0, -2.5, 2]} scale={[2, 0.5, 1]}>
+      <planeGeometry args={[2, 0.5]} />
+    </mesh>
+  );
+}
     </group>
   );
 }
