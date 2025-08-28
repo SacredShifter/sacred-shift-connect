@@ -32,7 +32,6 @@ import AuraQuantumCommandNexus from '@/pages/AuraQuantumCommandNexus';
 import ConstellationMapper from "./pages/ConstellationMapper";
 import Grove from "./pages/Grove";
 import Liberation from "./pages/Liberation";
-import LearningModule3D from './components/3D/LearningModule3D';
 import Shift from './pages/Shift';
 import Meditation from './pages/Meditation';
 
@@ -76,7 +75,6 @@ function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/ai-admin" element={<AdminRoute><AuraQuantumCommandNexus /></AdminRoute>} />
-                <Route path="/learning-3d" element={<LearningModule3D />} />
                 <Route path="/shift" element={<Shift />} />
                 <Route path="/meditation" element={<Meditation />} />
               </Route>

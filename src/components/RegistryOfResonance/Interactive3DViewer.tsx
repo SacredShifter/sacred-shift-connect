@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Box, Maximize2, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import LearningModule3D, { learningModules } from '../3D/LearningModule3D';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 interface Interactive3DViewerProps {
@@ -14,6 +13,30 @@ interface Interactive3DViewerProps {
   moduleId?: string;
   className?: string;
 }
+
+// Mock learning modules data for compatibility
+const learningModules = [
+  {
+    id: 'sacred-geometry',
+    title: 'Sacred Geometry',
+    description: 'Explore the mathematical patterns of creation',
+    category: 'Consciousness',
+    difficulty: 'beginner' as const,
+    duration: '15 min',
+    tags: ['geometry', 'patterns', 'sacred'],
+    icon: '🔯'
+  },
+  {
+    id: 'chakra-system',
+    title: 'Chakra System',
+    description: 'Interactive energy center alignment',
+    category: 'Energy Work',
+    difficulty: 'intermediate' as const,
+    duration: '20 min',
+    tags: ['chakras', 'energy', 'healing'],
+    icon: '🌈'
+  }
+];
 
 export default function Interactive3DViewer({
   entryId,
@@ -57,12 +80,21 @@ export default function Interactive3DViewer({
                   Explore in 3D
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-screen-2xl h-[90vh] p-0 bg-transparent border-none">
-                <div className="w-full h-full rounded-lg overflow-hidden">
-                  <LearningModule3D 
-                    moduleId={selectedModuleId}
-                    className="w-full h-full"
-                  />
+              <DialogContent className="max-w-screen-2xl h-[90vh] p-6">
+                <div className="w-full h-full rounded-lg overflow-hidden flex items-center justify-center">
+                  <Card className="w-full max-w-md">
+                    <CardContent className="p-8 text-center space-y-4">
+                      <Box className="h-16 w-16 mx-auto text-primary animate-pulse" />
+                      <h3 className="text-lg font-semibold">3D Module Temporarily Unavailable</h3>
+                      <p className="text-muted-foreground">
+                        Interactive 3D learning modules are being updated for better performance. 
+                        Please check back soon for immersive experiences.
+                      </p>
+                      <Badge variant="outline" className="bg-primary/10">
+                        Coming Soon
+                      </Badge>
+                    </CardContent>
+                  </Card>
                 </div>
               </DialogContent>
             </Dialog>
@@ -112,7 +144,7 @@ export default function Interactive3DViewer({
                 <div className="text-center space-y-2">
                   <Box className="h-12 w-12 mx-auto text-primary animate-pulse" />
                   <p className="text-sm text-muted-foreground">
-                    Click "Explore in 3D" for the full interactive experience
+                    3D modules are temporarily disabled - click above to learn more
                   </p>
                 </div>
               </div>
