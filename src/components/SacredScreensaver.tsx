@@ -7,6 +7,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { FrequencyVisuals } from './screensaver/FrequencyVisuals';
 import { ParticleSystem } from './screensaver/ParticleSystem';
 import { UIFragmentation } from './screensaver/UIFragmentation';
+import { SacredMessage } from './screensaver/SacredMessage';
+import { useScreensaverMessages } from '@/hooks/useScreensaverMessages';
 
 export type ScreensaverVisualType = 
   | "breath_orb" 
@@ -38,6 +40,13 @@ export default function SacredScreensaver({
   const [isInitialized, setIsInitialized] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sessionStartRef = useRef<Date>();
+
+  // Sacred Messages integration
+  const { currentMessage, isVisible: messageVisible, resetHistory } = useScreensaverMessages({
+    isActive: phase === "frequency",
+    rotationInterval: 75000, // 75 seconds between messages
+    preventRepeats: 4
+  });
 
   // Initialize after mount to prevent SSR issues
   useEffect(() => {
@@ -100,10 +109,11 @@ export default function SacredScreensaver({
           break;
           
         case "frequency":
-          // Log screensaver activation
+          // Log screensaver activation and reset message history for fresh start
           if (user) {
             await logScreensaverEvent("activated");
           }
+          resetHistory();
           break;
           
         case "reassembling":
@@ -206,6 +216,7 @@ export default function SacredScreensaver({
                   <FrequencyVisuals 
                     type={visualType}
                     isActive={true}
+                    showMessages={false} // Messages handled outside Canvas
                   />
                 )}
               </Canvas>
@@ -220,6 +231,14 @@ export default function SacredScreensaver({
                   setPhase("idle");
                   setIsActive(false);
                 }}
+              />
+            )}
+
+            {/* Sacred Messages Overlay */}
+            {phase === "frequency" && (
+              <SacredMessage 
+                message={currentMessage}
+                isVisible={messageVisible}
               />
             )}
 

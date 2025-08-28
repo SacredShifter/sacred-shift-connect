@@ -3,29 +3,55 @@ import { useFrame } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ScreensaverVisualType } from '../SacredScreensaver';
+import { SacredMessage } from './SacredMessage';
+import { useScreensaverMessages } from '@/hooks/useScreensaverMessages';
 
 interface FrequencyVisualsProps {
   type: ScreensaverVisualType;
   isActive: boolean;
+  showMessages?: boolean;
 }
 
-export function FrequencyVisuals({ type, isActive }: FrequencyVisualsProps) {
-  switch (type) {
-    case "breath_orb":
-      return <BreathOrb isActive={isActive} />;
-    case "heart_opening":
-      return <HeartOpening isActive={isActive} />;
-    case "chakra_column":
-      return <ChakraColumn isActive={isActive} />;
-    case "galaxy_mind":
-      return <GalaxyMind isActive={isActive} />;
-    case "somatic_body":
-      return <SomaticBody isActive={isActive} />;
-    case "energy_alignment":
-      return <EnergyAlignment isActive={isActive} />;
-    default:
-      return <BreathOrb isActive={isActive} />;
-  }
+export function FrequencyVisuals({ type, isActive, showMessages = true }: FrequencyVisualsProps) {
+  const { currentMessage, isVisible } = useScreensaverMessages({
+    isActive: isActive && showMessages,
+    rotationInterval: 75000, // 75 seconds between messages
+    preventRepeats: 4
+  });
+
+  return (
+    <>
+      {/* 3D Visuals */}
+      {(() => {
+        switch (type) {
+          case "breath_orb":
+            return <BreathOrb isActive={isActive} />;
+          case "heart_opening":
+            return <HeartOpening isActive={isActive} />;
+          case "chakra_column":
+            return <ChakraColumn isActive={isActive} />;
+          case "galaxy_mind":
+            return <GalaxyMind isActive={isActive} />;
+          case "somatic_body":
+            return <SomaticBody isActive={isActive} />;
+          case "energy_alignment":
+            return <EnergyAlignment isActive={isActive} />;
+          default:
+            return <BreathOrb isActive={isActive} />;
+        }
+      })()}
+      
+      {/* Sacred Messages Overlay (rendered outside Canvas in parent) */}
+      {showMessages && typeof window !== 'undefined' && (
+        <div className="fixed inset-0 pointer-events-none z-50">
+          <SacredMessage 
+            message={currentMessage}
+            isVisible={isVisible}
+          />
+        </div>
+      )}
+    </>
+  );
 }
 
 // Breath Orb Visual
