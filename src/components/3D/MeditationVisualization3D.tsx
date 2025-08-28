@@ -45,14 +45,17 @@ function BreathingOrb() {
 // Loving-kindness meditation - Pulsing heart energy
 function LovingKindnessHeart() {
   const groupRef = useRef<THREE.Group>(null);
-  const hearts = useMemo(() => 
-    Array.from({ length: 8 }, (_, i) => ({
+  const hearts = useMemo(() => {
+    console.log('Creating hearts array');
+    const heartsArray = Array.from({ length: 8 }, (_, i) => ({
       id: i,
       angle: (i / 8) * Math.PI * 2,
       radius: 2 + Math.random() * 1.5,
       speed: 0.3 + Math.random() * 0.4
-    })), 
-  []);
+    }));
+    console.log('Hearts array created:', heartsArray);
+    return heartsArray;
+  }, []);
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -127,8 +130,9 @@ function ChakraWheels() {
 // Mindfulness meditation - Floating geometric forms
 function MindfulnessGeometry() {
   const groupRef = useRef<THREE.Group>(null);
-  const shapes = useMemo(() => 
-    Array.from({ length: 12 }, (_, i) => ({
+  const shapes = useMemo(() => {
+    console.log('Creating shapes array');
+    const shapesArray = Array.from({ length: 12 }, (_, i) => ({
       id: i,
       position: [
         (Math.random() - 0.5) * 6,
@@ -137,8 +141,10 @@ function MindfulnessGeometry() {
       ] as [number, number, number],
       rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI] as [number, number, number],
       type: i % 3
-    })), 
-  []);
+    }));
+    console.log('Shapes array created:', shapesArray);
+    return shapesArray;
+  }, []);
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -291,6 +297,8 @@ function MeditationScene({ type }: { type: MeditationType }) {
 }
 
 export default function MeditationVisualization3D({ type, isActive = false }: MeditationVisualization3DProps) {
+  console.log('MeditationVisualization3D render:', { type, isActive });
+  
   if (!isActive) return null;
 
   return (
