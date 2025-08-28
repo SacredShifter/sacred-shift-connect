@@ -74,6 +74,7 @@ const createParticleShaderMaterial = (colors: THREE.Color[]) => {
     vertexShader: `
       uniform float time;
       uniform float size;
+      attribute vec3 color;
       varying vec3 vColor;
       
       vec3 noise3D(vec3 p) {
@@ -440,6 +441,7 @@ function HeartOpening({ isActive }: { isActive: boolean }) {
       vertexShader: `
         uniform float time;
         uniform float heartbeat;
+        attribute vec3 color;
         varying vec3 vColor;
         varying float vAlpha;
         
