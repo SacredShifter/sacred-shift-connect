@@ -60,17 +60,21 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({ onVideoComplete })
         const url = URL.createObjectURL(blob);
         setPreviewUrl(url);
         
-        // Stop stream
+        // Stop and cleanup stream first
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
           streamRef.current = null;
         }
 
-        if (videoRef.current) {
-          videoRef.current.srcObject = null;
-          videoRef.current.src = url;
-          videoRef.current.muted = false;
-        }
+        // Set up video element for playback
+        setTimeout(() => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = null;
+            videoRef.current.src = url;
+            videoRef.current.muted = false;
+            videoRef.current.load(); // Force reload
+          }
+        }, 100);
       };
 
       // Start recording
@@ -159,15 +163,16 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({ onVideoComplete })
     // Show preview and options
     return (
       <div className="space-y-3 p-4 border border-primary/20 rounded-lg bg-background/50">
-        <div className="relative">
+        <div className="relative w-full max-w-md mx-auto">
           <video
             ref={videoRef}
-            className="w-full max-w-md mx-auto rounded-lg"
+            className="w-full h-auto rounded-lg bg-black"
             controls
             playsInline
+            style={{ minHeight: '200px' }}
           />
           <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-            {formatTime(recordingTime)}
+            Duration: {formatTime(recordingTime)}
           </div>
         </div>
         
@@ -196,16 +201,21 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({ onVideoComplete })
     // Show recording interface
     return (
       <div className="space-y-3 p-4 border border-red-300 rounded-lg bg-red-50/50 dark:bg-red-900/20">
-        <div className="relative">
+        <div className="relative w-full max-w-md mx-auto">
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="w-full max-w-md mx-auto rounded-lg transform scale-x-[-1]"
+            className="w-full h-auto rounded-lg bg-black"
+            style={{ 
+              minHeight: '200px',
+              transform: 'scaleX(-1)' // Mirror effect for selfie view
+            }}
           />
-          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-mono">
-            ● REC {formatTime(recordingTime)}
+          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-mono flex items-center">
+            <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
+            REC {formatTime(recordingTime)}
           </div>
           {recordingTime >= 25 && (
             <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white p-2 rounded text-sm text-center">
@@ -220,7 +230,7 @@ export const VideoRecorder: React.FC<VideoRecorderProps> = ({ onVideoComplete })
             onClick={stopRecording}
             className="animate-pulse"
           >
-            <Square className="w-4 h-4 mr-2" />
+            <Square className="w-4 h-4 mr-2 fill-current" />
             Stop Recording
           </Button>
         </div>
