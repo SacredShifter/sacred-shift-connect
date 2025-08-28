@@ -74,7 +74,6 @@ const createParticleShaderMaterial = (colors: THREE.Color[]) => {
     vertexShader: `
       uniform float time;
       uniform float size;
-      attribute vec3 color;
       varying vec3 vColor;
       
       vec3 noise3D(vec3 p) {
@@ -388,8 +387,8 @@ function EnhancedLogoOverlay({ isActive }: { isActive: boolean }) {
   if (!logoMaterial) return null;
 
   return (
-    <mesh ref={logoRef} material={logoMaterial} position={[0, -2.5, 2]} scale={[2, 0.5, 1]}>
-      <planeGeometry args={[2, 0.5]} />
+    <mesh ref={logoRef} material={logoMaterial} position={[0, -2.5, 2]} scale={[1, 1, 1]}>
+      <planeGeometry args={[1.5, 0.4]} />
     </mesh>
   );
 }
@@ -441,7 +440,6 @@ function HeartOpening({ isActive }: { isActive: boolean }) {
       vertexShader: `
         uniform float time;
         uniform float heartbeat;
-        attribute vec3 color;
         varying vec3 vColor;
         varying float vAlpha;
         
