@@ -527,27 +527,27 @@ export function GroupMeditationSession({
       </AnimatePresence>
 
       {/* Main Session Interface */}
-      <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-        <Card className="w-full max-w-6xl h-full max-h-[90vh] overflow-hidden animate-scale-in">
-          <CardHeader className="border-b bg-gradient-to-r from-primary/5 to-secondary/5">
+      <div className={`fixed inset-0 ${sessionState.is_playing ? 'bg-transparent' : 'bg-background/95 backdrop-blur-sm'} z-50 flex items-center justify-center p-4 animate-fade-in`}>
+        <Card className={`w-full max-w-6xl h-full max-h-[90vh] overflow-hidden animate-scale-in ${sessionState.is_playing ? 'bg-black/20 backdrop-blur-md border-white/10' : ''}`}>
+          <CardHeader className={`border-b ${sessionState.is_playing ? 'bg-black/10 border-white/10' : 'bg-gradient-to-r from-primary/5 to-secondary/5'}`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <Sparkles className="h-5 w-5 text-primary" />
+                <div className={`p-2 rounded-full ${sessionState.is_playing ? 'bg-white/10' : 'bg-primary/10'}`}>
+                  <Sparkles className={`h-5 w-5 ${sessionState.is_playing ? 'text-white' : 'text-primary'}`} />
                 </div>
                 <div>
-                  <CardTitle className="text-xl">Group Meditation Session</CardTitle>
-                  <p className="text-sm text-muted-foreground capitalize">
+                  <CardTitle className={`text-xl ${sessionState.is_playing ? 'text-white' : ''}`}>Group Meditation Session</CardTitle>
+                  <p className={`text-sm ${sessionState.is_playing ? 'text-white/70' : 'text-muted-foreground'} capitalize`}>
                     {selectedMeditation?.name} • {sessionState.session_duration} minutes
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className={`flex items-center gap-1 ${sessionState.is_playing ? 'bg-white/10 text-white border-white/20' : ''}`}>
                   <Users className="h-3 w-3" />
                   {participants.length}
                 </Badge>
-                <Button variant="ghost" size="sm" onClick={onLeave}>
+                <Button variant="ghost" size="sm" onClick={onLeave} className={sessionState.is_playing ? 'text-white/60 hover:text-white hover:bg-white/10' : ''}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -618,7 +618,7 @@ export function GroupMeditationSession({
                     )}
 
                     {/* Breathing Guide */}
-                    {showBreathingGuide && (
+                    {showBreathingGuide && !sessionState.is_playing && (
                       <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
                         <CardContent className="p-6 text-center">
                           <div className="animate-pulse">
