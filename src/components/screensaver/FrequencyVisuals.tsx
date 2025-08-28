@@ -6,6 +6,109 @@ import type { ScreensaverVisualType } from '../SacredScreensaver';
 import { SacredMessage } from './SacredMessage';
 import { useScreensaverMessages } from '@/hooks/useScreensaverMessages';
 
+// Custom shader materials for enhanced visuals
+const createEnergyShaderMaterial = (color: THREE.Color, time: number = 0) => {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: time },
+      color: { value: color },
+      opacity: { value: 0.8 }
+    },
+    vertexShader: `
+      uniform float time;
+      varying vec3 vPosition;
+      varying vec3 vNormal;
+      
+      vec3 noise3D(vec3 p) {
+        return vec3(
+          sin(p.x * 12.9898 + p.y * 78.233 + p.z * 45.543),
+          sin(p.x * 32.233 + p.y * 43.142 + p.z * 23.123),
+          sin(p.x * 67.456 + p.y * 29.876 + p.z * 31.456)
+        );
+      }
+      
+      void main() {
+        vPosition = position;
+        vNormal = normal;
+        
+        vec3 noiseOffset = noise3D(position + time * 0.5) * 0.1;
+        vec3 newPosition = position + noiseOffset;
+        
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      uniform vec3 color;
+      uniform float opacity;
+      varying vec3 vPosition;
+      varying vec3 vNormal;
+      
+      void main() {
+        vec3 viewDirection = normalize(cameraPosition - vPosition);
+        float fresnel = pow(1.0 - dot(viewDirection, vNormal), 2.0);
+        
+        float glow = fresnel * (1.0 + sin(time * 2.0 + length(vPosition)) * 0.3);
+        vec3 finalColor = color * glow;
+        
+        gl_FragColor = vec4(finalColor, opacity * glow);
+      }
+    `,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide
+  });
+};
+
+const createParticleShaderMaterial = (colors: THREE.Color[]) => {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0 },
+      size: { value: 0.05 },
+      colors: { value: colors }
+    },
+    vertexShader: `
+      uniform float time;
+      uniform float size;
+      attribute vec3 color;
+      varying vec3 vColor;
+      
+      vec3 noise3D(vec3 p) {
+        return vec3(
+          sin(p.x * 12.9898 + p.y * 78.233 + time),
+          sin(p.x * 32.233 + p.y * 43.142 + time),
+          sin(p.x * 67.456 + p.y * 29.876 + time)
+        );
+      }
+      
+      void main() {
+        vColor = color;
+        
+        vec3 noiseOffset = noise3D(position) * 0.2;
+        vec3 newPosition = position + noiseOffset;
+        
+        vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
+        gl_PointSize = size * (300.0 / -mvPosition.z);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      
+      void main() {
+        float r = length(gl_PointCoord - vec2(0.5));
+        if (r > 0.5) discard;
+        
+        float alpha = 1.0 - r * 2.0;
+        gl_FragColor = vec4(vColor, alpha * 0.8);
+      }
+    `,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true
+  });
+};
+
 interface FrequencyVisualsProps {
   type: ScreensaverVisualType;
   isActive: boolean;
@@ -54,88 +157,578 @@ export function FrequencyVisuals({ type, isActive, showMessages = true }: Freque
   );
 }
 
-// Breath Orb Visual
+// Enhanced Breath Orb Visual with Shader-Driven Effects
 function BreathOrb({ isActive }: { isActive: boolean }) {
   const orbRef = useRef<THREE.Mesh>(null);
   const particlesRef = useRef<THREE.Points>(null);
-
-  const particles = useMemo(() => {
-    const positions = new Float32Array(1000 * 3);
-    const colors = new Float32Array(1000 * 3);
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const particleMaterialRef = useRef<THREE.ShaderMaterial>(null);
+  
+  // Enhanced instanced particle system
+  const { positions, colors, sizes, particleMaterial } = useMemo(() => {
+    const particleCount = 8000;
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
     
-    for (let i = 0; i < 1000; i++) {
-      // Spherical distribution
-      const radius = Math.random() * 3 + 1;
-      const theta = Math.random() * Math.PI * 2;
+    const sacredColors = [
+      new THREE.Color(0.2, 0.4, 1.0), // Deep Blue
+      new THREE.Color(0.8, 0.2, 1.0), // Purple
+      new THREE.Color(1.0, 0.8, 0.2), // Gold
+      new THREE.Color(0.2, 1.0, 0.8), // Cyan
+    ];
+    
+    for (let i = 0; i < particleCount; i++) {
+      // Spherical distribution with sacred geometry ratios
+      const radius = Math.pow(Math.random(), 0.5) * 4 + 1;
       const phi = Math.acos(2 * Math.random() - 1);
+      const theta = Math.random() * Math.PI * 2;
       
       positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
       positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
       positions[i * 3 + 2] = radius * Math.cos(phi);
       
-      // Sacred colors: gold, purple, blue
-      const colorType = i % 3;
-      if (colorType === 0) {
-        colors[i * 3] = 1; colors[i * 3 + 1] = 0.8; colors[i * 3 + 2] = 0.2; // Gold
-      } else if (colorType === 1) {
-        colors[i * 3] = 0.6; colors[i * 3 + 1] = 0.2; colors[i * 3 + 2] = 1; // Purple
-      } else {
-        colors[i * 3] = 0.2; colors[i * 3 + 1] = 0.6; colors[i * 3 + 2] = 1; // Blue
-      }
+      // Sacred color palette with golden ratio distribution
+      const colorIndex = Math.floor(Math.random() * sacredColors.length);
+      const color = sacredColors[colorIndex];
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+      
+      sizes[i] = Math.random() * 0.03 + 0.02;
     }
     
-    return { positions, colors };
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        breathPhase: { value: 0 }
+      },
+      vertexShader: `
+        uniform float time;
+        uniform float breathPhase;
+        attribute float size;
+        attribute vec3 color;
+        varying vec3 vColor;
+        varying float vAlpha;
+        
+        vec3 noise3D(vec3 p) {
+          return vec3(
+            sin(p.x * 7.13 + p.y * 5.17 + time * 0.5),
+            sin(p.x * 3.67 + p.y * 9.23 + time * 0.7),
+            sin(p.x * 2.41 + p.y * 7.89 + time * 0.3)
+          ) * 0.5;
+        }
+        
+        void main() {
+          vColor = color;
+          
+          vec3 noiseOffset = noise3D(position) * 0.3;
+          vec3 breathOffset = position * breathPhase * 0.2;
+          vec3 newPosition = position + noiseOffset + breathOffset;
+          
+          float distanceFromCenter = length(position);
+          vAlpha = 1.0 - smoothstep(1.0, 5.0, distanceFromCenter);
+          
+          vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
+          gl_PointSize = size * (800.0 / -mvPosition.z) * (1.0 + breathPhase);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        
+        void main() {
+          float r = length(gl_PointCoord - vec2(0.5));
+          if (r > 0.5) discard;
+          
+          float glow = exp(-r * 4.0);
+          float alpha = glow * vAlpha * 0.9;
+          
+          vec3 finalColor = vColor * (1.0 + glow * 0.5);
+          gl_FragColor = vec4(finalColor, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      vertexColors: true
+    });
+    
+    return { 
+      positions, 
+      colors, 
+      sizes, 
+      particleMaterial: material 
+    };
+  }, []);
+  
+  // Enhanced energy orb shader material
+  const orbMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        breathPhase: { value: 0 },
+        color: { value: new THREE.Color(0.2, 0.4, 1.0) }
+      },
+      vertexShader: `
+        uniform float time;
+        uniform float breathPhase;
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        varying vec3 vWorldPosition;
+        
+        vec3 noise3D(vec3 p) {
+          return vec3(
+            sin(p.x * 4.13 + p.y * 3.17 + time),
+            sin(p.x * 2.67 + p.y * 5.23 + time),
+            sin(p.x * 3.41 + p.y * 4.89 + time)
+          ) * 0.5;
+        }
+        
+        void main() {
+          vPosition = position;
+          vNormal = normal;
+          
+          vec3 noiseOffset = noise3D(position + time * 0.3) * 0.05 * (1.0 + breathPhase);
+          vec3 newPosition = position + noiseOffset;
+          
+          vec4 worldPosition = modelMatrix * vec4(newPosition, 1.0);
+          vWorldPosition = worldPosition.xyz;
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform float breathPhase;
+        uniform vec3 color;
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        varying vec3 vWorldPosition;
+        
+        void main() {
+          vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
+          float fresnel = pow(1.0 - dot(viewDirection, vNormal), 3.0);
+          
+          float pulse = sin(time * 2.0) * 0.3 + 0.7;
+          float breathGlow = 1.0 + breathPhase * 0.5;
+          
+          float energy = fresnel * pulse * breathGlow;
+          vec3 finalColor = color * energy * 2.0;
+          
+          float alpha = fresnel * 0.6 * breathGlow;
+          gl_FragColor = vec4(finalColor, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
   }, []);
 
   useFrame(({ clock }) => {
     if (!isActive) return;
     
     const time = clock.getElapsedTime();
+    const breathCycle = Math.sin(time * 0.4) * 0.5 + 0.5; // Slow breath cycle
     
-    // Breathing animation
-    if (orbRef.current) {
-      const breathScale = 1 + Math.sin(time * 0.5) * 0.3; // Slow breath
+    // Update orb
+    if (orbRef.current && orbMaterial) {
+      const breathScale = 1 + breathCycle * 0.4;
       orbRef.current.scale.setScalar(breathScale);
-      orbRef.current.rotation.y = time * 0.1;
+      orbRef.current.rotation.y = time * 0.05;
+      
+      orbMaterial.uniforms.time.value = time;
+      orbMaterial.uniforms.breathPhase.value = breathCycle;
     }
     
-    // Particle movement
-    if (particlesRef.current) {
-      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
-      
-      for (let i = 0; i < positions.length; i += 3) {
-        const originalRadius = Math.sqrt(
-          positions[i] * positions[i] + 
-          positions[i + 1] * positions[i + 1] + 
-          positions[i + 2] * positions[i + 2]
-        );
-        
-        const pulse = Math.sin(time * 2 + originalRadius) * 0.1;
-        const scale = 1 + pulse;
-        
-        positions[i] *= scale / (scale - pulse);
-        positions[i + 1] *= scale / (scale - pulse);
-        positions[i + 2] *= scale / (scale - pulse);
-      }
-      
-      particlesRef.current.geometry.attributes.position.needsUpdate = true;
+    // Update particles
+    if (particleMaterial) {
+      particleMaterial.uniforms.time.value = time;
+      particleMaterial.uniforms.breathPhase.value = breathCycle;
     }
   });
 
   return (
     <group>
-      {/* Central Orb */}
-      <mesh ref={orbRef}>
+      {/* Enhanced Central Energy Orb */}
+      <mesh ref={orbRef} material={orbMaterial}>
+        <icosahedronGeometry args={[1, 2]} />
+      </mesh>
+      
+      {/* Enhanced Particle Field */}
+      <points ref={particlesRef} material={particleMaterial}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={positions.length / 3}
+            array={positions}
+            itemSize={3}
+          />
+          <bufferAttribute
+            attach="attributes-color"
+            count={colors.length / 3}
+            array={colors}
+            itemSize={3}
+          />
+          <bufferAttribute
+            attach="attributes-size"
+            count={sizes.length}
+            array={sizes}
+            itemSize={1}
+          />
+        </bufferGeometry>
+      </points>
+      
+      {/* Ambient Energy Rings */}
+      {[1.5, 2.2, 3.1].map((radius, i) => (
+        <mesh key={i} rotation={[Math.PI / 2, 0, i * Math.PI / 3]}>
+          <torusGeometry args={[radius, 0.02, 8, 64]} />
+          <meshBasicMaterial 
+            color={new THREE.Color(0.2, 0.4, 1.0)} 
+            transparent 
+            opacity={0.3 - i * 0.08}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Enhanced Heart Opening Visual with Radiant Heart Shader
+function HeartOpening({ isActive }: { isActive: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
+  
+  const { heartPoints, heartColors, heartMaterial } = useMemo(() => {
+    const particleCount = 3000;
+    const points = [];
+    const colors = [];
+    
+    // Create multiple heart layers for depth
+    for (let layer = 0; layer < 3; layer++) {
+      const scale = 0.8 + layer * 0.4;
+      const particlesPerLayer = particleCount / 3;
+      
+      for (let i = 0; i < particlesPerLayer; i++) {
+        const t = (i / particlesPerLayer) * Math.PI * 2;
+        // Parametric heart equation
+        const x = 16 * Math.sin(t) ** 3;
+        const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+        
+        // Add some organic variation
+        const noise = (Math.random() - 0.5) * 2;
+        points.push(
+          x * 0.04 * scale + noise * 0.1, 
+          y * 0.04 * scale + noise * 0.1, 
+          layer * 0.3 + noise * 0.2
+        );
+        
+        // Golden-pink gradient with warmth
+        const intensity = 0.7 + Math.random() * 0.3;
+        colors.push(
+          1.0 * intensity,      // Red
+          0.4 + layer * 0.2,   // Green - gets more golden in outer layers  
+          0.6 + layer * 0.1    // Blue - warm pink
+        );
+      }
+    }
+    
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        heartbeat: { value: 0 }
+      },
+      vertexShader: `
+        uniform float time;
+        uniform float heartbeat;
+        attribute vec3 color;
+        varying vec3 vColor;
+        varying float vAlpha;
+        
+        void main() {
+          vColor = color;
+          
+          // Pulsing heart effect
+          float pulse = sin(time * 3.0) * 0.3 + 0.7;
+          float beat = heartbeat * 0.4;
+          
+          vec3 newPosition = position * (1.0 + pulse * 0.2 + beat);
+          
+          // Ripple effect from center
+          float dist = length(position.xy);
+          float ripple = sin(dist * 8.0 - time * 4.0) * 0.05;
+          newPosition.z += ripple;
+          
+          vAlpha = 1.0 - smoothstep(0.0, 2.0, dist);
+          
+          vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
+          gl_PointSize = 8.0 * (300.0 / -mvPosition.z) * (1.0 + pulse);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        
+        void main() {
+          float r = length(gl_PointCoord - vec2(0.5));
+          if (r > 0.5) discard;
+          
+          float glow = exp(-r * 3.0);
+          vec3 finalColor = vColor * (1.0 + glow);
+          float alpha = glow * vAlpha * 0.9;
+          
+          gl_FragColor = vec4(finalColor, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      vertexColors: true
+    });
+    
+    return { 
+      heartPoints: new Float32Array(points), 
+      heartColors: new Float32Array(colors),
+      heartMaterial: material 
+    };
+  }, []);
+  
+  // Heart glow shader material
+  const glowMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        color: { value: new THREE.Color(1.0, 0.3, 0.6) }
+      },
+      vertexShader: `
+        uniform float time;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        
+        void main() {
+          vNormal = normal;
+          vPosition = position;
+          
+          float pulse = sin(time * 2.5) * 0.1;
+          vec3 newPosition = position * (1.0 + pulse);
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec3 color;
+        varying vec3 vNormal;
+        
+        void main() {
+          float fresnel = pow(1.0 - dot(vNormal, vec3(0, 0, 1)), 2.0);
+          float pulse = sin(time * 2.5) * 0.3 + 0.7;
+          
+          vec3 finalColor = color * fresnel * pulse;
+          gl_FragColor = vec4(finalColor, fresnel * 0.4);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+  }, []);
+  
+  useFrame(({ clock }) => {
+    if (!isActive || !groupRef.current) return;
+    
+    const time = clock.getElapsedTime();
+    const heartbeat = Math.sin(time * 1.2) * 0.5 + 0.5; // Heartbeat rhythm
+    
+    groupRef.current.rotation.z = Math.sin(time * 0.3) * 0.05;
+    
+    // Update materials
+    if (heartMaterial) {
+      heartMaterial.uniforms.time.value = time;
+      heartMaterial.uniforms.heartbeat.value = heartbeat;
+    }
+    
+    if (glowMaterial) {
+      glowMaterial.uniforms.time.value = time;
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      {/* Enhanced Heart Particles */}
+      <points material={heartMaterial}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={heartPoints.length / 3}
+            array={heartPoints}
+            itemSize={3}
+          />
+          <bufferAttribute
+            attach="attributes-color"
+            count={heartColors.length / 3}
+            array={heartColors}
+            itemSize={3}
+          />
+        </bufferGeometry>
+      </points>
+      
+      {/* Heart Energy Aura */}
+      <mesh ref={glowRef} material={glowMaterial} scale={[2, 2, 0.5]}>
         <sphereGeometry args={[1, 32, 32]} />
+      </mesh>
+    </group>
+  );
+}
+
+// Enhanced Chakra Column with Radiant Energy Cores
+function ChakraColumn({ isActive }: { isActive: boolean }) {
+  const chakraColors = [
+    new THREE.Color(1.0, 0.0, 0.0), // Root - Red
+    new THREE.Color(1.0, 0.5, 0.0), // Sacral - Orange  
+    new THREE.Color(1.0, 1.0, 0.0), // Solar Plexus - Yellow
+    new THREE.Color(0.0, 1.0, 0.0), // Heart - Green
+    new THREE.Color(0.0, 0.7, 1.0), // Throat - Blue
+    new THREE.Color(0.3, 0.0, 0.8), // Third Eye - Indigo
+    new THREE.Color(0.5, 0.0, 1.0)  // Crown - Violet
+  ];
+  
+  return (
+    <group>
+      {/* Central Energy Column */}
+      <mesh>
+        <cylinderGeometry args={[0.05, 0.05, 10, 8]} />
         <meshBasicMaterial 
-          color="#4F46E5" 
+          color={new THREE.Color(1, 1, 1)}
           transparent 
-          opacity={0.3} 
-          wireframe 
+          opacity={0.2}
+          blending={THREE.AdditiveBlending}
         />
       </mesh>
       
-      {/* Surrounding Particles */}
+      {/* Enhanced Chakra Orbs */}
+      {chakraColors.map((color, index) => (
+        <EnhancedChakraOrb 
+          key={index}
+          position={[0, (index - 3) * 1.5, 0]}
+          color={color}
+          isActive={isActive}
+          delay={index * 0.3}
+          chakraIndex={index}
+        />
+      ))}
+    </group>
+  );
+}
+
+function EnhancedChakraOrb({ position, color, isActive, delay, chakraIndex }: {
+  position: [number, number, number];
+  color: THREE.Color;
+  isActive: boolean;
+  delay: number;
+  chakraIndex: number;
+}) {
+  const orbRef = useRef<THREE.Mesh>(null);
+  const particlesRef = useRef<THREE.Points>(null);
+  
+  // Enhanced chakra orb material
+  const orbMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        color: { value: color },
+        chakraIndex: { value: chakraIndex }
+      },
+      vertexShader: `
+        uniform float time;
+        uniform float chakraIndex;
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        
+        void main() {
+          vPosition = position;
+          vNormal = normal;
+          
+          float spin = time * (1.0 + chakraIndex * 0.3);
+          float pulse = sin(spin * 2.0) * 0.1;
+          vec3 newPosition = position * (1.0 + pulse);
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec3 color;
+        uniform float chakraIndex;
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        
+        void main() {
+          vec3 viewDirection = normalize(cameraPosition - vPosition);
+          float fresnel = pow(1.0 - dot(viewDirection, vNormal), 2.0);
+          
+          float energy = fresnel * (1.0 + sin(time * 3.0 + chakraIndex) * 0.4);
+          vec3 finalColor = color * energy * 2.0;
+          
+          gl_FragColor = vec4(finalColor, fresnel * 0.7);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+  }, [color, chakraIndex]);
+  
+  // Particle system for each chakra
+  const particles = useMemo(() => {
+    const particleCount = 200;
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2;
+      const radius = 0.8 + Math.random() * 0.4;
+      
+      positions[i * 3] = Math.cos(angle) * radius;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 0.3;
+      positions[i * 3 + 2] = Math.sin(angle) * radius;
+      
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+    }
+    
+    return { positions, colors };
+  }, [color]);
+  
+  useFrame(({ clock }) => {
+    if (!isActive || !orbRef.current) return;
+    
+    const time = clock.getElapsedTime() + delay;
+    
+    orbRef.current.rotation.y = time * (0.5 + chakraIndex * 0.1);
+    orbRef.current.scale.setScalar(1 + Math.sin(time * 2) * 0.15);
+    
+    if (orbMaterial) {
+      orbMaterial.uniforms.time.value = time;
+    }
+    
+    // Rotate particles
+    if (particlesRef.current) {
+      particlesRef.current.rotation.y = -time * 0.3;
+    }
+  });
+  
+  return (
+    <group position={position}>
+      {/* Enhanced Chakra Orb */}
+      <mesh ref={orbRef} material={orbMaterial}>
+        <torusGeometry args={[0.4, 0.15, 16, 32]} />
+      </mesh>
+      
+      {/* Chakra Particles */}
       <points ref={particlesRef}>
         <bufferGeometry>
           <bufferAttribute
@@ -152,11 +745,10 @@ function BreathOrb({ isActive }: { isActive: boolean }) {
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.05}
+          size={0.03}
           vertexColors
           transparent
           opacity={0.8}
-          sizeAttenuation={true}
           blending={THREE.AdditiveBlending}
         />
       </points>
@@ -164,209 +756,504 @@ function BreathOrb({ isActive }: { isActive: boolean }) {
   );
 }
 
-// Heart Opening Visual
-function HeartOpening({ isActive }: { isActive: boolean }) {
-  const groupRef = useRef<THREE.Group>(null);
+// Enhanced Galaxy Mind Visual with Spiral Shader
+function GalaxyMind({ isActive }: { isActive: boolean }) {
+  const spiralRef = useRef<THREE.Points>(null);
+  const nebulaRef = useRef<THREE.Mesh>(null);
   
-  const heartPoints = useMemo(() => {
-    const points = [];
+  const { spiralPositions, spiralColors, spiralSizes, spiralMaterial } = useMemo(() => {
+    const particleCount = 12000;
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
     
-    for (let i = 0; i < 500; i++) {
-      const t = (i / 500) * Math.PI * 2;
-      const x = 16 * Math.sin(t) ** 3;
-      const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+    for (let i = 0; i < particleCount; i++) {
+      const t = i / particleCount;
+      const angle = t * Math.PI * 16; // More spiral turns
+      const radius = t * 5;
       
-      points.push(x * 0.05, y * 0.05, (Math.random() - 0.5) * 0.5);
+      // Create multiple spiral arms
+      const armOffset = (i % 3) * (Math.PI * 2 / 3);
+      const finalAngle = angle + armOffset;
+      
+      positions[i * 3] = Math.cos(finalAngle) * radius;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 0.8 + Math.sin(t * Math.PI * 4) * 0.3;
+      positions[i * 3 + 2] = Math.sin(finalAngle) * radius;
+      
+      // Cosmic color gradient: purple center to gold outer
+      const intensity = 0.8 + Math.random() * 0.2;
+      colors[i * 3] = (0.3 + t * 0.7) * intensity;     // Red
+      colors[i * 3 + 1] = (0.1 + t * 0.8) * intensity; // Green  
+      colors[i * 3 + 2] = (1.0 - t * 0.6) * intensity; // Blue
+      
+      sizes[i] = 0.02 + t * 0.04;
     }
     
-    return new Float32Array(points);
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 }
+      },
+      vertexShader: `
+        uniform float time;
+        attribute float size;
+        attribute vec3 color;
+        varying vec3 vColor;
+        varying float vAlpha;
+        
+        void main() {
+          vColor = color;
+          
+          // Spiral rotation and cosmic drift
+          float rotation = time * 0.2;
+          float cos_r = cos(rotation);
+          float sin_r = sin(rotation);
+          
+          vec3 rotatedPos = vec3(
+            position.x * cos_r - position.z * sin_r,
+            position.y + sin(time * 0.5 + length(position.xz) * 0.1) * 0.1,
+            position.x * sin_r + position.z * cos_r
+          );
+          
+          float distanceFromCenter = length(position.xz);
+          vAlpha = 1.0 - smoothstep(0.0, 5.0, distanceFromCenter);
+          
+          vec4 mvPosition = modelViewMatrix * vec4(rotatedPos, 1.0);
+          gl_PointSize = size * (600.0 / -mvPosition.z) * vAlpha;
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        
+        void main() {
+          float r = length(gl_PointCoord - vec2(0.5));
+          if (r > 0.5) discard;
+          
+          float glow = exp(-r * 5.0);
+          vec3 finalColor = vColor * (1.0 + glow * 0.8);
+          float alpha = glow * vAlpha * 0.9;
+          
+          gl_FragColor = vec4(finalColor, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      vertexColors: true
+    });
+    
+    return { 
+      spiralPositions: positions,
+      spiralColors: colors,
+      spiralSizes: sizes,
+      spiralMaterial: material 
+    };
+  }, []);
+  
+  // Nebula background material
+  const nebulaMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 }
+      },
+      vertexShader: `
+        uniform float time;
+        varying vec3 vPosition;
+        varying vec2 vUv;
+        
+        void main() {
+          vPosition = position;
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        varying vec3 vPosition;
+        varying vec2 vUv;
+        
+        float noise(vec2 p) {
+          return sin(p.x * 12.9898 + p.y * 78.233) * 43758.5453;
+        }
+        
+        void main() {
+          vec2 uv = vUv * 3.0;
+          float n1 = sin(noise(uv + time * 0.1)) * 0.5 + 0.5;
+          float n2 = sin(noise(uv * 2.0 - time * 0.15)) * 0.5 + 0.5;
+          
+          vec3 nebulaColor = vec3(0.2 + n1 * 0.3, 0.1 + n2 * 0.2, 0.6 + n1 * 0.4);
+          float alpha = (n1 * n2) * 0.3;
+          
+          gl_FragColor = vec4(nebulaColor, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
   }, []);
   
   useFrame(({ clock }) => {
-    if (!isActive || !groupRef.current) return;
+    if (!isActive) return;
     
     const time = clock.getElapsedTime();
-    groupRef.current.rotation.z = Math.sin(time * 0.3) * 0.1;
+    
+    if (spiralMaterial) {
+      spiralMaterial.uniforms.time.value = time;
+    }
+    
+    if (nebulaMaterial) {
+      nebulaMaterial.uniforms.time.value = time;
+    }
+    
+    // Slow cosmic drift
+    if (nebulaRef.current) {
+      nebulaRef.current.rotation.z = time * 0.02;
+    }
   });
-
+  
   return (
-    <group ref={groupRef}>
-      {/* Heart-shaped particle formation */}
-      <points>
+    <group>
+      {/* Cosmic Nebula Background */}
+      <mesh ref={nebulaRef} material={nebulaMaterial} scale={[8, 8, 1]}>
+        <planeGeometry args={[1, 1, 32, 32]} />
+      </mesh>
+      
+      {/* Enhanced Spiral Galaxy */}
+      <points ref={spiralRef} material={spiralMaterial}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={heartPoints.length / 3}
-            array={heartPoints}
+            count={spiralPositions.length / 3}
+            array={spiralPositions}
             itemSize={3}
           />
+          <bufferAttribute
+            attach="attributes-color"
+            count={spiralColors.length / 3}
+            array={spiralColors}
+            itemSize={3}
+          />
+          <bufferAttribute
+            attach="attributes-size"
+            count={spiralSizes.length}
+            array={spiralSizes}
+            itemSize={1}
+          />
         </bufferGeometry>
-        <pointsMaterial
-          size={0.1}
-          color="#FF69B4"
-          transparent
-          opacity={0.8}
-          blending={THREE.AdditiveBlending}
-        />
       </points>
     </group>
   );
 }
 
-// Chakra Column Visual
-function ChakraColumn({ isActive }: { isActive: boolean }) {
-  const chakraColors = [
-    '#FF0000', // Root - Red
-    '#FF8C00', // Sacral - Orange  
-    '#FFD700', // Solar Plexus - Yellow
-    '#00FF00', // Heart - Green
-    '#00BFFF', // Throat - Blue
-    '#4B0082', // Third Eye - Indigo
-    '#8A2BE2'  // Crown - Violet
-  ];
+// Enhanced Somatic Body Visual with Human Energy Field
+function SomaticBody({ isActive }: { isActive: boolean }) {
+  const bodyRef = useRef<THREE.Group>(null);
+  const auraRef = useRef<THREE.Mesh>(null);
+  
+  // Human silhouette shader material
+  const bodyMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 }
+      },
+      vertexShader: `
+        uniform float time;
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        
+        void main() {
+          vPosition = position;
+          vNormal = normal;
+          
+          // Subtle breathing animation
+          float breath = sin(time * 0.6) * 0.02;
+          vec3 newPosition = position * (1.0 + breath);
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        
+        void main() {
+          vec3 viewDirection = normalize(cameraPosition - vPosition);
+          float fresnel = pow(1.0 - dot(viewDirection, vNormal), 2.0);
+          
+          // Cyan energy with pulse
+          vec3 bodyColor = vec3(0.0, 1.0, 0.8);
+          float pulse = sin(time * 2.0 + vPosition.y * 3.0) * 0.3 + 0.7;
+          
+          vec3 finalColor = bodyColor * fresnel * pulse;
+          gl_FragColor = vec4(finalColor, fresnel * 0.6);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+  }, []);
+  
+  // Energy aura material
+  const auraMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 }
+      },
+      vertexShader: `
+        uniform float time;
+        varying vec3 vPosition;
+        varying vec2 vUv;
+        
+        void main() {
+          vPosition = position;
+          vUv = uv;
+          
+          float auraExpansion = sin(time * 0.8) * 0.3 + 1.0;
+          vec3 newPosition = position * auraExpansion;
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        varying vec3 vPosition;
+        varying vec2 vUv;
+        
+        void main() {
+          float dist = length(vUv - vec2(0.5));
+          float aura = 1.0 - smoothstep(0.2, 0.8, dist);
+          
+          // Rainbow energy field
+          vec3 auraColor = vec3(
+            sin(time * 2.0 + vPosition.y * 2.0) * 0.5 + 0.5,
+            sin(time * 2.0 + vPosition.y * 2.0 + 2.094) * 0.5 + 0.5,
+            sin(time * 2.0 + vPosition.y * 2.0 + 4.188) * 0.5 + 0.5
+          );
+          
+          gl_FragColor = vec4(auraColor, aura * 0.3);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+  }, []);
+  
+  useFrame(({ clock }) => {
+    if (!isActive) return;
+    
+    const time = clock.getElapsedTime();
+    
+    if (bodyMaterial) {
+      bodyMaterial.uniforms.time.value = time;
+    }
+    
+    if (auraMaterial) {
+      auraMaterial.uniforms.time.value = time;
+    }
+    
+    // Gentle swaying
+    if (bodyRef.current) {
+      bodyRef.current.rotation.z = Math.sin(time * 0.3) * 0.05;
+    }
+  });
   
   return (
-    <group>
-      {chakraColors.map((color, index) => (
-        <ChakraOrb 
-          key={index}
-          position={[0, (index - 3) * 1.5, 0]}
-          color={color}
-          isActive={isActive}
-          delay={index * 0.2}
-        />
+    <group ref={bodyRef}>
+      {/* Human Energy Aura */}
+      <mesh ref={auraRef} material={auraMaterial} scale={[1.5, 1.5, 1]} position={[0, 0, -0.1]}>
+        <cylinderGeometry args={[0.8, 1.0, 3.5, 32]} />
+      </mesh>
+      
+      {/* Enhanced Human Silhouette */}
+      <mesh material={bodyMaterial}>
+        <cylinderGeometry args={[0.3, 0.5, 3, 16]} />
+      </mesh>
+      
+      {/* Chakra Points */}
+      {[
+        [0, 1.2, 0.1],   // Crown
+        [0, 0.8, 0.1],   // Third Eye
+        [0, 0.4, 0.1],   // Throat
+        [0, 0, 0.1],     // Heart
+        [0, -0.4, 0.1],  // Solar Plexus
+        [0, -0.8, 0.1],  // Sacral
+        [0, -1.2, 0.1]   // Root
+      ].map((pos, i) => (
+        <mesh key={i} position={pos as [number, number, number]}>
+          <sphereGeometry args={[0.05, 8, 8]} />
+          <meshBasicMaterial 
+            color={new THREE.Color().setHSL(i / 7, 1, 0.5)} 
+            transparent 
+            opacity={0.8}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
       ))}
     </group>
   );
 }
 
-function ChakraOrb({ position, color, isActive, delay }: {
-  position: [number, number, number];
-  color: string;
-  isActive: boolean;
-  delay: number;
-}) {
-  const ref = useRef<THREE.Mesh>(null);
+// Enhanced Energy Alignment Visual with Rainbow Arc Shader
+function EnergyAlignment({ isActive }: { isActive: boolean }) {
+  const arcRef = useRef<THREE.Group>(null);
+  const waveRef = useRef<THREE.Mesh>(null);
   
-  useFrame(({ clock }) => {
-    if (!isActive || !ref.current) return;
-    
-    const time = clock.getElapsedTime() + delay;
-    ref.current.rotation.y = time;
-    ref.current.scale.setScalar(1 + Math.sin(time * 2) * 0.2);
-  });
+  // Rainbow arc material
+  const arcMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 }
+      },
+      vertexShader: `
+        uniform float time;
+        varying vec3 vPosition;
+        varying vec2 vUv;
+        
+        void main() {
+          vPosition = position;
+          vUv = uv;
+          
+          // Wave distortion along the arc
+          float wave = sin(vUv.x * 10.0 + time * 3.0) * 0.1;
+          vec3 newPosition = position + normal * wave;
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        varying vec3 vPosition;
+        varying vec2 vUv;
+        
+        void main() {
+          // Rainbow gradient based on arc position
+          float progress = vUv.x;
+          vec3 rainbow = vec3(
+            sin(progress * 6.28 + time) * 0.5 + 0.5,
+            sin(progress * 6.28 + time + 2.094) * 0.5 + 0.5,
+            sin(progress * 6.28 + time + 4.188) * 0.5 + 0.5
+          );
+          
+          // Pulse effect
+          float pulse = sin(time * 4.0 + progress * 8.0) * 0.3 + 0.7;
+          vec3 finalColor = rainbow * pulse * 2.0;
+          
+          gl_FragColor = vec4(finalColor, 0.8);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+  }, []);
   
-  return (
-    <mesh ref={ref} position={position}>
-      <torusGeometry args={[0.3, 0.1, 8, 16]} />
-      <meshBasicMaterial 
-        color={color} 
-        transparent 
-        opacity={0.7}
-      />
-    </mesh>
-  );
-}
-
-// Galaxy Mind Visual
-function GalaxyMind({ isActive }: { isActive: boolean }) {
-  const spiralRef = useRef<THREE.Points>(null);
-  
-  const spiral = useMemo(() => {
-    const positions = new Float32Array(2000 * 3);
-    const colors = new Float32Array(2000 * 3);
-    
-    for (let i = 0; i < 2000; i++) {
-      const t = i / 2000;
-      const angle = t * Math.PI * 8;
-      const radius = t * 4;
-      
-      positions[i * 3] = Math.cos(angle) * radius;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 0.5;
-      positions[i * 3 + 2] = Math.sin(angle) * radius;
-      
-      // Gradient from purple to gold
-      colors[i * 3] = 0.5 + t * 0.5; // Red
-      colors[i * 3 + 1] = 0.2 + t * 0.6; // Green  
-      colors[i * 3 + 2] = 1 - t * 0.8; // Blue
-    }
-    
-    return { positions, colors };
+  // Resonance wave material
+  const waveMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 }
+      },
+      vertexShader: `
+        uniform float time;
+        varying vec2 vUv;
+        varying float vWave;
+        
+        void main() {
+          vUv = uv;
+          
+          // Multiple wave frequencies
+          float wave1 = sin(uv.x * 15.0 + time * 2.0) * 0.1;
+          float wave2 = sin(uv.x * 8.0 - time * 1.5) * 0.05;
+          vWave = wave1 + wave2;
+          
+          vec3 newPosition = position;
+          newPosition.y += vWave;
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        varying vec2 vUv;
+        varying float vWave;
+        
+        void main() {
+          // Spectral colors following the wave
+          vec3 spectrumColor = vec3(
+            sin(vUv.x * 6.28 + time * 2.0) * 0.5 + 0.5,
+            sin(vUv.x * 6.28 + time * 2.0 + 2.094) * 0.5 + 0.5,
+            sin(vUv.x * 6.28 + time * 2.0 + 4.188) * 0.5 + 0.5
+          );
+          
+          float intensity = abs(vWave) * 10.0 + 0.3;
+          gl_FragColor = vec4(spectrumColor * intensity, intensity);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      wireframe: true
+    });
   }, []);
   
   useFrame(({ clock }) => {
-    if (!isActive || !spiralRef.current) return;
-    
-    spiralRef.current.rotation.y = clock.getElapsedTime() * 0.1;
-  });
-  
-  return (
-    <points ref={spiralRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={spiral.positions.length / 3}
-          array={spiral.positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          count={spiral.colors.length / 3}
-          array={spiral.colors}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.02}
-        vertexColors
-        transparent
-        opacity={0.9}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
-}
-
-// Somatic Body Visual
-function SomaticBody({ isActive }: { isActive: boolean }) {
-  return (
-    <group>
-      {/* Human silhouette outline */}
-      <mesh>
-        <cylinderGeometry args={[0.3, 0.5, 3, 8]} />
-        <meshBasicMaterial 
-          color="#00FFD4" 
-          transparent 
-          opacity={0.3} 
-          wireframe 
-        />
-      </mesh>
-    </group>
-  );
-}
-
-// Energy Alignment Visual  
-function EnergyAlignment({ isActive }: { isActive: boolean }) {
-  const arcRef = useRef<THREE.Group>(null);
-  
-  useFrame(({ clock }) => {
-    if (!isActive || !arcRef.current) return;
+    if (!isActive) return;
     
     const time = clock.getElapsedTime();
-    arcRef.current.rotation.z = Math.sin(time * 0.5) * 0.2;
+    
+    if (arcRef.current) {
+      arcRef.current.rotation.z = Math.sin(time * 0.5) * 0.2;
+      arcRef.current.rotation.y = time * 0.1;
+    }
+    
+    if (arcMaterial) {
+      arcMaterial.uniforms.time.value = time;
+    }
+    
+    if (waveMaterial) {
+      waveMaterial.uniforms.time.value = time;
+    }
   });
   
   return (
     <group ref={arcRef}>
-      {/* Rainbow energy arc */}
-      <mesh>
-        <torusGeometry args={[3, 0.1, 4, 50, Math.PI]} />
-        <meshBasicMaterial 
-          color="#FF00FF"
-          transparent 
-          opacity={0.8}
-        />
+      {/* Enhanced Rainbow Energy Arc */}
+      <mesh material={arcMaterial}>
+        <torusGeometry args={[3, 0.15, 16, 64, Math.PI]} />
       </mesh>
+      
+      {/* Secondary Arc Layer */}
+      <mesh material={arcMaterial} scale={[1.1, 1.1, 1]} rotation={[0, 0, Math.PI]}>
+        <torusGeometry args={[3, 0.08, 16, 64, Math.PI]} />
+      </mesh>
+      
+      {/* Resonance Wave Plane */}
+      <mesh ref={waveRef} material={waveMaterial} rotation={[Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+        <planeGeometry args={[8, 2, 64, 16]} />
+      </mesh>
+      
+      {/* Energy Particles */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <mesh 
+          key={i} 
+          position={[
+            Math.cos(i / 20 * Math.PI) * 3,
+            Math.sin(i / 20 * Math.PI) * 3 + Math.sin(Date.now() * 0.001 + i) * 0.2,
+            0
+          ]}
+        >
+          <sphereGeometry args={[0.03, 8, 8]} />
+          <meshBasicMaterial 
+            color={new THREE.Color().setHSL((i / 20 + Date.now() * 0.0005) % 1, 1, 0.6)} 
+            transparent 
+            opacity={0.8}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
     </group>
   );
 }
