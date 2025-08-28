@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useNavigate } from 'react-router-dom';
 import { useRegistryOfResonance } from '@/hooks/useRegistryOfResonance';
 import { CollectiveAkashicEntryModal } from './CollectiveAkashicEntryModal';
+import { CollectiveCodexConstellation } from './CollectiveCodexConstellation';
 import { format } from 'date-fns/format';
 import { TooltipWrapper } from '@/components/HelpSystem/TooltipWrapper';
 
@@ -209,7 +210,7 @@ export function CollectiveAkashicConstellation() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [hoveredEntry, setHoveredEntry] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'constellation' | 'grid'>('constellation');
+  const [viewMode, setViewMode] = useState<'constellation' | 'grid' | 'fractal'>('constellation');
   const [activeTab, setActiveTab] = useState('collective');
 
   const handleTabChange = (value: string) => {
@@ -413,6 +414,14 @@ export function CollectiveAkashicConstellation() {
               <Eye className="h-4 w-4 mr-2" />
               Grid
             </Button>
+            <Button
+              variant={viewMode === 'fractal' ? 'default' : 'outline'}
+              onClick={() => setViewMode('fractal')}
+              size="sm"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Fractal
+            </Button>
             <Button onClick={() => setIsModalOpen(true)} className="gap-2 ml-2">
               <Plus className="h-4 w-4" />
               Contribute Sacred Entry
@@ -507,6 +516,11 @@ export function CollectiveAkashicConstellation() {
             <Globe className="h-4 w-4 text-primary" />
           </div>
         </motion.div>
+      ) : viewMode === 'fractal' ? (
+        <CollectiveCodexConstellation 
+          entries={filteredEntries}
+          onEntryClick={(entry) => navigate(`/resonance/entries/${entry.id}`)}
+        />
       ) : (
         // Enhanced Grid View for Collective
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
