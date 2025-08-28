@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRegistryOfResonance } from '@/hooks/useRegistryOfResonance';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,8 +19,10 @@ interface Comment {
   user_id: string;
   parent_comment_id: string | null;
   children: Comment[];
-  // I'll need user info, but the hook doesn't provide it yet.
-  // For now, I'll just show the user_id.
+  user_profile?: {
+    display_name?: string;
+    avatar_url?: string;
+  };
 }
 
 const CommentView: React.FC<{ comment: Comment; onReply: (id: string, content: string) => void }> = ({ comment, onReply }) => {
@@ -44,7 +47,9 @@ const CommentView: React.FC<{ comment: Comment; onReply: (id: string, content: s
           </div>
         </div>
         <div className="flex-1">
-          <div className="text-sm font-semibold">User {comment.user_id.substring(0, 8)}</div>
+          <div className="text-sm font-semibold">
+            {comment.user_profile?.display_name || `User ${comment.user_id.substring(0, 8)}`}
+          </div>
           <p className="text-sm text-muted-foreground">
             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
           </p>
@@ -59,7 +64,7 @@ const CommentView: React.FC<{ comment: Comment; onReply: (id: string, content: s
       {showReply && (
         <form onSubmit={handleReplySubmit} className="ml-11 mt-2 space-y-2">
           <Textarea
-            placeholder={`Replying to User ${comment.user_id.substring(0, 8)}...`}
+            placeholder={`Replying to ${comment.user_profile?.display_name || `User ${comment.user_id.substring(0, 8)}`}...`}
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
             rows={2}
@@ -89,6 +94,22 @@ const PublicDiscussion: React.FC<PublicDiscussionProps> = ({ entryId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('display_name, avatar_url')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      return { display_name: null, avatar_url: null };
+    }
+  };
+
   const buildThread = (commentList: any[]): Comment[] => {
     const commentMap: { [key: string]: any } = {};
     const roots: Comment[] = [];
@@ -111,7 +132,16 @@ const PublicDiscussion: React.FC<PublicDiscussionProps> = ({ entryId }) => {
   const fetchComments = useCallback(async () => {
     setIsLoading(true);
     const fetchedComments = await getComments(entryId);
-    const threadedComments = buildThread(fetchedComments);
+    
+    // Fetch user profiles for all comments
+    const commentsWithProfiles = await Promise.all(
+      fetchedComments.map(async (comment) => {
+        const profile = await fetchUserProfile(comment.user_id);
+        return { ...comment, user_profile: profile };
+      })
+    );
+    
+    const threadedComments = buildThread(commentsWithProfiles);
     setComments(threadedComments);
     setIsLoading(false);
   }, [entryId, getComments]);
