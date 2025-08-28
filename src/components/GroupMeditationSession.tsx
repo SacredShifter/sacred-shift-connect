@@ -454,14 +454,6 @@ export function GroupMeditationSession({
 
   return (
     <>
-      {/* Fullscreen Meditation Visual Background */}
-      <div className="fixed inset-0 z-40">
-        <MeditationVisuals 
-          type={sessionState.session_type} 
-          isActive={sessionState.is_playing}
-        />
-      </div>
-
       {/* Session Completion Overlay */}
       <AnimatePresence>
         {sessionCompleted && (
@@ -499,29 +491,7 @@ export function GroupMeditationSession({
         )}
       </AnimatePresence>
 
-      {/* Floating Session Timer (when active) - Minimized */}
-      <AnimatePresence>
-        {sessionState.is_playing && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed top-4 left-4 z-50"
-          >
-            <Card className="bg-black/30 backdrop-blur-sm border-white/20 text-white">
-              <CardContent className="p-3 flex items-center gap-3 text-sm">
-                <div className="font-mono">{formatTime(timeRemaining)}</div>
-                <Badge variant="secondary" className="bg-white/10 text-white border-white/20 text-xs">
-                  <Users className="h-3 w-3 mr-1" />
-                  {participants.length}
-                </Badge>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Session Interface - Hidden during meditation */}
+      {/* Main Session Interface - Completely hidden during meditation */}
       <AnimatePresence>
         {!sessionState.is_playing && (
           <motion.div 
@@ -968,39 +938,6 @@ export function GroupMeditationSession({
               </TabsContent>
             </Tabs>
           </CardContent>
-        </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Minimized Host Controls During Meditation */}
-      <AnimatePresence>
-        {sessionState.is_playing && isHost && (
-          <motion.div
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 100 }}
-            className="fixed bottom-4 right-4 z-50"
-          >
-            <Card className="bg-black/30 backdrop-blur-sm border-white/20">
-              <CardContent className="p-2 flex items-center gap-1">
-                <Button
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={pauseSession}
-                  className="text-white/70 hover:text-white hover:bg-white/10 p-2"
-                >
-                  <Pause className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={stopSession}
-                  className="text-white/70 hover:text-white hover:bg-white/10 p-2"
-                >
-                  <Square className="h-4 w-4" />
-                </Button>
-              </CardContent>
             </Card>
           </motion.div>
         )}
