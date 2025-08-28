@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Play, 
   Pause, 
@@ -18,16 +19,30 @@ import {
   RotateCcw,
   Timer,
   Music,
-  X
+  X,
+  Settings,
+  Clock,
+  Waves,
+  Circle,
+  Brain,
+  Video,
+  PlayCircle,
+  Square
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { YouTubeVideo } from '@/types/youtube';
 import { useToast } from '@/hooks/use-toast';
+import { useYouTubeAPI } from '@/hooks/useYouTubeAPI';
+import { MEDITATION_MODULE_CONFIG } from '@/config/mediaMaps';
+import { motion, AnimatePresence } from 'framer-motion';
+import MeditationVisuals from '@/components/MeditationVisuals';
+
+type MeditationType = 'breathing' | 'loving-kindness' | 'chakra' | 'mindfulness' | 'body-scan';
 
 interface GroupMeditationSessionProps {
   sessionId: string;
-  sessionType: string;
+  sessionType: MeditationType;
   duration: number;
   backgroundAudio?: YouTubeVideo;
   onLeave: () => void;
@@ -48,7 +63,58 @@ interface SessionState {
   current_time: number;
   volume: number;
   synchronized_start?: string;
+  session_type: MeditationType;
+  session_duration: number;
+  background_audio?: YouTubeVideo;
 }
+
+const meditationTypes = [
+  {
+    id: 'breathing' as MeditationType,
+    name: 'Breath Awareness',
+    description: 'Connect with the sacred rhythm of life force',
+    icon: <Waves className="w-5 h-5" />,
+    defaultDuration: 10,
+    guidance: 'Follow the natural flow of prana through your being',
+    color: 'from-emerald-600 to-teal-600'
+  },
+  {
+    id: 'loving-kindness' as MeditationType,
+    name: 'Heart Opening',
+    description: 'Expand love and compassion to all existence',
+    icon: <Heart className="w-5 h-5" />,
+    defaultDuration: 15,
+    guidance: 'Radiate unconditional love from your heart center',
+    color: 'from-rose-500 to-pink-500'
+  },
+  {
+    id: 'chakra' as MeditationType,
+    name: 'Energy Alignment',
+    description: 'Harmonize your subtle energy centers',
+    icon: <Circle className="w-5 h-5" />,
+    defaultDuration: 20,
+    guidance: 'Feel each chakra spinning with divine light',
+    color: 'from-purple-600 to-violet-600'
+  },
+  {
+    id: 'mindfulness' as MeditationType,
+    name: 'Consciousness Observation',
+    description: 'Witness the nature of awareness itself',
+    icon: <Brain className="w-5 h-5" />,
+    defaultDuration: 12,
+    guidance: 'Rest in pure awareness, the witness of all experience',
+    color: 'from-blue-600 to-cyan-600'
+  },
+  {
+    id: 'body-scan' as MeditationType,
+    name: 'Somatic Integration',
+    description: 'Awaken embodied presence and release',
+    icon: <Sparkles className="w-5 h-5" />,
+    defaultDuration: 18,
+    guidance: 'Feel the light of consciousness illuminating every cell',
+    color: 'from-violet-600 to-purple-600'
+  }
+];
 
 export function GroupMeditationSession({ 
   sessionId, 
@@ -59,17 +125,35 @@ export function GroupMeditationSession({
 }: GroupMeditationSessionProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { getVideosFromPlaylistByTitle, loading: youtubeLoading } = useYouTubeAPI();
+  
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [sessionState, setSessionState] = useState<SessionState>({
     is_playing: false,
     current_time: 0,
-    volume: 50
+    volume: 50,
+    session_type: sessionType,
+    session_duration: duration,
+    background_audio: backgroundAudio
   });
   const [timeRemaining, setTimeRemaining] = useState(duration * 60);
   const [isHost, setIsHost] = useState(false);
   const [showBreathingGuide, setShowBreathingGuide] = useState(true);
+  const [showControls, setShowControls] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [personalVolume, setPersonalVolume] = useState([70]);
+  const [meditationVideos, setMeditationVideos] = useState<YouTubeVideo[]>([]);
+  const [selectedBackgroundAudio, setSelectedBackgroundAudio] = useState<YouTubeVideo | null>(backgroundAudio || null);
+  const [sessionCompleted, setSessionCompleted] = useState(false);
+  const [availableDurations] = useState([5, 10, 15, 20, 25, 30, 45, 60]);
+  
   const channelRef = useRef<any>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const youtubePlayerRef = useRef<any>(null);
+
+  useEffect(() => {
+    loadMeditationContent();
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -141,13 +225,23 @@ export function GroupMeditationSession({
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
+      stopBackgroundAudio();
       supabase.removeChannel(channel);
     };
   }, [user, sessionId]);
 
+  const loadMeditationContent = async () => {
+    try {
+      const videosData = await getVideosFromPlaylistByTitle(MEDITATION_MODULE_CONFIG.playlistTitle, 25);
+      setMeditationVideos(videosData.videos);
+    } catch (error) {
+      console.error('Error loading meditation content:', error);
+    }
+  };
+
   const synchronizeTimer = (startTime: string) => {
     const elapsed = (Date.now() - new Date(startTime).getTime()) / 1000;
-    const remaining = Math.max(0, duration * 60 - elapsed);
+    const remaining = Math.max(0, sessionState.session_duration * 60 - elapsed);
     setTimeRemaining(remaining);
 
     if (timerRef.current) {
@@ -160,10 +254,7 @@ export function GroupMeditationSession({
           const newTime = Math.max(0, prev - 1);
           if (newTime === 0) {
             clearInterval(timerRef.current!);
-            toast({
-              title: "Collective Meditation Complete! 🧘",
-              description: "The group session has ended. Well done!",
-            });
+            completeMeditation();
           }
           return newTime;
         });
@@ -186,22 +277,36 @@ export function GroupMeditationSession({
 
   const startSession = () => {
     const startTime = new Date().toISOString();
+    setShowControls(false);
     broadcastSessionState({ 
       is_playing: true, 
       synchronized_start: startTime 
     });
     synchronizeTimer(startTime);
     
+    if (soundEnabled) {
+      if (selectedBackgroundAudio) {
+        startBackgroundAudio(selectedBackgroundAudio);
+      } else {
+        playMeditationSound('start');
+      }
+    }
+    
     toast({
-      title: "Group Session Started",
-      description: `Meditating together for ${duration} minutes`,
+      title: "Sacred Circle Begins",
+      description: `Collective meditation for ${sessionState.session_duration} minutes`,
     });
   };
 
   const pauseSession = () => {
+    setShowControls(true);
     broadcastSessionState({ is_playing: false });
     if (timerRef.current) {
       clearInterval(timerRef.current);
+    }
+    
+    if (soundEnabled) {
+      playMeditationSound('pause');
     }
     
     toast({
@@ -210,9 +315,113 @@ export function GroupMeditationSession({
     });
   };
 
+  const stopSession = () => {
+    setShowControls(true);
+    broadcastSessionState({ is_playing: false });
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    setTimeRemaining(sessionState.session_duration * 60);
+    
+    stopBackgroundAudio();
+    
+    if (soundEnabled) {
+      playMeditationSound('stop');
+    }
+
+    toast({
+      title: "Session Ended",
+      description: "Group meditation has been stopped",
+    });
+  };
+
+  const completeMeditation = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    setSessionCompleted(true);
+    setShowControls(true);
+    
+    stopBackgroundAudio();
+    
+    if (soundEnabled) {
+      playMeditationSound('complete');
+    }
+
+    toast({
+      title: "Sacred Circle Complete 🕉️",
+      description: "The collective light you have kindled continues to shine",
+    });
+
+    setTimeout(() => {
+      setSessionCompleted(false);
+    }, 8000);
+  };
+
   const adjustVolume = (newVolume: number[]) => {
     if (isHost) {
       broadcastSessionState({ volume: newVolume[0] });
+    }
+  };
+
+  const updateSessionType = (newType: MeditationType) => {
+    if (isHost && !sessionState.is_playing) {
+      broadcastSessionState({ session_type: newType });
+    }
+  };
+
+  const updateSessionDuration = (newDuration: number) => {
+    if (isHost && !sessionState.is_playing) {
+      broadcastSessionState({ session_duration: newDuration });
+      setTimeRemaining(newDuration * 60);
+    }
+  };
+
+  const updateBackgroundAudio = (audio: YouTubeVideo | null) => {
+    if (isHost) {
+      setSelectedBackgroundAudio(audio);
+      broadcastSessionState({ background_audio: audio || undefined });
+    }
+  };
+
+  const startBackgroundAudio = (video: YouTubeVideo) => {
+    try {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${video.id}?autoplay=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=1`;
+      iframe.style.display = 'none';
+      iframe.allow = 'autoplay';
+      document.body.appendChild(iframe);
+      youtubePlayerRef.current = iframe;
+    } catch (error) {
+      console.error('Error starting background audio:', error);
+    }
+  };
+
+  const stopBackgroundAudio = () => {
+    if (youtubePlayerRef.current) {
+      document.body.removeChild(youtubePlayerRef.current);
+      youtubePlayerRef.current = null;
+    }
+  };
+
+  const playMeditationSound = (type: 'start' | 'pause' | 'stop' | 'complete') => {
+    console.log(`Playing ${type} sound for group session`);
+  };
+
+  const shareSession = () => {
+    const sessionUrl = `${window.location.origin}/meditation?session=${sessionId}`;
+    if (navigator.share) {
+      navigator.share({ 
+        title: `Join our ${meditationTypes.find(t => t.id === sessionState.session_type)?.name} meditation circle`,
+        text: `Experience collective consciousness expansion in a ${sessionState.session_type} meditation session`,
+        url: sessionUrl
+      });
+    } else {
+      navigator.clipboard?.writeText(sessionUrl);
+      toast({
+        title: "Session Link Copied",
+        description: "Share this link to invite others to your meditation circle",
+      });
     }
   };
 
@@ -234,226 +443,531 @@ export function GroupMeditationSession({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = ((duration * 60 - timeRemaining) / (duration * 60)) * 100;
+  const progress = ((sessionState.session_duration * 60 - timeRemaining) / (sessionState.session_duration * 60)) * 100;
+  const selectedMeditation = meditationTypes.find(t => t.id === sessionState.session_type);
 
   return (
-    <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <Card className="w-full max-w-4xl h-full max-h-[90vh] overflow-hidden animate-scale-in">
-        <CardHeader className="border-b bg-gradient-to-r from-primary/5 to-secondary/5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-xl">Group Meditation Session</CardTitle>
-                <p className="text-sm text-muted-foreground capitalize">
-                  {sessionType.replace('-', ' ')} • {duration} minutes
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                {participants.length}
-              </Badge>
-              <Button variant="ghost" size="sm" onClick={onLeave}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
+    <>
+      {/* Fullscreen Meditation Visual Background */}
+      <div className="fixed inset-0 z-40">
+        <MeditationVisuals 
+          type={sessionState.session_type} 
+          isActive={sessionState.is_playing}
+        />
+      </div>
 
-        <CardContent className="flex-1 overflow-hidden p-0">
-          <div className="grid grid-cols-1 lg:grid-cols-3 h-full">
-            
-            {/* Main Session Area */}
-            <div className="lg:col-span-2 p-6 space-y-6">
-              
-              {/* Timer and Progress */}
-              <div className="text-center space-y-4">
-                <div className="relative">
-                  <div className="text-4xl font-bold text-primary animate-pulse">
-                    {formatTime(timeRemaining)}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {sessionState.is_playing ? 'Session in progress' : 'Ready to begin'}
+      {/* Session Completion Overlay */}
+      <AnimatePresence>
+        {sessionCompleted && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed inset-0 flex items-center justify-center z-60 bg-black/50"
+          >
+            <Card className="bg-black/40 backdrop-blur-lg border-white/20 text-white max-w-md mx-4">
+              <CardContent className="p-8 text-center space-y-6">
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                >
+                  <Sparkles className="h-16 w-16 mx-auto text-gold-400" />
+                </motion.div>
+                <div>
+                  <h3 className="text-2xl font-light mb-2">Sacred Circle Complete</h3>
+                  <p className="text-white/80">
+                    The collective light you have kindled within continues to shine. 
+                    May this shared peace remain with all souls who gathered here.
                   </p>
                 </div>
-                
-                <Progress value={progress} className="h-2" />
-              </div>
-
-              {/* Host Controls */}
-              {isHost && (
-                <Card className="border-primary/20">
-                  <CardHeader>
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Timer className="h-4 w-4" />
-                      Host Controls
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex gap-2">
-                    {!sessionState.is_playing ? (
-                      <Button onClick={startSession} className="hover-scale">
-                        <Play className="h-4 w-4 mr-2" />
-                        Start Session
-                      </Button>
-                    ) : (
-                      <Button onClick={pauseSession} variant="outline" className="hover-scale">
-                        <Pause className="h-4 w-4 mr-2" />
-                        Pause Session
-                      </Button>
-                    )}
-                    <Button variant="outline" onClick={() => setTimeRemaining(duration * 60)} className="hover-scale">
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Reset Timer
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Breathing Guide */}
-              {showBreathingGuide && (
-                <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
-                  <CardContent className="p-6 text-center">
-                    <div className="animate-pulse">
-                      <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-r from-primary to-secondary opacity-30 animate-[pulse_4s_ease-in-out_infinite]" />
-                      <p className="mt-4 text-sm text-muted-foreground">
-                        Breathe in harmony with the collective consciousness
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Inhale life • Hold integration • Exhale death • Rest in source
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Background Audio */}
-              {backgroundAudio && (
-                <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <img 
-                        src={backgroundAudio.thumbnail} 
-                        alt={backgroundAudio.title}
-                        className="w-16 h-12 object-cover rounded"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium line-clamp-1">{backgroundAudio.title}</h4>
-                        <p className="text-sm text-muted-foreground">Background Audio</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Music className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-medium">{sessionState.volume}%</span>
-                      </div>
-                    </div>
-                    
-                    {isHost && (
-                      <div className="flex items-center gap-4 mt-4">
-                        <div className="flex items-center gap-2">
-                          <VolumeX className="h-4 w-4" />
-                          <Slider
-                            value={[sessionState.volume]}
-                            onValueChange={adjustVolume}
-                            max={100}
-                            step={1}
-                            className="w-32"
-                          />
-                          <Volume2 className="h-4 w-4" />
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Participants Sidebar */}
-            <div className="border-l bg-muted/20 p-4 space-y-4 overflow-y-auto">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Participants ({participants.length})
-                </h3>
-              </div>
-
-              <div className="space-y-3">
-                {participants.map((participant) => (
-                  <div
-                    key={participant.id}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors animate-fade-in"
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={participant.avatar_url} />
-                      <AvatarFallback>
-                        {participant.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium line-clamp-1">
-                        {participant.name}
-                        {participant.user_id === user?.id && ' (You)'}
-                        {isHost && participant.user_id === participants.find(p => p.user_id === participants.sort((a, b) => new Date(a.joined_at).getTime() - new Date(b.joined_at).getTime())[0]?.user_id)?.user_id && ' 👑'}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${
-                          participant.status === 'meditating' ? 'bg-green-500' :
-                          participant.status === 'listening' ? 'bg-blue-500' : 'bg-gray-500'
-                        }`} />
-                        <span className="text-xs text-muted-foreground capitalize">
-                          {participant.status}
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={sendHeartbeat}
-                      className="p-1 hover-scale"
-                    >
-                      <Heart className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-
-              {participants.length === 0 && (
-                <p className="text-center text-sm text-muted-foreground py-8">
-                  Waiting for participants to join...
-                </p>
-              )}
-
-              {/* Quick Actions */}
-              <div className="space-y-2 pt-4 border-t">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start hover-scale"
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator.share({ 
-                        title: 'Join our meditation session',
-                        url: window.location.href 
-                      });
-                    } else {
-                      navigator.clipboard?.writeText(window.location.href);
-                      toast({
-                        title: "Link Copied",
-                        description: "Session link copied to clipboard",
-                      });
-                    }
-                  }}
+                <motion.div
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                  className="text-sm text-white/60"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share Session
+                  🕉️ Collective Namaste 🕉️
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Session Timer (when active) */}
+      <AnimatePresence>
+        {sessionState.is_playing && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50"
+          >
+            <Card className="bg-black/20 backdrop-blur-md border-white/10 text-white">
+              <CardContent className="p-6 text-center space-y-4">
+                <motion.div 
+                  className="text-4xl font-light tracking-wider"
+                  animate={{ opacity: [0.7, 1, 0.7] }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                >
+                  {formatTime(timeRemaining)}
+                </motion.div>
+                <Progress 
+                  value={progress} 
+                  className="h-1 bg-white/20"
+                />
+                <p className="text-sm text-white/80">{selectedMeditation?.guidance}</p>
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {participants.length} souls in circle
+                </Badge>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Session Interface */}
+      <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+        <Card className="w-full max-w-6xl h-full max-h-[90vh] overflow-hidden animate-scale-in">
+          <CardHeader className="border-b bg-gradient-to-r from-primary/5 to-secondary/5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-primary/10">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Group Meditation Session</CardTitle>
+                  <p className="text-sm text-muted-foreground capitalize">
+                    {selectedMeditation?.name} • {sessionState.session_duration} minutes
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {participants.length}
+                </Badge>
+                <Button variant="ghost" size="sm" onClick={onLeave}>
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardHeader>
+
+          <CardContent className="flex-1 overflow-hidden p-0">
+            <Tabs defaultValue="session" className="h-full flex flex-col">
+              <TabsList className="grid w-full grid-cols-4 bg-muted/50">
+                <TabsTrigger value="session">Session</TabsTrigger>
+                <TabsTrigger value="settings" disabled={!isHost}>Settings</TabsTrigger>
+                <TabsTrigger value="soundscape">Soundscape</TabsTrigger>
+                <TabsTrigger value="participants">Circle</TabsTrigger>
+              </TabsList>
+
+              {/* Session Tab */}
+              <TabsContent value="session" className="flex-1 overflow-hidden">
+                <div className="grid grid-cols-1 lg:grid-cols-3 h-full">
+                  
+                  {/* Main Session Area */}
+                  <div className="lg:col-span-2 p-6 space-y-6">
+                
+                    {/* Timer and Progress */}
+                    <div className="text-center space-y-4">
+                      <div className="relative">
+                        <div className="text-4xl font-bold text-primary animate-pulse">
+                          {formatTime(timeRemaining)}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {sessionState.is_playing ? `${selectedMeditation?.name} in progress` : 'Ready to begin sacred practice'}
+                        </p>
+                      </div>
+                      
+                      <Progress value={progress} className="h-2" />
+                    </div>
+
+                    {/* Host Controls */}
+                    {isHost && (
+                      <Card className="border-primary/20">
+                        <CardHeader>
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <Timer className="h-4 w-4" />
+                            Host Controls
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex gap-2">
+                          {!sessionState.is_playing ? (
+                            <Button onClick={startSession} className="hover-scale">
+                              <Play className="h-4 w-4 mr-2" />
+                              Start Session
+                            </Button>
+                          ) : (
+                            <Button onClick={pauseSession} variant="outline" className="hover-scale">
+                              <Pause className="h-4 w-4 mr-2" />
+                              Pause Session
+                            </Button>
+                          )}
+                          <Button variant="outline" onClick={() => setTimeRemaining(sessionState.session_duration * 60)} className="hover-scale">
+                            <RotateCcw className="h-4 w-4 mr-2" />
+                            Reset Timer
+                          </Button>
+                          <Button variant="outline" onClick={stopSession} className="hover-scale">
+                            <Square className="h-4 w-4 mr-2" />
+                            End Session
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Breathing Guide */}
+                    {showBreathingGuide && (
+                      <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+                        <CardContent className="p-6 text-center">
+                          <div className="animate-pulse">
+                            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-r from-primary to-secondary opacity-30 animate-[pulse_4s_ease-in-out_infinite]" />
+                            <p className="mt-4 text-sm text-muted-foreground">
+                              Breathe in harmony with the collective consciousness
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Inhale life • Hold integration • Exhale death • Rest in source
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Background Audio */}
+                    {selectedBackgroundAudio && (
+                      <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-4">
+                            <img 
+                              src={selectedBackgroundAudio.thumbnail} 
+                              alt={selectedBackgroundAudio.title}
+                              className="w-16 h-12 object-cover rounded"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium line-clamp-1">{selectedBackgroundAudio.title}</h4>
+                              <p className="text-sm text-muted-foreground">Sacred Soundscape</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Music className="h-4 w-4 text-primary" />
+                              <span className="text-sm font-medium">{sessionState.volume}%</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-4 mt-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">Personal Volume:</span>
+                              <VolumeX className="h-4 w-4" />
+                              <Slider
+                                value={personalVolume}
+                                onValueChange={setPersonalVolume}
+                                max={100}
+                                step={1}
+                                className="w-24"
+                              />
+                              <Volume2 className="h-4 w-4" />
+                              <span className="text-sm font-medium">{personalVolume[0]}%</span>
+                            </div>
+                            {isHost && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm">Circle Volume:</span>
+                                <Slider
+                                  value={[sessionState.volume]}
+                                  onValueChange={adjustVolume}
+                                  max={100}
+                                  step={1}
+                                  className="w-24"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Sound Controls */}
+                    <div className="flex items-center justify-center gap-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSoundEnabled(!soundEnabled)}
+                        className="hover-scale"
+                      >
+                        {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                        <span className="ml-2 text-sm">
+                          {soundEnabled ? 'Sound On' : 'Sound Off'}
+                        </span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={shareSession}
+                        className="hover-scale"
+                      >
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Share Session
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Participants Sidebar */}
+                  <div className="border-l bg-muted/20 p-4 space-y-4 overflow-y-auto">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Participants ({participants.length})
+                      </h3>
+                    </div>
+
+                    <div className="space-y-3">
+                      {participants.map((participant) => (
+                        <div
+                          key={participant.id}
+                          className="flex items-center gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors animate-fade-in"
+                        >
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={participant.avatar_url} />
+                            <AvatarFallback>
+                              {participant.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium line-clamp-1">
+                              {participant.name}
+                              {participant.user_id === user?.id && ' (You)'}
+                              {isHost && participant.user_id === participants.sort((a, b) => new Date(a.joined_at).getTime() - new Date(b.joined_at).getTime())[0]?.user_id && ' 👑'}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${
+                                participant.status === 'meditating' ? 'bg-green-500' :
+                                participant.status === 'listening' ? 'bg-blue-500' : 'bg-gray-500'
+                              }`} />
+                              <span className="text-xs text-muted-foreground capitalize">
+                                {participant.status}
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={sendHeartbeat}
+                            className="p-1 hover-scale"
+                          >
+                            <Heart className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {participants.length === 0 && (
+                      <p className="text-center text-sm text-muted-foreground py-8">
+                        Waiting for participants to join...
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Settings Tab (Host Only) */}
+              <TabsContent value="settings" className="flex-1 p-6 space-y-6">
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-semibold">Session Settings</h3>
+                  <p className="text-muted-foreground">Configure your meditation circle</p>
+                </div>
+
+                {/* Meditation Type Selection */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Practice Type</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {meditationTypes.map((type) => (
+                        <Card
+                          key={type.id}
+                          className={`cursor-pointer transition-all ${
+                            sessionState.session_type === type.id
+                              ? 'border-primary bg-primary/5'
+                              : 'hover:bg-muted/50'
+                          }`}
+                          onClick={() => updateSessionType(type.id)}
+                        >
+                          <CardContent className="p-4 text-center space-y-2">
+                            <div className={`mx-auto w-10 h-10 rounded-full bg-gradient-to-br ${type.color} flex items-center justify-center text-white`}>
+                              {type.icon}
+                            </div>
+                            <h4 className="font-medium text-sm">{type.name}</h4>
+                            <p className="text-xs text-muted-foreground">{type.description}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Duration Selection */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Session Duration</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-4 gap-2">
+                      {availableDurations.map((dur) => (
+                        <Button
+                          key={dur}
+                          variant={sessionState.session_duration === dur ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => updateSessionDuration(dur)}
+                          className="hover-scale"
+                        >
+                          {dur} min
+                        </Button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Soundscape Tab */}
+              <TabsContent value="soundscape" className="flex-1 p-6 space-y-6">
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-semibold">Sacred Soundscapes</h3>
+                  <p className="text-muted-foreground">Choose background audio for your practice</p>
+                </div>
+
+                {selectedBackgroundAudio ? (
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={selectedBackgroundAudio.thumbnail}
+                            alt={selectedBackgroundAudio.title}
+                            className="w-16 h-12 object-cover rounded"
+                          />
+                          <div>
+                            <h4 className="font-medium">{selectedBackgroundAudio.title}</h4>
+                            <p className="text-sm text-muted-foreground">{selectedBackgroundAudio.duration}</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => updateBackgroundAudio(null)}
+                        >
+                          Change
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {youtubeLoading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full mx-auto mb-4" />
+                        <p className="text-muted-foreground">Loading sacred sounds...</p>
+                      </div>
+                    ) : meditationVideos.length > 0 ? (
+                      meditationVideos.slice(0, 8).map((video) => (
+                        <Card
+                          key={video.id}
+                          className="hover:bg-muted/50 cursor-pointer transition-all hover-scale"
+                          onClick={() => updateBackgroundAudio(video)}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={video.thumbnail}
+                                alt={video.title}
+                                className="w-16 h-12 object-cover rounded"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium line-clamp-1">{video.title}</p>
+                                <p className="text-sm text-muted-foreground">{video.duration}</p>
+                              </div>
+                              <PlayCircle className="h-5 w-5 text-primary" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p className="text-muted-foreground">Sacred soundscapes unavailable</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* Participants Tab */}
+              <TabsContent value="participants" className="flex-1 p-6 space-y-6">
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-semibold">Sacred Circle</h3>
+                  <p className="text-muted-foreground">Souls gathered for collective practice</p>
+                </div>
+
+                <div className="grid gap-4">
+                  {participants.map((participant) => (
+                    <Card key={participant.id} className="animate-fade-in">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={participant.avatar_url} />
+                            <AvatarFallback>
+                              {participant.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">
+                                {participant.name}
+                                {participant.user_id === user?.id && ' (You)'}
+                              </h4>
+                              {isHost && participant.user_id === participants.sort((a, b) => new Date(a.joined_at).getTime() - new Date(b.joined_at).getTime())[0]?.user_id && (
+                                <Badge variant="secondary">Host 👑</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 mt-1">
+                              <div className="flex items-center gap-1">
+                                <div className={`w-2 h-2 rounded-full ${
+                                  participant.status === 'meditating' ? 'bg-green-500' :
+                                  participant.status === 'listening' ? 'bg-blue-500' : 'bg-gray-500'
+                                }`} />
+                                <span className="text-xs text-muted-foreground capitalize">
+                                  {participant.status}
+                                </span>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                Joined {new Date(participant.joined_at).toLocaleTimeString()}
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={sendHeartbeat}
+                            className="hover-scale"
+                          >
+                            <Heart className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {participants.length === 0 && (
+                  <div className="text-center py-12">
+                    <Users className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                    <p className="text-muted-foreground">Waiting for souls to join the circle...</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
