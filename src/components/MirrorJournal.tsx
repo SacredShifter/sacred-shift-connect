@@ -27,6 +27,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUnifiedMessaging } from '@/hooks/useUnifiedMessaging';
 import { DreamAnalyzer } from '@/components/DreamAnalyzer';
 import { Slogan } from './ui/Slogan';
+import { SynchronicityMirror } from '@/components/synchronicity/SynchronicityMirror';
 
 const poeticPrompts = [
   "What did your soul whisper today?",
@@ -78,6 +79,7 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
   });
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [showDreamAnalyzer, setShowDreamAnalyzer] = useState(false);
+  const [showSynchronicityMirror, setShowSynchronicityMirror] = useState(false);
 
   const currentPrompt = poeticPrompts[Math.floor(Math.random() * poeticPrompts.length)];
 
@@ -506,6 +508,14 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
             onClose={() => setShowDreamAnalyzer(false)}
           />
         )}
+
+        {/* Synchronicity Mirror */}
+        <SynchronicityMirror
+          isVisible={showSynchronicityMirror}
+          onToggle={() => setShowSynchronicityMirror(prev => !prev)}
+          journalContent={currentEntry.content || ''}
+          intention={currentEntry.title || ''}
+        />
       </div>
     </div>
   );
