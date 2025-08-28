@@ -59,23 +59,17 @@ export const SynchronicityMirror: React.FC<SynchronicityMirrorProps> = ({
             drag
             dragConstraints={{
               top: 0,
-              left: 0,
+              left: -window.innerWidth + 400,
               right: window.innerWidth - 400,
-              bottom: window.innerHeight - 600
+              bottom: window.innerHeight - 400
             }}
-            dragElastic={0.1}
             dragMomentum={false}
-            initial={{ x: window.innerWidth - 400, y: 100, opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ x: window.innerWidth - 420, y: 100, opacity: 0 }}
+            animate={{ opacity: 1, x: window.innerWidth - 420, y: 100 }}
             exit={{ opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            style={{ x: position.x, y: position.y }}
-            onDragEnd={(_, info) => {
-              setPosition({
-                x: position.x + info.offset.x,
-                y: position.y + info.offset.y
-              });
-            }}
+            whileDrag={{ scale: 1.05 }}
+            dragElastic={0.2}
             className="fixed w-96 h-96 bg-background/95 backdrop-blur-md border border-border rounded-lg z-40 overflow-hidden shadow-2xl"
           >
             <div className="h-full flex flex-col">
