@@ -677,7 +677,7 @@ export function GroupMeditationSession({
         )}
       </AnimatePresence>
 
-      {/* Main Session Interface - Hidden during meditation */}
+      {/* Main Session Interface - Only show when session is not playing */}
       <AnimatePresence>
         {!sessionState.is_playing && (
           <motion.div 

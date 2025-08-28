@@ -540,9 +540,9 @@ export default function Meditation() {
           )}
         </AnimatePresence>
 
-        {/* Control Panel (when not active) */}
+        {/* Control Panel (when not active and no group session joined) */}
         <AnimatePresence>
-          {showControls && sessionState === 'idle' && (
+          {showControls && sessionState === 'idle' && !joinedSession && (
             <motion.div
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
