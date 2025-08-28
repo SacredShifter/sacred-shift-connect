@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, Stars, Sphere, Box, Torus, Icosahedron } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Stars, Sphere, Box, Torus, Icosahedron } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
@@ -288,7 +288,6 @@ export default function MeditationVisualization3D({ type, isActive = false }: Me
       <EffectComposer>
         <Bloom intensity={0.3} luminanceThreshold={0.3} luminanceSmoothing={0.9} height={300} />
       </EffectComposer>
-      <Environment preset="night" />
     </Canvas>
   );
 }
