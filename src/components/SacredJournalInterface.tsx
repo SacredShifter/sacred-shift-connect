@@ -16,7 +16,11 @@ import {
   Search,
   Filter,
   Clock,
-  Infinity as InfinityIcon
+  Infinity as InfinityIcon,
+  Edit3,
+  Trash2,
+  Moon,
+  MoreHorizontal
 } from 'lucide-react';
 import { useSacredJournal } from '@/hooks/useSacredJournal';
 import { EntryModeSelector } from './journal/EntryModeSelector';
@@ -24,7 +28,10 @@ import { ResonanceTagPicker } from './journal/ResonanceTagPicker';
 import { JournalVisualization } from './journal/JournalVisualization';
 import { MirrorBackInterface } from './journal/MirrorBackInterface';
 import { VoiceJournalRecorder } from './journal/VoiceJournalRecorder';
+import { DreamAnalyzer } from './DreamAnalyzer';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { format, formatDistanceToNow } from 'date-fns';
+import type { SacredJournalEntry } from '@/hooks/useSacredJournal';
 
 export type EntryMode = 'stream' | 'reflection' | 'transmutation' | 'integration';
 
@@ -48,6 +55,10 @@ export const SacredJournalInterface: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTag, setFilterTag] = useState<string | null>(null);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [showDreamAnalyzer, setShowDreamAnalyzer] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<SacredJournalEntry | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
 
   const entryModes = [
     {
@@ -85,6 +96,56 @@ export const SacredJournalInterface: React.FC = () => {
   ];
 
   const currentModeData = entryModes.find(mode => mode.id === selectedMode);
+
+  const handleEditEntry = (entry: SacredJournalEntry) => {
+    setEditingEntry(entry);
+    setEditTitle(entry.title);
+    setEditContent(entry.content);
+  };
+
+  const handleUpdateEntry = async () => {
+    if (!editingEntry || !editContent.trim()) return;
+
+    try {
+      await updateEntry(editingEntry.id, {
+        title: editTitle || editingEntry.title,
+        content: editContent,
+        entry_mode: editingEntry.entry_mode,
+        resonance_tags: editingEntry.resonance_tags,
+        voice_transcription: editingEntry.voice_transcription
+      });
+      setEditingEntry(null);
+      setEditTitle('');
+      setEditContent('');
+    } catch (error) {
+      console.error('Error updating entry:', error);
+    }
+  };
+
+  const handleDeleteEntry = async (entryId: string) => {
+    if (window.confirm('Are you sure you want to delete this entry? This cannot be undone.')) {
+      try {
+        await deleteEntry(entryId);
+      } catch (error) {
+        console.error('Error deleting entry:', error);
+      }
+    }
+  };
+
+  const handleSaveDreamAnalysis = async (dreamData: any) => {
+    try {
+      await createEntry({
+        title: dreamData.title,
+        content: dreamData.content,
+        entry_mode: 'reflection',
+        resonance_tags: ['dream', 'analysis', 'archetypal'],
+        voice_transcription: false
+      });
+    } catch (error) {
+      console.error('Error saving dream analysis:', error);
+      throw error;
+    }
+  };
 
   const handleSaveEntry = async () => {
     if (!currentEntry.trim()) return;
@@ -215,6 +276,14 @@ export const SacredJournalInterface: React.FC = () => {
                 <TrendingUp className="h-4 w-4 mr-2" />
                 Evolve
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDreamAnalyzer(true)}
+              >
+                <Moon className="h-4 w-4 mr-2" />
+                Dream Analysis
+              </Button>
             </div>
           </div>
 
@@ -304,6 +373,59 @@ export const SacredJournalInterface: React.FC = () => {
                     />
                   )}
                 </AnimatePresence>
+
+                {/* Edit Entry Dialog */}
+                <AnimatePresence>
+                  {editingEntry && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="w-full max-w-2xl"
+                      >
+                        <Card className="bg-background border-primary/20">
+                          <CardHeader>
+                            <CardTitle>Edit Entry</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <input
+                              type="text"
+                              placeholder="Entry title"
+                              value={editTitle}
+                              onChange={(e) => setEditTitle(e.target.value)}
+                              className="w-full bg-transparent border border-primary/20 rounded-lg px-3 py-2 text-lg font-medium placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+                            />
+                            
+                            <textarea
+                              value={editContent}
+                              onChange={(e) => setEditContent(e.target.value)}
+                              placeholder="Entry content..."
+                              className="w-full h-64 bg-transparent border border-primary/20 rounded-lg px-3 py-2 resize-none placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+                            />
+
+                            <div className="flex items-center justify-end gap-2 pt-4">
+                              <Button 
+                                variant="outline" 
+                                onClick={() => setEditingEntry(null)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button 
+                                onClick={handleUpdateEntry}
+                                disabled={!editContent.trim()}
+                                className="bg-gradient-to-r from-primary to-secondary hover:opacity-90"
+                              >
+                                <Sparkles className="h-4 w-4 mr-2" />
+                                Update Entry
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    </div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
 
@@ -366,29 +488,51 @@ export const SacredJournalInterface: React.FC = () => {
                         layout
                       >
                         <Card className="bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all">
-                          <CardContent className="p-6">
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-full bg-gradient-to-r ${
-                                  entryModes.find(m => m.id === entry.entry_mode)?.color || 'from-gray-400 to-gray-600'
-                                }`}>
-                                  {(() => {
-                                    const IconComponent = entryModes.find(m => m.id === entry.entry_mode)?.icon;
-                                    return IconComponent ? <IconComponent className="w-4 h-4 text-white" /> : null;
-                                  })()}
-                                </div>
-                                <div>
-                                  <h3 className="font-medium">{entry.title}</h3>
-                                  <p className="text-sm text-muted-foreground">
-                                    {format(new Date(entry.created_at), 'MMM d, yyyy')} • 
-                                    {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
-                                  </p>
-                                </div>
-                              </div>
-                              {entry.is_draft && (
-                                <Badge variant="secondary">Draft</Badge>
-                              )}
-                            </div>
+                           <CardContent className="p-6">
+                             <div className="flex items-start justify-between mb-3">
+                               <div className="flex items-center gap-3">
+                                 <div className={`p-2 rounded-full bg-gradient-to-r ${
+                                   entryModes.find(m => m.id === entry.entry_mode)?.color || 'from-gray-400 to-gray-600'
+                                 }`}>
+                                   {(() => {
+                                     const IconComponent = entryModes.find(m => m.id === entry.entry_mode)?.icon;
+                                     return IconComponent ? <IconComponent className="w-4 h-4 text-white" /> : null;
+                                   })()}
+                                 </div>
+                                 <div>
+                                   <h3 className="font-medium">{entry.title}</h3>
+                                   <p className="text-sm text-muted-foreground">
+                                     {format(new Date(entry.created_at), 'MMM d, yyyy')} • 
+                                     {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
+                                   </p>
+                                 </div>
+                               </div>
+                               <div className="flex items-center gap-2">
+                                 {entry.is_draft && (
+                                   <Badge variant="secondary">Draft</Badge>
+                                 )}
+                                 <DropdownMenu>
+                                   <DropdownMenuTrigger asChild>
+                                     <Button variant="ghost" size="sm">
+                                       <MoreHorizontal className="h-4 w-4" />
+                                     </Button>
+                                   </DropdownMenuTrigger>
+                                   <DropdownMenuContent align="end">
+                                     <DropdownMenuItem onClick={() => handleEditEntry(entry)}>
+                                       <Edit3 className="h-4 w-4 mr-2" />
+                                       Edit Entry
+                                     </DropdownMenuItem>
+                                     <DropdownMenuItem 
+                                       onClick={() => handleDeleteEntry(entry.id)}
+                                       className="text-destructive"
+                                     >
+                                       <Trash2 className="h-4 w-4 mr-2" />
+                                       Delete Entry
+                                     </DropdownMenuItem>
+                                   </DropdownMenuContent>
+                                 </DropdownMenu>
+                               </div>
+                             </div>
                             
                             <p className="text-foreground/80 mb-4 line-clamp-3">
                               {entry.content}
@@ -455,7 +599,17 @@ export const SacredJournalInterface: React.FC = () => {
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+         </motion.div>
+
+        {/* Dream Analyzer */}
+        <AnimatePresence>
+          {showDreamAnalyzer && (
+            <DreamAnalyzer
+              onSaveToJournal={handleSaveDreamAnalysis}
+              onClose={() => setShowDreamAnalyzer(false)}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
