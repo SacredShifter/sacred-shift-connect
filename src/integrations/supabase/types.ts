@@ -7825,10 +7825,13 @@ export type Database = {
           entry_mode: string | null
           id: string
           is_draft: boolean | null
+          mirror_back: string | null
           mood_tag: string | null
+          resonance_tags: string[] | null
           title: string | null
           updated_at: string | null
           user_id: string
+          voice_transcription: boolean | null
         }
         Insert: {
           chakra_alignment?: string | null
@@ -7837,10 +7840,13 @@ export type Database = {
           entry_mode?: string | null
           id?: string
           is_draft?: boolean | null
+          mirror_back?: string | null
           mood_tag?: string | null
+          resonance_tags?: string[] | null
           title?: string | null
           updated_at?: string | null
           user_id: string
+          voice_transcription?: boolean | null
         }
         Update: {
           chakra_alignment?: string | null
@@ -7849,10 +7855,13 @@ export type Database = {
           entry_mode?: string | null
           id?: string
           is_draft?: boolean | null
+          mirror_back?: string | null
           mood_tag?: string | null
+          resonance_tags?: string[] | null
           title?: string | null
           updated_at?: string | null
           user_id?: string
+          voice_transcription?: boolean | null
         }
         Relationships: []
       }
@@ -11453,6 +11462,36 @@ export type Database = {
           participants?: string[]
           resonance_level?: number
           type?: string
+        }
+        Relationships: []
+      }
+      screensaver_events: {
+        Row: {
+          created_at: string
+          duration: number | null
+          event_type: string
+          id: string
+          triggered_at: string
+          user_id: string
+          visual_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration?: number | null
+          event_type: string
+          id?: string
+          triggered_at?: string
+          user_id: string
+          visual_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration?: number | null
+          event_type?: string
+          id?: string
+          triggered_at?: string
+          user_id?: string
+          visual_type?: string | null
         }
         Relationships: []
       }

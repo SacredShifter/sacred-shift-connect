@@ -98,18 +98,20 @@ export default function SacredScreensaver({
     handlePhaseTransition();
   }, [isActive, phase, enabled, user]);
 
-  // Supabase logging
+  // Supabase logging - TODO: Enable after screensaver_events table is approved
   const logScreensaverEvent = async (event_type: string, duration?: number) => {
     if (!user) return;
     
     try {
-      await supabase.from("screensaver_events").insert({
-        user_id: user.id,
-        event_type,
-        visual_type: visualType,
-        duration,
-        triggered_at: new Date().toISOString()
-      });
+      // TODO: Re-enable after screensaver_events table migration is approved
+      // await supabase.from("screensaver_events").insert({
+      //   user_id: user.id,
+      //   event_type,
+      //   visual_type: visualType,
+      //   duration,
+      //   triggered_at: new Date().toISOString()
+      // });
+      console.log('Screensaver event:', { event_type, visual_type: visualType, duration });
     } catch (error) {
       console.error('Failed to log screensaver event:', error);
     }

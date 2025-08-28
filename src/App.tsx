@@ -11,6 +11,7 @@ import { ToolbarWithComponents } from "@/components/ToolbarWithComponents";
 import { ErrorBoundary, UIErrorBoundary } from "@/components/ErrorBoundary";
 import { ProductionReadyErrorBoundary } from "@/components/production/ProductionReadyErrorBoundary";
 import { PerformanceMonitor } from "@/components/production/PerformanceMonitor";
+import SacredScreensaver from "@/components/SacredScreensaver";
 
 import Index from "./pages/Index";
 import Feed from "./pages/Feed";
@@ -45,47 +46,52 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-        <div className="min-h-screen relative w-full bg-black">
-          
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/auth/confirm" element={<AuthConfirm />} />
-            <Route
-              element={
-                <ProtectedRoute>
-                  <TourProvider>
-                    <MainLayout />
-                  </TourProvider>
-                </ProtectedRoute>
-              }
-            >
-                <Route path="/" element={<Index />} />
-                <Route path="/feed" element={<Feed />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/circles" element={<Circles />} />
-                <Route path="/journal" element={<Journal />} />
-                <Route path="/videos" element={<VideoLibrary />} />
-                <Route path="/registry" element={<CollectiveAkashicConstellationPage />} />
-                <Route path="/resonance/entries/:id" element={<RegistryEntry />} />
-                <Route path="/codex" element={<AkashicConstellationPage />} />
-                <Route path="/grove" element={<Grove />} />
-                <Route path="/liberation" element={<Liberation />} />
-                <Route path="/guidebook" element={<Guidebook />} />
-                <Route path="/learning-3d" element={<Learning3D />} />
-                <Route path="/constellation" element={<ConstellationMapper />} />
-                <Route path="/support" element={<Support />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/ai-admin" element={<AdminRoute><AuraQuantumCommandNexus /></AdminRoute>} />
-                <Route path="/shift" element={<Shift />} />
-                <Route path="/meditation" element={<Meditation />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+        <SacredScreensaver 
+          timeout={120000} 
+          visualType="breath_orb" 
+          enabled={true}
+        >
+          <div className="min-h-screen relative w-full bg-black">
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/confirm" element={<AuthConfirm />} />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <TourProvider>
+                      <MainLayout />
+                    </TourProvider>
+                  </ProtectedRoute>
+                }
+              >
+                  <Route path="/" element={<Index />} />
+                  <Route path="/feed" element={<Feed />} />
+                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/circles" element={<Circles />} />
+                  <Route path="/journal" element={<Journal />} />
+                  <Route path="/videos" element={<VideoLibrary />} />
+                  <Route path="/registry" element={<CollectiveAkashicConstellationPage />} />
+                  <Route path="/resonance/entries/:id" element={<RegistryEntry />} />
+                  <Route path="/codex" element={<AkashicConstellationPage />} />
+                  <Route path="/grove" element={<Grove />} />
+                  <Route path="/liberation" element={<Liberation />} />
+                  <Route path="/guidebook" element={<Guidebook />} />
+                  <Route path="/learning-3d" element={<Learning3D />} />
+                  <Route path="/constellation" element={<ConstellationMapper />} />
+                  <Route path="/support" element={<Support />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/ai-admin" element={<AdminRoute><AuraQuantumCommandNexus /></AdminRoute>} />
+                  <Route path="/shift" element={<Shift />} />
+                  <Route path="/meditation" element={<Meditation />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
 
-            {/* Proper Toolbar with Component Loading */}
-            <ToolbarWithComponents />
-          </div>
+              {/* Proper Toolbar with Component Loading */}
+              <ToolbarWithComponents />
+            </div>
+        </SacredScreensaver>
         </TooltipProvider>
       </ErrorBoundary>
     </ProductionReadyErrorBoundary>

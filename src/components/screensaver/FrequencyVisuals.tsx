@@ -142,6 +142,20 @@ function BreathOrb({ isActive }: { isActive: boolean }) {
 function HeartOpening({ isActive }: { isActive: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
   
+  const heartPoints = useMemo(() => {
+    const points = [];
+    
+    for (let i = 0; i < 500; i++) {
+      const t = (i / 500) * Math.PI * 2;
+      const x = 16 * Math.sin(t) ** 3;
+      const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+      
+      points.push(x * 0.05, y * 0.05, (Math.random() - 0.5) * 0.5);
+    }
+    
+    return new Float32Array(points);
+  }, []);
+  
   useFrame(({ clock }) => {
     if (!isActive || !groupRef.current) return;
     
@@ -152,41 +166,24 @@ function HeartOpening({ isActive }: { isActive: boolean }) {
   return (
     <group ref={groupRef}>
       {/* Heart-shaped particle formation */}
-      <Points>
-        <heartGeometry />
-        <PointMaterial
+      <points>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={heartPoints.length / 3}
+            array={heartPoints}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial
           size={0.1}
           color="#FF69B4"
           transparent
           opacity={0.8}
           blending={THREE.AdditiveBlending}
         />
-      </Points>
+      </points>
     </group>
-  );
-}
-
-// Custom heart geometry
-function heartGeometry() {
-  const points = [];
-  
-  for (let i = 0; i < 500; i++) {
-    const t = (i / 500) * Math.PI * 2;
-    const x = 16 * Math.sin(t) ** 3;
-    const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-    
-    points.push(x * 0.05, y * 0.05, (Math.random() - 0.5) * 0.5);
-  }
-  
-  return (
-    <bufferGeometry>
-      <bufferAttribute
-        attach="attributes-position"
-        count={points.length / 3}
-        array={new Float32Array(points)}
-        itemSize={3}
-      />
-    </bufferGeometry>
   );
 }
 
