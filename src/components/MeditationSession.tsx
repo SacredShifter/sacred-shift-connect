@@ -301,8 +301,14 @@ export function MeditationSession({
       };
       
       const { error } = await supabase
-        .from('meditation_sessions')
-        .insert(sessionData);
+        .from('akashic_records')
+        .insert({
+          type: 'meditation_session',
+          data: sessionData,
+          metadata: {
+            session_type: 'individual_meditation'
+          }
+        });
       
       if (error) {
         console.error('Error saving meditation session:', error);

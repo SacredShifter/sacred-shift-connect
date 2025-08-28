@@ -113,8 +113,14 @@ export function useMeditationSession() {
       };
 
       const { error } = await supabase
-        .from('meditation_sessions')
-        .insert(sessionData);
+        .from('akashic_records')
+        .insert({
+          type: 'meditation_session',
+          data: sessionData as any,
+          metadata: {
+            session_type: 'individual_meditation'
+          }
+        });
 
       if (error) {
         throw error;
@@ -158,10 +164,10 @@ export function useMeditationSession() {
     
     try {
       const { data, error } = await supabase
-        .from('meditation_sessions')
+        .from('akashic_records')
         .select('*')
-        .eq('user_id', user.id)
-        .order('completed_at', { ascending: false })
+        .eq('type', 'meditation_session')
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
@@ -179,57 +185,18 @@ export function useMeditationSession() {
     if (!user) return;
 
     try {
-      // Get current stats
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('meditation_stats')
-        .eq('user_id', user.id)
-        .single();
-
-      const currentStats = profile?.meditation_stats || {
-        total_sessions: 0,
-        total_minutes: 0,
-        streak_days: 0,
-        last_session_date: null,
-        favorite_practices: {},
-      };
-
-      // Calculate new stats
-      const today = new Date().toDateString();
-      const lastSessionDate = currentStats.last_session_date ? 
-        new Date(currentStats.last_session_date).toDateString() : null;
-      
-      let streakDays = currentStats.streak_days;
-      if (lastSessionDate !== today) {
-        // Check if yesterday
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        
-        if (lastSessionDate === yesterday.toDateString()) {
-          streakDays += 1;
-        } else if (lastSessionDate !== today) {
-          streakDays = 1; // Reset streak
-        }
-      }
-
-      const updatedStats = {
-        total_sessions: currentStats.total_sessions + 1,
-        total_minutes: currentStats.total_minutes + sessionDuration,
-        streak_days: streakDays,
-        last_session_date: new Date().toISOString(),
-        favorite_practices: {
-          ...currentStats.favorite_practices,
-          [currentSession?.practice.visualType || 'unknown']: 
-            (currentStats.favorite_practices[currentSession?.practice.visualType || 'unknown'] || 0) + 1,
+      // Store meditation stats update in akashic_records for now
+      await supabase.from('akashic_records').insert({
+        type: 'meditation_stats_update',
+        data: {
+          user_id: user.id,
+          session_duration: sessionDuration,
+          updated_at: new Date().toISOString()
         },
-      };
-
-      // Update profile with new stats
-      await supabase
-        .from('profiles')
-        .update({ meditation_stats: updatedStats })
-        .eq('user_id', user.id);
-
+        metadata: {
+          stats_type: 'session_completion'
+        }
+      });
     } catch (error) {
       console.error('Error updating meditation stats:', error);
     }
@@ -237,29 +204,29 @@ export function useMeditationSession() {
 
   // Generate contextual tags for the session
   const generateSessionTags = (practice: MeditationPractice, duration: number): string[] => {
-    const tags = [practice.visualType];
+    const tags: string[] = [practice.visualType];
     
     if (duration >= practice.defaultDuration) {
-      tags.push('completed');
+      tags.push('session-completed');
     } else if (duration >= practice.defaultDuration * 0.75) {
-      tags.push('mostly-completed');
+      tags.push('session-mostly-completed');
     } else {
-      tags.push('partial');
+      tags.push('session-partial');
     }
     
     // Add time-based tags
     const hour = new Date().getHours();
-    if (hour < 6) tags.push('late-night');
-    else if (hour < 12) tags.push('morning');
-    else if (hour < 18) tags.push('afternoon');
-    else tags.push('evening');
+    if (hour < 6) tags.push('time-late-night');
+    else if (hour < 12) tags.push('time-morning');
+    else if (hour < 18) tags.push('time-afternoon');
+    else tags.push('time-evening');
     
     // Add metrics-based tags
     if (metricsRef.current.emotionalState === 'blissful') {
-      tags.push('transcendent');
+      tags.push('state-transcendent');
     }
     if (metricsRef.current.focusLevel && metricsRef.current.focusLevel > 0.8) {
-      tags.push('high-focus');
+      tags.push('focus-high');
     }
     
     return tags;
