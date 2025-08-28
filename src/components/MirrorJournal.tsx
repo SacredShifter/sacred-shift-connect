@@ -220,12 +220,31 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center space-y-2"
         >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Mirror Journal
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Reflect, record, and remember your sacred journey
-          </p>
+          <div className="flex items-center justify-between">
+            <div className="flex-1" />
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Mirror Journal
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Reflect, record, and remember your sacred journey
+              </p>
+            </div>
+            <div className="flex-1 flex justify-end">
+              <Button
+                onClick={() => setShowSynchronicityMirror(prev => !prev)}
+                size="sm"
+                variant="outline"
+                className="border-primary/30 text-primary hover:bg-primary/10"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Mirror
+                {showSynchronicityMirror && (
+                  <Sparkles className="w-4 h-4 ml-2" />
+                )}
+              </Button>
+            </div>
+          </div>
         </motion.div>
 
         {/* Empty State with Onboarding */}
