@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
@@ -380,18 +380,11 @@ function BreathOrb({ isActive }: { isActive: boolean }) {
         </bufferGeometry>
       </points>
       
-      {/* Ambient Energy Rings */}
-      {[1.5, 2.2, 3.1].map((radius, i) => (
-        <mesh key={i} rotation={[Math.PI / 2, 0, i * Math.PI / 3]}>
-          <torusGeometry args={[radius, 0.02, 8, 64]} />
-          <meshBasicMaterial 
-            color={new THREE.Color(0.2, 0.4, 1.0)} 
-            transparent 
-            opacity={0.3 - i * 0.08}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
-      ))}
+      {/* Enhanced Energy Waves */}
+      <EnergyWaves isActive={isActive} />
+      
+      {/* Sacred Shifter Logo Overlay */}
+      <LogoOverlay isActive={isActive} />
     </group>
   );
 }
@@ -1097,7 +1090,240 @@ function SomaticBody({ isActive }: { isActive: boolean }) {
   );
 }
 
-// Enhanced Energy Alignment Visual with Rainbow Arc Shader
+// Enhanced Energy Waves Component
+function EnergyWaves({ isActive }: { isActive: boolean }) {
+  const wavesRef = useRef<THREE.Group>(null);
+  
+  // Energy wave shader material
+  const wavesMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        waveSpeed: { value: 2.0 },
+        energy: { value: 1.0 }
+      },
+      vertexShader: `
+        uniform float time;
+        uniform float waveSpeed;
+        uniform float energy;
+        varying vec3 vPosition;
+        varying vec2 vUv;
+        varying float vWaveIntensity;
+        
+        void main() {
+          vPosition = position;
+          vUv = uv;
+          
+          // Multiple wave frequencies for complex energy patterns
+          float wave1 = sin(time * waveSpeed + length(position.xy) * 8.0) * 0.1;
+          float wave2 = cos(time * waveSpeed * 1.3 + position.x * 12.0) * 0.05;
+          float wave3 = sin(time * waveSpeed * 0.7 + position.y * 15.0) * 0.03;
+          
+          vWaveIntensity = (wave1 + wave2 + wave3) * energy;
+          
+          vec3 newPosition = position;
+          newPosition += normal * vWaveIntensity;
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        varying vec3 vPosition;
+        varying vec2 vUv;
+        varying float vWaveIntensity;
+        
+        void main() {
+          // Electric energy colors
+          vec3 energyColor1 = vec3(0.2, 0.8, 1.0); // Cyan
+          vec3 energyColor2 = vec3(1.0, 0.4, 0.8); // Magenta
+          vec3 energyColor3 = vec3(0.8, 1.0, 0.2); // Electric green
+          
+          // Create electric arcs and plasma-like effects
+          float electric = abs(vWaveIntensity) * 20.0;
+          float plasma = sin(time * 4.0 + length(vPosition.xy) * 10.0) * 0.5 + 0.5;
+          
+          // Mix colors based on wave intensity and position
+          vec3 finalColor = mix(
+            mix(energyColor1, energyColor2, plasma),
+            energyColor3,
+            electric
+          );
+          
+          float alpha = (electric + 0.2) * (0.8 - length(vUv - vec2(0.5)) * 1.5);
+          alpha = max(0.0, alpha);
+          
+          gl_FragColor = vec4(finalColor * (1.0 + electric), alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+  }, []);
+  
+  useFrame(({ clock }) => {
+    if (!isActive) return;
+    
+    const time = clock.getElapsedTime();
+    
+    if (wavesMaterial) {
+      wavesMaterial.uniforms.time.value = time;
+      wavesMaterial.uniforms.energy.value = 1.0 + Math.sin(time * 1.5) * 0.5;
+    }
+    
+    if (wavesRef.current) {
+      wavesRef.current.rotation.z = time * 0.1;
+    }
+  });
+  
+  return (
+    <group ref={wavesRef}>
+      {/* Multiple Energy Wave Layers */}
+      {[
+        { radius: 1.8, thickness: 0.08, speed: 1.0, rotation: 0 },
+        { radius: 2.5, thickness: 0.06, speed: -0.7, rotation: Math.PI / 4 },
+        { radius: 3.2, thickness: 0.04, speed: 1.3, rotation: Math.PI / 2 },
+        { radius: 4.0, thickness: 0.03, speed: -0.9, rotation: Math.PI / 3 },
+        { radius: 4.8, thickness: 0.02, speed: 1.1, rotation: Math.PI / 6 }
+      ].map((wave, i) => (
+        <mesh 
+          key={i} 
+          material={wavesMaterial}
+          rotation={[Math.PI / 2, 0, wave.rotation]}
+        >
+          <torusGeometry args={[wave.radius, wave.thickness, 16, 128]} />
+        </mesh>
+      ))}
+      
+      {/* Vertical Energy Rings */}
+      {[
+        { radius: 2.0, height: 0.1, offset: 0 },
+        { radius: 3.0, height: 0.08, offset: Math.PI / 3 },
+        { radius: 4.0, height: 0.06, offset: Math.PI / 2 }
+      ].map((ring, i) => (
+        <mesh 
+          key={`vertical-${i}`}
+          material={wavesMaterial}
+          rotation={[0, 0, ring.offset]}
+        >
+          <torusGeometry args={[ring.radius, ring.height, 8, 64]} />
+        </mesh>
+      ))}
+      
+      {/* Intersecting Energy Discs */}
+      {[0, Math.PI / 4, Math.PI / 2, (3 * Math.PI) / 4].map((angle, i) => (
+        <mesh 
+          key={`disc-${i}`}
+          material={wavesMaterial}
+          rotation={[angle, 0, 0]}
+          scale={[1 - i * 0.1, 1 - i * 0.1, 1]}
+        >
+          <ringGeometry args={[2.5, 3.5, 32]} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Logo Overlay Component
+function LogoOverlay({ isActive }: { isActive: boolean }) {
+  const logoRef = useRef<THREE.Mesh>(null);
+  const [logoTexture, setLogoTexture] = useState<THREE.Texture | null>(null);
+  
+  // Load logo texture
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    loader.load(
+      'https://mikltjgbvxrxndtszorb.supabase.co/storage/v1/object/public/sacred-assets/uploads/Logo-MainSacredShifter-removebg-preview%20(1).png',
+      (texture) => {
+        texture.format = THREE.RGBAFormat;
+        setLogoTexture(texture);
+      },
+      undefined,
+      (error) => {
+        console.warn('Logo texture failed to load:', error);
+      }
+    );
+  }, []);
+  
+  // Logo material with glow effect
+  const logoMaterial = useMemo(() => {
+    if (!logoTexture) return null;
+    
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        logoTexture: { value: logoTexture },
+        opacity: { value: 0.8 }
+      },
+      vertexShader: `
+        uniform float time;
+        varying vec2 vUv;
+        varying vec3 vPosition;
+        
+        void main() {
+          vUv = uv;
+          vPosition = position;
+          
+          // Gentle floating animation
+          vec3 newPosition = position;
+          newPosition.y += sin(time * 0.8) * 0.1;
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform sampler2D logoTexture;
+        uniform float opacity;
+        varying vec2 vUv;
+        varying vec3 vPosition;
+        
+        void main() {
+          vec4 logoColor = texture2D(logoTexture, vUv);
+          
+          // Add subtle glow effect
+          float glow = sin(time * 2.0) * 0.1 + 0.9;
+          vec3 finalColor = logoColor.rgb * glow;
+          
+          // Respect original alpha channel for transparency
+          float alpha = logoColor.a * opacity * glow;
+          
+          gl_FragColor = vec4(finalColor, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.NormalBlending,
+      side: THREE.DoubleSide
+    });
+  }, [logoTexture]);
+  
+  useFrame(({ clock }) => {
+    if (!isActive || !logoMaterial) return;
+    
+    const time = clock.getElapsedTime();
+    logoMaterial.uniforms.time.value = time;
+    
+    if (logoRef.current) {
+      // Gentle rotation
+      logoRef.current.rotation.z = Math.sin(time * 0.3) * 0.05;
+    }
+  });
+  
+  if (!logoMaterial) return null;
+  
+  return (
+    <mesh 
+      ref={logoRef}
+      material={logoMaterial}
+      position={[0, -6, 2]}
+      scale={[1.5, 1.5, 1]}
+    >
+      <planeGeometry args={[2, 2]} />
+    </mesh>
+  );
+}
 function EnergyAlignment({ isActive }: { isActive: boolean }) {
   const arcRef = useRef<THREE.Group>(null);
   const waveRef = useRef<THREE.Mesh>(null);
