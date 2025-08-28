@@ -35,14 +35,20 @@ export default function SacredScreensaver({
   const [isActive, setIsActive] = useState(false);
   const [phase, setPhase] = useState<ScreensaverPhase>("idle");
   const [particles, setParticles] = useState<any[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sessionStartRef = useRef<Date>();
 
-  // Idle detection
-  const { getRemainingTime, getLastActiveTime } = useIdleTimer({
+  // Initialize after mount to prevent SSR issues
+  useEffect(() => {
+    setIsInitialized(true);
+  }, []);
+
+  // Idle detection - only initialize after component is mounted
+  const idleTimerResult = useIdleTimer({
     timeout,
     onIdle: () => {
-      if (enabled) {
+      if (enabled && isInitialized) {
         setIsActive(true);
         sessionStartRef.current = new Date();
       }
@@ -52,8 +58,14 @@ export default function SacredScreensaver({
         setPhase("reassembling");
       }
     },
-    throttle: 500
+    throttle: 500,
+    disabled: !isInitialized || !enabled
   });
+
+  const { getRemainingTime, getLastActiveTime } = idleTimerResult || { 
+    getRemainingTime: () => 0, 
+    getLastActiveTime: () => new Date() 
+  };
 
   // Phase lifecycle management
   useEffect(() => {
@@ -124,7 +136,7 @@ export default function SacredScreensaver({
     }
   };
 
-  if (!enabled) {
+  if (!enabled || !isInitialized) {
     return <>{children}</>;
   }
 
