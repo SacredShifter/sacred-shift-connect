@@ -19,7 +19,8 @@ import {
   Brain,
   Sparkles,
   Wifi,
-  Shield
+  Shield,
+  Video
 } from 'lucide-react';
 
 const sections = [
@@ -32,6 +33,19 @@ const sections = [
       "Bridging ancient wisdom with quantum consciousness",
       "Setting intentions for your transformation journey",
       "Creating your sacred digital space"
+    ]
+  },
+  {
+    title: "Core Platform Features",
+    icon: Zap,
+    topics: [
+      "Home Dashboard: Central hub with frequency tiles and quick access to all features",
+      "Sacred Social Feed: Share posts, images, videos, and consciousness insights with the community",
+      "Video & Voice Calling: WebRTC-powered calls with binaural beats integration",
+      "Messages: Private conversations with Sacred Mesh encrypted communication",
+      "Profile Management: Customize your spiritual identity and track consciousness evolution",
+      "Settings: Configure notifications, themes, privacy, and spiritual preferences",
+      "Real-time Synchronization: All data synced across devices with Supabase backend"
     ]
   },
   {
@@ -49,62 +63,74 @@ const sections = [
     ]
   },
   {
-    title: "Sacred Geometry & Symbols",
+    title: "3D Learning & Sacred Geometry",
     icon: Circle,
     topics: [
-      "Using the Flower of Life for meditation and manifestation",
-      "Metatron's Cube as a tool for consciousness expansion", 
-      "Understanding the Golden Ratio in nature and consciousness",
-      "Aligning with chakra frequencies through geometry",
-      "Activating sacred portals through geometric visualization"
+      "Interactive 3D Sacred Geometry library with Flower of Life, Metatron's Cube, and more",
+      "Immersive Tree of Life exploration with Sephiroth navigation and Kabbalistic wisdom",
+      "Hermetic Principles visualization with cause-and-effect consciousness mapping",
+      "Chakra Learning modules with 3D energy visualization and frequency alignment",
+      "Breath of Source meditation spaces with synchronized binaural beats and healing frequencies",
+      "Platonic Solids exploration for understanding universal geometric principles",
+      "WebGL-powered experiences optimized for mobile and desktop consciousness work",
+      "Audio integration with Tone.js for spatial sound design and frequency healing"
     ]
   },
   {
-    title: "Journal & Dream Work",
+    title: "Sacred Journal & Consciousness Tracking",
     icon: Eye,
     topics: [
-      "How to use Mirror Journal for shadow work and integration",
-      "Working with Aura AI for dream analysis and interpretation",
-      "Free association techniques for accessing the unconscious",
-      "Recognizing archetypal patterns in your dreams and experiences",
-      "Mapping consciousness shifts through journaling"
+      "Mirror Journal: Digital journaling with AI-powered insights and pattern recognition",
+      "Dream analysis and interpretation with Aura AI consciousness mapping",
+      "Mood tracking with sacred geometry visualizations and frequency alignment",
+      "Free association writing techniques for accessing deeper consciousness layers",
+      "Recognizing archetypal patterns in dreams, synchronicities, and daily experiences",
+      "Timeline view of your spiritual evolution and consciousness shifts over time",
+      "Integration with meditation tracking and biometric data for holistic awareness",
+      "Export and backup capabilities for long-term spiritual development records"
     ]
   },
   {
     title: "Sacred Circles",
     icon: Infinity,
     topics: [
-      "Creating and maintaining energetic boundaries in digital space",
-      "Understanding circle protocols for respectful engagement",
-      "Recognizing and working with energy resonance patterns",
-      "Participating in group consciousness experiments",
-      "Best practices for digital ceremonial and ritual work"
+      "Creating and joining circles for deep community engagement and consciousness evolution",
+      "Circle creation with custom themes, descriptions, and member management",
+      "Real-time messaging within circles with encryption and privacy protection",
+      "Circle analytics to track engagement, resonance, and collective growth patterns",
+      "Understanding circle protocols for respectful and transformational engagement",
+      "Video calls and voice communication within circle spaces",
+      "Sacred ritual planning and ceremony coordination tools",
+      "Energy resonance tracking between circle members and collective consciousness work"
     ]
   },
   {
-    title: "Personal Codex",
+    title: "Personal Codex (Akashic Constellation)",
     icon: Heart,
     topics: [
-      "How to track and measure frequency shifts in your consciousness",
-      "Recognizing synchronicities and their deeper meanings", 
-      "Calibrating your truth resonance through practice",
-      "Understanding harmonic alignment with others",
-      "Working with quantum field interactions in daily life"
+      "Personal consciousness tracking with frequency shift visualization and sacred metrics",
+      "Synchronicity logging and pattern recognition for meaningful coincidence mapping",
+      "Truth resonance calibration through interactive decision-making exercises",
+      "Harmonic alignment assessment with other consciousness signatures and circle members",
+      "Quantum field interaction tracking for daily spiritual practice integration",
+      "Archetypal activation mapping with Jungian psychology and consciousness evolution",
+      "Personal sacred symbol creation and energetic signature development",
+      "Integration with journal entries for holistic spiritual development tracking"
     ]
   },
   {
-    title: "Collective Codex",
+    title: "Collective Codex (Registry of Resonance)",
     icon: Star,
     topics: [
-      "Accessing the living repository of ancient wisdom and sacred texts",
-      "Understanding the intersection of quantum physics and consciousness",
-      "Exploring metaphysical principles across cultures and traditions",
-      "Scientific research on consciousness, meditation, and spiritual phenomena",
-      "Sacred geometry patterns found in nature and cosmos",
-      "Archetypal wisdom from world mythology and depth psychology",
-      "Current discoveries in neuroscience and consciousness research",
-      "Contributing verified insights and knowledge to the collective",
-      "Navigating the community-verified wisdom database"
+      "Community-powered wisdom database with verified insights and sacred knowledge",
+      "Ancient wisdom integration from world traditions, sacred texts, and mystery schools",
+      "Quantum physics and consciousness research with scientific validation and spiritual integration",
+      "Metaphysical principles exploration across cultures, traditions, and time periods",
+      "Interactive 3D visualization of consciousness research, meditation studies, and spiritual phenomena",
+      "Sacred geometry pattern library found in nature, cosmos, and consciousness structures",
+      "Archetypal wisdom from world mythology, depth psychology, and collective unconscious mapping",
+      "Community contribution system for sharing verified insights and consciousness discoveries",
+      "Advanced search and filtering for finding relevant wisdom based on your spiritual journey"
     ]
   },
   {
@@ -135,14 +161,39 @@ const sections = [
     ]
   },
   {
-    title: "Advanced Practices",
-    icon: Zap,
+    title: "YouTube Library & Media",
+    icon: Video,
     topics: [
-      "Techniques for bridging different states of consciousness",
-      "Developing multidimensional awareness and perception",
-      "Integrating sacred technology with spiritual practice",
-      "Participating in collective field harmonization experiments",
-      "Understanding the evolution of human consciousness"
+      "Curated YouTube library with consciousness, spirituality, and sacred geometry content",
+      "Personal video library management with favorites, playlists, and consciousness categories",
+      "Integration with meditation practices and 3D learning modules for comprehensive education",
+      "Community-recommended videos for collective learning and wisdom sharing",
+      "Video recording and sharing within the Sacred Shifter platform for personal documentation",
+      "Live streaming capabilities for circle gatherings and community consciousness events"
+    ]
+  },
+  {
+    title: "AI-Powered Features",
+    icon: Brain,
+    topics: [
+      "Aura AI: Personal consciousness guide for dream analysis, journal insights, and spiritual evolution",
+      "AI-powered meditation recommendations based on consciousness state and spiritual needs",
+      "Intelligent content curation for personalized learning paths and wisdom discovery",
+      "Natural language processing for consciousness pattern recognition in journaling",
+      "Predictive wisdom algorithms for optimal spiritual practice timing and synchronicity awareness",
+      "AI-assisted circle matching based on resonance patterns and consciousness compatibility"
+    ]
+  },
+  {
+    title: "Advanced Practices & Security",
+    icon: Shield,
+    topics: [
+      "End-to-end encryption for all sacred communications and private spiritual content",
+      "Quantum-inspired security protocols for consciousness data protection and sovereignty",
+      "Offline-first architecture with Sacred Mesh for communication independence from towers",
+      "Biometric integration for consciousness tracking with wearable devices and health monitors",
+      "Cross-platform synchronization with mobile apps, web interface, and future AR/VR experiences",
+      "Open-source spiritual technology for community-driven consciousness evolution tools"
     ]
   }
 ];

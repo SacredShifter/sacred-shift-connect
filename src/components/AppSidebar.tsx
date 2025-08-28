@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, User, Rss, Settings, LogOut, BookOpen, Video, Database, Archive, Scroll, Heart, MessageCircle, Brain, TreePine, Stars, Box, Sparkles } from "lucide-react";
+import { Home, Users, User, Rss, Settings, LogOut, BookOpen, Video, Database, Archive, Scroll, Heart, MessageCircle, Brain, TreePine, Stars, Box, Sparkles, Zap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,7 @@ const toolsItems = [
 
 const knowledgeItems = [
   { title: "Guidebook", url: "/guidebook", icon: Scroll, tooltip: "Guidebook - Ancient wisdom for modern transformation" },
+  { title: "Features Coming Soon", url: "/features-coming-soon", icon: Zap, tooltip: "Features Coming Soon - Upcoming enhancements for circles and platform evolution" },
   { title: "3D Learning Modules", url: "/learning-3d", icon: Box, tooltip: "3D Learning Modules - Interactive sacred geometry and consciousness visualization library" },
   { title: "Collective Codex", url: "/registry", icon: Database, tooltip: HelpTooltips.collectiveAkashicConstellation },
 ];
