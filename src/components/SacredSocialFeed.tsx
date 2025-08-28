@@ -224,28 +224,16 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
     }
 
     try {
-      const consciousnessMetadata = {
-        state: consciousnessState,
-        timestamp: new Date().toISOString(),
-        aura_reading: Math.random() * 100, // Simulated for now
-        frequency: 528 + Math.random() * 100 // Base healing frequency + variation
-      };
-
       const { data, error } = await supabase
         .from('circle_posts')
         .insert({
           user_id: user.id,
           content: newPost,
-          // Map consciousness features to existing schema
           chakra_tag: chakraTag || null,
           tone: consciousnessState,
-          frequency: consciousnessMetadata.frequency,
-          visibility: 'circle',
-          // Try to add new fields if they exist
-          ...(postType !== 'text' && { post_type: postType }),
-          ...(Object.keys(consciousnessMetadata).length > 0 && { consciousness_metadata: consciousnessMetadata }),
-          mood_signature: consciousnessState
-        } as any)
+          frequency: 528 + Math.random() * 100, // Base healing frequency + variation
+          visibility: 'circle'
+        })
         .select()
         .single();
 
