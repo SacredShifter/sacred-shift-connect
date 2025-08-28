@@ -146,6 +146,8 @@ export function GroupMeditationSession({
   const [selectedBackgroundAudio, setSelectedBackgroundAudio] = useState<YouTubeVideo | null>(backgroundAudio || null);
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [availableDurations] = useState([5, 10, 15, 20, 25, 30, 45, 60]);
+  const [actionBarMinimized, setActionBarMinimized] = useState(true);
+  const [actionBarVisible, setActionBarVisible] = useState(true);
   
   const channelRef = useRef<any>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -278,6 +280,7 @@ export function GroupMeditationSession({
   const startSession = () => {
     const startTime = new Date().toISOString();
     setShowControls(false);
+    setActionBarMinimized(true); // Minimize to action bar during meditation
     broadcastSessionState({ 
       is_playing: true, 
       synchronized_start: startTime 
@@ -300,6 +303,7 @@ export function GroupMeditationSession({
 
   const pauseSession = () => {
     setShowControls(true);
+    setActionBarMinimized(false); // Show full interface when paused
     broadcastSessionState({ is_playing: false });
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -317,6 +321,7 @@ export function GroupMeditationSession({
 
   const stopSession = () => {
     setShowControls(true);
+    setActionBarMinimized(false); // Show full interface when stopped
     broadcastSessionState({ is_playing: false });
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -491,7 +496,188 @@ export function GroupMeditationSession({
         )}
       </AnimatePresence>
 
-      {/* Main Session Interface - Completely hidden during meditation */}
+      {/* Minimized Action Bar during meditation */}
+      <AnimatePresence>
+        {sessionState.is_playing && actionBarVisible && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-0 left-0 right-0 z-50"
+          >
+            <Card className={`mx-4 mb-4 bg-black/40 backdrop-blur-md border-white/20 text-white transition-all duration-300 ${
+              actionBarMinimized ? 'rounded-full' : 'rounded-xl'
+            }`}>
+              <CardContent className={`p-0 ${actionBarMinimized ? 'py-3 px-6' : 'p-6'}`}>
+                {actionBarMinimized ? (
+                  // Minimized Action Bar
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <div className={`p-2 rounded-full bg-gradient-to-r ${selectedMeditation?.color || 'from-purple-500 to-indigo-500'}`}>
+                          {selectedMeditation?.icon}
+                        </div>
+                        <div className="text-left">
+                          <div className="text-lg font-mono tracking-wide">
+                            {formatTime(timeRemaining)}
+                          </div>
+                          <div className="text-xs text-white/70">
+                            {participants.length} souls present
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <Progress 
+                        value={progress} 
+                        className="w-24 h-1 bg-white/20" 
+                      />
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      {isHost && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={pauseSession}
+                          className="text-white hover:bg-white/20 rounded-full"
+                        >
+                          <Pause className="h-4 w-4" />
+                        </Button>
+                      )}
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setActionBarMinimized(false)}
+                        className="text-white hover:bg-white/20 rounded-full"
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setActionBarVisible(false)}
+                        className="text-white hover:bg-white/20 rounded-full"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  // Expanded Action Bar
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-full bg-gradient-to-r ${selectedMeditation?.color || 'from-purple-500 to-indigo-500'}`}>
+                          {selectedMeditation?.icon}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{selectedMeditation?.name}</h3>
+                          <p className="text-sm text-white/70">Sacred Circle • {participants.length} participants</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => setActionBarMinimized(true)}
+                          className="text-white hover:bg-white/20"
+                        >
+                          Minimize
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={onLeave}
+                          className="text-white hover:bg-white/20"
+                        >
+                          Leave
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="text-3xl font-mono tracking-wide mb-2">
+                        {formatTime(timeRemaining)}
+                      </div>
+                      <Progress value={progress} className="h-2 bg-white/20 mb-2" />
+                      <p className="text-sm text-white/80">{selectedMeditation?.guidance}</p>
+                    </div>
+                    
+                    {isHost && (
+                      <div className="flex justify-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={pauseSession}
+                          className="text-white border-white/30 hover:bg-white/20"
+                        >
+                          <Pause className="h-4 w-4 mr-2" />
+                          Pause
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={stopSession}
+                          className="text-white border-white/30 hover:bg-white/20"
+                        >
+                          <Square className="h-4 w-4 mr-2" />
+                          End Session
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <Volume2 className="h-4 w-4" />
+                        <Slider
+                          value={personalVolume}
+                          onValueChange={setPersonalVolume}
+                          max={100}
+                          step={1}
+                          className="w-24"
+                        />
+                      </div>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSoundEnabled(!soundEnabled)}
+                        className="text-white hover:bg-white/20"
+                      >
+                        {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Hidden Action Bar Toggle (when action bar is hidden) */}
+      <AnimatePresence>
+        {sessionState.is_playing && !actionBarVisible && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0 }}
+            className="fixed bottom-6 right-6 z-50"
+          >
+            <Button
+              onClick={() => setActionBarVisible(true)}
+              className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/20 hover:bg-black/60 text-white shadow-2xl"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Session Interface - Hidden during meditation */}
       <AnimatePresence>
         {!sessionState.is_playing && (
           <motion.div 
