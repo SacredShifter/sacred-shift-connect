@@ -38,7 +38,7 @@ import { GroupMeditationSession } from '@/components/GroupMeditationSession';
 import { MEDITATION_MODULE_CONFIG } from '@/config/mediaMaps';
 import { Slogan } from '@/components/ui/Slogan';
 import { BreathingVisualizer } from '@/components/BreathingVisualizer';
-import BreathOfSource3D from '@/components/3D/BreathOfSource3D';
+import MeditationVisualization3D from '@/components/3D/MeditationVisualization3D';
 
 type MeditationType = 'breathing' | 'loving-kindness' | 'chakra' | 'mindfulness' | 'body-scan';
 type SessionState = 'idle' | 'active' | 'paused' | 'completed';
@@ -884,7 +884,10 @@ export default function Meditation() {
             <Card className="mt-6 overflow-hidden animate-scale-in">
               <CardContent className="p-0">
                 <div className="h-96 w-full">
-                  <BreathOfSource3D />
+                  <MeditationVisualization3D 
+                    type={selectedType} 
+                    isActive={true}
+                  />
                 </div>
               </CardContent>
             </Card>
