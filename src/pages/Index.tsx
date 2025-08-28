@@ -59,7 +59,7 @@ const Index = () => {
 
   const modules = [
     {
-      title: 'Sacred Mesh',
+      title: 'Mesh',
       description: 'The crown jewel - sovereign peer-to-peer communication that transcends all networks',
       icon: Network,
       path: '/messages',
@@ -70,7 +70,7 @@ const Index = () => {
       status: meshStatus
     },
     {
-      title: 'Sacred Grove',
+      title: 'The Grove',
       description: 'Interactive 3D consciousness modules with breathing techniques and wisdom anchors',
       icon: Crown,
       path: '/grove',
@@ -88,7 +88,7 @@ const Index = () => {
       keywords: ['3D modules', 'interactive learning', 'sacred geometry']
     },
     {
-      title: 'Sacred Feed',
+      title: 'Feed',
       description: 'Your personalized stream of consciousness transformation content',
       icon: Rss,
       path: '/feed',
@@ -97,7 +97,7 @@ const Index = () => {
       keywords: ['feed', 'consciousness', 'personalized']
     },
     {
-      title: 'Sacred Circles',
+      title: 'Circles',
       description: 'Connect with fellow seekers in transformative group experiences',
       icon: Users,
       path: '/circles',
@@ -142,7 +142,7 @@ const Index = () => {
       keywords: ['curated videos', 'chapter navigation', 'reflection tools']
     },
     {
-      title: 'Sacred Guidebook',
+      title: 'Guidebook',
       description: 'Ancient wisdom for modern transformation',
       icon: Scroll,
       path: '/guidebook',
@@ -151,7 +151,7 @@ const Index = () => {
       keywords: ['wisdom', 'ancient', 'guidance']
     },
     {
-      title: 'Sacred Meditation',
+      title: 'Meditation',
       description: 'Guided meditation experiences for consciousness expansion and inner peace',
       icon: Heart,
       path: '/meditation',
@@ -281,11 +281,11 @@ const Index = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-violet-400 via-blue-400 to-emerald-400 bg-clip-text text-transparent">
-                      Sacred Mesh
+                      Mesh
                     </h2>
                     <div className={`mesh-status ${meshStatus}`}>
                       <div className="mesh-status-dot" />
-                      <span>{meshStatus === 'active' ? 'Sacred Mesh Active' : 'Sacred Mesh Offline'}</span>
+                      <span>{meshStatus === 'active' ? 'Mesh Active' : 'Mesh Offline'}</span>
                     </div>
                   </div>
                 </div>

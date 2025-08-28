@@ -18,7 +18,7 @@ const Feed = () => {
               <div className="flex items-center space-x-6">
                 <div>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                    Sacred Social
+                    Feed
                   </h1>
                   <p className="text-sm text-muted-foreground">
                     Consciousness-Powered Communication Hub

@@ -20,15 +20,15 @@ import { HelpTooltips } from "@/components/HelpSystem/ContextualHelp";
 
 const coreNavItems = [
   { title: "Home", url: "/", icon: Home, tooltip: HelpTooltips.home },
-  { title: "Sacred Social", url: "/feed", icon: Rss, tooltip: "Sacred Social Hub - Feed, Messages, and Community Connection" },
+  { title: "Feed", url: "/feed", icon: Rss, tooltip: "Social Hub - Feed, Messages, and Community Connection" },
 ];
 
-const sacredToolsItems = [
-  { title: "Sacred Grove", url: "/grove", icon: TreePine, tooltip: "Sacred Grove - Your living wisdom ecosystem for consciousness exploration" },
-  { title: "Meditation", url: "/meditation", icon: Sparkles, tooltip: "Sacred Meditation - Individual practice and collective consciousness expansion" },
+const toolsItems = [
+  { title: "The Grove", url: "/grove", icon: TreePine, tooltip: "The Grove - Your living wisdom ecosystem for consciousness exploration" },
+  { title: "Meditation", url: "/meditation", icon: Sparkles, tooltip: "Meditation - Individual practice and collective consciousness expansion" },
   { title: "Journal", url: "/journal", icon: BookOpen, tooltip: HelpTooltips.journal },
-  { title: "Sacred Circles", url: "/circles", icon: Users, tooltip: "Sacred Circles - Deep community engagement and consciousness evolution" },
-  { title: "Direct Messages", url: "/messages", icon: MessageCircle, tooltip: "Direct Messages - Private consciousness communication" },
+  { title: "Circles", url: "/circles", icon: Users, tooltip: "Circles - Deep community engagement and consciousness evolution" },
+  { title: "Messages", url: "/messages", icon: MessageCircle, tooltip: "Messages - Private consciousness communication" },
   { title: "Personal Codex", url: "/codex", icon: Archive, tooltip: HelpTooltips.akashicConstellation },
   { title: "Consciousness Mapper", url: "/constellation", icon: Stars, tooltip: "Consciousness Constellation Mapper - AI-powered consciousness cartography and pattern recognition" },
 ];
@@ -156,12 +156,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Sacred Tools */}
+        {/* Tools */}
         <SidebarGroup>
-          <SidebarGroupLabel>Sacred Tools</SidebarGroupLabel>
+          <SidebarGroupLabel>Tools</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {sacredToolsItems.map((item) => {
+              {toolsItems.map((item) => {
                 const isItemActive = isActive(item.url);
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -378,9 +378,9 @@ export function AppSidebar() {
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
-                  {userProfile?.display_name || user.email?.split('@')[0] || 'Sacred Seeker'}
+                  {userProfile?.display_name || user.email?.split('@')[0] || 'Seeker'}
                 </p>
-                <p className="text-xs text-muted-foreground">Sacred Seeker</p>
+                <p className="text-xs text-muted-foreground">Seeker</p>
               </div>
             </div>
           </div>

@@ -137,17 +137,17 @@ const Circles = () => {
               <div className="flex items-center space-x-6">
                 <div>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                    Sacred Shifter
+                    Circles
                   </h1>
                   <p className="text-sm text-muted-foreground">
-                    Consciousness-Powered Social Evolution
+                    Consciousness-Powered Community Evolution
                   </p>
                 </div>
                 
                 <TabsList className="bg-background/50 border border-primary/20">
                   <TabsTrigger value="feed" className="flex items-center space-x-2">
                     <Sparkles className="w-4 h-4" />
-                    <span>Sacred Feed</span>
+                    <span>Feed</span>
                   </TabsTrigger>
                   <TabsTrigger value="circles" className="flex items-center space-x-2">
                     <Users className="w-4 h-4" />
@@ -175,7 +175,7 @@ const Circles = () => {
           </div>
         </div>
 
-        {/* Sacred Social Feed */}
+        {/* Social Feed */}
         <TabsContent value="feed" className="mt-0">
           <div className="max-w-4xl mx-auto p-4">
             <SacredSocialFeed feedType="global" />
@@ -384,14 +384,14 @@ const Circles = () => {
           </div>
         </TabsContent>
 
-        {/* Sacred Events */}
+        {/* Events */}
         <TabsContent value="events" className="mt-0">
           <div className="max-w-6xl mx-auto p-4">
             <SacredEvents />
           </div>
         </TabsContent>
 
-        {/* Sacred Profile */}
+        {/* Profile */}
         <TabsContent value="profile" className="mt-0">
           <div className="max-w-6xl mx-auto p-4">
             <SacredProfile isOwnProfile={true} />
