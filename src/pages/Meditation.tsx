@@ -37,6 +37,8 @@ import { SimpleVideoModal } from '@/components/YouTubeLibrary/SimpleVideoModal';
 import { GroupMeditationSession } from '@/components/GroupMeditationSession';
 import { MEDITATION_MODULE_CONFIG } from '@/config/mediaMaps';
 import { Slogan } from '@/components/ui/Slogan';
+import { BreathingVisualizer } from '@/components/BreathingVisualizer';
+import BreathOfSource3D from '@/components/3D/BreathOfSource3D';
 
 type MeditationType = 'breathing' | 'loving-kindness' | 'chakra' | 'mindfulness' | 'body-scan';
 type SessionState = 'idle' | 'active' | 'paused' | 'completed';
@@ -765,7 +767,7 @@ export default function Meditation() {
                 </CardContent>
               </Card>
 
-              {/* Session Controls */}
+              {/* Session Controls & Visualization */}
               <Card className="hover-scale">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -774,6 +776,14 @@ export default function Meditation() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Breathing Visualization */}
+                  <div className="flex justify-center py-4">
+                    <BreathingVisualizer 
+                      size="lg" 
+                      showLabels={sessionState === 'active'} 
+                      className="animate-fade-in"
+                    />
+                  </div>
                   {sessionState === 'idle' && (
                     <Button 
                       onClick={startSoloMeditation} 
@@ -869,6 +879,17 @@ export default function Meditation() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* 3D Meditation Environment */}
+            {sessionState === 'active' && selectedType === 'breathing' && (
+              <Card className="mt-6 overflow-hidden animate-scale-in">
+                <CardContent className="p-0">
+                  <div className="h-96 w-full">
+                    <BreathOfSource3D />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Group Sessions Tab */}
