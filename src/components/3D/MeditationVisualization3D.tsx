@@ -147,11 +147,36 @@ function MindfulnessGeometry() {
   });
 
   const ShapeComponent = ({ type, position, rotation }: any) => {
-    const Component = type === 0 ? Box : type === 1 ? Sphere : Icosahedron;
-    const args = type === 0 ? [0.3, 0.3, 0.3] : type === 1 ? [0.2, 16, 16] : [0.2];
+    if (type === 0) {
+      return (
+        <Box args={[0.3, 0.3, 0.3]} position={position} rotation={rotation}>
+          <meshPhongMaterial 
+            color="#06b6d4" 
+            transparent 
+            opacity={0.6}
+            emissive="#0891b2"
+            emissiveIntensity={0.2}
+          />
+        </Box>
+      );
+    }
+    
+    if (type === 1) {
+      return (
+        <Sphere args={[0.2, 16, 16]} position={position} rotation={rotation}>
+          <meshPhongMaterial 
+            color="#06b6d4" 
+            transparent 
+            opacity={0.6}
+            emissive="#0891b2"
+            emissiveIntensity={0.2}
+          />
+        </Sphere>
+      );
+    }
     
     return (
-      <Component args={args as any} position={position} rotation={rotation}>
+      <Icosahedron args={[0.2]} position={position} rotation={rotation}>
         <meshPhongMaterial 
           color="#06b6d4" 
           transparent 
@@ -159,7 +184,7 @@ function MindfulnessGeometry() {
           emissive="#0891b2"
           emissiveIntensity={0.2}
         />
-      </Component>
+      </Icosahedron>
     );
   };
 
