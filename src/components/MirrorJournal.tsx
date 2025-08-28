@@ -18,7 +18,8 @@ import {
   Clock,
   BookOpen,
   X,
-  Brain
+  Brain,
+  Eye
 } from 'lucide-react';
 import { format } from 'date-fns/format';
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
@@ -509,13 +510,31 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
           />
         )}
 
-        {/* Synchronicity Mirror */}
-        <SynchronicityMirror
-          isVisible={showSynchronicityMirror}
-          onToggle={() => setShowSynchronicityMirror(prev => !prev)}
-          journalContent={currentEntry.content || ''}
-          intention={currentEntry.title || ''}
-        />
+        {/* Synchronicity Mirror - Move inside container */}
+        <div className="relative">
+          {/* Mirror Toggle Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSynchronicityMirror(prev => !prev)}
+            className="absolute top-4 right-4 z-10 bg-primary/10 border-primary/30 hover:bg-primary/20"
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Mirror
+            {showSynchronicityMirror && (
+              <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 rounded-full">
+                <Sparkles className="h-3 w-3" />
+              </Badge>
+            )}
+          </Button>
+
+          <SynchronicityMirror
+            isVisible={showSynchronicityMirror}
+            onToggle={() => setShowSynchronicityMirror(prev => !prev)}
+            journalContent={currentEntry.content || ''}
+            intention={currentEntry.title || ''}
+          />
+        </div>
       </div>
     </div>
   );

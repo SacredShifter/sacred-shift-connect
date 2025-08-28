@@ -49,21 +49,7 @@ export const SynchronicityMirror: React.FC<SynchronicityMirrorProps> = ({
 
   return (
     <>
-      {/* Toggle Button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onToggle}
-        className="fixed top-4 right-4 z-[60] bg-background/80 backdrop-blur-sm border border-border hover:bg-accent shadow-lg"
-      >
-        <Eye className="h-4 w-4 mr-2" />
-        Mirror
-        {currentReading && (
-          <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 rounded-full">
-            <Sparkles className="h-3 w-3" />
-          </Badge>
-        )}
-      </Button>
+      {/* Toggle Button - Remove since we moved it */}
 
       {/* Mirror Panel */}
       <AnimatePresence>
