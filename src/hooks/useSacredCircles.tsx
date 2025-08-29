@@ -145,19 +145,57 @@ export const useSacredCircles = () => {
       frequency?: number;
       isAnonymous?: boolean;
       circleId?: string;
+      attachedFiles?: File[];
+      selectedSigils?: string[];
     } = {}
   ) => {
     if (!user) throw new Error('User not authenticated');
 
+    let imageUrl = null;
+    let hasImage = false;
+
+    // Upload images to storage if provided
+    if (options.attachedFiles && options.attachedFiles.length > 0) {
+      try {
+        const file = options.attachedFiles[0]; // For now, handle one image
+        const fileName = `${user.id}/${Date.now()}-${file.name}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('circle-media')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('circle-media')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicUrl;
+        hasImage = true;
+      } catch (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        throw new Error('Failed to upload image');
+      }
+    }
+
+    // Add sigils to content if provided
+    let finalContent = content;
+    if (options.selectedSigils && options.selectedSigils.length > 0) {
+      finalContent = `${options.selectedSigils.join(' ')} ${content}`.trim();
+    }
+
     // Use unified messaging system with mesh fallback
     if (isInitialized && options.circleId) {
       try {
-        await sendUnifiedMessage(options.circleId, content, {
+        await sendUnifiedMessage(options.circleId, finalContent, {
           visibility,
           chakraTag: options.chakraTag,
           tone: options.tone,
           frequency: options.frequency,
-          isAnonymous: options.isAnonymous
+          isAnonymous: options.isAnonymous,
+          imageUrl,
+          hasImage
         }, {
           fallbackToMesh: true,
           enableRetry: true
@@ -175,13 +213,15 @@ export const useSacredCircles = () => {
         .from('circle_posts')
         .insert({
           user_id: user.id,
-          content,
+          content: finalContent,
           visibility,
           chakra_tag: options.chakraTag,
           tone: options.tone,
           frequency: options.frequency,
           is_anonymous: options.isAnonymous || false,
-          group_id: options.circleId || null
+          group_id: options.circleId || null,
+          image_url: imageUrl,
+          has_image: hasImage
         })
         .select()
         .single();

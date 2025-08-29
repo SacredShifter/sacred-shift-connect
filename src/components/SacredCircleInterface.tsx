@@ -199,10 +199,10 @@ export const SacredCircleInterface = ({
   const handleSendMessage = async () => {
     const trimmed = newMessage.trim();
 
-    if (!trimmed) {
+    if (!trimmed && attachedFiles.length === 0) {
       toast({
         title: "Nothing to send",
-        description: "Please enter a message.",
+        description: "Please enter a message or attach an image.",
         variant: "destructive",
       });
       return;
@@ -231,11 +231,15 @@ export const SacredCircleInterface = ({
         chakraTag: messageMode === 'sacred' ? 'heart' : messageMode === 'quantum' ? 'third_eye' : 'heart',
         tone: messageMode === 'sacred' ? 'sacred' : messageMode === 'quantum' ? 'quantum' : 'harmonious',
         circleId,
+        attachedFiles,
+        selectedSigils,
         messageMode // Add mode to metadata for special handling
       };
 
-      await sendMessage(trimmed, 'circle', messageOptions);
+      await sendMessage(trimmed || '', 'circle', messageOptions);
       setNewMessage('');
+      setAttachedFiles([]);
+      setSelectedSigils([]);
       inputRef.current?.focus();
 
       const modeText = messageMode === 'sacred' ? 'sacred' : messageMode === 'quantum' ? 'quantum' : '';
@@ -550,39 +554,55 @@ export const SacredCircleInterface = ({
                                 </div>
                               )}
                               
-                              <div
-                                className={cn(
-                                  "px-3 py-2 rounded-2xl relative",
-                                  isOwnMessage
-                                    ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md"
-                                    : "bg-muted rounded-bl-md",
-                                  "animate-fade-in"
-                                )}
-                              >
-                                <p className="text-sm whitespace-pre-wrap break-words">
-                                  {message.content}
-                                </p>
-                                
-                                <div className={cn(
-                                  "flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity",
-                                  isOwnMessage ? "justify-end" : "justify-start"
-                                )}>
-                                  <span className={cn(
-                                    "text-xs",
-                                    isOwnMessage ? "text-primary-foreground/70" : "text-muted-foreground"
-                                  )}>
-                                    {formatTime(message.created_at)}
-                                  </span>
-                                  {message.tone && (
-                                    <span className={cn(
-                                      "text-xs opacity-75",
-                                      isOwnMessage ? "text-primary-foreground/70" : "text-muted-foreground"
-                                    )}>
-                                      • {message.tone}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
+                               <div
+                                 className={cn(
+                                   "px-3 py-2 rounded-2xl relative",
+                                   isOwnMessage
+                                     ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md"
+                                     : "bg-muted rounded-bl-md",
+                                   "animate-fade-in"
+                                 )}
+                               >
+                                 {/* Image Display */}
+                                 {message.has_image && message.image_url && (
+                                   <div className="mb-2">
+                                     <img 
+                                       src={message.image_url} 
+                                       alt="Shared image"
+                                       className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                       onClick={() => window.open(message.image_url, '_blank')}
+                                       style={{ maxHeight: '300px' }}
+                                     />
+                                   </div>
+                                 )}
+                                 
+                                 {/* Text Content */}
+                                 {message.content && (
+                                   <p className="text-sm whitespace-pre-wrap break-words">
+                                     {message.content}
+                                   </p>
+                                 )}
+                                 
+                                 <div className={cn(
+                                   "flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity",
+                                   isOwnMessage ? "justify-end" : "justify-start"
+                                 )}>
+                                   <span className={cn(
+                                     "text-xs",
+                                     isOwnMessage ? "text-primary-foreground/70" : "text-muted-foreground"
+                                   )}>
+                                     {formatTime(message.created_at)}
+                                   </span>
+                                   {message.tone && (
+                                     <span className={cn(
+                                       "text-xs opacity-75",
+                                       isOwnMessage ? "text-primary-foreground/70" : "text-muted-foreground"
+                                     )}>
+                                       • {message.tone}
+                                     </span>
+                                   )}
+                                 </div>
+                               </div>
                             </div>
 
                             {isOwnMessage && <div className="w-8 flex-shrink-0"></div>}
@@ -734,22 +754,22 @@ export const SacredCircleInterface = ({
                     />
                   </div>
 
-                  {/* Send Button */}
-                  <Button 
-                    onClick={handleSendMessage}
-                    disabled={!newMessage.trim() || !user || !circleId}
-                    size="sm" 
-                    className={cn(
-                      "h-9 w-9 p-0",
-                      messageMode === 'sacred' ? "bg-gradient-to-br from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600" :
-                      messageMode === 'quantum' ? "bg-gradient-to-br from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600" :
-                      "bg-gradient-to-br from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
-                    )}
-                  >
-                    {messageMode === 'sacred' ? <Heart className="h-4 w-4" /> :
-                     messageMode === 'quantum' ? <Brain className="h-4 w-4" /> :
-                     <Send className="h-4 w-4" />}
-                  </Button>
+                   {/* Send Button */}
+                   <Button 
+                     onClick={handleSendMessage}
+                     disabled={(!newMessage.trim() && attachedFiles.length === 0) || !user || !circleId}
+                     size="sm" 
+                     className={cn(
+                       "h-9 w-9 p-0",
+                       messageMode === 'sacred' ? "bg-gradient-to-br from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600" :
+                       messageMode === 'quantum' ? "bg-gradient-to-br from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600" :
+                       "bg-gradient-to-br from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+                     )}
+                   >
+                     {messageMode === 'sacred' ? <Heart className="h-4 w-4" /> :
+                      messageMode === 'quantum' ? <Brain className="h-4 w-4" /> :
+                      <Send className="h-4 w-4" />}
+                   </Button>
                 </div>
 
                 {/* Quick Actions */}
