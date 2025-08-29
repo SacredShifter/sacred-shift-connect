@@ -13,7 +13,13 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.aura-core]
-verify_jwt = true
+verify_jwt = false
+
+[functions.aura-autonomous-engine]
+verify_jwt = false
+
+[functions.aura-autonomous-platform]
+verify_jwt = false
 
 [functions.voice-to-text]
 verify_jwt = true
@@ -25,9 +31,6 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.aura-emit]
-verify_jwt = true
-
-[functions.aura-autonomous-platform]
 verify_jwt = true
 
 [functions.admin-broadcast]
