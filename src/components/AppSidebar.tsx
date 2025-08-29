@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, User, Rss, Settings, LogOut, BookOpen, Video, Database, Archive, Scroll, Heart, MessageCircle, Brain, TreePine, Stars, Box, Sparkles, Zap } from "lucide-react";
+import { Home, Users, User, Rss, Settings, LogOut, BookOpen, Video, Database, Archive, Scroll, Heart, MessageCircle, Brain, TreePine, Stars, Box, Sparkles, Zap, BarChart3 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +20,7 @@ import { HelpTooltips } from "@/components/HelpSystem/ContextualHelp";
 
 const coreNavItems = [
   { title: "Home", url: "/", icon: Home, tooltip: HelpTooltips.home },
+  { title: "Dashboard", url: "/dashboard", icon: BarChart3, tooltip: "Sacred Journey Dashboard - Track your consciousness evolution and spiritual growth" },
   { title: "Feed", url: "/feed", icon: Rss, tooltip: "Social Hub - Feed, Messages, and Community Connection" },
 ];
 
