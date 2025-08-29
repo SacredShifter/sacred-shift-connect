@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { 
@@ -20,7 +21,9 @@ import {
   Video,
   PlayCircle,
   Waves,
-  Circle
+  Circle,
+  Info,
+  BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSacredCircles } from '@/hooks/useSacredCircles';
@@ -225,6 +228,7 @@ export default function Meditation() {
   
   // Enhanced UX state
   const [showReflectionPrompt, setShowReflectionPrompt] = useState(false);
+  const [showPracticeInfo, setShowPracticeInfo] = useState(false);
   
   // Refs
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -732,20 +736,21 @@ export default function Meditation() {
                     </div>
 
                     {/* Practice Selection */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 relative z-50">
                       {meditationTypes.map((practice) => (
                         <motion.div
                           key={practice.id}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
+                          className="relative z-50"
                         >
                           <Card 
-                            className={`cursor-pointer transition-all duration-300 ${
+                            className={`cursor-pointer transition-all duration-300 relative z-50 ${
                               selectedType === practice.id 
                                 ? 'bg-white/20 border-white/40 shadow-lg shadow-white/10' 
                                 : 'bg-white/5 border-white/10 hover:bg-white/10'
                             }`}
-                            onClick={() => setSelectedType(practice.id)}
+                            onClick={() => handlePracticeSelect(practice.id)}
                           >
                             <CardContent className="p-4 text-center space-y-3">
                               <div className={`mx-auto w-12 h-12 rounded-full bg-gradient-to-br ${practice.color} flex items-center justify-center text-white`}>
@@ -788,6 +793,15 @@ export default function Meditation() {
                       >
                         <Play className="h-5 w-5 mr-2" />
                         Begin Sacred Practice
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowPracticeInfo(true)}
+                        className="border-white/20 text-white hover:bg-white/10"
+                      >
+                        <Info className="h-4 w-4 mr-2" />
+                        Practice Info
                       </Button>
 
                       <Button
@@ -946,6 +960,123 @@ export default function Meditation() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Practice Info Modal */}
+      <Dialog open={showPracticeInfo} onOpenChange={setShowPracticeInfo}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 border-white/20">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-3">
+              {selectedMeditation && (
+                <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${selectedMeditation.color} flex items-center justify-center text-white`}>
+                  {selectedMeditation.icon}
+                </div>
+              )}
+              {selectedMeditation?.name} Practice Guide
+            </DialogTitle>
+            <DialogDescription className="text-white/70 text-lg">
+              {selectedMeditation?.description}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedMeditation && (
+            <div className="space-y-6 text-white">
+              {/* Practice Overview */}
+              <div>
+                <p className="text-white/90 italic mb-4">"{selectedMeditation.guidance}"</p>
+                <div className="flex items-center gap-4 text-sm text-white/70">
+                  <Badge variant="outline" className="text-white/60 border-white/20">
+                    {selectedMeditation.defaultDuration} minutes
+                  </Badge>
+                  <span>• Default duration</span>
+                </div>
+              </div>
+
+              {/* Benefits */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5" />
+                  Benefits & Effects
+                </h3>
+                <ul className="space-y-2">
+                  {selectedMeditation.benefits.map((benefit, index) => (
+                    <li key={index} className="flex items-start gap-2 text-white/80">
+                      <span className="text-white/60">•</span>
+                      {benefit}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Instructions */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5" />
+                  Practice Instructions
+                </h3>
+                <ol className="space-y-3">
+                  {selectedMeditation.instructions.map((instruction, index) => (
+                    <li key={index} className="flex gap-3 text-white/80">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-sm font-medium">
+                        {index + 1}
+                      </span>
+                      {instruction}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              {/* Sacred Prompts */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Heart className="w-5 h-5" />
+                  Sacred Meditation Prompts
+                </h3>
+                <div className="grid gap-4">
+                  <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                    <h4 className="font-medium text-white/90 mb-2">Beginning</h4>
+                    <p className="text-white/70 italic">"{selectedMeditation.prompts.beginning}"</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                    <h4 className="font-medium text-white/90 mb-2">Midpoint</h4>
+                    <p className="text-white/70 italic">"{selectedMeditation.prompts.midpoint}"</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                    <h4 className="font-medium text-white/90 mb-2">Closing</h4>
+                    <p className="text-white/70 italic">"{selectedMeditation.prompts.closing}"</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reflection Question */}
+              <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/20">
+                <h4 className="font-medium text-white/90 mb-2">Post-Practice Reflection</h4>
+                <p className="text-white/80 italic">"{selectedMeditation.reflectionPrompt}"</p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  onClick={() => {
+                    setShowPracticeInfo(false);
+                    startSoloMeditation();
+                  }}
+                  className={`flex-1 bg-gradient-to-r ${selectedMeditation.color} hover:opacity-90 text-white`}
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Begin This Practice
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPracticeInfo(false)}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
     </>
   );
