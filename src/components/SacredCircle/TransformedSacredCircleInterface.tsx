@@ -15,6 +15,10 @@ import { SacredNavigation } from './SacredNavigation';
 import { SacredMessageVessel } from './SacredMessageVessel';
 import { SacredMessageInput } from './SacredMessageInput';
 import { SacredRitualOpening } from './SacredRitualOpening';
+import { CollectiveBreathingSync } from './CollectiveBreathingSync';
+import { SacredPauseSystem } from './SacredPauseSystem';
+import { AIFacilitationPanel } from './AIFacilitationPanel';
+import { useAIFacilitation } from '@/hooks/useAIFacilitation';
 
 // Legacy components for advanced features
 import { CircleSettingsModal } from '@/components/CircleSettingsModal';
@@ -57,10 +61,20 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
   const [userIntention, setUserIntention] = useState('');
   const [userSigil, setUserSigil] = useState('');
   const [sacredPauseActive, setSacredPauseActive] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
   const [internalMaximized, setInternalMaximized] = useState(false);
   const [internalMinimized, setInternalMinimized] = useState(false);
+
+  // Mock member data (would come from API)
+  const mockMembers = [
+    { id: '1', name: 'Alice Wisdom', role: 'admin', avatar: '', isOnline: true },
+    { id: '2', name: 'Bob Light', role: 'moderator', avatar: '', isOnline: true },
+    { id: '3', name: 'Carol Unity', role: 'member', avatar: '', isOnline: false },
+    { id: '4', name: 'David Peace', role: 'member', avatar: '', isOnline: true },
+  ];
+  const participantCount = mockMembers.length;
 
   // Use internal state as fallback when parent doesn't provide handlers
   const currentMaximized = isMaximized || internalMaximized;
@@ -72,6 +86,14 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
     sendMessage,
     fetchRecentMessages,
   } = useSacredCircles();
+
+  // AI Facilitation
+  const facilitation = useAIFacilitation({
+    circleId: circleId || 'sacred-circle-1',
+    participantCount: participantCount,
+    currentTopic: activeRealm,
+    messageHistory: messages
+  });
 
   // Handle window controls
   const handleMaximize = () => {
@@ -116,6 +138,7 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
 
   // Sacred pause functionality
   const handleSacredPause = () => {
+    setIsPaused(true);
     setSacredPauseActive(true);
     setCeremonyPhase('silence');
     
@@ -123,12 +146,17 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
       title: "Sacred Pause Initiated",
       description: "The circle enters a moment of sacred silence.",
     });
+  };
 
-    // Auto-restore after 30 seconds
-    setTimeout(() => {
-      setSacredPauseActive(false);
-      setCeremonyPhase('communion');
-    }, 30000);
+  const handlePauseResume = () => {
+    setIsPaused(false);
+    setSacredPauseActive(false);
+    setCeremonyPhase('communion');
+    
+    toast({
+      title: "Sacred Circle Restored",
+      description: "The circle returns to sacred communion.",
+    });
   };
 
   // Handle message sending with sacred context
@@ -181,13 +209,6 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
     fetchRecentMessages(circleId);
   }, [fetchRecentMessages, circleId]);
 
-  // Mock member data (would come from API)
-  const mockMembers = [
-    { id: '1', name: 'Alice Wisdom', role: 'admin', avatar: '', isOnline: true },
-    { id: '2', name: 'Bob Light', role: 'moderator', avatar: '', isOnline: true },
-    { id: '3', name: 'Carol Unity', role: 'member', avatar: '', isOnline: false },
-    { id: '4', name: 'David Peace', role: 'member', avatar: '', isOnline: true },
-  ];
 
   // Show ritual opening for first-time entry
   if (showRitualOpening) {
@@ -299,11 +320,38 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
           />
         </div>
 
-        {/* Sacred Navigation */}
-        <SacredNavigation 
-          activeRealm={activeRealm}
-          onRealmChange={setActiveRealm}
-        />
+          {/* Sacred Navigation */}
+          <SacredNavigation 
+            activeRealm={activeRealm}
+            onRealmChange={setActiveRealm}
+          />
+
+          {/* Sacred Pause System */}
+          {isPaused && (
+            <div className="px-6 py-4">
+              <SacredPauseSystem
+                isActive={isPaused}
+                onInitiate={handleSacredPause}
+                onResume={handlePauseResume}
+                initiatedBy="You"
+                participantCount={participantCount}
+              />
+            </div>
+          )}
+
+          {/* AI Facilitation Panel */}
+          <div className="px-6 py-3 border-b border-border/20">
+            <AIFacilitationPanel
+              isActive={facilitation.isActive}
+              currentFacilitator={facilitation.currentFacilitator}
+              suggestion={facilitation.suggestion}
+              resonanceReading={facilitation.resonanceReading}
+              onInvokeAura={facilitation.invokeAura}
+              onInvokeValeion={facilitation.invokeValeion}
+              onDismissSuggestion={facilitation.dismissSuggestion}
+              onToggleFacilitation={facilitation.toggleFacilitation}
+            />
+          </div>
 
         {/* Sacred Realms Content */}
         <div className="flex-1 flex flex-col">
