@@ -14,7 +14,8 @@ import {
   Volume2,
   VolumeX,
   Move,
-  RotateCcw
+  RotateCcw,
+  Info
 } from 'lucide-react';
 import { WhereAmIWidget } from '@/components/SacredSitemap/WhereAmIWidget';
 import { Slogan } from '@/components/ui/Slogan';
@@ -25,6 +26,7 @@ export const SacredBottomToolbar: React.FC = () => {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showWidget, setShowWidget] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const { resonanceState } = useResonanceField();
   const { currentThreshold } = useConsciousnessState();
   
@@ -284,14 +286,25 @@ export const SacredBottomToolbar: React.FC = () => {
                 <div className="p-4">
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="font-semibold text-sm">Sacred Navigator</h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowWidget(false)}
-                      className="h-6 w-6 p-0"
-                    >
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowInfo(!showInfo)}
+                        className="h-6 w-6 p-0"
+                        title="Learn about Sacred Navigator"
+                      >
+                        <Info className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowWidget(false)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                   
                    {/* Dynamic WhereAmIWidget content */}
@@ -314,6 +327,66 @@ export const SacredBottomToolbar: React.FC = () => {
                        </div>
                      </div>
                    </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Sacred Navigator Info Popup */}
+        <AnimatePresence>
+          {showInfo && (
+            <motion.div
+              initial={{ y: 50, opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 50, opacity: 0, scale: 0.95 }}
+              className="fixed bottom-20 left-4 z-50 max-w-md"
+            >
+              <div 
+                className="bg-background/95 backdrop-blur-sm border-2 rounded-lg shadow-2xl"
+                style={{
+                  borderColor: resonanceState.resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.3)'),
+                  boxShadow: `0 -8px 32px ${resonanceState.resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.2)')}`
+                }}
+              >
+                <div className="p-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-semibold text-sm flex items-center gap-2">
+                      <Info className="w-4 h-4" />
+                      Navigator Guide
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowInfo(false)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-3 text-xs">
+                    <div className="border-l-2 pl-3" style={{ borderColor: resonanceState.resonanceColor }}>
+                      <div className="font-medium mb-1">Current Location</div>
+                      <div className="text-muted-foreground">Shows which sacred space you're currently exploring within the Sacred Shifter ecosystem.</div>
+                    </div>
+                    
+                    <div className="border-l-2 pl-3" style={{ borderColor: resonanceState.resonanceColor }}>
+                      <div className="font-medium mb-1">Journey Stage</div>
+                      <div className="text-muted-foreground">Represents the type of consciousness work you're engaged in - from reflection to connection to transformation.</div>
+                    </div>
+                    
+                    <div className="border-l-2 pl-3" style={{ borderColor: resonanceState.resonanceColor }}>
+                      <div className="font-medium mb-1">Sacred Time</div>
+                      <div className="text-muted-foreground">The energetic quality of the present moment based on your current activity and intention.</div>
+                    </div>
+                    
+                    <div className="mt-4 p-2 bg-primary/5 rounded text-center">
+                      <div className="text-primary text-xs italic">
+                        "Every moment is a doorway to deeper awareness"
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>
