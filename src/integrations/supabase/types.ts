@@ -5111,6 +5111,38 @@ export type Database = {
           },
         ]
       }
+      event_attendees: {
+        Row: {
+          created_at: string | null
+          event_id: string | null
+          id: string
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_attendees_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_participants: {
         Row: {
           attendance_confirmed_at: string | null
@@ -5157,6 +5189,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      events: {
+        Row: {
+          circle_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          end_datetime: string | null
+          event_type: string | null
+          id: string
+          image_url: string | null
+          is_public: boolean | null
+          location: string | null
+          max_attendees: number | null
+          start_datetime: string
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          circle_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          end_datetime?: string | null
+          event_type?: string | null
+          id?: string
+          image_url?: string | null
+          is_public?: boolean | null
+          location?: string | null
+          max_attendees?: number | null
+          start_datetime: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          circle_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          end_datetime?: string | null
+          event_type?: string | null
+          id?: string
+          image_url?: string | null
+          is_public?: boolean | null
+          location?: string | null
+          max_attendees?: number | null
+          start_datetime?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       featured_content: {
         Row: {
