@@ -204,10 +204,20 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
         </div>
 
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-9 w-9 p-0"
+            onClick={() => toast({ title: "Voice call", description: "Starting voice call...", })}
+          >
             <Phone className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-9 w-9 p-0"
+            onClick={() => toast({ title: "Video call", description: "Starting video call...", })}
+          >
             <Video className="h-4 w-4" />
           </Button>
           <Button 
@@ -254,7 +264,7 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
         </div>
 
         {/* Message Input - Fixed and Visible */}
-        <div className="sticky bottom-0 p-4 border-t bg-background/95 backdrop-blur-sm">
+        <div className="sticky bottom-0 p-4 border-t bg-background border-border shadow-lg">
           {/* Attached Files Preview */}
           {attachedFiles.length > 0 && (
             <div className="mb-3 p-3 bg-muted/30 rounded-lg">
@@ -299,8 +309,8 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Write a message..."
-                className="h-12 pl-4 pr-12 rounded-full bg-muted/50 border-0 focus:bg-muted focus:ring-2 focus:ring-primary/20 text-base"
+                placeholder="Type a message..."
+                className="h-12 pl-4 pr-12 rounded-full bg-background border border-border focus:ring-2 focus:ring-primary/20 text-base shadow-sm"
                 disabled={loading}
                 autoComplete="off"
               />
