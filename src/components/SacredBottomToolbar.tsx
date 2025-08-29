@@ -244,13 +244,19 @@ export const SacredBottomToolbar: React.FC = () => {
                     {/* Sacred message */}
                     {resonanceState.isFieldAlert && (
                       <motion.div 
-                        className="text-center py-3 px-4 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20"
+                        className="text-center py-3 px-4 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 cursor-pointer hover:bg-gradient-to-r hover:from-yellow-500/15 hover:to-orange-500/15 transition-all"
                         animate={{ opacity: [0.8, 1, 0.8] }}
                         transition={{ duration: 3, repeat: Infinity }}
+                        onClick={() => setShowWidget(true)}
+                        title="Click to access Sacred Navigator for guidance"
                       >
                         <div className="flex items-center justify-center gap-2 text-yellow-400 font-medium">
                           <Zap className="w-4 h-4" />
                           <span>High synchronicity detected - profound moment available</span>
+                          <Sparkles className="w-4 h-4 animate-pulse" />
+                        </div>
+                        <div className="text-xs text-yellow-300/80 mt-1">
+                          Click here to explore this sacred opportunity
                         </div>
                       </motion.div>
                     )}
