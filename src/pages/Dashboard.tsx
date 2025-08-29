@@ -31,11 +31,17 @@ import { ProfileDashboard } from '@/components/Profile/ProfileDashboard';
 import { ProfileSetupFlow } from '@/components/Profile/ProfileSetupFlow';
 import { useProfile } from '@/hooks/useProfile';
 import Settings from '@/pages/Settings';
+import { MirrorInsightsWidget } from '@/components/dashboard/MirrorInsightsWidget';
+import { EnhancedTruthSpark } from '@/components/dashboard/EnhancedTruthSpark';
+import { FloatingMirrorToggle } from '@/components/dashboard/FloatingMirrorToggle';
+import { SynchronicityMirror } from '@/components/synchronicity/SynchronicityMirror';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [isMirrorOpen, setIsMirrorOpen] = useState(false);
+  const [mirrorContent, setMirrorContent] = useState('');
 
   const handleProfileEdit = () => {
     setShowProfileSetup(true);
@@ -43,6 +49,11 @@ const Dashboard = () => {
 
   const handleProfileSetupComplete = () => {
     setShowProfileSetup(false);
+  };
+
+  const handleOpenMirror = (content?: string) => {
+    if (content) setMirrorContent(content);
+    setIsMirrorOpen(true);
   };
 
   return (
@@ -150,22 +161,9 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-secondary/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-secondary mb-1">Truth Spark</h3>
-                      <p className="text-sm text-muted-foreground">Quick reflection</p>
-                    </div>
-                    <Link to="/journal">
-                      <Button size="sm" variant="outline" className="border-secondary/30 text-secondary hover:bg-secondary/10">
-                        <Plus className="w-3 h-3 mr-1" />
-                        Seal to Journal
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-secondary/20 rounded-lg">
+                <EnhancedTruthSpark onOpenMirror={handleOpenMirror} />
+              </div>
             </div>
 
             {/* Main Dashboard Grid */}
@@ -252,7 +250,7 @@ const Dashboard = () => {
             </div>
 
             {/* Community & Support Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -272,13 +270,15 @@ const Dashboard = () => {
                     <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5">
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 rounded-full bg-primary" />
-                        <span className="text-sm">7-Day Journey Streak</span>
+                        <span className="text-sm">Mirror Mystic</span>
                       </div>
-                      <Badge variant="outline" className="text-xs">In Progress</Badge>
+                      <Badge variant="outline" className="text-xs">2/5</Badge>
                     </div>
                   </div>
                 </CardContent>
               </Card>
+
+              <MirrorInsightsWidget onOpenMirror={handleOpenMirror} />
 
               <Card>
                 <CardHeader>
@@ -348,6 +348,16 @@ const Dashboard = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Floating Mirror Toggle */}
+        <FloatingMirrorToggle />
+
+        {/* Synchronicity Mirror */}
+        <SynchronicityMirror
+          isVisible={isMirrorOpen}
+          onToggle={() => setIsMirrorOpen(false)}
+          journalContent={mirrorContent}
+        />
       </div>
     </div>
   );
