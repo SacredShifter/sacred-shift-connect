@@ -18,6 +18,9 @@ import { SacredRitualOpening } from './SacredRitualOpening';
 import { CollectiveBreathingSync } from './CollectiveBreathingSync';
 import { SacredPauseSystem } from './SacredPauseSystem';
 import { AIFacilitationPanel } from './AIFacilitationPanel';
+import { CollectiveEnergyVisualizer } from './CollectiveEnergyVisualizer';
+import { ChakraAlignmentTracker } from './ChakraAlignmentTracker';
+import { MessageResonanceIndicator } from './MessageResonanceIndicator';
 import { useAIFacilitation } from '@/hooks/useAIFacilitation';
 
 // Legacy components for advanced features
@@ -354,17 +357,17 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
           </div>
 
         {/* Sacred Realms Content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           
           {/* Sacred Communion (Messages) */}
           {activeRealm === 'communion' && (
             <>
               <ScrollArea 
                 ref={scrollAreaRef}
-                className="flex-1 px-6 py-4"
+                className="flex-1 px-6 py-4 min-h-0"
               >
                 {sacredPauseActive ? (
-                  <div className="flex items-center justify-center h-full">
+                  <div className="flex items-center justify-center h-full min-h-[200px]">
                     <div className="text-center space-y-4">
                       <div className="text-6xl animate-pulse">🤫</div>
                       <p className="text-lg font-medium">Sacred Silence</p>
@@ -374,7 +377,7 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-6 pb-4">
                     {loading ? (
                       <div className="text-center text-muted-foreground">
                         Loading sacred messages...
@@ -389,17 +392,38 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
                       </div>
                     ) : (
                       messages.map((message, index) => (
-                        <SacredMessageVessel
-                          key={message.id}
-                          message={{
-                            ...message,
-                            author: {
-                              name: message.author?.display_name,
-                              avatar: message.author?.avatar_url
-                            }
-                          }}
-                          isOwn={message.user_id === user?.id}
-                        />
+                        <div key={message.id} className="space-y-3">
+                          <SacredMessageVessel
+                            message={{
+                              ...message,
+                              author: {
+                                name: message.author?.display_name,
+                                avatar: message.author?.avatar_url
+                              }
+                            }}
+                            isOwn={message.user_id === user?.id}
+                          />
+                          
+                          {/* Message Resonance Indicator */}
+                          <MessageResonanceIndicator
+                            messageId={message.id}
+                            content={message.content}
+                            authorId={message.user_id}
+                            sigils={(message as any).sigils || []}
+                            resonanceLevel={0.7 + (index * 0.05) % 0.3}
+                            resonanceType={['heart', 'mind', 'soul', 'energy'][index % 4] as any}
+                            participantReactions={[
+                              { userId: 'user1', type: 'resonance', intensity: 0.8 },
+                              { userId: 'user2', type: 'wisdom', intensity: 0.9 }
+                            ]}
+                            onResonanceClick={(type) => {
+                              toast({
+                                title: "Sacred Resonance",
+                                description: `You sent ${type} energy to this message`,
+                              });
+                            }}
+                          />
+                        </div>
                       ))
                     )}
                   </div>
@@ -417,31 +441,93 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
             </>
           )}
 
-          {/* Collective Presence (Members & Energy) */}
+          {/* Collective Presence (Energy Visualization) */}
           {activeRealm === 'collective' && (
-            <div className="flex-1 p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {mockMembers.map((member) => (
-                  <div
-                    key={member.id}
-                    className="sacred-card p-4 text-center"
-                  >
-                    <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-gradient-to-br from-primary/30 to-purpose/30 flex items-center justify-center">
-                      <span className="text-lg">{member.name[0]}</span>
+            <div className="flex-1 p-6 space-y-6">
+              
+              {/* Collective Energy Visualization */}
+              <div className="h-64">
+                <CollectiveEnergyVisualizer
+                  resonanceLevel={facilitation.resonanceReading?.level || 0.7}
+                  participantCount={participantCount}
+                  energyQuality={facilitation.resonanceReading?.quality || 'harmonious'}
+                  className="h-full"
+                />
+              </div>
+
+              {/* Chakra Alignment Tracker */}
+              <ChakraAlignmentTracker
+                participantChakras={[
+                  { name: 'Crown', color: 'hsl(280, 70%, 70%)', symbol: '🟣', alignment: 0.8, active: true },
+                  { name: 'Third Eye', color: 'hsl(260, 80%, 65%)', symbol: '🔵', alignment: 0.9, active: true },
+                  { name: 'Heart', color: 'hsl(120, 70%, 55%)', symbol: '💚', alignment: 0.9, active: true },
+                  { name: 'Solar Plexus', color: 'hsl(50, 90%, 60%)', symbol: '🟡', alignment: 0.6, active: false },
+                  { name: 'Root', color: 'hsl(0, 70%, 55%)', symbol: '🔴', alignment: 0.8, active: true }
+                ]}
+                collectiveAlignment={0.8}
+              />
+
+              {/* Collective Wisdom Display */}
+              <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+                <h3 className="text-sm font-medium mb-3 text-center">Collective Consciousness Field</h3>
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🌊</div>
+                    <div className="font-medium">Resonance</div>
+                    <div className="text-muted-foreground">
+                      {Math.round((facilitation.resonanceReading?.level || 0.7) * 100)}%
                     </div>
-                    <p className="font-medium">{member.name}</p>
-                    <p className="text-xs text-muted-foreground">{member.role}</p>
-                    <div className={`w-2 h-2 rounded-full mx-auto mt-2 ${member.isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />
                   </div>
-                ))}
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">🧘‍♀️</div>
+                    <div className="font-medium">Coherence</div>
+                    <div className="text-muted-foreground">High</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">💫</div>
+                    <div className="font-medium">Unity</div>
+                    <div className="text-muted-foreground">Emerging</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">✨</div>
+                    <div className="font-medium">Transcendence</div>
+                    <div className="text-muted-foreground">Active</div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Sacred Practice (Meditation & Ceremony) */}
+          {/* Sacred Practice */}
           {activeRealm === 'transcendence' && (
-            <div className="flex-1 p-6">
-              <CollectiveMeditationSession circleId={circleId} />
+            <div className="flex-1 p-6 space-y-6">
+              <div className="text-center space-y-4">
+                <div className="text-6xl">🧘‍♂️</div>
+                <h3 className="text-xl font-medium">Sacred Practice Space</h3>
+                <p className="text-sm text-muted-foreground">
+                  Meditation, ceremony, and ritual practices
+                </p>
+                
+                {/* Practice Options */}
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                    <span className="text-2xl">🌬️</span>
+                    <span className="text-xs">Breathing Meditation</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                    <span className="text-2xl">🔮</span>
+                    <span className="text-xs">Vision Ceremony</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                    <span className="text-2xl">🌙</span>
+                    <span className="text-xs">Moon Ritual</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                    <span className="text-2xl">🙏</span>
+                    <span className="text-xs">Gratitude Circle</span>
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </div>
