@@ -64,7 +64,6 @@ export function FlowerOfLife({ isActive, breathPhase }: { isActive: boolean; bre
       vertexShader: `
         uniform float time;
         uniform float breathPhase;
-        attribute vec3 color;
         varying vec3 vColor;
         varying float vAlpha;
         
@@ -220,7 +219,6 @@ export function MerkabaField({ isActive, breathPhase }: { isActive: boolean; bre
       vertexShader: `
         uniform float time;
         uniform float breathPhase;
-        attribute vec3 color;
         varying vec3 vColor;
         varying float vIntensity;
         
@@ -369,7 +367,6 @@ export function TorusField({ isActive, breathPhase }: { isActive: boolean; breat
       vertexShader: `
         uniform float time;
         uniform float breathPhase;
-        attribute vec3 color;
         varying vec3 vColor;
         varying float vGlow;
         

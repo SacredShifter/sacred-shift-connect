@@ -64,7 +64,6 @@ export const useSharedMaterials = () => {
       },
       vertexShader: `
         attribute float size;
-        attribute vec3 color;
         
         varying vec3 vColor;
         

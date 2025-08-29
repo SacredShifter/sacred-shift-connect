@@ -88,7 +88,6 @@ export function EnhancedFrequencyWaves({
         uniform float time;
         uniform float breathPhase;
         uniform float resonanceStrength;
-        attribute vec3 color;
         attribute float phase;
         varying vec3 vColor;
         varying float vIntensity;
