@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useBreathingTool } from '@/hooks/useBreathingTool';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,6 +15,7 @@ export const BreathingVisualizer = ({
   className = '' 
 }: BreathingVisualizerProps) => {
   const [currentTab, setCurrentTab] = useState<'resonance' | 'ventilation'>('resonance'); 
+  const {
     isActive, 
     currentPhase, 
     currentPreset, 

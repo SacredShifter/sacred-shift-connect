@@ -302,7 +302,7 @@ export default function SacredVentilation() {
         {/* Right Column - Visualization */}
         <div className="space-y-6">
           <BreathMeter
-            phase={state}
+            phase={state === 'completed' || state === 'journal_prompted' ? 'idle' : state}
             currentBreathPhase={currentPhase}
             cycleCount={context.cyclesInRound}
             intensity={context.intensity}
