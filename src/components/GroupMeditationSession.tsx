@@ -37,6 +37,10 @@ import { useYouTubeAPI } from '@/hooks/useYouTubeAPI';
 import { MEDITATION_MODULE_CONFIG } from '@/config/mediaMaps';
 import { motion, AnimatePresence } from 'framer-motion';
 import MeditationVisuals from '@/components/MeditationVisuals';
+import { MeditationPracticeGuide } from '@/components/MeditationPracticeGuide';
+import { MeditationPrompts } from '@/components/MeditationPrompts';
+import { PostMeditationReflection } from '@/components/PostMeditationReflection';
+import { MeditationPlaylistIntegration } from '@/components/MeditationPlaylistIntegration';
 
 type MeditationType = 'breathing' | 'loving-kindness' | 'chakra' | 'mindfulness' | 'body-scan';
 
@@ -76,7 +80,26 @@ const meditationTypes = [
     icon: <Waves className="w-5 h-5" />,
     defaultDuration: 10,
     guidance: 'Follow the natural flow of prana through your being',
-    color: 'from-emerald-600 to-teal-600'
+    color: 'from-emerald-600 to-teal-600',
+    benefits: [
+      'Activates parasympathetic nervous system for deep calm',
+      'Increases present moment awareness and mindfulness',
+      'Balances life force energy (prana) throughout the body',
+      'Reduces stress hormones and anxiety naturally'
+    ],
+    instructions: [
+      'Sit comfortably with spine naturally erect',
+      'Close eyes and bring attention to natural breathing',
+      'Notice the pause between inhale and exhale',
+      'When mind wanders, gently return to breath sensation',
+      'Feel the breath as sacred life force flowing through you'
+    ],
+    prompts: {
+      beginning: "Notice how your breath flows naturally without control.",
+      midpoint: "Bring attention to the space between breaths—what do you find there?",
+      closing: "Feel gratitude for this sacred rhythm that sustains your being."
+    },
+    reflectionPrompt: "What shifted in your breath or body awareness?"
   },
   {
     id: 'loving-kindness' as MeditationType,
@@ -85,7 +108,26 @@ const meditationTypes = [
     icon: <Heart className="w-5 h-5" />,
     defaultDuration: 15,
     guidance: 'Radiate unconditional love from your heart center',
-    color: 'from-rose-500 to-pink-500'
+    color: 'from-rose-500 to-pink-500',
+    benefits: [
+      'Cultivates self-compassion and emotional resilience',
+      'Strengthens neural pathways for empathy and connection',
+      'Reduces social anxiety and interpersonal conflicts',
+      'Opens the heart chakra for deeper spiritual connection'
+    ],
+    instructions: [
+      'Place hand on heart and feel its gentle rhythm',
+      'Begin by sending love to yourself: "May I be happy, may I be peaceful"',
+      'Extend love to loved ones, then neutral people, then difficult people',
+      'Finally, radiate love to all beings everywhere',
+      'Feel your heart expanding with each loving intention'
+    ],
+    prompts: {
+      beginning: "Feel the warmth in your heart center as you begin.",
+      midpoint: "Notice how love naturally wants to expand beyond boundaries.",
+      closing: "Carry this open heart with you into the world."
+    },
+    reflectionPrompt: "What emotions or connections arose during your practice?"
   },
   {
     id: 'chakra' as MeditationType,
@@ -94,7 +136,26 @@ const meditationTypes = [
     icon: <Circle className="w-5 h-5" />,
     defaultDuration: 20,
     guidance: 'Feel each chakra spinning with divine light',
-    color: 'from-purple-600 to-violet-600'
+    color: 'from-purple-600 to-violet-600',
+    benefits: [
+      'Balances and aligns the seven main energy centers',
+      'Clears energetic blocks and stagnant emotions',
+      'Enhances intuition and spiritual awareness',
+      'Promotes overall energetic health and vitality'
+    ],
+    instructions: [
+      'Visualize each chakra as a spinning wheel of light',
+      'Start at root (red) and move up to crown (violet)',
+      'Breathe colored light into each energy center',
+      'Feel each chakra becoming bright and balanced',
+      'Sense the flow of energy throughout your entire being'
+    ],
+    prompts: {
+      beginning: "Visualize roots extending from your base into the earth.",
+      midpoint: "Feel the rainbow of light ascending through your spine.",
+      closing: "Sense all chakras spinning in perfect harmony."
+    },
+    reflectionPrompt: "Which energy centers felt most active or in need of attention?"
   },
   {
     id: 'mindfulness' as MeditationType,
@@ -103,7 +164,26 @@ const meditationTypes = [
     icon: <Brain className="w-5 h-5" />,
     defaultDuration: 12,
     guidance: 'Rest in pure awareness, the witness of all experience',
-    color: 'from-blue-600 to-cyan-600'
+    color: 'from-blue-600 to-cyan-600',
+    benefits: [
+      'Develops meta-cognitive awareness and mental clarity',
+      'Reduces identification with thoughts and emotions',
+      'Cultivates the witness consciousness beyond the ego',
+      'Enhances equanimity and inner peace'
+    ],
+    instructions: [
+      'Sit in relaxed alertness, spine straight but not rigid',
+      'Simply observe whatever arises in consciousness',
+      'Notice thoughts, sensations, emotions without judgment',
+      'Ask: "Who is aware of these experiences?"',
+      'Rest as the aware presence that witnesses all'
+    ],
+    prompts: {
+      beginning: "Simply notice what is here in this moment.",
+      midpoint: "Who or what is aware of these changing experiences?",
+      closing: "Rest as the unchanging awareness itself."
+    },
+    reflectionPrompt: "What did you notice about the nature of awareness itself?"
   },
   {
     id: 'body-scan' as MeditationType,
@@ -112,7 +192,26 @@ const meditationTypes = [
     icon: <Sparkles className="w-5 h-5" />,
     defaultDuration: 18,
     guidance: 'Feel the light of consciousness illuminating every cell',
-    color: 'from-violet-600 to-purple-600'
+    color: 'from-violet-600 to-purple-600',
+    benefits: [
+      'Releases physical tension and stored trauma',
+      'Increases body awareness and somatic intelligence',
+      'Promotes deep relaxation and nervous system regulation',
+      'Integrates mind-body connection for holistic wellness'
+    ],
+    instructions: [
+      'Lie down or sit comfortably with eyes closed',
+      'Systematically scan from toes to head',
+      'Breathe into each area, noticing sensations',
+      'Send loving awareness to tense or uncomfortable areas',
+      'Feel your entire body relaxed and integrated'
+    ],
+    prompts: {
+      beginning: "Bring gentle curiosity to how your body feels right now.",
+      midpoint: "Breathe loving awareness into any areas of tension.",
+      closing: "Feel your body as a temple of consciousness."
+    },
+    reflectionPrompt: "What sensations, tensions, or releases did you experience?"
   }
 ];
 
@@ -148,6 +247,9 @@ export function GroupMeditationSession({
   const [availableDurations] = useState([5, 10, 15, 20, 25, 30, 45, 60]);
   const [actionBarMinimized, setActionBarMinimized] = useState(true);
   const [actionBarVisible, setActionBarVisible] = useState(true);
+  
+  // Enhanced UX state
+  const [showReflectionPrompt, setShowReflectionPrompt] = useState(false);
   
   const channelRef = useRef<any>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -358,9 +460,25 @@ export function GroupMeditationSession({
       description: "The collective light you have kindled continues to shine",
     });
 
+    // Show reflection prompt after a brief moment
+    setTimeout(() => {
+      setShowReflectionPrompt(true);
+    }, 2000);
+
     setTimeout(() => {
       setSessionCompleted(false);
     }, 8000);
+  };
+
+  const handlePracticeSelect = (practiceId: string) => {
+    const practice = meditationTypes.find(t => t.id === practiceId);
+    if (practice && isHost) {
+      updateSessionType(practice.id);
+    }
+  };
+
+  const handleReflectionClose = () => {
+    setShowReflectionPrompt(false);
   };
 
   const adjustVolume = (newVolume: number[]) => {
@@ -459,6 +577,50 @@ export function GroupMeditationSession({
 
   return (
     <>
+      {/* YouTube Playlist Integration for Group Session */}
+      <MeditationPlaylistIntegration
+        isActive={sessionState.is_playing && soundEnabled}
+        practiceName={selectedMeditation?.name || 'Group Meditation'}
+        durationMinutes={sessionState.session_duration}
+        volume={personalVolume[0]}
+        onVideoChange={(title) => {
+          console.log(`🎵 Group session now playing: ${title}`);
+        }}
+        onError={(error) => {
+          console.error('🚨 Group session playlist error:', error);
+          toast({
+            title: "Audio Error",
+            description: "Continuing group session without background audio",
+            variant: "destructive",
+          });
+        }}
+      />
+
+      {/* Practice Guide for Group Sessions */}
+      <MeditationPracticeGuide
+        practices={meditationTypes}
+        onSelectPractice={handlePracticeSelect}
+      />
+
+      {/* Dynamic Meditation Prompts for Group Sessions */}
+      {selectedMeditation?.prompts && (
+        <MeditationPrompts
+          isActive={sessionState.is_playing}
+          sessionProgress={progress}
+          prompts={selectedMeditation.prompts}
+          practiceColor={selectedMeditation.color}
+        />
+      )}
+
+      {/* Post-Meditation Reflection for Group Sessions */}
+      <PostMeditationReflection
+        isVisible={showReflectionPrompt}
+        onClose={handleReflectionClose}
+        practiceName={selectedMeditation?.name || 'Group Meditation'}
+        practiceType={sessionState.session_type}
+        sessionDuration={sessionState.session_duration}
+        reflectionPrompt={selectedMeditation?.reflectionPrompt || 'How did this group practice affect you?'}
+      />
       {/* Session Completion Overlay */}
       <AnimatePresence>
         {sessionCompleted && (
