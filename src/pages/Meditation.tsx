@@ -432,7 +432,7 @@ export default function Meditation() {
           console.log(`🎵 Now playing: ${title}`);
         }}
         onError={(error) => {
-          console.error('Playlist error:', error);
+          console.error('🚨 Playlist error:', error);
           toast({
             title: "Audio Error",
             description: "Continuing session without background audio",
@@ -440,6 +440,15 @@ export default function Meditation() {
           });
         }}
       />
+
+      {/* Debug info */}
+      <div className="fixed top-4 right-4 text-xs bg-black/50 text-white p-2 rounded z-50">
+        <div>Session: {sessionState}</div>
+        <div>Sound: {soundEnabled ? 'ON' : 'OFF'}</div>
+        <div>Practice: {selectedMeditation?.name}</div>
+        <div>Duration: {duration[0]}min</div>
+        <div>Volume: {volume[0]}</div>
+      </div>
 
       {/* Group Session Interface Overlay */}
       {joinedSession && (
