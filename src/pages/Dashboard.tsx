@@ -35,6 +35,9 @@ import { MirrorInsightsWidget } from '@/components/dashboard/MirrorInsightsWidge
 import { EnhancedTruthSpark } from '@/components/dashboard/EnhancedTruthSpark';
 import { FloatingMirrorToggle } from '@/components/dashboard/FloatingMirrorToggle';
 import { SynchronicityMirror } from '@/components/synchronicity/SynchronicityMirror';
+import { DailyResonanceWeather } from '@/components/dashboard/DailyResonanceWeather';
+import { CommunityMirrorPulse } from '@/components/dashboard/CommunityMirrorPulse';
+import { GlowWrapper } from '@/components/dashboard/GlowWrapper';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -127,7 +130,7 @@ const Dashboard = () => {
           {/* Journey Tab Content */}
           <TabsContent value="journey" className="space-y-8">
             {/* Top Action Strip */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -161,9 +164,13 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-secondary/20 rounded-lg">
-                <EnhancedTruthSpark onOpenMirror={handleOpenMirror} />
-              </div>
+              <GlowWrapper elementId="truth-spark">
+                <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-secondary/20 rounded-lg">
+                  <EnhancedTruthSpark onOpenMirror={handleOpenMirror} />
+                </div>
+              </GlowWrapper>
+
+              <DailyResonanceWeather />
             </div>
 
             {/* Main Dashboard Grid */}
@@ -251,68 +258,42 @@ const Dashboard = () => {
 
             {/* Community & Support Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-amber-500" />
-                    Sacred Achievements
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-amber-500" />
-                        <span className="text-sm">First Meditation Complete</span>
+              <GlowWrapper elementId="sacred-achievements">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Trophy className="w-5 h-5 text-amber-500" />
+                      Sacred Achievements
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-amber-500" />
+                          <span className="text-sm">First Meditation Complete</span>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">New</Badge>
                       </div>
-                      <Badge variant="secondary" className="text-xs">New</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-primary" />
-                        <span className="text-sm">Mirror Mystic</span>
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-primary" />
+                          <span className="text-sm">Mirror Mystic</span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">2/5</Badge>
                       </div>
-                      <Badge variant="outline" className="text-xs">2/5</Badge>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </GlowWrapper>
 
-              <MirrorInsightsWidget onOpenMirror={handleOpenMirror} />
+              <GlowWrapper elementId="mirror-insights">
+                <MirrorInsightsWidget onOpenMirror={handleOpenMirror} />
+              </GlowWrapper>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-rose-500" />
-                    Community Pulse
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Collective Meditations Today</span>
-                      <span className="font-semibold">247</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Sacred Circles Active</span>
-                      <span className="font-semibold">23</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Global Resonance</span>
-                      <div className="flex items-center gap-2">
-                        <Progress value={78} className="w-16 h-2" />
-                        <span className="text-sm font-semibold">78%</span>
-                      </div>
-                    </div>
-                    <Link to="/circles" className="block">
-                      <Button variant="outline" size="sm" className="w-full mt-4">
-                        Join Community
-                        <ChevronRight className="w-3 h-3 ml-1" />
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+              <GlowWrapper elementId="community-pulse">
+                <CommunityMirrorPulse />
+              </GlowWrapper>
             </div>
           </TabsContent>
 
