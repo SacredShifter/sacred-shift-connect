@@ -67,10 +67,10 @@ export function UnifiedActivityFeed() {
       
       // Fetch multiple activity sources in parallel
       const [postsResponse, eventsResponse] = await Promise.all([
-        // Circle posts with basic user info
+        // Circle posts - fetch separately due to missing foreign key
         supabase
           .from('circle_posts')
-          .select('*, profiles!circle_posts_user_id_fkey(display_name, avatar_url)')
+          .select('*')
           .order('created_at', { ascending: false })
           .limit(15),
           
@@ -94,13 +94,15 @@ export function UnifiedActivityFeed() {
             type: 'circle_post',
             title: 'Circle Post',
             content: post.content,
-            user_name: (post.profiles as any)?.display_name || 'Sacred Soul',
-            user_avatar: (post.profiles as any)?.avatar_url,
+            user_name: 'Sacred Soul', // Default since we're not joining profiles
+            user_avatar: undefined,
             created_at: post.created_at,
             metadata: {
               chakra_tag: post.chakra_tag,
               frequency: post.frequency,
-              tone: post.tone
+              tone: post.tone,
+              image_url: post.image_url,
+              has_image: post.has_image
             }
           });
         });
@@ -263,6 +265,18 @@ export function UnifiedActivityFeed() {
               {activity.content && (
                 <CardContent className="pt-0">
                   <p className="text-sm leading-relaxed mb-3">{activity.content}</p>
+                  
+                  {/* Display image if present */}
+                  {activity.metadata?.has_image && activity.metadata?.image_url && (
+                    <div className="mb-3">
+                      <img 
+                        src={activity.metadata.image_url} 
+                        alt="Shared image"
+                        className="rounded-lg max-w-full h-auto cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(activity.metadata.image_url, '_blank')}
+                      />
+                    </div>
+                  )}
                   
                   {/* Activity-specific metadata */}
                   {activity.metadata && (
