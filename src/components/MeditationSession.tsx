@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Play, Pause, Square, Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useYouTubeAPI } from '@/hooks/useYouTubeAPI';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import MeditationVisuals from '@/components/MeditationVisuals';
 import { PracticeSetup } from '@/components/PracticeSetup';
+import { MeditationPlaylistIntegration } from '@/components/MeditationPlaylistIntegration';
 
 type MeditationType = 'breathing' | 'loving-kindness' | 'chakra' | 'mindfulness' | 'body-scan';
 
@@ -46,7 +46,6 @@ export function MeditationSession({
 }: MeditationSessionProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { getVideosFromPlaylistByTitle } = useYouTubeAPI();
   
   // Session state
   const [isActive, setIsActive] = useState(false);
@@ -55,93 +54,23 @@ export function MeditationSession({
   const [isCompleted, setIsCompleted] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [audioVolume, setAudioVolume] = useState(70);
-  
-  // Audio state
-  const [audioPreloaded, setAudioPreloaded] = useState(false);
-  const [visualPreloaded, setVisualPreloaded] = useState(false);
-  const [playlistVideos, setPlaylistVideos] = useState<any[]>([]);
+  const [currentPlayingTitle, setCurrentPlayingTitle] = useState<string>('');
   
   // Refs
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const youtubePlayerRef = useRef<any>(null);
-  const youtubeContainerRef = useRef<HTMLDivElement>(null);
-  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const sessionStartTime = useRef<Date | null>(null);
 
-  // Preload resources
-  useEffect(() => {
-    preloadResources();
-  }, [practice]);
-
-  const preloadResources = async () => {
-    try {
-      // Preload YouTube content if playlist exists
-      if (practice.youtubePlaylistId) {
-        await preloadYouTube(practice.youtubePlaylistId);
-      }
-      
-      // Preload visual (mark as ready)
-      preloadVisual(practice.visualType);
-      
-    } catch (error) {
-      console.error('Error preloading resources:', error);
-      toast({
-        title: "Preload Warning",
-        description: "Some resources may take longer to load",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const preloadYouTube = async (playlistId: string) => {
-    try {
-      // Load YouTube playlist videos for better control
-      const videosData = await getVideosFromPlaylistByTitle(playlistId, 10);
-      setPlaylistVideos(videosData.videos);
-      setAudioPreloaded(true);
-    } catch (error) {
-      console.error('Error preloading YouTube:', error);
-      setAudioPreloaded(true); // Continue without audio
-    }
-  };
-
-  const preloadVisual = (visualType: MeditationType) => {
-    // Visual preloading logic (shaders, textures, etc.)
-    setVisualPreloaded(true);
-  };
-
-  const startSession = useCallback(() => {
-    console.log('Starting meditation session:', { 
-      audioPreloaded, 
-      visualPreloaded, 
-      practiceType: practice.visualType,
-      audioEnabled 
-    });
-
-    if (!audioPreloaded || !visualPreloaded) {
-      toast({
-        title: "Loading Resources",
-        description: "Please wait while we prepare your session...",
-      });
-      return;
-    }
-
+  const startSession = useCallback(async () => {
     setIsActive(true);
     setIsPaused(false);
     sessionStartTime.current = new Date();
     startTimer();
     
-    if (audioEnabled && playlistVideos.length > 0) {
-      playAudio();
-    }
-    
-    launchVisual(practice.visualType);
-    
     toast({
       title: "Sacred Practice Begins",
       description: `${practice.name} session initiated`,
     });
-  }, [audioPreloaded, visualPreloaded, audioEnabled, playlistVideos.length, practice]);
+  }, [practice.name]);
 
   const startTimer = () => {
     timerRef.current = setInterval(() => {
@@ -164,29 +93,18 @@ export function MeditationSession({
       timerRef.current = null;
     }
     setIsPaused(true);
-    
-    if (youtubePlayerRef.current) {
-      youtubePlayerRef.current.pauseVideo();
-    }
   };
 
   const resumeSession = () => {
     setIsPaused(false);
     startTimer();
-    
-    if (youtubePlayerRef.current) {
-      youtubePlayerRef.current.playVideo();
-    }
   };
 
-  const stopSession = () => {
+  const stopSessionHandler = async () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    
-    fadeOutAudio();
-    fadeOutVisual();
     
     setIsActive(false);
     setIsPaused(false);
@@ -205,9 +123,6 @@ export function MeditationSession({
   const endSession = async () => {
     setIsCompleted(true);
     
-    fadeOutAudio();
-    fadeOutVisual();
-    
     // Save session to Supabase
     await saveSessionToSupabase();
     
@@ -225,70 +140,6 @@ export function MeditationSession({
     }, 3000);
   };
 
-  const playAudio = () => {
-    if (!audioEnabled || playlistVideos.length === 0) return;
-    
-    // Create YouTube player
-    const playerDiv = document.createElement('div');
-    playerDiv.style.display = 'none';
-    if (youtubeContainerRef.current) {
-      youtubeContainerRef.current.appendChild(playerDiv);
-    }
-    
-    // Initialize YouTube player with first video from playlist
-    const firstVideo = playlistVideos[0];
-    if (firstVideo && window.YT) {
-      youtubePlayerRef.current = new window.YT.Player(playerDiv, {
-        videoId: firstVideo.id,
-        playerVars: {
-          autoplay: 1,
-          controls: 0,
-          disablekb: 1,
-          loop: 1,
-          playlist: playlistVideos.map(v => v.id).join(','),
-          volume: audioVolume,
-        },
-        events: {
-          onReady: (event: any) => {
-            event.target.setVolume(audioVolume);
-            event.target.playVideo();
-          },
-        },
-      });
-    }
-  };
-
-  const fadeOutAudio = () => {
-    if (!youtubePlayerRef.current) return;
-    
-    let vol = audioVolume;
-    fadeIntervalRef.current = setInterval(() => {
-      vol -= 5;
-      if (vol <= 0) {
-        youtubePlayerRef.current?.stopVideo();
-        if (fadeIntervalRef.current) {
-          clearInterval(fadeIntervalRef.current);
-        }
-        // Clean up player
-        if (youtubeContainerRef.current) {
-          youtubeContainerRef.current.innerHTML = '';
-        }
-      } else {
-        youtubePlayerRef.current?.setVolume(vol);
-      }
-    }, 200);
-  };
-
-  const fadeOutVisual = () => {
-    // Visual fade-out will be handled by the visual component
-    // through the isActive prop change
-  };
-
-  const launchVisual = (visualType: MeditationType) => {
-    // Visual launching is handled by the MeditationVisuals component
-    // through the type and isActive props
-  };
-
   const saveSessionToSupabase = async () => {
     if (!user || !sessionStartTime.current) return;
     
@@ -303,7 +154,7 @@ export function MeditationSession({
         session_data: {
           practice_id: practice.id,
           audio_enabled: audioEnabled,
-          playlist_used: practice.youtubePlaylistId || null,
+          current_playing: currentPlayingTitle,
         }
       };
       
@@ -339,27 +190,35 @@ export function MeditationSession({
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
-      if (fadeIntervalRef.current) {
-        clearInterval(fadeIntervalRef.current);
-      }
-      if (youtubePlayerRef.current) {
-        youtubePlayerRef.current.destroy();
-      }
     };
   }, []);
 
   return (
     <>
-      {/* Hidden YouTube container */}
-      <div ref={youtubeContainerRef} style={{ display: 'none' }} />
+      {/* YouTube Playlist Integration */}
+      <MeditationPlaylistIntegration
+        isActive={isActive && audioEnabled}
+        practiceName={practice.name}
+        durationMinutes={duration}
+        volume={audioVolume}
+        onVideoChange={(title) => setCurrentPlayingTitle(title)}
+        onError={(error) => {
+          console.error('Playlist error:', error);
+          toast({
+            title: "Audio Error",
+            description: "Continuing session without background audio",
+            variant: "destructive",
+          });
+        }}
+      />
       
       {/* Session Setup Phase */}
       {!isActive && !isCompleted && (
         <PracticeSetup
           practice={practice}
           duration={duration}
-          audioPreloaded={audioPreloaded}
-          visualPreloaded={visualPreloaded}
+          audioPreloaded={true}
+          visualPreloaded={true}
           onStart={startSession}
           onExit={onExit}
           audioEnabled={audioEnabled}
@@ -430,7 +289,7 @@ export function MeditationSession({
               )}
               
               <Button
-                onClick={stopSession}
+                onClick={stopSessionHandler}
                 className="w-16 h-16 rounded-full bg-black/30 backdrop-blur-md border border-white/20 hover:bg-black/50 text-white"
               >
                 <Square className="h-6 w-6" />
