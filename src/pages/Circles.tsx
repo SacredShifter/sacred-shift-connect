@@ -129,275 +129,229 @@ const Circles = () => {
     <div className="h-full overflow-y-auto">
       <Slogan variant="watermark" />
       
-        {/* Revolutionary Sacred Social Platform */}
-        <Tabs defaultValue="circles" className="h-full">
-        <div className="border-b border-primary/10 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between py-3">
-              <div className="flex items-center space-x-6">
-                <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                    Circles
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    Consciousness-Powered Community Evolution
-                  </p>
-                </div>
-                
-                <TabsList className="bg-background/50 border border-primary/20">
-                  <TabsTrigger value="feed" className="flex items-center space-x-2">
-                    <Sparkles className="w-4 h-4" />
-                    <span>Feed</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="circles" className="flex items-center space-x-2">
-                    <Users className="w-4 h-4" />
-                    <span>Circles</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="events" className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>Events</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="profile" className="flex items-center space-x-2">
-                    <User className="w-4 h-4" />
-                    <span>Profile</span>
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              
-              <Button 
-                onClick={() => setCreateModalOpen(true)}
-                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create
-              </Button>
+      {/* Sacred Circles Header */}
+      <div className="border-b border-primary/10 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Sacred Circles
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Deep community engagement and consciousness evolution
+              </p>
             </div>
-          </div>
-        </div>
-
-        {/* Social Feed */}
-        <TabsContent value="feed" className="mt-0">
-          <div className="max-w-4xl mx-auto p-4">
-            <SacredSocialFeed feedType="global" />
-          </div>
-        </TabsContent>
-
-        {/* Enhanced Circles View */}
-        <TabsContent value="circles" className="mt-0">
-          <div className="max-w-7xl mx-auto p-4 space-y-6">
-            {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  placeholder="Search sacred circles..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-primary/20 focus:border-primary"
-                />
-              </div>
-              
-              <div className="flex gap-2 overflow-x-auto">
-                {filterOptions.map((option) => {
-                  const IconComponent = option.icon;
-                  const isActive = activeFilter === option.id;
-                  return (
-                    <Button
-                      key={option.id}
-                      variant={isActive ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setActiveFilter(option.id)}
-                      className={`whitespace-nowrap ${
-                        isActive 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'border-primary/20 hover:border-primary/50'
-                      }`}
-                    >
-                      <IconComponent className="w-4 h-4 mr-2" />
-                      {option.label}
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Results Summary */}
-            <div className="text-sm text-muted-foreground">
-              {filteredCircles.length} circle{filteredCircles.length !== 1 ? 's' : ''} found
-            </div>
-
-            {/* Circles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCircles.map((circle) => {
-          const isJoined = joinedCircleIds.has(circle.id);
-          const isPrivate = circle.is_private;
-          
-          return (
-            <Card key={circle.id} className="group hover:shadow-lg transition-all duration-300 border-primary/10 hover:border-primary/30">
-              <CardHeader className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-2">
-                    {isPrivate ? (
-                      <Lock className="w-4 h-4 text-muted-foreground" />
-                    ) : (
-                      <Globe className="w-4 h-4 text-muted-foreground" />
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      {isPrivate ? 'Private' : 'Public'}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                    <Users className="w-3 h-3" />
-                    <span>{circle.member_count || 0}</span>
-                  </div>
-                </div>
-                
-                <div>
-                  <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                    {circle.name}
-                  </CardTitle>
-                  {circle.description && (
-                    <CardDescription className="mt-2 line-clamp-2">
-                      {circle.description}
-                    </CardDescription>
-                  )}
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-3">
-                {/* Chakra Focus Badge */}
-                {circle.chakra_focus && (
-                  <Badge 
-                    variant="outline" 
-                    className="text-xs"
-                    style={{ 
-                      borderColor: getChakraColor(circle.chakra_focus),
-                      color: getChakraColor(circle.chakra_focus)
-                    }}
-                  >
-                    🧘 {circle.chakra_focus}
-                  </Badge>
-                )}
-
-                {/* Frequency Range */}
-                {circle.frequency_range && (
-                  <Badge variant="secondary" className="text-xs">
-                    🎵 {circle.frequency_range}
-                  </Badge>
-                )}
-              </CardContent>
-
-              <CardFooter className="flex gap-2">
-                <Button
-                  variant={isJoined ? "outline" : "default"}
-                  size="sm"
-                  onClick={() => handleJoinLeave(circle.id)}
-                  className={`flex-1 ${
-                    isJoined 
-                      ? 'border-primary text-primary hover:bg-primary hover:text-primary-foreground' 
-                      : 'bg-primary hover:bg-primary/90'
-                  }`}
-                >
-                  {isJoined ? 'Leave' : 'Join'} Circle
-                </Button>
-                
-                {isJoined && (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedCircle(circle.id)}
-                        className="border-primary/20 hover:border-primary/50"
-                      >
-                        Enter
-                      </Button>
-                    </DialogTrigger>
-                     <DialogContent 
-                       className={
-                         isCircleMaximized 
-                           ? "fixed inset-0 top-0 left-0 right-0 bottom-0 z-50 max-w-none max-h-none w-screen h-screen rounded-none border-none m-0 p-0 !translate-x-0 !translate-y-0 !left-0 !top-0" 
-                           : "max-w-4xl max-h-[90vh] overflow-hidden"
-                       }
-                       onOpenAutoFocus={() => {
-                         setIsCircleMaximized(false);
-                         setIsCircleMinimized(false);
-                       }}
-                    >
-                      <DialogHeader className={isCircleMinimized ? "hidden" : ""}>
-                        <DialogTitle>Sacred Circle: {circle.name}</DialogTitle>
-                      </DialogHeader>
-                      <div className={isCircleMaximized ? "h-full" : "h-[70vh]"}>
-                        <SacredCircleInterface 
-                          circleId={circle.id}
-                          circleName={circle.name}
-                          className="h-full"
-                          isMaximized={isCircleMaximized}
-                          isMinimized={isCircleMinimized}
-                          onMaximize={() => setIsCircleMaximized(true)}
-                          onMinimize={() => setIsCircleMinimized(true)}
-                          onRestore={() => {
-                            setIsCircleMaximized(false);
-                            setIsCircleMinimized(false);
-                          }}
-                        />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </CardFooter>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Empty State */}
-      {filteredCircles.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-            <Users className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-medium mb-2">No circles found</h3>
-          <p className="text-muted-foreground mb-4">
-            {searchTerm || activeFilter !== 'all' 
-              ? 'Try adjusting your search or filters'
-              : 'Be the first to create a Sacred Circle!'
-            }
-          </p>
-          {(!searchTerm && activeFilter === 'all') && (
+            
             <Button 
               onClick={() => setCreateModalOpen(true)}
-              className="bg-gradient-to-r from-primary to-primary/80"
+              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Create Your First Circle
+              Create Circle
             </Button>
-          )}
+          </div>
         </div>
-      )}
+      </div>
 
-            {/* Create Circle Modal */}
-            <CreateCircleModal 
-              open={createModalOpen}
-              onOpenChange={setCreateModalOpen}
+      {/* Main Circles Content */}
+      <div className="max-w-7xl mx-auto p-4 space-y-6">
+        {/* Search and Filters */}
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Search sacred circles..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-primary/20 focus:border-primary"
             />
           </div>
-        </TabsContent>
-
-        {/* Events */}
-        <TabsContent value="events" className="mt-0">
-          <div className="max-w-6xl mx-auto p-4">
-            <SacredEvents />
+          
+          <div className="flex gap-2 overflow-x-auto">
+            {filterOptions.map((option) => {
+              const IconComponent = option.icon;
+              const isActive = activeFilter === option.id;
+              return (
+                <Button
+                  key={option.id}
+                  variant={isActive ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveFilter(option.id)}
+                  className={`whitespace-nowrap ${
+                    isActive 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'border-primary/20 hover:border-primary/50'
+                  }`}
+                >
+                  <IconComponent className="w-4 h-4 mr-2" />
+                  {option.label}
+                </Button>
+              );
+            })}
           </div>
-        </TabsContent>
+        </div>
 
-        {/* Profile */}
-        <TabsContent value="profile" className="mt-0">
-          <div className="max-w-6xl mx-auto p-4">
-            <SacredProfile isOwnProfile={true} />
+        {/* Results Summary */}
+        <div className="text-sm text-muted-foreground">
+          {filteredCircles.length} circle{filteredCircles.length !== 1 ? 's' : ''} found
+        </div>
+
+        {/* Circles Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCircles.map((circle) => {
+            const isJoined = joinedCircleIds.has(circle.id);
+            const isPrivate = circle.is_private;
+            
+            return (
+              <Card key={circle.id} className="group hover:shadow-lg transition-all duration-300 border-primary/10 hover:border-primary/30">
+                <CardHeader className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-2">
+                      {isPrivate ? (
+                        <Lock className="w-4 h-4 text-muted-foreground" />
+                      ) : (
+                        <Globe className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {isPrivate ? 'Private' : 'Public'}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                      <Users className="w-3 h-3" />
+                      <span>{circle.member_count || 0}</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                      {circle.name}
+                    </CardTitle>
+                    {circle.description && (
+                      <CardDescription className="mt-2 line-clamp-2">
+                        {circle.description}
+                      </CardDescription>
+                    )}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-3">
+                  {/* Chakra Focus Badge */}
+                  {circle.chakra_focus && (
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs"
+                      style={{ 
+                        borderColor: getChakraColor(circle.chakra_focus),
+                        color: getChakraColor(circle.chakra_focus)
+                      }}
+                    >
+                      🧘 {circle.chakra_focus}
+                    </Badge>
+                  )}
+
+                  {/* Frequency Range */}
+                  {circle.frequency_range && (
+                    <Badge variant="secondary" className="text-xs">
+                      🎵 {circle.frequency_range}
+                    </Badge>
+                  )}
+                </CardContent>
+
+                <CardFooter className="flex gap-2">
+                  <Button
+                    variant={isJoined ? "outline" : "default"}
+                    size="sm"
+                    onClick={() => handleJoinLeave(circle.id)}
+                    className={`flex-1 ${
+                      isJoined 
+                        ? 'border-primary text-primary hover:bg-primary hover:text-primary-foreground' 
+                        : 'bg-primary hover:bg-primary/90'
+                    }`}
+                  >
+                    {isJoined ? 'Leave' : 'Join'} Circle
+                  </Button>
+                  
+                  {isJoined && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedCircle(circle.id)}
+                          className="border-primary/20 hover:border-primary/50"
+                        >
+                          Enter
+                        </Button>
+                      </DialogTrigger>
+                       <DialogContent 
+                         className={
+                           isCircleMaximized 
+                             ? "fixed inset-0 top-0 left-0 right-0 bottom-0 z-50 max-w-none max-h-none w-screen h-screen rounded-none border-none m-0 p-0 !translate-x-0 !translate-y-0 !left-0 !top-0" 
+                             : "max-w-4xl max-h-[90vh] overflow-hidden"
+                         }
+                         onOpenAutoFocus={() => {
+                           setIsCircleMaximized(false);
+                           setIsCircleMinimized(false);
+                         }}
+                      >
+                        <DialogHeader className={isCircleMinimized ? "hidden" : ""}>
+                          <DialogTitle>Sacred Circle: {circle.name}</DialogTitle>
+                        </DialogHeader>
+                        <div className={isCircleMaximized ? "h-full" : "h-[70vh]"}>
+                          <SacredCircleInterface 
+                            circleId={circle.id}
+                            circleName={circle.name}
+                            className="h-full"
+                            isMaximized={isCircleMaximized}
+                            isMinimized={isCircleMinimized}
+                            onMaximize={() => setIsCircleMaximized(true)}
+                            onMinimize={() => setIsCircleMinimized(true)}
+                            onRestore={() => {
+                              setIsCircleMaximized(false);
+                              setIsCircleMinimized(false);
+                            }}
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Empty State */}
+        {filteredCircles.length === 0 && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <Users className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="text-lg font-medium mb-2">No circles found</h3>
+            <p className="text-muted-foreground mb-4">
+              {searchTerm || activeFilter !== 'all' 
+                ? 'Try adjusting your search or filters'
+                : 'Be the first to create a Sacred Circle!'
+              }
+            </p>
+            {(!searchTerm && activeFilter === 'all') && (
+              <Button 
+                onClick={() => setCreateModalOpen(true)}
+                className="bg-gradient-to-r from-primary to-primary/80"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Your First Circle
+              </Button>
+            )}
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+
+        {/* Create Circle Modal */}
+        <CreateCircleModal 
+          open={createModalOpen}
+          onOpenChange={setCreateModalOpen}
+        />
+      </div>
     </div>
   );
 };
