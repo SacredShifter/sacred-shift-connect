@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Settings, UserPlus, Phone, Video, Send, Image, Paperclip, Smile } from 'lucide-react';
+import { ArrowLeft, Settings, UserPlus, Phone, Video, Send, Image, Paperclip, Smile, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,9 +24,13 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
   const { user } = useAuth();
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  
   const [messageText, setMessageText] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 
   // Mock member data
   const mockMembers = [
@@ -45,16 +49,17 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
 
   // Handle message sending
   const handleSendMessage = async () => {
-    if (!messageText.trim() || !user || !circleId) return;
+    if ((!messageText.trim() && attachedFiles.length === 0) || !user || !circleId) return;
 
     try {
       await sendMessage(messageText, 'circle', {
         circleId,
-        attachedFiles: [],
+        attachedFiles: attachedFiles,
         selectedSigils: []
       });
       
       setMessageText('');
+      setAttachedFiles([]);
       
       toast({
         title: "Message sent",
@@ -74,6 +79,31 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  // Handle file attachment
+  const handleFileAttach = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle image attachment  
+  const handleImageAttach = () => {
+    imageInputRef.current?.click();
+  };
+
+  // Handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setAttachedFiles(prev => [...prev, ...files]);
+    toast({
+      title: "Files attached",
+      description: `${files.length} file(s) attached to your message.`,
+    });
+  };
+
+  // Remove attached file
+  const removeFile = (index: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   // Auto-scroll to bottom when new messages arrive
@@ -225,11 +255,42 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
 
         {/* Message Input - Fixed and Visible */}
         <div className="sticky bottom-0 p-4 border-t bg-background/95 backdrop-blur-sm">
+          {/* Attached Files Preview */}
+          {attachedFiles.length > 0 && (
+            <div className="mb-3 p-3 bg-muted/30 rounded-lg">
+              <div className="flex flex-wrap gap-2">
+                {attachedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center gap-2 bg-background px-3 py-2 rounded-full text-sm">
+                    <span className="truncate max-w-32">{file.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0"
+                      onClick={() => removeFile(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           <div className="flex items-center gap-3 max-w-4xl mx-auto">
-            <Button variant="ghost" size="sm" className="h-10 w-10 p-0 hover:bg-muted">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-10 w-10 p-0 hover:bg-muted"
+              onClick={handleFileAttach}
+            >
               <Paperclip className="h-5 w-5 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="sm" className="h-10 w-10 p-0 hover:bg-muted">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-10 w-10 p-0 hover:bg-muted"
+              onClick={handleImageAttach}
+            >
               <Image className="h-5 w-5 text-muted-foreground" />
             </Button>
             
@@ -254,7 +315,7 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
             
             <Button 
               onClick={handleSendMessage}
-              disabled={!messageText.trim() || loading}
+              disabled={(!messageText.trim() && attachedFiles.length === 0) || loading}
               size="sm"
               className="h-10 w-10 p-0 rounded-full bg-primary hover:bg-primary/90"
             >
@@ -323,6 +384,24 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
           </div>
         </div>
       )}
+
+      {/* Hidden File Inputs */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="*/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+      <input
+        ref={imageInputRef}
+        type="file"
+        multiple
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
     </div>
   );
 };
