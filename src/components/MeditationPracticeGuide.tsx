@@ -44,16 +44,27 @@ export const MeditationPracticeGuide: React.FC<MeditationPracticeGuideProps> = (
   const [expandedPractice, setExpandedPractice] = useState<string>('');
 
   useEffect(() => {
+    console.log('🔍 MeditationPracticeGuide - Checking if user has seen guide before');
+    console.log('👤 User ID:', user?.id);
+    
     // Check if user has seen the guide before
     const hasSeenGuide = localStorage.getItem(`meditation-guide-seen-${user?.id}`);
+    console.log('💾 Has seen guide before:', hasSeenGuide);
+    
     if (!hasSeenGuide) {
+      console.log('🆕 First time user - showing guide');
       setIsVisible(true);
+    } else {
+      console.log('👀 Returning user - guide hidden');
+      setIsVisible(false);
     }
   }, [user?.id]);
 
   const handleClose = () => {
+    console.log('🚫 CLOSING MEDITATION GUIDE - User clicked close button');
     if (user?.id) {
       localStorage.setItem(`meditation-guide-seen-${user.id}`, 'true');
+      console.log('✅ Saved guide preference to localStorage');
     }
     setIsVisible(false);
   };
@@ -101,8 +112,14 @@ export const MeditationPracticeGuide: React.FC<MeditationPracticeGuideProps> = (
                   Discover the transformative power of each meditation practice
                 </p>
               </div>
-              <Button variant="ghost" size="sm" onClick={handleClose}>
-                <X className="w-4 h-4" />
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={handleClose}
+                className="bg-destructive/20 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground min-w-[100px] font-semibold"
+              >
+                <X className="w-5 h-5 mr-2" />
+                CLOSE
               </Button>
             </div>
           </CardHeader>
