@@ -38,6 +38,8 @@ import Shift from './pages/Shift';
 import Meditation from './pages/Meditation';
 import Learning3D from './pages/Learning3D';
 import FeaturesComingSoon from './pages/FeaturesComingSoon';
+import { DevSitemap } from './components/SacredSitemap/DevSitemap';
+import { UserSitemap } from './components/SacredSitemap/UserSitemap';
 
 
 function App() {
@@ -88,6 +90,8 @@ function App() {
                   <Route path="/shift" element={<Shift />} />
                   <Route path="/meditation" element={<Meditation />} />
                   <Route path="/features-coming-soon" element={<FeaturesComingSoon />} />
+                  <Route path="/sitemap" element={<UserSitemap />} />
+                  <Route path="/dev/sitemap" element={<DevSitemap />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

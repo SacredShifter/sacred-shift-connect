@@ -6,6 +6,8 @@ import { AuraPresenceIndicator } from "@/components/AuraPresenceIndicator";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
 import { SovereignMeshHeader } from "@/components/SovereignMeshHeader";
 import { Slogan } from './ui/Slogan';
+import { SacredBreadcrumbs } from "@/components/SacredSitemap/SacredBreadcrumbs";
+import { WhereAmIWidget } from "@/components/SacredSitemap/WhereAmIWidget";
 
 
 export const MainLayout = () => {
@@ -46,10 +48,16 @@ export const MainLayout = () => {
           )}
           <main className={`flex-1 min-h-0 flex flex-col ${isHermetic ? '!h-screen' : ''}`}>
             <UIErrorBoundary>
+              {!isHermetic && (
+                <div className="px-6 pt-4">
+                  <SacredBreadcrumbs />
+                </div>
+              )}
               <Outlet />
             </UIErrorBoundary>
           </main>
         </SidebarInset>
+        {!isHermetic && <WhereAmIWidget />}
       </div>
     </SidebarProvider>
   );
