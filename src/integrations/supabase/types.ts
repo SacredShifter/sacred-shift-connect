@@ -9223,61 +9223,118 @@ export type Database = {
       profiles: {
         Row: {
           ascension_title: string | null
+          aura_signature: string | null
           avatar_url: string | null
+          circles_joined: string[] | null
           completed_tours: string[] | null
           consciousness_level: number | null
           created_at: string | null
           current_chakra_focus: string | null
+          current_stage: string | null
+          date_of_birth: string | null
+          deleted_at: string | null
           display_name: string | null
           full_name: string | null
+          gender_identity: string | null
           id: string
           is_admin: boolean
           journey_stage: string | null
           last_level_up: string | null
+          last_login: string | null
+          last_synchronicity_event: string | null
           light_level: number | null
           light_points: number | null
           meditation_stats: Json | null
+          mood_trends: Json | null
           onboarding_completed: boolean
+          primary_language: string | null
+          resonance_tags: string[] | null
+          soul_identity: string | null
+          streak_days: number | null
+          synchronicity_chain: string[] | null
+          synchronicity_score: number | null
+          timezone: string | null
+          total_breath_sessions: number | null
+          total_journal_entries: number | null
+          total_meditation_minutes: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           ascension_title?: string | null
+          aura_signature?: string | null
           avatar_url?: string | null
+          circles_joined?: string[] | null
           completed_tours?: string[] | null
           consciousness_level?: number | null
           created_at?: string | null
           current_chakra_focus?: string | null
+          current_stage?: string | null
+          date_of_birth?: string | null
+          deleted_at?: string | null
           display_name?: string | null
           full_name?: string | null
+          gender_identity?: string | null
           id: string
           is_admin?: boolean
           journey_stage?: string | null
           last_level_up?: string | null
+          last_login?: string | null
+          last_synchronicity_event?: string | null
           light_level?: number | null
           light_points?: number | null
           meditation_stats?: Json | null
+          mood_trends?: Json | null
           onboarding_completed?: boolean
+          primary_language?: string | null
+          resonance_tags?: string[] | null
+          soul_identity?: string | null
+          streak_days?: number | null
+          synchronicity_chain?: string[] | null
+          synchronicity_score?: number | null
+          timezone?: string | null
+          total_breath_sessions?: number | null
+          total_journal_entries?: number | null
+          total_meditation_minutes?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           ascension_title?: string | null
+          aura_signature?: string | null
           avatar_url?: string | null
+          circles_joined?: string[] | null
           completed_tours?: string[] | null
           consciousness_level?: number | null
           created_at?: string | null
           current_chakra_focus?: string | null
+          current_stage?: string | null
+          date_of_birth?: string | null
+          deleted_at?: string | null
           display_name?: string | null
           full_name?: string | null
+          gender_identity?: string | null
           id?: string
           is_admin?: boolean
           journey_stage?: string | null
           last_level_up?: string | null
+          last_login?: string | null
+          last_synchronicity_event?: string | null
           light_level?: number | null
           light_points?: number | null
           meditation_stats?: Json | null
+          mood_trends?: Json | null
           onboarding_completed?: boolean
+          primary_language?: string | null
+          resonance_tags?: string[] | null
+          soul_identity?: string | null
+          streak_days?: number | null
+          synchronicity_chain?: string[] | null
+          synchronicity_score?: number | null
+          timezone?: string | null
+          total_breath_sessions?: number | null
+          total_journal_entries?: number | null
+          total_meditation_minutes?: number | null
           updated_at?: string | null
           user_id?: string
         }

@@ -14,7 +14,7 @@ export const BreathingVisualizer = ({
   showLabels = true,
   className = '' 
 }: BreathingVisualizerProps) => {
-  const { 
+  const [currentTab, setCurrentTab] = useState<'resonance' | 'ventilation'>('resonance'); 
     isActive, 
     currentPhase, 
     currentPreset, 
