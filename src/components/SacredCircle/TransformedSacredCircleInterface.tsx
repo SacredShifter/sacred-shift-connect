@@ -240,10 +240,10 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 bg-background">
         <div 
           ref={scrollAreaRef}
-          className="flex-1 px-4 py-4 overflow-y-auto"
+          className="flex-1 px-4 py-4 overflow-y-auto bg-background"
         >
           <div className="space-y-4">
             {loading ? (
@@ -252,7 +252,7 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
               </div>
             ) : messages.length === 0 ? (
               <div className="text-center space-y-3 py-12">
-                <p className="text-lg font-medium">No messages yet</p>
+                <p className="text-lg font-medium text-foreground">No messages yet</p>
                 <p className="text-sm text-muted-foreground">
                   Start the conversation with your first message
                 </p>
@@ -264,7 +264,7 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
         </div>
 
         {/* Message Input - Fixed and Visible */}
-        <div className="sticky bottom-0 p-4 border-t bg-background border-border shadow-lg">
+        <div className="sticky bottom-0 p-4 border-t bg-background border-border shadow-lg z-10">
           {/* Attached Files Preview */}
           {attachedFiles.length > 0 && (
             <div className="mb-3 p-3 bg-muted/30 rounded-lg">
