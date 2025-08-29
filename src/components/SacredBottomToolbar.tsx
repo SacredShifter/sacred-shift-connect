@@ -32,6 +32,42 @@ export const SacredBottomToolbar: React.FC = () => {
   
   if (isHermetic) return null;
 
+  const getLocationTitle = () => {
+    const path = location.pathname;
+    if (path === '/') return 'Sacred Dashboard';
+    if (path.startsWith('/circles')) return 'Sacred Circles';
+    if (path.startsWith('/journal')) return 'Sacred Journal';
+    if (path.startsWith('/messages')) return 'Sacred Messages';
+    if (path.startsWith('/learn')) return 'Sacred Learning';
+    if (path.startsWith('/tools')) return 'Sacred Tools';
+    if (path.startsWith('/profile')) return 'Sacred Profile';
+    return 'Sacred Space';
+  };
+
+  const getJourneyStage = () => {
+    const path = location.pathname;
+    if (path === '/') return 'Integration';
+    if (path.startsWith('/circles')) return 'Connection';
+    if (path.startsWith('/journal')) return 'Reflection';
+    if (path.startsWith('/messages')) return 'Communication';
+    if (path.startsWith('/learn')) return 'Discovery';
+    if (path.startsWith('/tools')) return 'Practice';
+    if (path.startsWith('/profile')) return 'Evolution';
+    return 'Present';
+  };
+
+  const getSacredTime = () => {
+    const path = location.pathname;
+    if (path === '/') return 'Now';
+    if (path.startsWith('/circles')) return 'Gathering';
+    if (path.startsWith('/journal')) return 'Contemplation';
+    if (path.startsWith('/messages')) return 'Exchange';
+    if (path.startsWith('/learn')) return 'Awakening';
+    if (path.startsWith('/tools')) return 'Activation';
+    if (path.startsWith('/profile')) return 'Transformation';
+    return 'Present';
+  };
+
   const getResonanceStyles = () => {
     const { synchronicityLevel, fieldIntensity, resonanceColor, isFieldAlert } = resonanceState;
     
@@ -258,26 +294,26 @@ export const SacredBottomToolbar: React.FC = () => {
                     </Button>
                   </div>
                   
-                  {/* Mini version of WhereAmIWidget content */}
-                  <div className="space-y-3 text-sm">
-                    <div className="text-center">
-                      <div className="text-muted-foreground">Current Location</div>
-                      <div className="font-medium">Sacred Dashboard</div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <span className="text-muted-foreground">Journey Stage:</span>
-                        <br />
-                        <span className="font-medium">Integration</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Sacred Time:</span>
-                        <br />
-                        <span className="font-medium">Present</span>
-                      </div>
-                    </div>
-                  </div>
+                   {/* Dynamic WhereAmIWidget content */}
+                   <div className="space-y-3 text-sm">
+                     <div className="text-center">
+                       <div className="text-muted-foreground">Current Location</div>
+                       <div className="font-medium">{getLocationTitle()}</div>
+                     </div>
+                     
+                     <div className="grid grid-cols-2 gap-2 text-xs">
+                       <div>
+                         <span className="text-muted-foreground">Journey Stage:</span>
+                         <br />
+                         <span className="font-medium">{getJourneyStage()}</span>
+                       </div>
+                       <div>
+                         <span className="text-muted-foreground">Sacred Time:</span>
+                         <br />
+                         <span className="font-medium">{getSacredTime()}</span>
+                       </div>
+                     </div>
+                   </div>
                 </div>
               </div>
             </motion.div>
