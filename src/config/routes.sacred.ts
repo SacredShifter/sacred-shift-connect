@@ -1,4 +1,4 @@
-import { Home, Users, User, Rss, Settings, BookOpen, Video, Database, Archive, Scroll, Heart, MessageCircle, Brain, TreePine, Stars, Box, Sparkles, Zap, BarChart3, LucideIcon } from "lucide-react";
+import { Home, Users, User, Rss, Settings, BookOpen, Video, Database, Archive, Scroll, Heart, MessageCircle, Brain, TreePine, Stars, Box, Sparkles, Zap, BarChart3, Navigation, LucideIcon } from "lucide-react";
 
 // Sacred Sigils for major modules - using Unicode symbols
 export const SacredSigils = {
@@ -546,6 +546,56 @@ export const SACRED_ROUTES_REGISTRY: SacredRouteMetadata[] = [
     journeyStage: "transcendence",
     resonanceChains: ["liberation", "constellation", "meditation"],
     synchronicityTriggers: ["reality_flexibility", "dimensional_awareness", "quantum_entanglement"]
+  },
+
+  // Navigation & Meta Routes
+  {
+    path: "/sitemap",
+    component: "UserSitemap",
+    title: "Sacred Constellation Map",
+    icon: Navigation,
+    sigil: "⋆",
+    description: "Navigate the sacred constellation of consciousness pathways and explore your spiritual journey map",
+    category: "core",
+    authRequired: true,
+    adminOnly: false,
+    rlsPolicies: [],
+    supabaseTables: [],
+    edgeFunctions: [],
+    triLawScores: { truth: 0.9, resonance: 0.8, sovereignty: 0.7 },
+    chakraAlignment: "Third Eye",
+    consciousnessLevel: 5,
+    sacredTiming: "any",
+    dependencies: ["sacred_routes_registry"],
+    errorPatterns: ["navigation_confusion", "path_uncertainty"],
+    performanceWeight: "light",
+    journeyStage: "exploration",
+    resonanceChains: ["dashboard", "constellation", "guidebook"],
+    synchronicityTriggers: ["navigation_seeking", "path_discovery", "journey_planning"]
+  },
+  {
+    path: "/dev/sitemap", 
+    component: "DevSitemap",
+    title: "Developer Sacred Map",
+    icon: Navigation,
+    sigil: "⟐",
+    description: "Sacred routes registry developer interface with tri-law analysis and system diagnostics",
+    category: "dev",
+    authRequired: true,
+    adminOnly: true,
+    rlsPolicies: [],
+    supabaseTables: [],
+    edgeFunctions: [],
+    triLawScores: { truth: 1.0, resonance: 0.6, sovereignty: 0.8 },
+    chakraAlignment: "Throat",
+    consciousnessLevel: 4,
+    sacredTiming: "any",
+    dependencies: ["sacred_routes_registry", "tri_law_engine"],
+    errorPatterns: ["registry_inconsistency", "route_validation_failure"],
+    performanceWeight: "medium",
+    journeyStage: "mastery",
+    resonanceChains: ["sitemap", "registry", "ai-admin"],
+    synchronicityTriggers: ["development_focus", "system_analysis", "route_optimization"]
   }
 ];
 

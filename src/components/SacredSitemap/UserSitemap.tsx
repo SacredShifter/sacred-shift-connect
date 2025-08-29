@@ -89,10 +89,22 @@ export const UserSitemap: React.FC = () => {
     return icons[chakra] || Star;
   };
 
+  // Enhanced getAccessibleRoutes with deduplication
   const getAccessibleRoutes = () => {
-    return SACRED_ROUTES_REGISTRY.filter(route => {
+    const routes = SACRED_ROUTES_REGISTRY.filter(route => {
       if (route.adminOnly) return false;
       // In a real app, check user permissions here
+      return true;
+    });
+
+    // Ensure no duplicates by path
+    const seen = new Set();
+    return routes.filter(route => {
+      if (seen.has(route.path)) {
+        console.warn(`Duplicate route found: ${route.path}`);
+        return false;
+      }
+      seen.add(route.path);
       return true;
     });
   };
