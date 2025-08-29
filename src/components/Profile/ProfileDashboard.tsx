@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Label } from '@/components/ui/label';
 import { 
   User, 
   Calendar, 
@@ -80,8 +81,8 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ profile, onE
     return date.toLocaleDateString();
   };
 
-  const stageInfo = journeyStageInfo[profile.current_stage];
-  const totalSessions = profile.total_meditation_minutes + profile.total_journal_entries + profile.total_breath_sessions;
+  const stageInfo = journeyStageInfo[profile.current_stage || 'Entry'];
+  const totalSessions = (profile.total_meditation_minutes || 0) + (profile.total_journal_entries || 0) + (profile.total_breath_sessions || 0);
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -144,7 +145,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ profile, onE
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className={`${stageInfo.color} border-current`}>
-                  {profile.current_stage}
+                  {profile.current_stage || 'Entry'}
                 </Badge>
                 <span className="text-sm font-medium">{stageInfo.progress}%</span>
               </div>
@@ -155,11 +156,11 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ profile, onE
               
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{profile.streak_days}</div>
+                  <div className="text-lg font-bold text-primary">{profile.streak_days || 0}</div>
                   <div className="text-xs text-muted-foreground">Day Streak</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{profile.synchronicity_score}</div>
+                  <div className="text-lg font-bold text-primary">{profile.synchronicity_score || 0}</div>
                   <div className="text-xs text-muted-foreground">Sync Score</div>
                 </div>
               </div>
@@ -185,7 +186,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ profile, onE
                   <span className="text-sm">Meditation</span>
                 </div>
                 <div className="text-right">
-                  <div className="font-semibold">{profile.total_meditation_minutes}m</div>
+                  <div className="font-semibold">{profile.total_meditation_minutes || 0}m</div>
                   <div className="text-xs text-muted-foreground">total</div>
                 </div>
               </div>
@@ -198,7 +199,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ profile, onE
                   <span className="text-sm">Journal Entries</span>
                 </div>
                 <div className="text-right">
-                  <div className="font-semibold">{profile.total_journal_entries}</div>
+                  <div className="font-semibold">{profile.total_journal_entries || 0}</div>
                   <div className="text-xs text-muted-foreground">entries</div>
                 </div>
               </div>
@@ -211,7 +212,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ profile, onE
                   <span className="text-sm">Breath Sessions</span>
                 </div>
                 <div className="text-right">
-                  <div className="font-semibold">{profile.total_breath_sessions}</div>
+                  <div className="font-semibold">{profile.total_breath_sessions || 0}</div>
                   <div className="text-xs text-muted-foreground">sessions</div>
                 </div>
               </div>
@@ -245,41 +246,41 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ profile, onE
                 </div>
               )}
 
-              {profile.resonance_tags.length > 0 && (
+              {(profile.resonance_tags || []).length > 0 && (
                 <div>
                   <Label className="text-xs text-muted-foreground">Resonance Tags</Label>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {profile.resonance_tags.slice(0, 6).map((tag) => (
+                    {(profile.resonance_tags || []).slice(0, 6).map((tag) => (
                       <Badge key={tag} variant="outline" className="text-xs">
                         {tag}
                       </Badge>
                     ))}
-                    {profile.resonance_tags.length > 6 && (
+                    {(profile.resonance_tags || []).length > 6 && (
                       <Badge variant="outline" className="text-xs">
-                        +{profile.resonance_tags.length - 6} more
+                        +{(profile.resonance_tags || []).length - 6} more
                       </Badge>
                     )}
                   </div>
                 </div>
               )}
 
-              {profile.circles_joined.length > 0 && (
+              {(profile.circles_joined || []).length > 0 && (
                 <div>
                   <Label className="text-xs text-muted-foreground">Sacred Circles</Label>
                   <div className="flex items-center gap-2 mt-2">
                     <Users className="w-4 h-4 text-primary" />
                     <span className="text-sm">
-                      {profile.circles_joined.length} circle{profile.circles_joined.length !== 1 ? 's' : ''} joined
+                      {(profile.circles_joined || []).length} circle{(profile.circles_joined || []).length !== 1 ? 's' : ''} joined
                     </span>
                   </div>
                 </div>
               )}
 
-              {profile.synchronicity_chain.length > 0 && (
+              {(profile.synchronicity_chain || []).length > 0 && (
                 <div>
                   <Label className="text-xs text-muted-foreground">Recent Synchronicity</Label>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {profile.synchronicity_chain.slice(-3).join(' → ')}
+                    {(profile.synchronicity_chain || []).slice(-3).join(' → ')}
                   </div>
                 </div>
               )}

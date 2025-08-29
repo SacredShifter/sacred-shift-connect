@@ -5,30 +5,59 @@ import { useToast } from '@/hooks/use-toast';
 export interface Profile {
   id: string;
   user_id: string;
-  full_name: string;
-  date_of_birth: string;
+  display_name: string;
+  avatar_url: string;
+  bio?: string;
+  full_name?: string;
+  date_of_birth?: string;
   gender_identity?: string;
-  timezone: string;
-  primary_language: string;
+  timezone?: string;
+  primary_language?: string;
   soul_identity?: string;
-  resonance_tags: string[];
+  resonance_tags?: string[];
   aura_signature?: string;
-  circles_joined: string[];
-  current_stage: 'Entry' | 'Expansion' | 'Integration' | 'Crown' | 'Beyond';
+  circles_joined?: string[];
+  current_stage?: 'Entry' | 'Expansion' | 'Integration' | 'Crown' | 'Beyond';
   last_login?: string;
-  streak_days: number;
-  total_meditation_minutes: number;
-  total_journal_entries: number;
-  total_breath_sessions: number;
-  mood_trends: Record<string, number>;
+  streak_days?: number;
+  total_meditation_minutes?: number;
+  total_journal_entries?: number;
+  total_breath_sessions?: number;
+  mood_trends?: Record<string, number>;
   last_synchronicity_event?: string;
-  synchronicity_chain: string[];
-  synchronicity_score: number;
+  synchronicity_chain?: string[];
+  synchronicity_score?: number;
+  ascension_title?: string;
+  consciousness_level?: number;
+  current_chakra_focus?: string;
+  energy_frequency?: number;
+  astral_coordinates?: string;
+  dimensional_access?: string[];
+  quantum_entanglements?: string[];
+  spirit_guide_name?: string;
+  last_vision_quest?: string;
+  sacred_geometry_preference?: string;
+  moon_phase_affinity?: string;
+  elemental_alignment?: string;
+  crystal_resonance?: string[];
+  mantra_collection?: string[];
+  dream_journal_entries?: number;
+  past_life_memories?: string[];
+  future_self_visions?: string[];
+  cosmic_events_witnessed?: string[];
+  interdimensional_travels?: number;
+  light_body_activation?: number;
+  dna_activation_level?: number;
+  merkaba_spin_rate?: number;
+  completed_tours?: string[];
   created_at: string;
   updated_at: string;
 }
 
 export interface ProfileUpdate {
+  display_name?: string;
+  avatar_url?: string;
+  bio?: string;
   full_name?: string;
   date_of_birth?: string;
   gender_identity?: string;
@@ -117,7 +146,7 @@ export function useCreateProfile() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (profileData: Omit<ProfileUpdate, 'user_id'> & { 
+    mutationFn: async (profileData: ProfileUpdate & { 
       full_name: string; 
       date_of_birth: string; 
       timezone: string; 
@@ -131,7 +160,7 @@ export function useCreateProfile() {
         .insert({
           user_id: user.id,
           ...profileData,
-        })
+        } as any)
         .select()
         .single();
 
@@ -161,14 +190,9 @@ export function useUpdateProfileMetrics() {
 
   return useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const { error } = await supabase.rpc('update_profile_metrics', {
-        profile_user_id: user.id
-      });
-
-      if (error) throw error;
+      // For now, we'll just invalidate the query to refresh the profile
+      // In the future, this could calculate metrics from other tables
+      return Promise.resolve();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
