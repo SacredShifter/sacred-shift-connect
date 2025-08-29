@@ -236,7 +236,7 @@ export const SacredBottomToolbar: React.FC = () => {
               initial={{ y: 50, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 50, opacity: 0, scale: 0.95 }}
-              className="absolute bottom-full right-6 mb-4 max-w-sm"
+              className="fixed bottom-20 right-4 z-50 max-w-sm"
             >
               <div 
                 className="bg-background/95 backdrop-blur-sm border-2 rounded-lg shadow-2xl"
