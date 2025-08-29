@@ -56,8 +56,12 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Sacred Circle State
-  const [showRitualOpening, setShowRitualOpening] = useState(true);
+  // Sacred Circle State - Check if ritual needed today
+  const [showRitualOpening, setShowRitualOpening] = useState(() => {
+    const today = new Date().toDateString();
+    const lastRitual = localStorage.getItem(`sacred-ritual-${circleId}-${user?.id}`);
+    return lastRitual !== today;
+  });
   const [activeRealm, setActiveRealm] = useState('communion');
   const [ceremonyPhase, setCeremonyPhase] = useState<'opening' | 'communion' | 'silence' | 'closing'>('communion');
   const [coherenceLevel, setCoherenceLevel] = useState(0.7);
@@ -132,6 +136,10 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
     setUserSigil(sigil);
     setShowRitualOpening(false);
     setCeremonyPhase('communion');
+    
+    // Store ritual completion for today
+    const today = new Date().toDateString();
+    localStorage.setItem(`sacred-ritual-${circleId}-${user?.id}`, today);
     
     toast({
       title: "Sacred Opening Complete",

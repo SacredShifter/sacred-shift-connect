@@ -48,7 +48,7 @@ export const SacredRitualOpening: React.FC<SacredRitualOpeningProps> = ({
         if (phases[currentIndex] === 'inhale') {
           setBreathCount(prev => {
             const newCount = prev + 1;
-            if (newCount >= 3) {
+            if (newCount >= 1) {
               clearInterval(interval);
               setTimeout(() => setPhase('intention'), 1000);
             }
@@ -132,22 +132,19 @@ export const SacredRitualOpening: React.FC<SacredRitualOpeningProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-center gap-2">
-              {[1, 2, 3].map((i) => (
-                <div 
-                  key={i}
-                  className={cn(
-                    "w-3 h-3 rounded-full transition-all duration-300",
-                    i <= breathCount 
-                      ? "bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.6)]" 
-                      : "bg-muted"
-                  )}
-                />
-              ))}
+            <div className="flex justify-center">
+              <div 
+                className={cn(
+                  "w-4 h-4 rounded-full transition-all duration-300",
+                  breathCount >= 1
+                    ? "bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.8)]" 
+                    : "bg-muted"
+                )}
+              />
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Breath {breathCount} of 3
+              One sacred breath to align with the circle
             </p>
           </div>
         )}
