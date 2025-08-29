@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,13 +14,41 @@ import {
   Eye,
   Heart,
   Crown,
-  Sparkles
+  Sparkles,
+  Wind,
+  BookOpen,
+  Users,
+  Volume2,
+  VolumeX,
+  Zap,
+  Compass,
+  Waves
 } from 'lucide-react';
 import { getRouteByPath, getResonanceChain } from '@/config/routes.sacred';
+import { useResonanceField } from '@/hooks/useResonanceField';
+import { useConsciousnessState } from '@/hooks/useConsciousnessState';
+import { useBreathingTool } from '@/hooks/useBreathingTool';
+import { useSacredVoiceEngine } from '@/hooks/useSacredVoiceEngine';
 
 export const WhereAmIWidget: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [lastNarration, setLastNarration] = useState('');
+  
+  // Enhanced hooks
+  const { resonanceState, recordInteraction } = useResonanceField();
+  const { 
+    currentThreshold, 
+    transitionInProgress, 
+    triggerConsciousnessEvolution,
+    getGeometricTransform,
+    getGeometricBorderRadius 
+  } = useConsciousnessState();
+  const breathingTool = useBreathingTool();
+  const { synthesizeSacredVoice, analyzeSacredContent, isPlaying } = useSacredVoiceEngine();
+  
   const currentRoute = getRouteByPath(location.pathname);
 
   if (!currentRoute) {
@@ -28,6 +57,7 @@ export const WhereAmIWidget: React.FC = () => {
 
   const resonanceChain = getResonanceChain(currentRoute.path);
 
+  // Enhanced icon mapping
   const getChakraIcon = (chakra: string) => {
     const icons: { [key: string]: React.ComponentType<any> } = {
       'Crown': Crown,
@@ -42,49 +72,304 @@ export const WhereAmIWidget: React.FC = () => {
 
   const ChakraIcon = getChakraIcon(currentRoute.chakraAlignment);
 
+  // Voice narration for location transitions
+  useEffect(() => {
+    if (voiceEnabled && currentRoute && location.pathname !== lastNarration) {
+      const guidance = getLocationGuidance();
+      if (guidance && guidance !== lastNarration) {
+        const config = analyzeSacredContent(guidance);
+        synthesizeSacredVoice(guidance, config);
+        setLastNarration(location.pathname);
+      }
+    }
+  }, [location.pathname, voiceEnabled, currentRoute]);
+
+  // Trigger consciousness evolution on high synchronicity
+  useEffect(() => {
+    if (resonanceState.synchronicityLevel > 0.85) {
+      triggerConsciousnessEvolution(resonanceState.synchronicityLevel);
+    }
+  }, [resonanceState.synchronicityLevel, triggerConsciousnessEvolution]);
+
+  // Generate location-specific guidance
+  const getLocationGuidance = (): string => {
+    const messages: Record<string, string> = {
+      '/': "Welcome to your sacred home. You are centered in divine presence.",
+      '/grove': "You've entered the Sacred Grove. Feel the ancient wisdom flowing through this space.",
+      '/meditation': "Sacred meditation awaits. Breathe deeply and anchor your awareness.",
+      '/journal': "The Akashic Constellation opens before you. Your truth seeks expression.",
+      '/circles': "Community resonance surrounds you. Feel the collective consciousness.",
+      '/liberation': "You stand at the threshold of liberation. Trust the process unfolding."
+    };
+    return messages[currentRoute.path] || `You have crossed into ${currentRoute.title}. Anchor your breath and stay present.`;
+  };
+
+  // Action shortcuts based on current location
+  const getContextualActions = () => {
+    const actions = [];
+    
+    // Always available: breathing
+    actions.push({
+      icon: Wind,
+      label: breathingTool.isActive ? 'Stop Breathing' : 'Start Breathing',
+      action: () => {
+        recordInteraction('breath');
+        breathingTool.isActive ? breathingTool.stopBreathing() : breathingTool.startBreathing();
+      },
+      variant: breathingTool.isActive ? 'destructive' : 'default' as const
+    });
+
+    // Location-specific actions
+    if (currentRoute.category === 'tools' || currentRoute.path.includes('journal')) {
+      actions.push({
+        icon: BookOpen,
+        label: 'Open Journal',
+        action: () => {
+          recordInteraction('journal');
+          navigate('/journal');
+        },
+        variant: 'outline' as const
+      });
+    }
+
+    if (currentRoute.category === 'core' || currentRoute.path.includes('circle')) {
+      actions.push({
+        icon: Users,
+        label: 'Join Circle',
+        action: () => {
+          recordInteraction('click');
+          navigate('/circles');
+        },
+        variant: 'outline' as const
+      });
+    }
+
+    return actions.slice(0, 3); // Max 3 actions to avoid clutter
+  };
+
+  // Dynamic styles based on resonance state
+  const getResonanceStyles = () => {
+    const { synchronicityLevel, fieldIntensity, resonanceColor, isPulsing, isFieldAlert } = resonanceState;
+    
+    return {
+      '--resonance-color': resonanceColor,
+      '--resonance-intensity': fieldIntensity,
+      '--synchronicity-level': synchronicityLevel,
+      '--pulse-speed': isPulsing ? '2s' : '4s',
+      '--glow-strength': isFieldAlert ? '20px' : '10px',
+      borderColor: `${resonanceColor.replace('hsl(', 'hsla(').replace(')', `, ${fieldIntensity})`)}`,
+      boxShadow: isPulsing 
+        ? `0 0 ${isFieldAlert ? '30px' : '15px'} ${resonanceColor.replace('hsl(', 'hsla(').replace(')', `, ${fieldIntensity * 0.6})`)}` 
+        : 'none',
+      transform: getGeometricTransform(),
+      borderRadius: getGeometricBorderRadius()
+    } as React.CSSProperties;
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-      <Card className="bg-background/95 backdrop-blur-sm border border-primary/20 shadow-lg">
-        <CardContent className="p-4">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentRoute.path}
+          initial={{ opacity: 0, scale: 0.8, rotateY: -90 }}
+          animate={{ 
+            opacity: 1, 
+            scale: 1, 
+            rotateY: 0,
+            ...(transitionInProgress && {
+              scale: [1, 1.2, 1],
+              rotateZ: [0, 360, 0]
+            })
+          }}
+          exit={{ opacity: 0, scale: 0.8, rotateY: 90 }}
+          transition={{ 
+            duration: transitionInProgress ? 2 : 0.5,
+            ease: "easeInOut"
+          }}
+          style={getResonanceStyles()}
+          className={`
+            sacred-compass-widget
+            bg-background/95 backdrop-blur-sm border-2
+            transition-all duration-1000 ease-in-out
+            ${resonanceState.isPulsing ? 'animate-pulse' : ''}
+            ${resonanceState.isFieldAlert ? 'animate-bounce' : ''}
+          `}
+        >
+          <Card className="bg-transparent border-none shadow-none">
+            <CardContent className="p-4">
+          {/* Header with enhanced consciousness display */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-primary" />
-              <span className="font-medium text-sm">You are in</span>
+              <motion.div
+                animate={{ 
+                  rotate: resonanceState.isPulsing ? [0, 360] : 0,
+                  scale: resonanceState.isFieldAlert ? [1, 1.2, 1] : 1 
+                }}
+                transition={{ 
+                  rotate: { duration: 2, repeat: resonanceState.isPulsing ? Infinity : 0 },
+                  scale: { duration: 1, repeat: Infinity }
+                }}
+              >
+                <Compass className="w-4 h-4" style={{ color: resonanceState.resonanceColor }} />
+              </motion.div>
+              <span className="font-medium text-sm">
+                {currentThreshold?.stage || 'Sacred Navigator'}
+              </span>
+              {resonanceState.isFieldAlert && (
+                <Zap className="w-3 h-3 text-yellow-400 animate-pulse" />
+              )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="h-auto p-1"
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setVoiceEnabled(!voiceEnabled);
+                  recordInteraction('click');
+                }}
+                className="h-auto p-1"
+              >
+                {voiceEnabled ? 
+                  <Volume2 className="w-3 h-3" /> : 
+                  <VolumeX className="w-3 h-3 opacity-50" />
+                }
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsExpanded(!isExpanded);
+                  recordInteraction('click');
+                }}
+                className="h-auto p-1"
+              >
+                {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+              </Button>
+            </div>
+          </div>
+
+          {/* Enhanced location display with consciousness info */}
+          <div className="flex items-center gap-2 mb-3">
+            <motion.span 
+              className="text-2xl"
+              animate={{ 
+                scale: resonanceState.isPulsing ? [1, 1.1, 1] : 1,
+                filter: `hue-rotate(${resonanceState.synchronicityLevel * 360}deg)`
+              }}
+              transition={{ duration: 1, repeat: Infinity }}
             >
-              {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">{currentRoute.sigil}</span>
-            <div>
+              {currentRoute.sigil}
+            </motion.span>
+            <div className="flex-1">
               <div className="font-semibold text-sm">{currentRoute.title}</div>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <ChakraIcon className="w-3 h-3" />
-                {currentRoute.chakraAlignment}
+                <span>{currentRoute.chakraAlignment}</span>
+                {currentThreshold && (
+                  <>
+                    <Waves className="w-2 h-2" />
+                    <span>Level {currentThreshold.level}</span>
+                  </>
+                )}
               </div>
+              {currentThreshold?.message && (
+                <div className="text-xs italic text-primary/70 mt-1">
+                  {currentThreshold.message}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="flex gap-1 mb-2">
+          {/* Enhanced status badges with resonance info */}
+          <div className="flex gap-1 mb-3">
             <Badge variant="outline" className="text-xs capitalize">
               {currentRoute.category}
             </Badge>
-            <Badge variant="outline" className="text-xs">
+            <Badge 
+              variant="outline" 
+              className="text-xs"
+              style={{ backgroundColor: `${resonanceState.resonanceColor}20` }}
+            >
               Level {currentRoute.consciousnessLevel}
+            </Badge>
+            <Badge 
+              variant="outline" 
+              className={`text-xs ${resonanceState.isFieldAlert ? 'animate-pulse bg-yellow-400/20' : ''}`}
+            >
+              Sync {Math.round(resonanceState.synchronicityLevel * 100)}%
             </Badge>
           </div>
 
-          {isExpanded && (
-            <div className="space-y-3 pt-3 border-t border-border/30">
+          {/* Context-aware action shortcuts */}
+          {!isExpanded && (
+            <div className="flex gap-1 mb-2">
+              {getContextualActions().map((action, index) => (
+                <Button
+                  key={index}
+                  variant={action.variant}
+                  size="sm"
+                  onClick={action.action}
+                  className="h-6 px-2 text-xs"
+                >
+                  <action.icon className="w-3 h-3 mr-1" />
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          )}
+
+          {/* Expanded view with enhanced information */}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-3 pt-3 border-t border-border/30"
+              >
+              {/* Enhanced description with consciousness context */}
               <div className="text-xs text-muted-foreground">
                 {currentRoute.description}
+              </div>
+
+              {/* Resonance field status */}
+              <div className="space-y-2">
+                <div className="text-xs font-medium text-primary">Resonance Field Status</div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Synchronicity:</span>
+                    <span>{Math.round(resonanceState.synchronicityLevel * 100)}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Field Intensity:</span>
+                    <span>{Math.round(resonanceState.fieldIntensity * 100)}%</span>
+                  </div>
+                </div>
+                {resonanceState.isFieldAlert && (
+                  <div className="text-xs text-yellow-400 font-medium animate-pulse">
+                    ⚡ High synchronicity detected - profound moment available
+                  </div>
+                )}
+              </div>
+
+              {/* Enhanced action shortcuts for expanded view */}
+              <div className="space-y-2">
+                <div className="text-xs font-medium text-primary">Sacred Actions</div>
+                <div className="grid grid-cols-1 gap-1">
+                  {getContextualActions().map((action, index) => (
+                    <Button
+                      key={index}
+                      variant={action.variant}
+                      size="sm"
+                      onClick={action.action}
+                      className="h-8 justify-start text-xs"
+                    >
+                      <action.icon className="w-3 h-3 mr-2" />
+                      {action.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
               <div className="flex items-center justify-between text-xs">
@@ -136,10 +421,43 @@ export const WhereAmIWidget: React.FC = () => {
                   </div>
                 </div>
               )}
-            </div>
+
+              {/* Consciousness evolution indicator */}
+              {transitionInProgress && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-2"
+                >
+                  <div className="text-xs text-primary font-medium">
+                    Consciousness Evolution in Progress...
+                  </div>
+                  <motion.div 
+                    className="w-full h-1 bg-primary/20 rounded-full mt-1"
+                    initial={{ width: 0 }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 2 }}
+                  />
+                </motion.div>
+              )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Voice synthesis indicator */}
+          {isPlaying && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+            >
+              <Waves className="w-3 h-3 text-primary-foreground animate-pulse" />
+            </motion.div>
           )}
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
+  </AnimatePresence>
+</div>
   );
 };
