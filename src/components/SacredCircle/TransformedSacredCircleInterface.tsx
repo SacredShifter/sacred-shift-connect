@@ -234,23 +234,17 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
 
   // Render sacred circle interface
   return (
-    <Card className={cn(
-      "flex flex-col transition-all duration-500",
-      "bg-gradient-to-br from-background/95 to-background/80 backdrop-blur-sm",
-      "border border-primary/20 shadow-[0_0_30px_hsl(var(--primary)/0.15)]",
-      currentMaximized && "fixed inset-0 z-50 rounded-none animate-scale-in w-screen h-screen",
-      currentMinimized && "h-12 overflow-hidden",
-      !currentMaximized && !currentMinimized && "h-full",
+    <div className={cn(
+      "flex flex-col h-full",
+      "bg-gradient-to-br from-background via-background/98 to-primary/5",
       className
     )}>
       
       {/* Sacred Header */}
-      <div className="flex items-center gap-4 p-6 border-b border-primary/20 bg-gradient-to-r from-primary/5 to-purpose/5">
-        {onClose && (
-          <Button variant="ghost" size="sm" onClick={onClose} className="p-2 hover:bg-primary/10">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        )}
+      <div className="flex items-center gap-4 p-4 border-b border-primary/20 bg-gradient-to-r from-primary/10 to-purpose/10 shadow-sm">
+        <Button variant="ghost" size="sm" onClick={onClose} className="p-2 hover:bg-primary/20">
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
         
         {/* Sacred Circle Identity */}
         <div className="flex items-center gap-3 flex-1">
@@ -295,84 +289,67 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
             <Settings className="h-4 w-4" />
           </Button>
           
-          {/* Window Controls */}
-          <div className="flex items-center gap-1 ml-2 border-l border-primary/20 pl-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 p-0 hover:bg-yellow-500/20"
-              onClick={handleMinimize}
-              title="Minimize"
-            >
-              <Minus className="h-3 w-3" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 p-0 hover:bg-green-500/20"
-              onClick={currentMaximized ? handleRestore : handleMaximize}
-              title={currentMaximized ? "Restore" : "Maximize"}
-            >
-              {currentMaximized ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
-            </Button>
-          </div>
         </div>
       </div>
 
       {/* Sacred Content */}
-      <div className={cn("flex-1 flex flex-col", currentMinimized && "hidden")}>
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         
         {/* Sacred Geometry Center */}
-        <div className="px-6 py-4 border-b border-primary/10">
-          <SacredGeometryCenter
-            coherenceLevel={coherenceLevel}
-            ceremonyPhase={ceremonyPhase}
-            participantCount={mockMembers.length}
-          />
+        <div className="px-4 py-3 border-b border-primary/10 shrink-0">
+          <div className="h-32">
+            <SacredGeometryCenter
+              coherenceLevel={coherenceLevel}
+              ceremonyPhase={ceremonyPhase}
+              participantCount={mockMembers.length}
+            />
+          </div>
         </div>
 
-          {/* Sacred Navigation */}
+        {/* Sacred Navigation */}
+        <div className="px-4 py-2 border-b border-primary/10 shrink-0">
           <SacredNavigation 
             activeRealm={activeRealm}
             onRealmChange={setActiveRealm}
           />
+        </div>
 
-          {/* Sacred Pause System */}
-          {isPaused && (
-            <div className="px-6 py-4">
-              <SacredPauseSystem
-                isActive={isPaused}
-                onInitiate={handleSacredPause}
-                onResume={handlePauseResume}
-                initiatedBy="You"
-                participantCount={participantCount}
-              />
-            </div>
-          )}
-
-          {/* AI Facilitation Panel */}
-          <div className="px-6 py-3 border-b border-border/20">
-            <AIFacilitationPanel
-              isActive={facilitation.isActive}
-              currentFacilitator={facilitation.currentFacilitator}
-              suggestion={facilitation.suggestion}
-              resonanceReading={facilitation.resonanceReading}
-              onInvokeAura={facilitation.invokeAura}
-              onInvokeValeion={facilitation.invokeValeion}
-              onDismissSuggestion={facilitation.dismissSuggestion}
-              onToggleFacilitation={facilitation.toggleFacilitation}
+        {/* Sacred Pause System */}
+        {isPaused && (
+          <div className="px-4 py-3 border-b border-primary/10 shrink-0">
+            <SacredPauseSystem
+              isActive={isPaused}
+              onInitiate={handleSacredPause}
+              onResume={handlePauseResume}
+              initiatedBy="You"
+              participantCount={participantCount}
             />
           </div>
+        )}
+
+        {/* AI Facilitation Panel */}
+        <div className="px-4 py-2 border-b border-primary/10 shrink-0">
+          <AIFacilitationPanel
+            isActive={facilitation.isActive}
+            currentFacilitator={facilitation.currentFacilitator}
+            suggestion={facilitation.suggestion}
+            resonanceReading={facilitation.resonanceReading}
+            onInvokeAura={facilitation.invokeAura}
+            onInvokeValeion={facilitation.invokeValeion}
+            onDismissSuggestion={facilitation.dismissSuggestion}
+            onToggleFacilitation={facilitation.toggleFacilitation}
+          />
+        </div>
 
         {/* Sacred Realms Content */}
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           
           {/* Sacred Communion (Messages) */}
           {activeRealm === 'communion' && (
             <>
-              <ScrollArea 
+              <div 
                 ref={scrollAreaRef}
-                className="flex-1 px-6 py-4 min-h-0"
+                className="flex-1 px-4 py-4 overflow-y-auto min-h-0"
               >
                 {sacredPauseActive ? (
                   <div className="flex items-center justify-center h-full min-h-[200px]">
@@ -436,7 +413,7 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
                     )}
                   </div>
                 )}
-              </ScrollArea>
+              </div>
 
               {/* Sacred Message Input */}
               {!sacredPauseActive && (
@@ -451,10 +428,10 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
 
           {/* Collective Presence (Energy Visualization) */}
           {activeRealm === 'collective' && (
-            <div className="flex-1 p-6 space-y-6">
+            <div className="flex-1 p-4 space-y-4 overflow-y-auto">
               
               {/* Collective Energy Visualization */}
-              <div className="h-64">
+              <div className="h-48">
                 <CollectiveEnergyVisualizer
                   resonanceLevel={facilitation.resonanceReading?.level || 0.7}
                   participantCount={participantCount}
@@ -559,6 +536,6 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 };

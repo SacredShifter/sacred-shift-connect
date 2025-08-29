@@ -272,48 +272,14 @@ const Circles = () => {
                   </Button>
                   
                   {isJoined && (
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedCircle(circle.id)}
-                          className="border-primary/20 hover:border-primary/50"
-                        >
-                          Enter
-                        </Button>
-                      </DialogTrigger>
-                       <DialogContent 
-                         className={
-                           isCircleMaximized 
-                             ? "fixed inset-0 top-0 left-0 right-0 bottom-0 z-50 max-w-none max-h-none w-screen h-screen rounded-none border-none m-0 p-0 !translate-x-0 !translate-y-0 !left-0 !top-0" 
-                             : "max-w-4xl max-h-[90vh] overflow-hidden"
-                         }
-                         onOpenAutoFocus={() => {
-                           setIsCircleMaximized(false);
-                           setIsCircleMinimized(false);
-                         }}
-                      >
-                        <DialogHeader className={isCircleMinimized ? "hidden" : ""}>
-                          <DialogTitle>Sacred Circle: {circle.name}</DialogTitle>
-                        </DialogHeader>
-                        <div className={isCircleMaximized ? "h-full" : "h-[70vh]"}>
-                          <TransformedSacredCircleInterface 
-                            circleId={circle.id}
-                            circleName={circle.name}
-                            className="h-full"
-                            isMaximized={isCircleMaximized}
-                            isMinimized={isCircleMinimized}
-                            onMaximize={() => setIsCircleMaximized(true)}
-                            onMinimize={() => setIsCircleMinimized(true)}
-                            onRestore={() => {
-                              setIsCircleMaximized(false);
-                              setIsCircleMinimized(false);
-                            }}
-                          />
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedCircle(circle.id)}
+                      className="border-primary/20 hover:border-primary/50"
+                    >
+                      Enter Sacred Circle
+                    </Button>
                   )}
                 </CardFooter>
               </Card>
@@ -352,6 +318,18 @@ const Circles = () => {
           onOpenChange={setCreateModalOpen}
         />
       </div>
+
+      {/* Full-Screen Sacred Circle Interface */}
+      {selectedCircle && (
+        <div className="fixed inset-0 bg-background z-50">
+          <TransformedSacredCircleInterface 
+            circleId={selectedCircle}
+            circleName={circles?.find(c => c.id === selectedCircle)?.name || 'Sacred Circle'}
+            onClose={() => setSelectedCircle(null)}
+            className="h-full w-full"
+          />
+        </div>
+      )}
     </div>
   );
 };
