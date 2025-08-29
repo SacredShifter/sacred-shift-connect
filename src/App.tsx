@@ -13,6 +13,7 @@ import { ProductionReadyErrorBoundary } from "@/components/production/Production
 import { PerformanceMonitor } from "@/components/production/PerformanceMonitor";
 import SacredScreensaver from "@/components/SacredScreensaver";
 
+import Dashboard from './pages/Dashboard';
 import Index from "./pages/Index";
 import Feed from "./pages/Feed";
 import Messages from "./pages/Messages";
