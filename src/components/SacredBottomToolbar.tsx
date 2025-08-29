@@ -28,10 +28,6 @@ export const SacredBottomToolbar: React.FC = () => {
   const { resonanceState } = useResonanceField();
   const { currentThreshold } = useConsciousnessState();
   
-  const isHermetic = location.pathname.startsWith('/learn/hermetic');
-  
-  if (isHermetic) return null;
-
   const getLocationTitle = () => {
     const path = location.pathname;
     if (path === '/') return 'Sacred Dashboard';
@@ -67,6 +63,10 @@ export const SacredBottomToolbar: React.FC = () => {
     if (path.startsWith('/profile')) return 'Transformation';
     return 'Present';
   };
+
+  const isHermetic = location.pathname.startsWith('/learn/hermetic');
+  
+  if (isHermetic) return null;
 
   const getResonanceStyles = () => {
     const { synchronicityLevel, fieldIntensity, resonanceColor, isFieldAlert } = resonanceState;
