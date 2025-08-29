@@ -56,12 +56,8 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Sacred Circle State - Check if ritual needed today
-  const [showRitualOpening, setShowRitualOpening] = useState(() => {
-    const today = new Date().toDateString();
-    const lastRitual = localStorage.getItem(`sacred-ritual-${circleId}-${user?.id}`);
-    return lastRitual !== today;
-  });
+  // Sacred Circle State - No ritual opening
+  const [showRitualOpening, setShowRitualOpening] = useState(false);
   const [activeRealm, setActiveRealm] = useState('communion');
   const [ceremonyPhase, setCeremonyPhase] = useState<'opening' | 'communion' | 'silence' | 'closing'>('communion');
   const [coherenceLevel, setCoherenceLevel] = useState(0.7);
@@ -221,16 +217,6 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
   }, [fetchRecentMessages, circleId]);
 
 
-  // Show ritual opening for first-time entry
-  if (showRitualOpening) {
-    return (
-      <SacredRitualOpening
-        circleName={circleName}
-        onComplete={handleRitualComplete}
-        participantCount={mockMembers.length}
-      />
-    );
-  }
 
   // Render sacred circle interface
   return (
@@ -295,226 +281,51 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
       {/* Sacred Content */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         
-        {/* Sacred Geometry Center */}
-        <div className="px-4 py-3 border-b border-primary/10 shrink-0">
-          <div className="h-32">
-            <SacredGeometryCenter
-              coherenceLevel={coherenceLevel}
-              ceremonyPhase={ceremonyPhase}
-              participantCount={mockMembers.length}
-            />
-          </div>
-        </div>
 
-        {/* Sacred Navigation */}
-        <div className="px-4 py-2 border-b border-primary/10 shrink-0">
-          <SacredNavigation 
-            activeRealm={activeRealm}
-            onRealmChange={setActiveRealm}
-          />
-        </div>
-
-        {/* Sacred Pause System */}
-        {isPaused && (
-          <div className="px-4 py-3 border-b border-primary/10 shrink-0">
-            <SacredPauseSystem
-              isActive={isPaused}
-              onInitiate={handleSacredPause}
-              onResume={handlePauseResume}
-              initiatedBy="You"
-              participantCount={participantCount}
-            />
-          </div>
-        )}
-
-        {/* AI Facilitation Panel */}
-        <div className="px-4 py-2 border-b border-primary/10 shrink-0">
-          <AIFacilitationPanel
-            isActive={facilitation.isActive}
-            currentFacilitator={facilitation.currentFacilitator}
-            suggestion={facilitation.suggestion}
-            resonanceReading={facilitation.resonanceReading}
-            onInvokeAura={facilitation.invokeAura}
-            onInvokeValeion={facilitation.invokeValeion}
-            onDismissSuggestion={facilitation.dismissSuggestion}
-            onToggleFacilitation={facilitation.toggleFacilitation}
-          />
-        </div>
-
-        {/* Sacred Realms Content */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          
-          {/* Sacred Communion (Messages) */}
-          {activeRealm === 'communion' && (
-            <>
-              <div 
-                ref={scrollAreaRef}
-                className="flex-1 px-4 py-4 overflow-y-auto min-h-0"
-              >
-                {sacredPauseActive ? (
-                  <div className="flex items-center justify-center h-full min-h-[200px]">
-                    <div className="text-center space-y-4">
-                      <div className="text-6xl animate-pulse">🤫</div>
-                      <p className="text-lg font-medium">Sacred Silence</p>
-                      <p className="text-sm text-muted-foreground">
-                        The circle rests in sacred pause
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-6 pb-4">
-                    {loading ? (
-                      <div className="text-center text-muted-foreground">
-                        Loading sacred messages...
-                      </div>
-                    ) : messages.length === 0 ? (
-                      <div className="text-center space-y-3 py-12">
-                        <div className="text-4xl">🌸</div>
-                        <p className="text-lg font-medium">Sacred Silence</p>
-                        <p className="text-sm text-muted-foreground">
-                          Be the first to share your truth in this sacred space
-                        </p>
-                      </div>
-                    ) : (
-                      messages.map((message, index) => (
-                        <div key={message.id} className="space-y-3">
-                          <SacredMessageVessel
-                            message={{
-                              ...message,
-                              author: {
-                                name: message.author?.display_name,
-                                avatar: message.author?.avatar_url
-                              }
-                            }}
-                            isOwn={message.user_id === user?.id}
-                          />
-                          
-                          {/* Message Resonance Indicator */}
-                          <MessageResonanceIndicator
-                            messageId={message.id}
-                            content={message.content}
-                            authorId={message.user_id}
-                            sigils={(message as any).sigils || []}
-                            resonanceLevel={0.7 + (index * 0.05) % 0.3}
-                            resonanceType={['heart', 'mind', 'soul', 'energy'][index % 4] as any}
-                            participantReactions={[
-                              { userId: 'user1', type: 'resonance', intensity: 0.8 },
-                              { userId: 'user2', type: 'wisdom', intensity: 0.9 }
-                            ]}
-                            onResonanceClick={(type) => {
-                              toast({
-                                title: "Sacred Resonance",
-                                description: `You sent ${type} energy to this message`,
-                              });
-                            }}
-                          />
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Sacred Message Input */}
-              {!sacredPauseActive && (
-                <SacredMessageInput
-                  onSendMessage={handleSendMessage}
-                  onSacredPause={handleSacredPause}
-                  disabled={loading}
-                />
+        {/* Messages Area */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div 
+            ref={scrollAreaRef}
+            className="flex-1 px-4 py-4 overflow-y-auto min-h-0"
+          >
+            <div className="space-y-4 pb-4">
+              {loading ? (
+                <div className="text-center text-muted-foreground py-8">
+                  Loading messages...
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="text-center space-y-3 py-12">
+                  <p className="text-lg font-medium">No messages yet</p>
+                  <p className="text-sm text-muted-foreground">
+                    Be the first to start the conversation
+                  </p>
+                </div>
+              ) : (
+                messages.map((message) => (
+                  <SacredMessageVessel
+                    key={message.id}
+                    message={{
+                      ...message,
+                      author: {
+                        name: message.author?.display_name || 'Unknown',
+                        avatar: message.author?.avatar_url
+                      }
+                    }}
+                    isOwn={message.user_id === user?.id}
+                  />
+                ))
               )}
-            </>
-          )}
-
-          {/* Collective Presence (Energy Visualization) */}
-          {activeRealm === 'collective' && (
-            <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-              
-              {/* Collective Energy Visualization */}
-              <div className="h-48">
-                <CollectiveEnergyVisualizer
-                  resonanceLevel={facilitation.resonanceReading?.level || 0.7}
-                  participantCount={participantCount}
-                  energyQuality={facilitation.resonanceReading?.quality || 'harmonious'}
-                  className="h-full"
-                />
-              </div>
-
-              {/* Chakra Alignment Tracker */}
-              <ChakraAlignmentTracker
-                participantChakras={[
-                  { name: 'Crown', color: 'hsl(280, 70%, 70%)', symbol: '🟣', alignment: 0.8, active: true },
-                  { name: 'Third Eye', color: 'hsl(260, 80%, 65%)', symbol: '🔵', alignment: 0.9, active: true },
-                  { name: 'Heart', color: 'hsl(120, 70%, 55%)', symbol: '💚', alignment: 0.9, active: true },
-                  { name: 'Solar Plexus', color: 'hsl(50, 90%, 60%)', symbol: '🟡', alignment: 0.6, active: false },
-                  { name: 'Root', color: 'hsl(0, 70%, 55%)', symbol: '🔴', alignment: 0.8, active: true }
-                ]}
-                collectiveAlignment={0.8}
-              />
-
-              {/* Collective Wisdom Display */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-                <h3 className="text-sm font-medium mb-3 text-center">Collective Consciousness Field</h3>
-                <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div className="text-center">
-                    <div className="text-2xl mb-1">🌊</div>
-                    <div className="font-medium">Resonance</div>
-                    <div className="text-muted-foreground">
-                      {Math.round((facilitation.resonanceReading?.level || 0.7) * 100)}%
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl mb-1">🧘‍♀️</div>
-                    <div className="font-medium">Coherence</div>
-                    <div className="text-muted-foreground">High</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl mb-1">💫</div>
-                    <div className="font-medium">Unity</div>
-                    <div className="text-muted-foreground">Emerging</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl mb-1">✨</div>
-                    <div className="font-medium">Transcendence</div>
-                    <div className="text-muted-foreground">Active</div>
-                  </div>
-                </div>
-              </div>
             </div>
-          )}
+          </div>
 
-          {/* Sacred Practice */}
-          {activeRealm === 'transcendence' && (
-            <div className="flex-1 p-6 space-y-6">
-              <div className="text-center space-y-4">
-                <div className="text-6xl">🧘‍♂️</div>
-                <h3 className="text-xl font-medium">Sacred Practice Space</h3>
-                <p className="text-sm text-muted-foreground">
-                  Meditation, ceremony, and ritual practices
-                </p>
-                
-                {/* Practice Options */}
-                <div className="grid grid-cols-2 gap-4 mt-6">
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
-                    <span className="text-2xl">🌬️</span>
-                    <span className="text-xs">Breathing Meditation</span>
-                  </Button>
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
-                    <span className="text-2xl">🔮</span>
-                    <span className="text-xs">Vision Ceremony</span>
-                  </Button>
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
-                    <span className="text-2xl">🌙</span>
-                    <span className="text-xs">Moon Ritual</span>
-                  </Button>
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
-                    <span className="text-2xl">🙏</span>
-                    <span className="text-xs">Gratitude Circle</span>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Message Input - Always visible */}
+          <div className="border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <SacredMessageInput
+              onSendMessage={handleSendMessage}
+              onSacredPause={handleSacredPause}
+              disabled={loading}
+            />
+          </div>
         </div>
       </div>
 
