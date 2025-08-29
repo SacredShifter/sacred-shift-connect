@@ -38,6 +38,26 @@ export function UnifiedActivityFeed() {
   useEffect(() => {
     if (user) {
       fetchUnifiedActivity();
+      
+      // Set up real-time subscriptions
+      const postsChannel = supabase
+        .channel('feed-posts')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'circle_posts'
+          },
+          () => {
+            fetchUnifiedActivity();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(postsChannel);
+      };
     }
   }, [user]);
 
