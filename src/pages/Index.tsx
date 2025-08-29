@@ -31,7 +31,8 @@ import {
   Map,
   Rss,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  BarChart3
 } from 'lucide-react';
 
 const Index = () => {
@@ -58,6 +59,15 @@ const Index = () => {
   ];
 
   const modules = [
+    {
+      title: 'Sacred Journey Dashboard',
+      description: 'Track your consciousness evolution and spiritual growth with detailed metrics and insights',
+      icon: BarChart3,
+      path: '/dashboard',
+      gradient: 'from-primary/20 to-accent/20',
+      glow: 'shadow-primary/30',
+      keywords: ['progress tracking', 'meditation metrics', 'consciousness evolution']
+    },
     {
       title: 'Mesh',
       description: 'The crown jewel - sovereign peer-to-peer communication that transcends all networks',

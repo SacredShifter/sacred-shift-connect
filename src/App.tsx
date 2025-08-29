@@ -67,6 +67,7 @@ function App() {
                 }
               >
                   <Route path="/" element={<Index />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/feed" element={<Feed />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/circles" element={<Circles />} />
