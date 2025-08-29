@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Plus, Users, Lock, Globe, Filter, TrendingUp, Clock, Star, Calendar, Heart, Sparkles, User, Zap } from 'lucide-react';
 import { CreateCircleModal } from '@/components/CreateCircleModal';
 import { SacredCircleInterface } from '@/components/SacredCircleInterface';
+import { TransformedSacredCircleInterface } from '@/components/SacredCircle/TransformedSacredCircleInterface';
 import { SacredSocialFeed } from '@/components/SacredSocialFeed';
 import { SacredProfile } from '@/components/SacredProfile';
 import { SacredEvents } from '@/components/SacredEvents';
@@ -297,7 +298,7 @@ const Circles = () => {
                           <DialogTitle>Sacred Circle: {circle.name}</DialogTitle>
                         </DialogHeader>
                         <div className={isCircleMaximized ? "h-full" : "h-[70vh]"}>
-                          <SacredCircleInterface 
+                          <TransformedSacredCircleInterface 
                             circleId={circle.id}
                             circleName={circle.name}
                             className="h-full"
