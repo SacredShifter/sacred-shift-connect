@@ -33,6 +33,7 @@ import { GroupMeditationSession } from '@/components/GroupMeditationSession';
 import { MEDITATION_MODULE_CONFIG } from '@/config/mediaMaps';
 import { Slogan } from '@/components/ui/Slogan';
 import MeditationVisuals from '@/components/MeditationVisuals';
+import { MeditationPlaylistIntegration } from '@/components/MeditationPlaylistIntegration';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type MeditationType = 'breathing' | 'loving-kindness' | 'chakra' | 'mindfulness' | 'body-scan';
@@ -186,6 +187,7 @@ export default function Meditation() {
 
 
   const startSoloMeditation = () => {
+    console.log(`🚀 Starting solo meditation: ${selectedMeditation?.name} for ${duration[0]} minutes`);
     const totalTime = duration[0] * 60;
     setTimeRemaining(totalTime);
     setSessionState('active');
@@ -420,6 +422,25 @@ export default function Meditation() {
 
   return (
     <>
+      {/* YouTube Playlist Integration */}
+      <MeditationPlaylistIntegration
+        isActive={sessionState === 'active' && soundEnabled}
+        practiceName={selectedMeditation?.name || 'Sacred Shifter Journey Snippets'}
+        durationMinutes={duration[0]}
+        volume={volume[0]}
+        onVideoChange={(title) => {
+          console.log(`🎵 Now playing: ${title}`);
+        }}
+        onError={(error) => {
+          console.error('Playlist error:', error);
+          toast({
+            title: "Audio Error",
+            description: "Continuing session without background audio",
+            variant: "destructive",
+          });
+        }}
+      />
+
       {/* Group Session Interface Overlay */}
       {joinedSession && (
         <GroupMeditationSession

@@ -182,19 +182,23 @@ export const useMeditationPlaylist = () => {
     practiceName: string, 
     durationMinutes: number
   ): Promise<YouTubeVideo[]> => {
+    console.log(`🎵 Loading playlist for practice: "${practiceName}", duration: ${durationMinutes} minutes`);
     setError(null);
     
     try {
       // First try to find playlist with exact practice name
+      console.log(`🔍 Searching for playlist: "${practiceName}"`);
       let playlistData = await getVideosFromPlaylistByTitle(practiceName, 50);
       
       // If no playlist found, fall back to default
       if (!playlistData.videos || playlistData.videos.length === 0) {
-        console.log(`No playlist found for "${practiceName}", using default playlist`);
+        console.log(`⚠️ No playlist found for "${practiceName}", using default playlist: "${MEDITATION_MODULE_CONFIG.playlistTitle}"`);
         playlistData = await getVideosFromPlaylistByTitle(
           MEDITATION_MODULE_CONFIG.playlistTitle, 
           50
         );
+      } else {
+        console.log(`✅ Found playlist for "${practiceName}" with ${playlistData.videos.length} videos`);
       }
 
       if (!playlistData.videos || playlistData.videos.length === 0) {
@@ -223,6 +227,7 @@ export const useMeditationPlaylist = () => {
     onVideoChange?: (video: YouTubeVideo, index: number) => void,
     onSessionComplete?: () => void
   ) => {
+    console.log(`🚀 Starting meditation session: "${practiceName}" for ${durationMinutes} minutes`);
     try {
       const playlist = await loadPlaylistForPractice(practiceName, durationMinutes);
       

@@ -38,7 +38,9 @@ export const MeditationPlaylistIntegration: React.FC<MeditationPlaylistIntegrati
 
   // Handle session start/stop
   useEffect(() => {
+    console.log(`🎧 Playlist Integration - isActive: ${isActive}, hasStarted: ${hasStarted.current}, practice: "${practiceName}"`);
     if (isActive && !hasStarted.current && practiceName) {
+      console.log(`🎵 Starting playlist for meditation session`);
       hasStarted.current = true;
       startMeditationSession(
         practiceName,
