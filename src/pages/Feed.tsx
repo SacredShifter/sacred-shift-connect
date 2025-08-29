@@ -1,10 +1,8 @@
 import { UnifiedActivityFeed } from '@/components/UnifiedActivityFeed';
-import { Slogan } from '@/components/ui/Slogan';
 
 const Feed = () => {
   return (
     <div className="h-full overflow-y-auto">
-      <Slogan variant="watermark" />
       
       {/* Unified Activity Feed */}
       <div className="border-b border-primary/10 bg-background/80 backdrop-blur-sm sticky top-0 z-10">

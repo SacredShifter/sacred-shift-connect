@@ -127,7 +127,6 @@ const Circles = () => {
 
   return (
     <div className="h-full overflow-y-auto">
-      <Slogan variant="watermark" />
       
       {/* Sacred Circles Header */}
       <div className="border-b border-primary/10 bg-background/80 backdrop-blur-sm sticky top-0 z-10">

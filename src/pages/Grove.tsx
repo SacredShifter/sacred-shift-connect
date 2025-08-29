@@ -21,7 +21,6 @@ export default function Grove() {
   return (
     <ProtectedRoute>
       <div className="h-full">
-        <Slogan variant="watermark" />
         {tab === '3d-modules' ? (
           <div className="p-6 space-y-6 animate-fade-in">
             {/* Grove Header */}

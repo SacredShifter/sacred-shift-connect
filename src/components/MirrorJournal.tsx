@@ -212,7 +212,6 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
 
   return (
     <div className={`min-h-screen bg-transparent ${className}`}>
-      <Slogan variant="watermark" />
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         {/* Header */}
         <motion.div

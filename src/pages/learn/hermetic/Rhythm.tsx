@@ -71,7 +71,6 @@ export default function Rhythm() {
   const [showInfo, setShowInfo] = useState(false)
   return (
     <div className="w-screen h-screen relative">
-      <Slogan variant="watermark" />
       <Canvas camera={{ position: [0, 1, 8] }}>
         <color attach="background" args={["#0b0c10"]} />
         <SceneContent />

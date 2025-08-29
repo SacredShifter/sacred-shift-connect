@@ -66,7 +66,6 @@ export default function CauseEffect() {
   const [showInfo, setShowInfo] = useState(false)
   return (
     <div className="w-screen h-screen relative">
-      <Slogan variant="watermark" />
       <Canvas camera={{ position: [0, 0, 8] }}>
         <color attach="background" args={["#0b0c10"]} />
         <SceneContent />

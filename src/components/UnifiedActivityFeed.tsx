@@ -54,13 +54,14 @@ export function UnifiedActivityFeed() {
           .order('created_at', { ascending: false })
           .limit(15),
           
-        // Sacred events
+        // Sacred events - handle gracefully if table doesn't exist
         supabase
           .from('sacred_events')
           .select('*')
           .gte('scheduled_start', new Date().toISOString())
           .order('scheduled_start', { ascending: true })
           .limit(5)
+          .then(result => result.error ? { data: [], error: null } : result)
       ]);
 
       const allActivities: ActivityItem[] = [];

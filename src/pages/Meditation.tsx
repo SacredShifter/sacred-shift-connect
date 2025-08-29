@@ -429,10 +429,8 @@ export default function Meditation() {
           backgroundAudio={joinedSession.backgroundAudio}
           onLeave={leaveGroupSession}
         />
-      )}
+        )}
 
-      <Slogan variant="watermark" />
-      
       <div className="h-screen w-full relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900">
         {/* Fullscreen Meditation Visual */}
         <div className="absolute inset-0">

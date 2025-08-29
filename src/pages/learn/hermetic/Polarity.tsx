@@ -79,7 +79,6 @@ export default function Polarity() {
 
   return (
     <div className="w-screen h-screen relative">
-      <Slogan variant="watermark" />
       <Canvas camera={{ position: [0, 0, 5] }}>
         <color attach="background" args={["#0b0c10"]} />
         <SceneContent value={value} />

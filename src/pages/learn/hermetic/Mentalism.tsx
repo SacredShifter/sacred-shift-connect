@@ -80,7 +80,6 @@ export default function Mentalism(){
 
   return (
     <div className="w-screen h-screen relative">
-      <Slogan variant="watermark" />
       <Canvas camera={{ position:[0,0,4] }}>
         <color attach="background" args={["#0b0c10"]} />
         <ambientLight intensity={0.6}/>
