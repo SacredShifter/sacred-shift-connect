@@ -147,7 +147,7 @@ export const WhereAmIWidget: React.FC = () => {
     return actions.slice(0, 3); // Max 3 actions to avoid clutter
   };
 
-  // Dynamic styles based on resonance state
+  // Gentle resonance styles without aggressive animations
   const getResonanceStyles = () => {
     const { synchronicityLevel, fieldIntensity, resonanceColor, isPulsing, isFieldAlert } = resonanceState;
     
@@ -155,14 +155,10 @@ export const WhereAmIWidget: React.FC = () => {
       '--resonance-color': resonanceColor,
       '--resonance-intensity': fieldIntensity,
       '--synchronicity-level': synchronicityLevel,
-      '--pulse-speed': isPulsing ? '2s' : '4s',
-      '--glow-strength': isFieldAlert ? '20px' : '10px',
-      borderColor: `${resonanceColor.replace('hsl(', 'hsla(').replace(')', `, ${fieldIntensity})`)}`,
-      boxShadow: isPulsing 
-        ? `0 0 ${isFieldAlert ? '30px' : '15px'} ${resonanceColor.replace('hsl(', 'hsla(').replace(')', `, ${fieldIntensity * 0.6})`)}` 
-        : 'none',
-      transform: getGeometricTransform(),
-      borderRadius: getGeometricBorderRadius()
+      borderColor: `${resonanceColor.replace('hsl(', 'hsla(').replace(')', `, ${Math.min(fieldIntensity * 0.8, 0.6)})`)}`,
+      boxShadow: `0 0 ${isFieldAlert ? '12px' : '6px'} ${resonanceColor.replace('hsl(', 'hsla(').replace(')', `, ${Math.min(fieldIntensity * 0.3, 0.2)})`)}`,
+      backgroundColor: `${resonanceColor.replace('hsl(', 'hsla(').replace(')', `, ${Math.min(synchronicityLevel * 0.05, 0.03)})`)}`,
+      opacity: isFieldAlert ? 0.98 : 0.95
     } as React.CSSProperties;
   };
 
@@ -171,29 +167,21 @@ export const WhereAmIWidget: React.FC = () => {
       <AnimatePresence mode="wait">
         <motion.div
           key={currentRoute.path}
-          initial={{ opacity: 0, scale: 0.8, rotateY: -90 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ 
             opacity: 1, 
-            scale: 1, 
-            rotateY: 0,
+            scale: 1,
             ...(transitionInProgress && {
-              scale: [1, 1.2, 1],
-              rotateZ: [0, 360, 0]
+              scale: [1, 1.05, 1]
             })
           }}
-          exit={{ opacity: 0, scale: 0.8, rotateY: 90 }}
+          exit={{ opacity: 0, scale: 0.95 }}
           transition={{ 
-            duration: transitionInProgress ? 2 : 0.5,
-            ease: "easeInOut"
+            duration: transitionInProgress ? 1 : 0.3,
+            ease: "easeOut"
           }}
           style={getResonanceStyles()}
-          className={`
-            sacred-compass-widget
-            bg-background/95 backdrop-blur-sm border-2
-            transition-all duration-1000 ease-in-out
-            ${resonanceState.isPulsing ? 'animate-pulse' : ''}
-            ${resonanceState.isFieldAlert ? 'animate-bounce' : ''}
-          `}
+          className="sacred-compass-widget bg-background/95 backdrop-blur-sm border-2 transition-all duration-700 ease-out rounded-lg"
         >
           <Card className="bg-transparent border-none shadow-none">
             <CardContent className="p-4">
@@ -202,12 +190,12 @@ export const WhereAmIWidget: React.FC = () => {
             <div className="flex items-center gap-2">
               <motion.div
                 animate={{ 
-                  rotate: resonanceState.isPulsing ? [0, 360] : 0,
-                  scale: resonanceState.isFieldAlert ? [1, 1.2, 1] : 1 
+                  rotate: resonanceState.synchronicityLevel > 0.8 ? 360 : 0,
+                  scale: resonanceState.isFieldAlert ? 1.1 : 1
                 }}
                 transition={{ 
-                  rotate: { duration: 2, repeat: resonanceState.isPulsing ? Infinity : 0 },
-                  scale: { duration: 1, repeat: Infinity }
+                  rotate: { duration: 8, ease: "linear" },
+                  scale: { duration: 0.5, ease: "easeOut" }
                 }}
               >
                 <Compass className="w-4 h-4" style={{ color: resonanceState.resonanceColor }} />
@@ -216,7 +204,12 @@ export const WhereAmIWidget: React.FC = () => {
                 {currentThreshold?.stage || 'Sacred Navigator'}
               </span>
               {resonanceState.isFieldAlert && (
-                <Zap className="w-3 h-3 text-yellow-400 animate-pulse" />
+                <motion.div
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Zap className="w-3 h-3 text-yellow-400" />
+                </motion.div>
               )}
             </div>
             <div className="flex items-center gap-1">
@@ -253,10 +246,13 @@ export const WhereAmIWidget: React.FC = () => {
             <motion.span 
               className="text-2xl"
               animate={{ 
-                scale: resonanceState.isPulsing ? [1, 1.1, 1] : 1,
-                filter: `hue-rotate(${resonanceState.synchronicityLevel * 360}deg)`
+                scale: resonanceState.isFieldAlert ? 1.05 : 1
               }}
-              transition={{ duration: 1, repeat: Infinity }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              style={{ 
+                filter: `hue-rotate(${resonanceState.synchronicityLevel * 30}deg)`,
+                textShadow: resonanceState.isFieldAlert ? `0 0 8px ${resonanceState.resonanceColor}` : 'none'
+              }}
             >
               {currentRoute.sigil}
             </motion.span>
@@ -294,7 +290,11 @@ export const WhereAmIWidget: React.FC = () => {
             </Badge>
             <Badge 
               variant="outline" 
-              className={`text-xs ${resonanceState.isFieldAlert ? 'animate-pulse bg-yellow-400/20' : ''}`}
+              className="text-xs transition-colors duration-300"
+              style={{ 
+                backgroundColor: resonanceState.isFieldAlert ? `${resonanceState.resonanceColor}20` : 'transparent',
+                borderColor: resonanceState.synchronicityLevel > 0.7 ? resonanceState.resonanceColor : undefined
+              }}
             >
               Sync {Math.round(resonanceState.synchronicityLevel * 100)}%
             </Badge>
@@ -347,9 +347,13 @@ export const WhereAmIWidget: React.FC = () => {
                   </div>
                 </div>
                 {resonanceState.isFieldAlert && (
-                  <div className="text-xs text-yellow-400 font-medium animate-pulse">
+                  <motion.div 
+                    className="text-xs text-yellow-400 font-medium"
+                    animate={{ opacity: [0.7, 1, 0.7] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
                     ⚡ High synchronicity detected - profound moment available
-                  </div>
+                  </motion.div>
                 )}
               </div>
 
@@ -451,7 +455,12 @@ export const WhereAmIWidget: React.FC = () => {
               animate={{ opacity: 1 }}
               className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center"
             >
-              <Waves className="w-3 h-3 text-primary-foreground animate-pulse" />
+              <motion.div
+                animate={{ scale: [0.8, 1.2, 0.8] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Waves className="w-3 h-3 text-primary-foreground" />
+              </motion.div>
             </motion.div>
           )}
         </CardContent>
