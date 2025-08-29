@@ -43,8 +43,10 @@ export const useCompactState = (options: CompactStateOptions = {}) => {
     if (wasManuallyToggled) return;
 
     const shouldAutoCompact = autoCompactRoutes.includes(location.pathname);
-    setIsCompact(shouldAutoCompact);
-  }, [location.pathname, autoCompactRoutes, wasManuallyToggled]);
+    if (isCompact !== shouldAutoCompact) {
+      setIsCompact(shouldAutoCompact);
+    }
+  }, [location.pathname, autoCompactRoutes, wasManuallyToggled, isCompact]);
 
   // Save state to localStorage
   const saveState = useCallback((compact: boolean, manuallyToggled: boolean) => {
