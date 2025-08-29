@@ -223,14 +223,14 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
           </div>
         </div>
 
-        {/* Message Input */}
-        <div className="p-4 border-t bg-background">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
-              <Paperclip className="h-4 w-4" />
+        {/* Message Input - Fixed and Visible */}
+        <div className="sticky bottom-0 p-4 border-t bg-background/95 backdrop-blur-sm">
+          <div className="flex items-center gap-3 max-w-4xl mx-auto">
+            <Button variant="ghost" size="sm" className="h-10 w-10 p-0 hover:bg-muted">
+              <Paperclip className="h-5 w-5 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
-              <Image className="h-4 w-4" />
+            <Button variant="ghost" size="sm" className="h-10 w-10 p-0 hover:bg-muted">
+              <Image className="h-5 w-5 text-muted-foreground" />
             </Button>
             
             <div className="flex-1 relative">
@@ -238,16 +238,17 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Type a message..."
-                className="pr-10 rounded-full border-muted-foreground/20 focus:border-primary"
+                placeholder="Write a message..."
+                className="h-12 pl-4 pr-12 rounded-full bg-muted/50 border-0 focus:bg-muted focus:ring-2 focus:ring-primary/20 text-base"
                 disabled={loading}
+                autoComplete="off"
               />
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-background rounded-full"
               >
-                <Smile className="h-4 w-4" />
+                <Smile className="h-4 w-4 text-muted-foreground" />
               </Button>
             </div>
             
@@ -255,9 +256,9 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
               onClick={handleSendMessage}
               disabled={!messageText.trim() || loading}
               size="sm"
-              className="h-9 w-9 p-0 rounded-full"
+              className="h-10 w-10 p-0 rounded-full bg-primary hover:bg-primary/90"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-4 w-4 text-primary-foreground" />
             </Button>
           </div>
         </div>
