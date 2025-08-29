@@ -22,13 +22,17 @@ import {
   VolumeX,
   Zap,
   Compass,
-  Waves
+  Waves,
+  RotateCcw,
+  Move
 } from 'lucide-react';
 import { getRouteByPath, getResonanceChain } from '@/config/routes.sacred';
 import { useResonanceField } from '@/hooks/useResonanceField';
 import { useConsciousnessState } from '@/hooks/useConsciousnessState';
 import { useBreathingTool } from '@/hooks/useBreathingTool';
 import { useSacredVoiceEngine } from '@/hooks/useSacredVoiceEngine';
+import { useSmartPosition } from '@/hooks/useSmartPosition';
+import { useCompactState } from '@/hooks/useCompactState';
 
 export const WhereAmIWidget: React.FC = () => {
   const location = useLocation();
@@ -36,6 +40,27 @@ export const WhereAmIWidget: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [lastNarration, setLastNarration] = useState('');
+  
+  // Smart positioning and compact state
+  const { 
+    position, 
+    isDragging, 
+    widgetRef, 
+    getPositionStyle, 
+    handleMouseDown, 
+    resetPosition 
+  } = useSmartPosition({
+    enableCollisionDetection: true,
+    enableRouteSpecificPositioning: true
+  });
+  
+  const { 
+    isCompact, 
+    toggleCompact, 
+    shouldAutoCompact 
+  } = useCompactState({
+    autoCompactRoutes: ['/messages', '/journal']
+  });
   
   // Enhanced hooks
   const { resonanceState, recordInteraction } = useResonanceField();
@@ -163,14 +188,18 @@ export const WhereAmIWidget: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm">
+    <div 
+      ref={widgetRef}
+      style={getPositionStyle()}
+      className="max-w-sm select-none"
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={currentRoute.path}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ 
             opacity: 1, 
-            scale: 1,
+            scale: isDragging ? 1.05 : 1,
             ...(transitionInProgress && {
               scale: [1, 1.05, 1]
             })
@@ -185,9 +214,12 @@ export const WhereAmIWidget: React.FC = () => {
         >
           <Card className="bg-transparent border-none shadow-none">
             <CardContent className="p-4">
-          {/* Header with enhanced consciousness display */}
+          {/* Header with enhanced consciousness display and drag handle */}
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
+            <div 
+              className="flex items-center gap-2 cursor-grab active:cursor-grabbing flex-1"
+              onMouseDown={handleMouseDown}
+            >
               <motion.div
                 animate={{ 
                   rotate: resonanceState.synchronicityLevel > 0.8 ? 360 : 0,
@@ -200,9 +232,11 @@ export const WhereAmIWidget: React.FC = () => {
               >
                 <Compass className="w-4 h-4" style={{ color: resonanceState.resonanceColor }} />
               </motion.div>
-              <span className="font-medium text-sm">
-                {currentThreshold?.stage || 'Sacred Navigator'}
-              </span>
+              {!isCompact && (
+                <span className="font-medium text-sm">
+                  {currentThreshold?.stage || 'Sacred Navigator'}
+                </span>
+              )}
               {resonanceState.isFieldAlert && (
                 <motion.div
                   animate={{ opacity: [0.5, 1, 0.5] }}
@@ -211,97 +245,160 @@ export const WhereAmIWidget: React.FC = () => {
                   <Zap className="w-3 h-3 text-yellow-400" />
                 </motion.div>
               )}
+              {isDragging && (
+                <Move className="w-3 h-3 opacity-50" />
+              )}
             </div>
             <div className="flex items-center gap-1">
+              {!isCompact && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setVoiceEnabled(!voiceEnabled);
+                    recordInteraction('click');
+                  }}
+                  className="h-auto p-1"
+                >
+                  {voiceEnabled ? 
+                    <Volume2 className="w-3 h-3" /> : 
+                    <VolumeX className="w-3 h-3 opacity-50" />
+                  }
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setVoiceEnabled(!voiceEnabled);
+                  toggleCompact();
                   recordInteraction('click');
                 }}
                 className="h-auto p-1"
+                title={isCompact ? "Expand widget" : "Compact widget"}
               >
-                {voiceEnabled ? 
-                  <Volume2 className="w-3 h-3" /> : 
-                  <VolumeX className="w-3 h-3 opacity-50" />
-                }
+                {isCompact ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setIsExpanded(!isExpanded);
-                  recordInteraction('click');
-                }}
-                className="h-auto p-1"
-              >
-                {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-              </Button>
-            </div>
-          </div>
-
-          {/* Enhanced location display with consciousness info */}
-          <div className="flex items-center gap-2 mb-3">
-            <motion.span 
-              className="text-2xl"
-              animate={{ 
-                scale: resonanceState.isFieldAlert ? 1.05 : 1
-              }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              style={{ 
-                filter: `hue-rotate(${resonanceState.synchronicityLevel * 30}deg)`,
-                textShadow: resonanceState.isFieldAlert ? `0 0 8px ${resonanceState.resonanceColor}` : 'none'
-              }}
-            >
-              {currentRoute.sigil}
-            </motion.span>
-            <div className="flex-1">
-              <div className="font-semibold text-sm">{currentRoute.title}</div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <ChakraIcon className="w-3 h-3" />
-                <span>{currentRoute.chakraAlignment}</span>
-                {currentThreshold && (
-                  <>
-                    <Waves className="w-2 h-2" />
-                    <span>Level {currentThreshold.level}</span>
-                  </>
-                )}
-              </div>
-              {currentThreshold?.message && (
-                <div className="text-xs italic text-primary/70 mt-1">
-                  {currentThreshold.message}
-                </div>
+              {position.isCustom && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={resetPosition}
+                  className="h-auto p-1"
+                  title="Reset position"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                </Button>
+              )}
+              {!isCompact && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsExpanded(!isExpanded);
+                    recordInteraction('click');
+                  }}
+                  className="h-auto p-1"
+                >
+                  {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                </Button>
               )}
             </div>
           </div>
 
-          {/* Enhanced status badges with resonance info */}
-          <div className="flex gap-1 mb-3">
-            <Badge variant="outline" className="text-xs capitalize">
-              {currentRoute.category}
-            </Badge>
-            <Badge 
-              variant="outline" 
-              className="text-xs"
-              style={{ backgroundColor: `${resonanceState.resonanceColor}20` }}
-            >
-              Level {currentRoute.consciousnessLevel}
-            </Badge>
-            <Badge 
-              variant="outline" 
-              className="text-xs transition-colors duration-300"
-              style={{ 
-                backgroundColor: resonanceState.isFieldAlert ? `${resonanceState.resonanceColor}20` : 'transparent',
-                borderColor: resonanceState.synchronicityLevel > 0.7 ? resonanceState.resonanceColor : undefined
-              }}
-            >
-              Sync {Math.round(resonanceState.synchronicityLevel * 100)}%
-            </Badge>
-          </div>
+          {/* Compact view: just sigil and sync % */}
+          {isCompact ? (
+            <div className="flex items-center gap-2">
+              <motion.span 
+                className="text-xl"
+                animate={{ 
+                  scale: resonanceState.isFieldAlert ? 1.05 : 1
+                }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                style={{ 
+                  filter: `hue-rotate(${resonanceState.synchronicityLevel * 30}deg)`,
+                  textShadow: resonanceState.isFieldAlert ? `0 0 8px ${resonanceState.resonanceColor}` : 'none'
+                }}
+              >
+                {currentRoute.sigil}
+              </motion.span>
+              <Badge 
+                variant="outline" 
+                className="text-xs transition-colors duration-300"
+                style={{ 
+                  backgroundColor: resonanceState.isFieldAlert ? `${resonanceState.resonanceColor}20` : 'transparent',
+                  borderColor: resonanceState.synchronicityLevel > 0.7 ? resonanceState.resonanceColor : undefined
+                }}
+              >
+                {Math.round(resonanceState.synchronicityLevel * 100)}%
+              </Badge>
+            </div>
+          ) : (
+            <>
+              {/* Enhanced location display with consciousness info */}
+              <div className="flex items-center gap-2 mb-3">
+                <motion.span 
+                  className="text-2xl"
+                  animate={{ 
+                    scale: resonanceState.isFieldAlert ? 1.05 : 1
+                  }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  style={{ 
+                    filter: `hue-rotate(${resonanceState.synchronicityLevel * 30}deg)`,
+                    textShadow: resonanceState.isFieldAlert ? `0 0 8px ${resonanceState.resonanceColor}` : 'none'
+                  }}
+                >
+                  {currentRoute.sigil}
+                </motion.span>
+                <div className="flex-1">
+                  <div className="font-semibold text-sm">{currentRoute.title}</div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <ChakraIcon className="w-3 h-3" />
+                    <span>{currentRoute.chakraAlignment}</span>
+                    {currentThreshold && (
+                      <>
+                        <Waves className="w-2 h-2" />
+                        <span>Level {currentThreshold.level}</span>
+                      </>
+                    )}
+                  </div>
+                  {currentThreshold?.message && (
+                    <div className="text-xs italic text-primary/70 mt-1">
+                      {currentThreshold.message}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
-          {/* Context-aware action shortcuts */}
-          {!isExpanded && (
+          {/* Enhanced status badges with resonance info - only in non-compact mode */}
+          {!isCompact && (
+            <div className="flex gap-1 mb-3">
+              <Badge variant="outline" className="text-xs capitalize">
+                {currentRoute.category}
+              </Badge>
+              <Badge 
+                variant="outline" 
+                className="text-xs"
+                style={{ backgroundColor: `${resonanceState.resonanceColor}20` }}
+              >
+                Level {currentRoute.consciousnessLevel}
+              </Badge>
+              <Badge 
+                variant="outline" 
+                className="text-xs transition-colors duration-300"
+                style={{ 
+                  backgroundColor: resonanceState.isFieldAlert ? `${resonanceState.resonanceColor}20` : 'transparent',
+                  borderColor: resonanceState.synchronicityLevel > 0.7 ? resonanceState.resonanceColor : undefined
+                }}
+              >
+                Sync {Math.round(resonanceState.synchronicityLevel * 100)}%
+              </Badge>
+            </div>
+          )}
+
+          {/* Context-aware action shortcuts - only in non-compact mode */}
+          {!isCompact && !isExpanded && (
             <div className="flex gap-1 mb-2">
               {getContextualActions().map((action, index) => (
                 <Button
@@ -318,9 +415,9 @@ export const WhereAmIWidget: React.FC = () => {
             </div>
           )}
 
-          {/* Expanded view with enhanced information */}
+          {/* Expanded view with enhanced information - only in non-compact mode */}
           <AnimatePresence>
-            {isExpanded && (
+            {!isCompact && isExpanded && (
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
