@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sacred Shifter Ethos Verification",
+  "description": "Schema for validating ethos compliance of new features",
+  "type": "object",
+  "required": ["truth_anchor", "sovereignty_privacy", "scores", "warns", "owner_signoff"],
+  "properties": {
+    "truth_anchor": {
+      "type": "string",
+      "enum": ["PASS"],
+      "description": "Critical gate: No hedging language in core flows"
+    },
+    "sovereignty_privacy": {
+      "type": "string", 
+      "enum": ["PASS"],
+      "description": "Critical gate: Data minimization and explicit consent"
+    },
+    "scores": {
+      "type": "object",
+      "description": "Ethos principle scoring (0=FAIL, 1=WARN, 2=PASS)",
+      "required": [
+        "resonance_over_noise",
+        "patterned_awakening", 
+        "collective_coherence",
+        "integrity",
+        "tech_as_transcendence",
+        "accessibility",
+        "performance",
+        "telemetry_consent"
+      ],
+      "properties": {
+        "resonance_over_noise": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Reduces cognitive churn, fewer steps/notifications"
+        },
+        "patterned_awakening": {
+          "type": "integer", 
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Uses sacred geometry/temporal patterns as scaffolding"
+        },
+        "collective_coherence": {
+          "type": "integer",
+          "minimum": 0, 
+          "maximum": 2,
+          "description": "Supports shared field states with opt-in"
+        },
+        "integrity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2, 
+          "description": "No exploitation, manipulation, or dark patterns"
+        },
+        "tech_as_transcendence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Animations/interactions serve regulation/coherence"
+        },
+        "accessibility": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "WCAG 2.2 AA compliance with motion-safe alternatives"
+        },
+        "performance": {
+          "type": "integer", 
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Core Web Vitals within Sacred Shifter budgets"
+        },
+        "telemetry_consent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Metrics validate resonance, all anonymized/consented"
+        }
+      },
+      "additionalProperties": false
+    },
+    "warns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 2,
+      "description": "Warning items requiring owner sign-off (max 2)"
+    },
+    "owner_signoff": {
+      "type": "string",
+      "description": "GitHub username of ethos owner if any WARNs present"
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Supporting evidence for verification",
+      "properties": {
+        "screenshots": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "performance_reports": {
+          "type": "array", 
+          "items": { "type": "string" }
+        },
+        "accessibility_scans": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "pattern_specs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
