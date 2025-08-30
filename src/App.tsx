@@ -30,7 +30,7 @@ import Support from "./pages/Support";
 import Auth from "./pages/Auth";
 import AuthConfirm from "./pages/AuthConfirm";
 import NotFound from "./pages/NotFound";
-import AuraQuantumCommandNexus from '@/pages/AuraQuantumCommandNexus';
+import JusticeQuantumCommandNexus from '@/pages/JusticeQuantumCommandNexus';
 import ConstellationMapper from "./pages/ConstellationMapper";
 import Grove from "./pages/Grove";
 import Liberation from "./pages/Liberation";
@@ -87,7 +87,7 @@ function App() {
                   <Route path="/support" element={<Support />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/settings" element={<Settings />} />
-                  <Route path="/ai-admin" element={<AdminRoute><AuraQuantumCommandNexus /></AdminRoute>} />
+                  <Route path="/ai-admin" element={<AdminRoute><JusticeQuantumCommandNexus /></AdminRoute>} />
                   <Route path="/shift" element={<Shift />} />
                   <Route path="/meditation" element={<Meditation />} />
                   <Route path="/breath" element={<Breath />} />

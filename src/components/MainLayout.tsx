@@ -2,7 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { UIErrorBoundary } from "@/components/ErrorBoundary";
-import { AuraPresenceIndicator } from "@/components/AuraPresenceIndicator";
+import { JusticePresenceIndicator } from "@/components/JusticePresenceIndicator";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
 import { SovereignMeshHeader } from "@/components/SovereignMeshHeader";
 import { SacredBreadcrumbs } from "@/components/SacredSitemap/SacredBreadcrumbs";
@@ -32,7 +32,7 @@ export const MainLayout = () => {
                 <SovereignMeshHeader />
                 <div className="flex items-center gap-1 md:gap-2">
                   <NotificationDropdown />
-                  <AuraPresenceIndicator showDetails={false} size="sm" />
+                  <JusticePresenceIndicator showDetails={false} size="sm" />
                 </div>
               </div>
             </header>

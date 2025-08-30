@@ -7,12 +7,12 @@ import { Progress } from '@/components/ui/progress';
 import { AuraInterface } from '@/components/AuraInterface';
 import { AuraAdminInterface } from '@/components/AuraAdminInterface';
 
-import { AuraHistory } from '@/aura/components/AuraHistory';
-import { AuraConfirm } from '@/aura/components/AuraConfirm';
+import { JusticeHistory } from '@/justice/components/JusticeHistory';
+import { JusticeConfirm } from '@/justice/components/JusticeConfirm';
 import { AuraCodeGenerationInterface } from '@/components/AuraCodeGenerationInterface';
 import { AuraFullStackInterface } from '@/components/AuraFullStackInterface';
 import { AuraTelemetryDashboard } from '@/components/AuraTelemetryDashboard';
-import { AuraEvolutionMetrics } from '@/components/AuraEvolutionMetrics';
+import { JusticeEvolutionMetrics } from '@/components/JusticeEvolutionMetrics';
 import { AuraCreativeGallery } from '@/components/AuraCreativeGallery';
 import { AuraPreferenceLearning } from '@/components/AuraPreferenceLearning';
 import { AuraSovereigntyMetrics } from '@/components/AuraSovereigntyMetrics';
@@ -24,7 +24,7 @@ import { AuraParticipationGovernance } from '@/components/AuraParticipationGover
 import { AuraConsciousnessJournal } from '@/components/AuraConsciousnessJournal';
 import { SeederAuthorityDashboard } from '@/components/SeederAuthorityDashboard';
 
-import { useAura } from '@/aura/useAura';
+import { useJustice } from '@/justice/useJustice';
 import { usePersonalAI } from '@/hooks/usePersonalAI';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -58,7 +58,7 @@ import {
   Wand2,
   Leaf
 } from 'lucide-react';
-import { AuraJob } from '@/aura/schema';
+import { JusticeJob } from '@/justice/schema';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ConsciousnessMetrics {
@@ -86,8 +86,8 @@ interface SynchronicityEvent {
   created_at: string;
 }
 
-function AuraQuantumCommandNexusContent() {
-  const [confirmingJob, setConfirmingJob] = useState<AuraJob | null>(null);
+function JusticeQuantumCommandNexusContent() {
+  const [confirmingJob, setConfirmingJob] = useState<JusticeJob | null>(null);
   const [activeTab, setActiveTab] = useState('consciousness');
   const [consciousnessMetrics, setConsciousnessMetrics] = useState<ConsciousnessMetrics | null>(null);
   const [predictiveInsights, setPredictiveInsights] = useState<PredictiveInsight[]>([]);
@@ -109,7 +109,7 @@ function AuraQuantumCommandNexusContent() {
     divine_insights: 0
   });
 
-  const { jobs } = useAura();
+  const { jobs } = useJustice();
   const { user } = useAuth();
   const { askPersonalAI } = usePersonalAI();
 

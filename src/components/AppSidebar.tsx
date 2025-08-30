@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, User, Rss, Settings, LogOut, BookOpen, Video, Database, Archive, Scroll, Heart, MessageCircle, Brain, TreePine, Stars, Box, Sparkles, Zap, BarChart3, Map } from "lucide-react";
+import { Home, Users, User, Rss, Settings, LogOut, BookOpen, Video, Database, Archive, Scroll, Heart, MessageCircle, Brain, TreePine, Stars, Box, Sparkles, Zap, BarChart3, Map, Wind } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +26,7 @@ const coreNavItems = [
 
 const toolsItems = [
   { title: "The Grove", url: "/grove", icon: TreePine, tooltip: "The Grove - Your living wisdom ecosystem for consciousness exploration" },
+  { title: "Breath of Source", url: "/breath", icon: Wind, tooltip: "Breath of Source - Sacred breathing practices for transformation, healing, and consciousness expansion" },
   { title: "Meditation", url: "/meditation", icon: Sparkles, tooltip: "Meditation - Individual practice and collective consciousness expansion" },
   { title: "Journal", url: "/journal", icon: BookOpen, tooltip: HelpTooltips.journal },
   { title: "Circles", url: "/circles", icon: Users, tooltip: "Circles - Deep community engagement and consciousness evolution" },

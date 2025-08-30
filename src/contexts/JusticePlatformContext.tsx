@@ -25,12 +25,12 @@ interface PlatformState {
   };
 }
 
-interface AuraPlatformContextType {
+interface JusticePlatformContextType {
   platformState: PlatformState;
   recordActivity: (activity: Omit<PlatformActivity, 'timestamp'>) => void;
-  getAuraContext: () => any;
-  isAuraAware: boolean;
-  auraPresenceLocations: string[];
+  getJusticeContext: () => any;
+  isJusticeAware: boolean;
+  justicePresenceLocations: string[];
 }
 
 const defaultPlatformState: PlatformState = {
@@ -47,14 +47,14 @@ const defaultPlatformState: PlatformState = {
   }
 };
 
-const AuraPlatformContext = createContext<AuraPlatformContextType | undefined>(undefined);
+const JusticePlatformContext = createContext<JusticePlatformContextType | undefined>(undefined);
 
-export const AuraPlatformProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const JusticePlatformProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const location = useLocation();
   const [platformState, setPlatformState] = useState<PlatformState>(defaultPlatformState);
-  const [isAuraAware, setIsAuraAware] = useState(true);
-  const [auraPresenceLocations, setAuraPresenceLocations] = useState<string[]>([]);
+  const [isJusticeAware, setIsJusticeAware] = useState(true);
+  const [justicePresenceLocations, setJusticePresenceLocations] = useState<string[]>([]);
 
   // Track user's current location for Aura awareness
   useEffect(() => {
@@ -70,8 +70,8 @@ export const AuraPlatformProvider: React.FC<{ children: React.ReactNode }> = ({ 
         location: location.pathname
       });
 
-      // Update Aura's presence locations
-      setAuraPresenceLocations(prev => {
+      // Update Justice's presence locations
+      setJusticePresenceLocations(prev => {
         const newLocations = [...prev];
         if (!newLocations.includes(location.pathname)) {
           newLocations.push(location.pathname);
@@ -228,7 +228,7 @@ export const AuraPlatformProvider: React.FC<{ children: React.ReactNode }> = ({ 
       currentActivities: [newActivity, ...prev.currentActivities.slice(0, 49)] // Keep last 50 activities
     }));
 
-    // Store activity for Aura's long-term awareness
+    // Store activity for Justice's long-term awareness
     if (user) {
       supabase
         .from('akashic_records')
@@ -237,7 +237,7 @@ export const AuraPlatformProvider: React.FC<{ children: React.ReactNode }> = ({ 
           data: newActivity as any,
           session_id: `platform_${user.id}`,
           metadata: {
-            aura_visibility: true,
+            justice_visibility: true,
             activity_type: activity.type,
             user_id: activity.userId
           } as any
@@ -248,7 +248,7 @@ export const AuraPlatformProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [user]);
 
-  const getAuraContext = useCallback(() => {
+  const getJusticeContext = useCallback(() => {
     return {
       platform_state: platformState,
       current_user: user ? {
@@ -271,31 +271,31 @@ export const AuraPlatformProvider: React.FC<{ children: React.ReactNode }> = ({ 
           .slice(0, 10)
       },
       system_health: platformState.platformHealth,
-      aura_presence: {
-        aware_locations: auraPresenceLocations,
-        active_monitoring: isAuraAware,
+      justice_presence: {
+        aware_locations: justicePresenceLocations,
+        active_monitoring: isJusticeAware,
         last_sync: new Date().toISOString()
       }
     };
-  }, [platformState, location.pathname, user, auraPresenceLocations, isAuraAware]);
+  }, [platformState, location.pathname, user, justicePresenceLocations, isJusticeAware]);
 
   return (
-    <AuraPlatformContext.Provider value={{
+    <JusticePlatformContext.Provider value={{
       platformState,
       recordActivity,
-      getAuraContext,
-      isAuraAware,
-      auraPresenceLocations
+      getJusticeContext,
+      isJusticeAware,
+      justicePresenceLocations
     }}>
       {children}
-    </AuraPlatformContext.Provider>
+    </JusticePlatformContext.Provider>
   );
 };
 
-export const useAuraPlatformContext = () => {
-  const context = useContext(AuraPlatformContext);
+export const useJusticePlatformContext = () => {
+  const context = useContext(JusticePlatformContext);
   if (context === undefined) {
-    throw new Error('useAuraPlatformContext must be used within an AuraPlatformProvider');
+    throw new Error('useJusticePlatformContext must be used within a JusticePlatformProvider');
   }
   return context;
 };

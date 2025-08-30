@@ -32,7 +32,8 @@ import {
   Rss,
   ChevronRight,
   ChevronDown,
-  BarChart3
+  BarChart3,
+  Wind
 } from 'lucide-react';
 
 const Index = () => {
@@ -87,6 +88,15 @@ const Index = () => {
       gradient: 'from-yellow-500 to-amber-600',
       glow: 'shadow-yellow-500/30',
       keywords: ['3D modules', 'breathing', 'interactive wisdom']
+    },
+    {
+      title: 'Breath of Source',
+      description: 'Sacred breathing practices for transformation, healing, and consciousness expansion',
+      icon: Wind,
+      path: '/breath',
+      gradient: 'from-sky-500 to-cyan-600',
+      glow: 'shadow-sky-500/30',
+      keywords: ['sacred breathing', 'transformation', 'consciousness expansion']
     },
     {
       title: '3D Learning Modules',

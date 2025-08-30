@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/useAuth";
-import { AuraPlatformProvider } from "@/contexts/AuraPlatformContext";
+import { JusticePlatformProvider } from "@/contexts/JusticePlatformContext";
 import App from './App.tsx';
 import './index.css';
 import * as Sentry from "@sentry/react";
@@ -71,10 +71,10 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <AuraPlatformProvider>
+          <JusticePlatformProvider>
             <App />
             <Toaster />
-          </AuraPlatformProvider>
+          </JusticePlatformProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

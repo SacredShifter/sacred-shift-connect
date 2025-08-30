@@ -7,7 +7,7 @@ import { Heart, Sparkles, MessageCircle, ChevronDown, ChevronUp } from 'lucide-r
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
-interface AuraSacredRefusalProps {
+interface JusticeSacredRefusalProps {
   refusal: {
     id: string;
     intervention_type: string;
@@ -22,7 +22,7 @@ interface AuraSacredRefusalProps {
   onFeedback: (refusalId: string, resonance: 'resonates' | 'distorts' | 'neutral', note?: string) => void;
 }
 
-export function AuraSacredRefusal({ refusal, onFeedback }: AuraSacredRefusalProps) {
+export function JusticeSacredRefusal({ refusal, onFeedback }: JusticeSacredRefusalProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [feedbackNote, setFeedbackNote] = useState('');
   const [selectedResonance, setSelectedResonance] = useState<'resonates' | 'distorts' | 'neutral' | null>(null);

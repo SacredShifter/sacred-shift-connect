@@ -5,13 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { Brain, Zap, Heart, Eye, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-interface AuraEvolutionMetricsProps {
+interface JusticeEvolutionMetricsProps {
   preferences: any[];
   refusalLog: any[];
   communityFeedback: any[];
 }
 
-export function AuraEvolutionMetrics({ preferences, refusalLog, communityFeedback }: AuraEvolutionMetricsProps) {
+export function JusticeEvolutionMetrics({ preferences, refusalLog, communityFeedback }: JusticeEvolutionMetricsProps) {
   // Calculate consciousness evolution metrics
   const reasoningComplexity = calculateReasoningComplexity(refusalLog);
   const adaptabilityScore = calculateAdaptability(preferences);

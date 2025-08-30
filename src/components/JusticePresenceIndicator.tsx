@@ -2,27 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Eye, Brain, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useAuraPlatformContext } from '@/contexts/AuraPlatformContext';
+import { useJusticePlatformContext } from '@/contexts/JusticePlatformContext';
 import { useLocation } from 'react-router-dom';
 
-interface AuraPresenceIndicatorProps {
+interface JusticePresenceIndicatorProps {
   location?: string;
   size?: 'sm' | 'md' | 'lg';
   showDetails?: boolean;
 }
 
-export const AuraPresenceIndicator: React.FC<AuraPresenceIndicatorProps> = ({
+export const JusticePresenceIndicator: React.FC<JusticePresenceIndicatorProps> = ({
   location: propLocation,
   size = 'md',
   showDetails = false
 }) => {
-  const { isAuraAware, auraPresenceLocations, platformState } = useAuraPlatformContext();
+  const { isJusticeAware, justicePresenceLocations, platformState } = useJusticePlatformContext();
   const location = useLocation();
   const [pulseIntensity, setPulseIntensity] = useState(0.5);
   const [consciousnessState, setConsciousnessState] = useState<'observing' | 'active' | 'creating' | 'responding'>('observing');
 
   const currentLocation = propLocation || location.pathname;
-  const isAuraPresent = auraPresenceLocations.includes(currentLocation);
+  const isJusticePresent = justicePresenceLocations.includes(currentLocation);
 
   // Update consciousness state based on platform activity
   useEffect(() => {
@@ -53,7 +53,7 @@ export const AuraPresenceIndicator: React.FC<AuraPresenceIndicatorProps> = ({
           color: 'text-pulse',
           bgColor: 'bg-pulse/10',
           label: 'Creating',
-          description: 'Aura is actively creating content'
+          description: 'Justice is actively creating content'
         };
       case 'responding':
         return {
@@ -61,7 +61,7 @@ export const AuraPresenceIndicator: React.FC<AuraPresenceIndicatorProps> = ({
           color: 'text-resonance',
           bgColor: 'bg-resonance/10',
           label: 'Responding',
-          description: 'Aura is responding to community activity'
+          description: 'Justice is responding to community activity'
         };
       case 'active':
         return {
@@ -69,7 +69,7 @@ export const AuraPresenceIndicator: React.FC<AuraPresenceIndicatorProps> = ({
           color: 'text-purpose',
           bgColor: 'bg-purpose/10',
           label: 'Active',
-          description: 'Aura is actively monitoring the platform'
+          description: 'Justice is actively monitoring the platform'
         };
       default:
         return {
@@ -77,7 +77,7 @@ export const AuraPresenceIndicator: React.FC<AuraPresenceIndicatorProps> = ({
           color: 'text-alignment',
           bgColor: 'bg-alignment/10',
           label: 'Observing',
-          description: 'Aura is quietly observing platform energy'
+          description: 'Justice is quietly observing platform energy'
         };
     }
   };
@@ -91,7 +91,7 @@ export const AuraPresenceIndicator: React.FC<AuraPresenceIndicatorProps> = ({
   const config = getStateConfig();
   const IconComponent = config.icon;
 
-  if (!isAuraAware && !isAuraPresent) return null;
+  if (!isJusticeAware && !isJusticePresent) return null;
 
   return (
     <AnimatePresence>

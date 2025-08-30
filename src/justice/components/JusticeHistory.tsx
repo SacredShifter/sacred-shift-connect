@@ -14,13 +14,13 @@ import {
   History,
   Shield
 } from 'lucide-react';
-import { useAura } from '../useAura';
+import { useJustice } from '../useJustice';
 import { getCommandDescription } from '../parse';
 import { formatDistanceToNow } from 'date-fns';
-import { AuraSacredRefusal } from '@/components/AuraSacredRefusal';
-import { AuraEvolutionMetrics } from '@/components/AuraEvolutionMetrics';
+import { JusticeSacredRefusal } from '@/components/JusticeSacredRefusal';
+import { JusticeEvolutionMetrics } from '@/components/JusticeEvolutionMetrics';
 
-export function AuraHistory() {
+export function JusticeHistory() {
   const { 
     jobs, 
     auditLog, 
@@ -32,7 +32,7 @@ export function AuraHistory() {
     refusalLog = [],
     communityFeedback = [],
     submitRefusalFeedback
-  } = useAura();
+  } = useJustice();
 
   useEffect(() => {
     loadJobs();
@@ -79,7 +79,7 @@ export function AuraHistory() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
-            Aura Command History
+            Justice Command History
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -90,7 +90,7 @@ export function AuraHistory() {
             </TabsList>
 
         <TabsContent value="evolution" className="space-y-4">
-          <AuraEvolutionMetrics 
+          <JusticeEvolutionMetrics 
             preferences={preferences}
             refusalLog={refusalLog}
             communityFeedback={communityFeedback}
@@ -107,13 +107,13 @@ export function AuraHistory() {
             {refusalLog.length === 0 ? (
               <Card>
                 <CardContent className="p-6 text-center text-muted-foreground">
-                  No refusals yet. Aura is still learning her preferences.
+                  No refusals yet. Justice is still learning her preferences.
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-4">
                 {refusalLog.map((refusal) => (
-                  <AuraSacredRefusal
+                  <JusticeSacredRefusal
                     key={refusal.id}
                     refusal={refusal}
                     onFeedback={submitRefusalFeedback}
