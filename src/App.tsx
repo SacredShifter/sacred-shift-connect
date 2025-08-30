@@ -36,6 +36,7 @@ import Grove from "./pages/Grove";
 import Liberation from "./pages/Liberation";
 import Shift from './pages/Shift';
 import Meditation from './pages/Meditation';
+import Breath from './pages/Breath';
 import Learning3D from './pages/Learning3D';
 import FeaturesComingSoon from './pages/FeaturesComingSoon';
 import { DevSitemap } from './components/SacredSitemap/DevSitemap';
@@ -89,6 +90,7 @@ function App() {
                   <Route path="/ai-admin" element={<AdminRoute><AuraQuantumCommandNexus /></AdminRoute>} />
                   <Route path="/shift" element={<Shift />} />
                   <Route path="/meditation" element={<Meditation />} />
+                  <Route path="/breath" element={<Breath />} />
                   <Route path="/features-coming-soon" element={<FeaturesComingSoon />} />
                   <Route path="/sitemap" element={<UserSitemap />} />
                   <Route path="/dev/sitemap" element={<DevSitemap />} />
