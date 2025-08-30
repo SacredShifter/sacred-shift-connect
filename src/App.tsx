@@ -22,6 +22,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Journal from "./pages/Journal";
 import VideoLibrary from "./pages/VideoLibrary";
+import VideoStudio from "./pages/VideoStudio";
 import CollectiveAkashicConstellationPage from "./pages/CollectiveAkashicConstellation";
 import RegistryEntry from "./pages/RegistryEntry";
 import AkashicConstellationPage from "./pages/AkashicConstellation";
@@ -76,6 +77,7 @@ function App() {
                   <Route path="/circles" element={<Circles />} />
                   <Route path="/journal" element={<Journal />} />
                   <Route path="/videos" element={<VideoLibrary />} />
+                  <Route path="/video-studio" element={<VideoStudio />} />
                   <Route path="/registry" element={<CollectiveAkashicConstellationPage />} />
                   <Route path="/resonance/entries/:id" element={<RegistryEntry />} />
                   <Route path="/codex" element={<AkashicConstellationPage />} />
