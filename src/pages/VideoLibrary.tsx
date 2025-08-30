@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Grid, Flower } from 'lucide-react';
+import { Grid, Flower, Plus } from 'lucide-react';
 
 import { YouTubeLibrary } from '@/components/YouTubeLibrary/YouTubeLibrary';
 import { PetalLotus, ContentPlatform } from '@/components/PetalLotus';
+import { ContentManager } from '@/components/ContentManager';
 
 const VideoLibrary: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'lotus' | 'grid'>('lotus');
+  const [viewMode, setViewMode] = useState<'lotus' | 'grid' | 'manage'>('lotus');
   const [selectedPlatform, setSelectedPlatform] = useState<ContentPlatform | undefined>();
 
   return (
@@ -56,6 +57,15 @@ const VideoLibrary: React.FC = () => {
                 <Grid className="w-4 h-4" />
                 Grid View
               </Button>
+              <Button
+                variant={viewMode === 'manage' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('manage')}
+                className="gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Manage Sources
+              </Button>
             </div>
           </motion.div>
           
@@ -80,6 +90,8 @@ const VideoLibrary: React.FC = () => {
                 <YouTubeLibrary />
               )}
             </div>
+          ) : viewMode === 'manage' ? (
+            <ContentManager selectedPlatform={selectedPlatform} />
           ) : (
             <YouTubeLibrary />
           )}
