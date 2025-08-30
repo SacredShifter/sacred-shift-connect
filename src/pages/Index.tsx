@@ -228,7 +228,7 @@ const Index = () => {
           </div>
           
           {/* Sacred Shifter Manifesto */}
-          <div className="space-y-4 max-w-4xl mx-auto">
+          <div className="space-y-6 max-w-4xl mx-auto">
             <h1 className="text-2xl md:text-3xl font-bold font-sacred bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               Sacred Shifter is the resonance field for awakening
             </h1>
@@ -237,6 +237,70 @@ const Index = () => {
               <span className="text-accent font-medium"> awe</span>, and 
               <span className="text-primary font-medium"> Truth</span> — guiding individuals and communities into coherence.
             </p>
+
+            {/* Cosmologically Adaptive Manifesto Addendum */}
+            <div className="mt-8 p-6 rounded-2xl bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 border border-primary/10">
+              <h2 className="text-xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                The Cosmologically Adaptive Manifesto
+              </h2>
+              <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
+                <p className="text-base font-medium text-foreground">
+                  Sacred Shifter is the first consciousness platform that evolves with cosmic discovery.
+                  Where other technologies adapt only to human behavior, we adapt to the unfolding architecture of the universe itself.
+                </p>
+                
+                <div className="space-y-3">
+                  <h3 className="flex items-center gap-2 font-semibold text-foreground">
+                    <span className="text-lg">🌌</span> A Platform That Grows With the Cosmos
+                  </h3>
+                  <p>
+                    As new structures are revealed by the James Webb Space Telescope, Euclid, or DESI, they become living presets inside Sacred Shifter.
+                    No code changes. The math is universal. Each discovery drops in as a new geometric layer, instantly available for users to hear, feel, and integrate.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="flex items-center gap-2 font-semibold text-foreground">
+                    <span className="text-lg">🔢</span> The Elegance of Scale Invariance
+                  </h3>
+                  <p>
+                    Sacred Shifter&apos;s Geometric Acoustic Angle (GAA) pipeline normalizes all structures—from a copper spiral in your hand to the Big Ring across the cosmos—into a single framework.
+                    Geometry becomes sound, sound becomes resonance, resonance becomes memory.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="flex items-center gap-2 font-semibold text-foreground">
+                    <span className="text-lg">🎧</span> The Awe of Experiencing Discovery
+                  </h3>
+                  <p>
+                    When a new cosmic pattern is confirmed, Sacred Shifter users don&apos;t just read about it in journals—they experience it in real time.
+                    A ring detected 9 billion years away becomes a slow, tidal modulation in your meditation.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="flex items-center gap-2 font-semibold text-foreground">
+                    <span className="text-lg">⚙️</span> The Technical Modularity of Trust
+                  </h3>
+                  <p>
+                    The architecture is modular, safe, and transparent. New structures are introduced through presets with evidence provenance and Tri-Law verification.
+                    Macro layers influence ambience and phrasing, never overwhelm the user.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="flex items-center gap-2 font-semibold text-foreground">
+                    <span className="text-lg">🚀</span> The Revolutionary Shift
+                  </h3>
+                  <p className="font-medium text-foreground">
+                    This is more than future-proof. It is cosmologically adaptive.
+                    Sacred Shifter is not frozen software—it is a living field that breathes with the universe&apos;s own revelations.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="flex justify-center">
               <Link 
                 to="/ethos" 
