@@ -61,6 +61,7 @@ function App() {
           enabled={true}
         >
           <div className="min-h-screen relative w-full bg-black">
+            <RouteRedirectManager />
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/confirm" element={<AuthConfirm />} />
@@ -72,8 +73,7 @@ function App() {
                     </TourProvider>
                   </ProtectedRoute>
                 }
-              >
-                  <RouteRedirectManager />
+                >
                   <Route path="/" element={<Index />} />
                   
                   {/* Redirects for old routes */}
