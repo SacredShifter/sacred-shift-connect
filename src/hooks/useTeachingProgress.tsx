@@ -82,38 +82,57 @@ export const useTeachingProgress = () => {
     saveProgress(newProgress);
   };
 
-  // Determine which tiers are unlocked based on progress
+  // Determine which tiers are unlocked based on sacred initiation progress
   const getUnlockedTiers = (): UnlockedTiers => {
     return {
-      scientific: true, // Always available
-      metaphysical: progress.sessionsCompleted >= 1, // Unlocked after first session
-      esoteric: progress.sessionsCompleted >= 7 // Unlocked after 7+ sessions
+      scientific: true, // Always available - The Seeker's foundation
+      metaphysical: progress.sessionsCompleted >= 1, // The Experiencer - After first sacred practice
+      esoteric: progress.sessionsCompleted >= 7 // The Initiate - After proving dedication through practice
     };
   };
 
-  // Get progress towards next unlock
+  // Get initiation stage based on progress
+  const getInitiationStage = () => {
+    const sessions = progress.sessionsCompleted;
+    if (sessions >= 21) return { name: 'The Adept', level: 4, title: 'Master of Sacred Arts' };
+    if (sessions >= 7) return { name: 'The Initiate', level: 3, title: 'Keeper of Sacred Mysteries' };
+    if (sessions >= 1) return { name: 'The Experiencer', level: 2, title: 'Awakening to Energy' };
+    return { name: 'The Seeker', level: 1, title: 'Foundation of Understanding' };
+  };
+
+  // Get progress towards next sacred initiation
   const getProgressToNextUnlock = () => {
     const unlocked = getUnlockedTiers();
+    const sessions = progress.sessionsCompleted;
     
     if (!unlocked.metaphysical) {
       return {
-        current: progress.sessionsCompleted,
+        current: sessions,
         needed: 1,
         nextTier: 'metaphysical' as const,
-        description: 'Complete your first practice to unlock Metaphysical teachings'
+        description: 'Begin your first sacred practice to awaken as The Experiencer'
       };
     }
     
     if (!unlocked.esoteric) {
       return {
-        current: progress.sessionsCompleted,
+        current: sessions,
         needed: 7,
         nextTier: 'esoteric' as const,
-        description: 'Complete 7 practices to unlock Esoteric teachings'
+        description: 'Complete 7 practices to be initiated as Keeper of Sacred Mysteries'
+      };
+    }
+
+    if (sessions < 21) {
+      return {
+        current: sessions,
+        needed: 21,
+        nextTier: 'adept' as const,
+        description: 'Master 21 practices to achieve Adepthood - Master of Sacred Arts'
       };
     }
     
-    return null; // All tiers unlocked
+    return null; // All initiations completed
   };
 
   // Get teaching engagement stats
@@ -133,6 +152,7 @@ export const useTeachingProgress = () => {
     recordEngagement,
     getUnlockedTiers,
     getProgressToNextUnlock,
-    getEngagementStats
+    getEngagementStats,
+    getInitiationStage
   };
 };
