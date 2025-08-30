@@ -3906,6 +3906,122 @@ export type Database = {
         }
         Relationships: []
       }
+      content_plans: {
+        Row: {
+          approval_notes: string | null
+          confidence_score: number | null
+          created_at: string
+          id: string
+          intent: string
+          outline: Json
+          script_md: string
+          seed_id: string
+          status: string
+          target_duration_seconds: number | null
+          target_form: string
+          tone: string | null
+          updated_at: string
+          visual_style: string | null
+        }
+        Insert: {
+          approval_notes?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          intent: string
+          outline: Json
+          script_md: string
+          seed_id: string
+          status?: string
+          target_duration_seconds?: number | null
+          target_form: string
+          tone?: string | null
+          updated_at?: string
+          visual_style?: string | null
+        }
+        Update: {
+          approval_notes?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          intent?: string
+          outline?: Json
+          script_md?: string
+          seed_id?: string
+          status?: string
+          target_duration_seconds?: number | null
+          target_form?: string
+          tone?: string | null
+          updated_at?: string
+          visual_style?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_plans_seed_id_fkey"
+            columns: ["seed_id"]
+            isOneToOne: false
+            referencedRelation: "content_seeds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_seeds: {
+        Row: {
+          circle_id: string | null
+          created_at: string
+          id: string
+          justice_processed: boolean
+          module: string
+          raw_payload: Json
+          resonance_score: number | null
+          sensitivity_level: number
+          source_id: string
+          source_type: string
+          summary: string
+          tags: string[] | null
+          tri_law_notes: string | null
+          tri_law_status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          circle_id?: string | null
+          created_at?: string
+          id?: string
+          justice_processed?: boolean
+          module: string
+          raw_payload: Json
+          resonance_score?: number | null
+          sensitivity_level?: number
+          source_id: string
+          source_type: string
+          summary: string
+          tags?: string[] | null
+          tri_law_notes?: string | null
+          tri_law_status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          circle_id?: string | null
+          created_at?: string
+          id?: string
+          justice_processed?: boolean
+          module?: string
+          raw_payload?: Json
+          resonance_score?: number | null
+          sensitivity_level?: number
+          source_id?: string
+          source_type?: string
+          summary?: string
+          tags?: string[] | null
+          tri_law_notes?: string | null
+          tri_law_status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       continuum_sessions: {
         Row: {
           action: string | null
@@ -7049,6 +7165,27 @@ export type Database = {
         }
         Relationships: []
       }
+      justice_config: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       kindred_soul_matches: {
         Row: {
           created_at: string | null
@@ -7627,6 +7764,56 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      media_assets: {
+        Row: {
+          checksum: string | null
+          created_at: string
+          dimensions: Json | null
+          duration_ms: number | null
+          generation_params: Json | null
+          id: string
+          license_ref: string | null
+          plan_id: string
+          quality_score: number | null
+          storage_path: string
+          type: string
+        }
+        Insert: {
+          checksum?: string | null
+          created_at?: string
+          dimensions?: Json | null
+          duration_ms?: number | null
+          generation_params?: Json | null
+          id?: string
+          license_ref?: string | null
+          plan_id: string
+          quality_score?: number | null
+          storage_path: string
+          type: string
+        }
+        Update: {
+          checksum?: string | null
+          created_at?: string
+          dimensions?: Json | null
+          duration_ms?: number | null
+          generation_params?: Json | null
+          id?: string
+          license_ref?: string | null
+          plan_id?: string
+          quality_score?: number | null
+          storage_path?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_assets_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "content_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meditation_music: {
         Row: {
@@ -8765,8 +8952,11 @@ export type Database = {
           component: string
           created_at: string
           id: string
+          justice_processed: boolean | null
+          justice_processed_at: string | null
           payload: Json
           sanctuary_flag: boolean | null
+          seed_eligibility_score: number | null
           session_id: string | null
           timestamp: string
           user_id: string | null
@@ -8778,8 +8968,11 @@ export type Database = {
           component: string
           created_at?: string
           id?: string
+          justice_processed?: boolean | null
+          justice_processed_at?: string | null
           payload?: Json
           sanctuary_flag?: boolean | null
+          seed_eligibility_score?: number | null
           session_id?: string | null
           timestamp?: string
           user_id?: string | null
@@ -8791,8 +8984,11 @@ export type Database = {
           component?: string
           created_at?: string
           id?: string
+          justice_processed?: boolean | null
+          justice_processed_at?: string | null
           payload?: Json
           sanctuary_flag?: boolean | null
+          seed_eligibility_score?: number | null
           session_id?: string | null
           timestamp?: string
           user_id?: string | null
@@ -9922,6 +10118,134 @@ export type Database = {
           title?: string
           type?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      render_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          edl: Json
+          file_size_bytes: number | null
+          id: string
+          output_paths: string[] | null
+          plan_id: string
+          preset: string
+          progress_pct: number | null
+          render_log: string | null
+          render_time_ms: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          edl: Json
+          file_size_bytes?: number | null
+          id?: string
+          output_paths?: string[] | null
+          plan_id: string
+          preset: string
+          progress_pct?: number | null
+          render_log?: string | null
+          render_time_ms?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          edl?: Json
+          file_size_bytes?: number | null
+          id?: string
+          output_paths?: string[] | null
+          plan_id?: string
+          preset?: string
+          progress_pct?: number | null
+          render_log?: string | null
+          render_time_ms?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_jobs_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "content_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resonance_metrics: {
+        Row: {
+          authenticity_score: number | null
+          collected_at: string
+          id: number
+          resonance_score: number | null
+          ss_circle_coherence_delta: number | null
+          ss_journal_events: number | null
+          ss_resonance_votes: number | null
+          ss_ritual_starts: number | null
+          ss_saves: number | null
+          time_window: string
+          transformation_score: number | null
+          youtube_video_id: string
+          yt_avg_view_duration_seconds: number | null
+          yt_avg_view_percentage: number | null
+          yt_click_through_rate: number | null
+          yt_comments: number | null
+          yt_likes: number | null
+          yt_shares: number | null
+          yt_subscribers_gained: number | null
+          yt_views: number | null
+          yt_watch_time_minutes: number | null
+        }
+        Insert: {
+          authenticity_score?: number | null
+          collected_at?: string
+          id?: number
+          resonance_score?: number | null
+          ss_circle_coherence_delta?: number | null
+          ss_journal_events?: number | null
+          ss_resonance_votes?: number | null
+          ss_ritual_starts?: number | null
+          ss_saves?: number | null
+          time_window: string
+          transformation_score?: number | null
+          youtube_video_id: string
+          yt_avg_view_duration_seconds?: number | null
+          yt_avg_view_percentage?: number | null
+          yt_click_through_rate?: number | null
+          yt_comments?: number | null
+          yt_likes?: number | null
+          yt_shares?: number | null
+          yt_subscribers_gained?: number | null
+          yt_views?: number | null
+          yt_watch_time_minutes?: number | null
+        }
+        Update: {
+          authenticity_score?: number | null
+          collected_at?: string
+          id?: number
+          resonance_score?: number | null
+          ss_circle_coherence_delta?: number | null
+          ss_journal_events?: number | null
+          ss_resonance_votes?: number | null
+          ss_ritual_starts?: number | null
+          ss_saves?: number | null
+          time_window?: string
+          transformation_score?: number | null
+          youtube_video_id?: string
+          yt_avg_view_duration_seconds?: number | null
+          yt_avg_view_percentage?: number | null
+          yt_click_through_rate?: number | null
+          yt_comments?: number | null
+          yt_likes?: number | null
+          yt_shares?: number | null
+          yt_subscribers_gained?: number | null
+          yt_views?: number | null
+          yt_watch_time_minutes?: number | null
         }
         Relationships: []
       }
@@ -13243,6 +13567,36 @@ export type Database = {
           },
         ]
       }
+      taxonomy: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          key: string
+          kind: string
+          label: string
+          metadata: Json | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          key: string
+          kind: string
+          label: string
+          metadata?: Json | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          key?: string
+          kind?: string
+          label?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       taxonomy_categories: {
         Row: {
           created_at: string
@@ -16192,6 +16546,74 @@ export type Database = {
           word?: string
         }
         Relationships: []
+      }
+      yt_publish: {
+        Row: {
+          category_id: number | null
+          created_at: string
+          description: string
+          id: string
+          playlist_id: string | null
+          publish_error: string | null
+          published_at: string | null
+          render_job_id: string
+          scheduled_for: string | null
+          tags: string[] | null
+          thumb_path: string | null
+          title: string
+          updated_at: string
+          upload_status: string
+          visibility: string
+          youtube_url: string | null
+          youtube_video_id: string | null
+        }
+        Insert: {
+          category_id?: number | null
+          created_at?: string
+          description: string
+          id?: string
+          playlist_id?: string | null
+          publish_error?: string | null
+          published_at?: string | null
+          render_job_id: string
+          scheduled_for?: string | null
+          tags?: string[] | null
+          thumb_path?: string | null
+          title: string
+          updated_at?: string
+          upload_status?: string
+          visibility?: string
+          youtube_url?: string | null
+          youtube_video_id?: string | null
+        }
+        Update: {
+          category_id?: number | null
+          created_at?: string
+          description?: string
+          id?: string
+          playlist_id?: string | null
+          publish_error?: string | null
+          published_at?: string | null
+          render_job_id?: string
+          scheduled_for?: string | null
+          tags?: string[] | null
+          thumb_path?: string | null
+          title?: string
+          updated_at?: string
+          upload_status?: string
+          visibility?: string
+          youtube_url?: string | null
+          youtube_video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "yt_publish_render_job_id_fkey"
+            columns: ["render_job_id"]
+            isOneToOne: false
+            referencedRelation: "render_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
