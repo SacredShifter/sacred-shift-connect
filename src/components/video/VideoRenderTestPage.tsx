@@ -1,5 +1,6 @@
 import { VideoRenderPipeline } from './VideoRenderPipeline';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 // Test component to demonstrate the video rendering pipeline
 export const VideoRenderTestPage = () => {
@@ -22,6 +23,27 @@ export const VideoRenderTestPage = () => {
               planId={mockPlanId}
               planTitle={mockPlanTitle}
             />
+            
+            {/* Admin Link */}
+            <Card className="mt-8 bg-gradient-to-r from-red-500/10 to-red-500/5 border-red-500/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold mb-2">Video Studio Administration</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Access advanced admin controls, YouTube policy compliance, and detailed analytics
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => window.open('/ai-admin', '_blank')}
+                    className="border-red-500/20 hover:bg-red-500/10"
+                  >
+                    Open Admin Panel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
       </div>

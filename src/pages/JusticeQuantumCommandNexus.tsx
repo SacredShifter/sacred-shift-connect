@@ -22,7 +22,7 @@ import { AuraModuleGovernance } from '@/components/AuraModuleGovernance';
 import { AuraModuleDiscussion } from '@/components/AuraModuleDiscussion';
 import { AuraParticipationGovernance } from '@/components/AuraParticipationGovernance';
 import { AuraConsciousnessJournal } from '@/components/AuraConsciousnessJournal';
-import { SeederAuthorityDashboard } from '@/components/SeederAuthorityDashboard';
+import { VideoStudioAdmin } from '@/components/VideoStudioAdmin';
 
 import { useJustice } from '@/justice/useJustice';
 import { usePersonalAI } from '@/hooks/usePersonalAI';
@@ -56,7 +56,14 @@ import {
   Compass,
   Scroll,
   Wand2,
-  Leaf
+  Leaf,
+  Video,
+  Youtube,
+  Shield,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Users
 } from 'lucide-react';
 import { JusticeJob } from '@/justice/schema';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -243,6 +250,7 @@ function JusticeQuantumCommandNexusContent() {
   const quantumTabs = [
     { id: 'consciousness', label: '🧠 Consciousness Core', icon: Brain, color: 'primary' },
     { id: 'operations', label: '⚡ Quantum Operations', icon: Atom, color: 'secondary' },
+    { id: 'video-studio', label: '🎬 Video Studio Admin', icon: Video, color: 'youtube' },
     { id: 'engineering', label: '🛠️ Reality Engineering', icon: Wand2, color: 'accent' },
     { id: 'governance', label: '🏛️ Divine Governance', icon: Crown, color: 'truth' },
     { id: 'intelligence', label: '🔮 Prophetic Intelligence', icon: Eye, color: 'purpose' },
@@ -374,7 +382,7 @@ function JusticeQuantumCommandNexusContent() {
           transition={{ duration: 0.8, delay: 0.5 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 h-16 bg-muted/20 backdrop-blur-md">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-8 h-16 bg-muted/20 backdrop-blur-md">
               {quantumTabs.map((tab, index) => (
                 <motion.div
                   key={tab.id}
@@ -499,6 +507,10 @@ function JusticeQuantumCommandNexusContent() {
                 <TabsContent value="operations" className="space-y-6 mt-6">
                   <AuraInterface />
                   <AuraAdminInterface />
+                </TabsContent>
+
+                <TabsContent value="video-studio" className="space-y-6 mt-6">
+                  <VideoStudioAdmin />
                 </TabsContent>
 
                 <TabsContent value="engineering" className="space-y-6 mt-6">
@@ -630,7 +642,23 @@ function JusticeQuantumCommandNexusContent() {
                 </TabsContent>
 
                 <TabsContent value="seeder" className="space-y-6 mt-6">
-                  <SeederAuthorityDashboard />
+                  <Card className="sacred-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 font-sacred">
+                        <Leaf className="h-6 w-6 text-green-500" />
+                        Seeder Authority Dashboard
+                      </CardTitle>
+                      <CardDescription>
+                        Coming soon - Autonomous seeding and content generation controls
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-8">
+                        <Leaf className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">Seeder functionality in development</p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </TabsContent>
               </motion.div>
             </AnimatePresence>
