@@ -38,6 +38,7 @@ import { SynchronicityMirror } from '@/components/synchronicity/SynchronicityMir
 import { DailyResonanceWeather } from '@/components/dashboard/DailyResonanceWeather';
 import { CommunityMirrorPulse } from '@/components/dashboard/CommunityMirrorPulse';
 import { GlowWrapper } from '@/components/dashboard/GlowWrapper';
+import { GAAControlPanel } from '@/components/dashboard/GAAControlPanel';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -254,6 +255,13 @@ const Dashboard = () => {
                 {/* Mood Timeline */}
                 <MoodTimeline />
               </div>
+            </div>
+
+            {/* GAA Engine Section */}
+            <div className="mb-8">
+              <GlowWrapper elementId="gaa-engine">
+                <GAAControlPanel />
+              </GlowWrapper>
             </div>
 
             {/* Community & Support Section */}
