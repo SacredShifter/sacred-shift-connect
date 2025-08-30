@@ -58,12 +58,18 @@ export const NAV_CONFIG: NavGroup[] = [
     defaultOpen: true,
     children: [
       { 
+        id: "dashboard", 
+        label: "Dashboard", 
+        icon: BarChart3, 
+        path: "/dashboard",
+        tooltip: "Sacred Journey Dashboard - Your consciousness evolution center"
+      },
+      { 
         id: "home", 
         label: "Home", 
         icon: Home, 
         path: "/", 
-        redirectFrom: ["/dashboard"],
-        tooltip: "Sacred Journey Dashboard - Your consciousness evolution center"
+        tooltip: "Home - Sacred community hub and navigation center"
       },
       { 
         id: "feed", 
