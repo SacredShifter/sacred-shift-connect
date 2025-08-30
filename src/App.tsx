@@ -1,12 +1,13 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { TourProvider } from "@/components/TourProvider";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
 import { MainLayout } from "@/components/MainLayout";
 import { ToolbarWithComponents } from "@/components/ToolbarWithComponents";
+import { RouteRedirectManager } from "@/components/RouteRedirectManager";
 
 import { ErrorBoundary, UIErrorBoundary } from "@/components/ErrorBoundary";
 import { ProductionReadyErrorBoundary } from "@/components/production/ProductionReadyErrorBoundary";
@@ -28,6 +29,7 @@ import RegistryEntry from "./pages/RegistryEntry";
 import AkashicConstellationPage from "./pages/AkashicConstellation";
 import Guidebook from "./pages/Guidebook";
 import Support from "./pages/Support";
+import Help from "./pages/Help";
 import Auth from "./pages/Auth";
 import AuthConfirm from "./pages/AuthConfirm";
 import NotFound from "./pages/NotFound";
@@ -71,31 +73,56 @@ function App() {
                   </ProtectedRoute>
                 }
               >
+                  <RouteRedirectManager />
                   <Route path="/" element={<Index />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
+                  
+                  {/* Redirects for old routes */}
+                  <Route path="/dashboard" element={<Navigate to="/" replace />} />
+                  <Route path="/youtube" element={<Navigate to="/library" replace />} />
+                  <Route path="/videos" element={<Navigate to="/library" replace />} />
+                  
+                  {/* Core Routes */}
                   <Route path="/feed" element={<Feed />} />
-                  <Route path="/messages" element={<Messages />} />
-                  <Route path="/circles" element={<Circles />} />
+                  
+                  {/* Practice Routes */}
+                  <Route path="/breath" element={<Breath />} />
+                  <Route path="/meditation" element={<Meditation />} />
                   <Route path="/journal" element={<Journal />} />
-                  <Route path="/videos" element={<VideoLibrary />} />
-                  <Route path="/video-studio" element={<VideoStudio />} />
-                  <Route path="/registry" element={<CollectiveAkashicConstellationPage />} />
-                  <Route path="/resonance/entries/:id" element={<RegistryEntry />} />
-                  <Route path="/codex" element={<AkashicConstellationPage />} />
                   <Route path="/grove" element={<Grove />} />
-                  <Route path="/liberation" element={<Liberation />} />
-                  <Route path="/guidebook" element={<Guidebook />} />
-                  <Route path="/learning-3d" element={<Learning3D />} />
+                  
+                  {/* Community Routes */}
+                  <Route path="/circles" element={<Circles />} />
+                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/codex" element={<AkashicConstellationPage />} />
                   <Route path="/constellation" element={<ConstellationMapper />} />
+                  
+                  {/* Library Routes */}
+                  <Route path="/library" element={<VideoLibrary />} />
+                  <Route path="/video-studio" element={<VideoStudio />} />
+                  
+                  {/* Help & Docs Routes */}
+                  <Route path="/help" element={<Help />} />
+                  <Route path="/guidebook" element={<Guidebook />} />
+                  <Route path="/sitemap" element={<UserSitemap />} />
                   <Route path="/support" element={<Support />} />
+                  
+                  {/* Account Routes */}
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/support-the-shift" element={<Support />} />
+                  
+                  {/* Admin Routes */}
                   <Route path="/ai-admin" element={<AdminRoute><JusticeQuantumCommandNexus /></AdminRoute>} />
+                  <Route path="/admin/curation" element={<AdminRoute><VideoLibrary /></AdminRoute>} />
+                  <Route path="/labs" element={<AdminRoute><FeaturesComingSoon /></AdminRoute>} />
+                  
+                  {/* Legacy Routes */}
+                  <Route path="/registry" element={<CollectiveAkashicConstellationPage />} />
+                  <Route path="/resonance/entries/:id" element={<RegistryEntry />} />
+                  <Route path="/liberation" element={<Liberation />} />
+                  <Route path="/learning-3d" element={<Learning3D />} />
                   <Route path="/shift" element={<Shift />} />
-                  <Route path="/meditation" element={<Meditation />} />
-                  <Route path="/breath" element={<Breath />} />
                   <Route path="/features-coming-soon" element={<FeaturesComingSoon />} />
-                  <Route path="/sitemap" element={<UserSitemap />} />
                   <Route path="/dev/sitemap" element={<DevSitemap />} />
                   <Route path="/ethos" element={<Ethos />} />
                 </Route>
