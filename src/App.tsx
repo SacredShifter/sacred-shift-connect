@@ -59,7 +59,6 @@ function App() {
           <Sonner />
         <SacredScreensaver 
           timeout={120000} 
-          visualType="breath_orb" 
           enabled={true}
         >
           <div className="min-h-screen relative w-full bg-black">

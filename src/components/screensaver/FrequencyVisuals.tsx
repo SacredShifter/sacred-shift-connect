@@ -2,13 +2,23 @@ import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
-import type { ScreensaverVisualType } from '../SacredScreensaver';
 import { SacredMessage } from './SacredMessage';
 import { useScreensaverMessages } from '@/hooks/useScreensaverMessages';
 import { useCollectiveResonance } from '@/hooks/useCollectiveResonance';
 import { FlowerOfLife, MerkabaField, TorusField } from './SacredGeometry';
 import { EnhancedFrequencyWaves } from './EnhancedFrequencyWaves';
 import { ResonanceMessaging } from './ResonanceMessaging';
+
+type ScreensaverVisualType = 
+  | "breath_orb"
+  | "galaxy_mind"
+  | "sacred_geometry"
+  | "frequency_waves"
+  | "void_meditation"
+  | "heart_opening"
+  | "chakra_column"
+  | "somatic_body"
+  | "energy_alignment";
 
 // Custom shader materials for enhanced visuals
 const createEnergyShaderMaterial = (color: THREE.Color, time: number = 0) => {

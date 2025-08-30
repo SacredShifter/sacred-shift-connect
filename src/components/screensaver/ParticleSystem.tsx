@@ -1,7 +1,8 @@
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import type { ScreensaverPhase } from '../SacredScreensaver';
+
+type ScreensaverPhase = "idle" | "fragmenting" | "frequency" | "reassembling";
 
 interface ParticleSystemProps {
   phase: ScreensaverPhase;
