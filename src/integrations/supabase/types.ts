@@ -6803,6 +6803,36 @@ export type Database = {
         }
         Relationships: []
       }
+      initiation_trigger_log: {
+        Row: {
+          conditions_met: Json
+          created_at: string | null
+          id: string
+          seal_awarded: boolean | null
+          seal_name: string
+          trigger_event: string
+          user_id: string
+        }
+        Insert: {
+          conditions_met: Json
+          created_at?: string | null
+          id?: string
+          seal_awarded?: boolean | null
+          seal_name: string
+          trigger_event: string
+          user_id: string
+        }
+        Update: {
+          conditions_met?: Json
+          created_at?: string | null
+          id?: string
+          seal_awarded?: boolean | null
+          seal_name?: string
+          trigger_event?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       insight_reflections: {
         Row: {
           content: string
@@ -11130,6 +11160,53 @@ export type Database = {
           },
         ]
       }
+      routine_completion_logs: {
+        Row: {
+          completed_practices: Json
+          completion_date: string
+          completion_percentage: number
+          created_at: string
+          geometry_evolution: Json | null
+          id: string
+          insights: string | null
+          sequence_type: string
+          user_id: string
+          user_routine_id: string | null
+        }
+        Insert: {
+          completed_practices?: Json
+          completion_date?: string
+          completion_percentage?: number
+          created_at?: string
+          geometry_evolution?: Json | null
+          id?: string
+          insights?: string | null
+          sequence_type: string
+          user_id: string
+          user_routine_id?: string | null
+        }
+        Update: {
+          completed_practices?: Json
+          completion_date?: string
+          completion_percentage?: number
+          created_at?: string
+          geometry_evolution?: Json | null
+          id?: string
+          insights?: string | null
+          sequence_type?: string
+          user_id?: string
+          user_routine_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_completion_logs_user_routine_id_fkey"
+            columns: ["user_routine_id"]
+            isOneToOne: false
+            referencedRelation: "user_sacred_routines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sacred_blessings: {
         Row: {
           animation_type: string | null
@@ -12014,6 +12091,66 @@ export type Database = {
           },
         ]
       }
+      sacred_lineage_seals: {
+        Row: {
+          blessing_text: string
+          color_signature: string
+          created_at: string | null
+          description_text: string
+          esoteric_unlock_level: number | null
+          geometry_type: string
+          icon_name: string
+          id: string
+          minimum_routines: number
+          oath_text: string
+          requires_circle_leadership: boolean | null
+          requires_community_contribution: boolean | null
+          requires_journal_entries: number | null
+          requires_module_diversity: boolean | null
+          requires_streak_days: number | null
+          seal_name: string
+          seal_order: number
+        }
+        Insert: {
+          blessing_text: string
+          color_signature: string
+          created_at?: string | null
+          description_text: string
+          esoteric_unlock_level?: number | null
+          geometry_type: string
+          icon_name: string
+          id?: string
+          minimum_routines: number
+          oath_text: string
+          requires_circle_leadership?: boolean | null
+          requires_community_contribution?: boolean | null
+          requires_journal_entries?: number | null
+          requires_module_diversity?: boolean | null
+          requires_streak_days?: number | null
+          seal_name: string
+          seal_order: number
+        }
+        Update: {
+          blessing_text?: string
+          color_signature?: string
+          created_at?: string | null
+          description_text?: string
+          esoteric_unlock_level?: number | null
+          geometry_type?: string
+          icon_name?: string
+          id?: string
+          minimum_routines?: number
+          oath_text?: string
+          requires_circle_leadership?: boolean | null
+          requires_community_contribution?: boolean | null
+          requires_journal_entries?: number | null
+          requires_module_diversity?: boolean | null
+          requires_streak_days?: number | null
+          seal_name?: string
+          seal_order?: number
+        }
+        Relationships: []
+      }
       sacred_message_threads: {
         Row: {
           created_at: string | null
@@ -12258,6 +12395,63 @@ export type Database = {
         }
         Relationships: []
       }
+      sacred_practice_analytics: {
+        Row: {
+          calculation_date: string | null
+          circles_created_count: number | null
+          circles_with_min_members_count: number | null
+          community_contributions_count: number | null
+          consistency_score: number | null
+          current_streak_days: number | null
+          id: string
+          journal_entries_count: number | null
+          last_routine_date: string | null
+          leadership_score: number | null
+          longest_streak_days: number | null
+          module_diversity_score: number | null
+          total_routines: number | null
+          unique_module_types_count: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          calculation_date?: string | null
+          circles_created_count?: number | null
+          circles_with_min_members_count?: number | null
+          community_contributions_count?: number | null
+          consistency_score?: number | null
+          current_streak_days?: number | null
+          id?: string
+          journal_entries_count?: number | null
+          last_routine_date?: string | null
+          leadership_score?: number | null
+          longest_streak_days?: number | null
+          module_diversity_score?: number | null
+          total_routines?: number | null
+          unique_module_types_count?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          calculation_date?: string | null
+          circles_created_count?: number | null
+          circles_with_min_members_count?: number | null
+          community_contributions_count?: number | null
+          consistency_score?: number | null
+          current_streak_days?: number | null
+          id?: string
+          journal_entries_count?: number | null
+          last_routine_date?: string | null
+          leadership_score?: number | null
+          longest_streak_days?: number | null
+          module_diversity_score?: number | null
+          total_routines?: number | null
+          unique_module_types_count?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       sacred_rituals: {
         Row: {
           affirmation: string | null
@@ -12303,6 +12497,57 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      sacred_routine_templates: {
+        Row: {
+          archetype: string
+          created_at: string
+          day_sequence: Json
+          description: string
+          evening_sequence: Json
+          id: string
+          is_default: boolean | null
+          morning_sequence: Json
+          name: string
+          sacred_geometry: string
+          template_type: string
+          tri_lens_mappings: Json
+          unlock_requirements: Json
+          updated_at: string
+        }
+        Insert: {
+          archetype: string
+          created_at?: string
+          day_sequence?: Json
+          description: string
+          evening_sequence?: Json
+          id?: string
+          is_default?: boolean | null
+          morning_sequence?: Json
+          name: string
+          sacred_geometry: string
+          template_type: string
+          tri_lens_mappings?: Json
+          unlock_requirements?: Json
+          updated_at?: string
+        }
+        Update: {
+          archetype?: string
+          created_at?: string
+          day_sequence?: Json
+          description?: string
+          evening_sequence?: Json
+          id?: string
+          is_default?: boolean | null
+          morning_sequence?: Json
+          name?: string
+          sacred_geometry?: string
+          template_type?: string
+          tri_lens_mappings?: Json
+          unlock_requirements?: Json
+          updated_at?: string
         }
         Relationships: []
       }
@@ -16250,6 +16495,100 @@ export type Database = {
           },
         ]
       }
+      user_sacred_initiations: {
+        Row: {
+          awarded_at: string | null
+          ceremony_completed: boolean | null
+          ceremony_completed_at: string | null
+          conditions_snapshot: Json
+          created_at: string | null
+          esoteric_access_granted: boolean | null
+          id: string
+          seal_id: string | null
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string | null
+          ceremony_completed?: boolean | null
+          ceremony_completed_at?: string | null
+          conditions_snapshot: Json
+          created_at?: string | null
+          esoteric_access_granted?: boolean | null
+          id?: string
+          seal_id?: string | null
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string | null
+          ceremony_completed?: boolean | null
+          ceremony_completed_at?: string | null
+          conditions_snapshot?: Json
+          created_at?: string | null
+          esoteric_access_granted?: boolean | null
+          id?: string
+          seal_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sacred_initiations_seal_id_fkey"
+            columns: ["seal_id"]
+            isOneToOne: false
+            referencedRelation: "sacred_lineage_seals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_sacred_routines: {
+        Row: {
+          created_at: string
+          current_streak: number
+          customizations: Json
+          geometry_progress: Json
+          id: string
+          is_active: boolean
+          longest_streak: number
+          template_id: string | null
+          total_completions: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          customizations?: Json
+          geometry_progress?: Json
+          id?: string
+          is_active?: boolean
+          longest_streak?: number
+          template_id?: string | null
+          total_completions?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          customizations?: Json
+          geometry_progress?: Json
+          id?: string
+          is_active?: boolean
+          longest_streak?: number
+          template_id?: string | null
+          total_completions?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sacred_routines_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "sacred_routine_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_saved_frequencies: {
         Row: {
           created_at: string | null
@@ -17818,6 +18157,21 @@ export type Database = {
         }
         Returns: number
       }
+      calculate_sacred_progress: {
+        Args: { p_user_id: string }
+        Returns: {
+          circles_leadership: number
+          community_contributions: number
+          consistency_score: number
+          current_streak: number
+          journal_entries: number
+          leadership_score: number
+          longest_streak: number
+          module_diversity_score: number
+          total_routines: number
+          unique_module_types: number
+        }[]
+      }
       calculate_trust_weight: {
         Args: { user_id_param: string }
         Returns: number
@@ -17825,6 +18179,13 @@ export type Database = {
       can_view_circle_members: {
         Args: { circle_uuid: string; user_uuid: string }
         Returns: boolean
+      }
+      check_and_award_sacred_seals: {
+        Args: { p_user_id: string }
+        Returns: {
+          ceremony_required: boolean
+          newly_awarded_seal: string
+        }[]
       }
       check_security_invoker: {
         Args: Record<PropertyKey, never>
