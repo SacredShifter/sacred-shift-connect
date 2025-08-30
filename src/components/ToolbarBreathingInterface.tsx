@@ -66,10 +66,10 @@ export const ToolbarBreathingInterface = () => {
           <div className="space-y-2">
             <Label className="text-xs">Breathing Pattern</Label>
             <Select 
-              value={currentPreset.id} 
+              value={currentPreset.name} 
               onValueChange={(value) => {
-                const preset = presets.find(p => p.id === value);
-                if (preset) setCurrentPreset(preset);
+                const presetEntry = Object.entries(presets).find(([key, preset]) => preset.name === value);
+                if (presetEntry) setCurrentPreset(presetEntry[0]);
               }}
               disabled={isActive}
             >
@@ -77,8 +77,8 @@ export const ToolbarBreathingInterface = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {presets.map((preset) => (
-                  <SelectItem key={preset.id} value={preset.id}>
+                {Object.entries(presets).map(([key, preset]) => (
+                  <SelectItem key={key} value={preset.name}>
                     {preset.name}
                   </SelectItem>
                 ))}
