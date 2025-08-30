@@ -5,9 +5,11 @@ import { Users, User, BookOpen, Sparkles } from 'lucide-react';
 import { CodexConstellation } from '@/components/Codex/CodexConstellation';
 import { CodexList } from '@/components/Codex/CodexList';
 import { CollectiveCodexConstellation } from '@/components/CollectiveAkashicConstellation/CollectiveCodexConstellation';
+import { useRegistryOfResonance } from '@/hooks/useRegistryOfResonance';
 
 export default function Codex() {
   const [activeTab, setActiveTab] = useState('personal');
+  const { entries: collectiveEntries } = useRegistryOfResonance();
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -78,8 +80,11 @@ export default function Codex() {
 
           <div className="min-h-[600px]">
             <CollectiveCodexConstellation 
-              entries={[]}
-              onEntryClick={() => {}}
+              entries={collectiveEntries || []}
+              onEntryClick={(entry) => {
+                // Navigate to entry detail or open modal
+                console.log('Collective entry clicked:', entry);
+              }}
             />
           </div>
         </TabsContent>
