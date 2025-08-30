@@ -363,8 +363,16 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
   const { width, height } = useSceneResize();
   const [showFallback, setShowFallback] = useState(false);
   
-  // Calculate safe area - MUCH LARGER
-  const safeRadius = Math.min(width, height) * 0.4; // Increased from safeRadiusScale
+  // Calculate safe area - MUCH LARGER with safety checks
+  const safeRadius = useMemo(() => {
+    if (!width || !height || width <= 0 || height <= 0) {
+      console.warn('Invalid dimensions detected:', { width, height });
+      return 0.4; // Fallback value
+    }
+    const calculated = Math.min(width, height) * 0.4;
+    console.log('SafeRadius calculated:', calculated, 'from dimensions:', { width, height });
+    return calculated;
+  }, [width, height]);
   
   // Device-responsive particle count
   const particleCount = useMemo(() => {
@@ -427,7 +435,7 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
         dpr={[1, 2]}
         performance={{ min: 0.8 }}
       >
-        <Scene safeRadius={0.4} particleCount={Math.min(particleCount, 800)} />
+        <Scene safeRadius={safeRadius} particleCount={Math.min(particleCount, 800)} />
       </Canvas>
       
       {/* Logo Overlay - MAXIMUM PROMINENCE */}
