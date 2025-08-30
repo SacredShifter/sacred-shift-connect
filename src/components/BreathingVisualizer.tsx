@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useBreathingTool } from '@/hooks/useBreathingTool';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import SacredVentilation from '@/modules/breath/SacredVentilation';
 
 interface BreathingVisualizerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -66,112 +68,125 @@ export const BreathingVisualizer = ({
   };
 
   return (
-    <div className={`flex flex-col items-center space-y-4 ${className}`}>
-      {/* Main breathing orb */}
-      <div className="relative flex items-center justify-center">
-        <motion.div
-          animate={{
-            scale: getOrbScale(),
-            opacity: getOrbOpacity()
-          }}
-          transition={{
-            duration: isActive ? currentPreset[currentPhase] : 2,
-            ease: "easeInOut"
-          }}
-          className={`
-            ${sizeClasses[size]} 
-            rounded-full 
-            bg-gradient-to-br ${getGradient()}
-            backdrop-blur-sm 
-            border 
-            border-white/20 
-            shadow-2xl
-            flex 
-            items-center 
-            justify-center
-            relative
-          `}
-        >
-          {/* Inner glow */}
-          <div className="absolute inset-2 rounded-full bg-white/20 blur-sm" />
-          
-          {/* Timer display */}
-          {isActive && timeRemaining > 0 && (
-            <div className="relative z-10 text-center">
-              <div className="text-white font-bold text-sm">
-                {Math.ceil(timeRemaining / 1000)}s
-              </div>
-            </div>
-          )}
-          
-          {/* Cycle count when not in active phase */}
-          {!isActive && cycleCount > 0 && (
-            <div className="relative z-10 text-center">
-              <div className="text-white font-bold text-xs">
-                {cycleCount}
-              </div>
-              <div className="text-white/80 text-xs">
-                cycles
-              </div>
-            </div>
-          )}
-        </motion.div>
+    <div className={`w-full max-w-4xl mx-auto ${className}`}>
+      <Tabs value={currentTab} onValueChange={(value) => setCurrentTab(value as 'resonance' | 'ventilation')} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsTrigger value="resonance">Heart Resonance</TabsTrigger>
+          <TabsTrigger value="ventilation">Sacred Ventilation</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="resonance" className="flex flex-col items-center space-y-4">
+          {/* Main breathing orb */}
+          <div className="relative flex items-center justify-center">
+            <motion.div
+              animate={{
+                scale: getOrbScale(),
+                opacity: getOrbOpacity()
+              }}
+              transition={{
+                duration: isActive ? currentPreset[currentPhase] : 2,
+                ease: "easeInOut"
+              }}
+              className={`
+                ${sizeClasses[size]} 
+                rounded-full 
+                bg-gradient-to-br ${getGradient()}
+                backdrop-blur-sm 
+                border 
+                border-white/20 
+                shadow-2xl
+                flex 
+                items-center 
+                justify-center
+                relative
+              `}
+            >
+              {/* Inner glow */}
+              <div className="absolute inset-2 rounded-full bg-white/20 blur-sm" />
+              
+              {/* Timer display */}
+              {isActive && timeRemaining > 0 && (
+                <div className="relative z-10 text-center">
+                  <div className="text-white font-bold text-sm">
+                    {Math.ceil(timeRemaining / 1000)}s
+                  </div>
+                </div>
+              )}
+              
+              {/* Cycle count when not in active phase */}
+              {!isActive && cycleCount > 0 && (
+                <div className="relative z-10 text-center">
+                  <div className="text-white font-bold text-xs">
+                    {cycleCount}
+                  </div>
+                  <div className="text-white/80 text-xs">
+                    cycles
+                  </div>
+                </div>
+              )}
+            </motion.div>
 
-        {/* Breathing rings */}
-        {isActive && (
-          <>
-            {[1, 2, 3].map((ring) => (
-              <motion.div
-                key={ring}
-                animate={{
-                  scale: currentPhase === 'inhale' || currentPhase === 'hold1' ? 
-                    1 + (ring * 0.2) : 0.8 + (ring * 0.1),
-                  opacity: 0.3 - (ring * 0.1)
-                }}
-                transition={{
-                  duration: currentPreset[currentPhase],
-                  ease: "easeInOut",
-                  delay: ring * 0.1
-                }}
-                className="absolute inset-0 rounded-full border border-white/30"
-                style={{
-                  width: `${100 + ring * 25}%`,
-                  height: `${100 + ring * 25}%`,
-                }}
-              />
-            ))}
-          </>
-        )}
-      </div>
-
-      {/* Phase labels */}
-      {showLabels && (
-        <div className="text-center space-y-1">
-          {isActive ? (
-            <>
-              <div className="text-sm font-medium text-primary">
-                {getPhaseLabel(currentPhase)}
-              </div>
-              <div className="text-xs text-muted-foreground italic">
-                {getPhaseMessage(currentPhase)}
-              </div>
-            </>
-          ) : (
-            <div className="text-sm text-muted-foreground">
-              {cycleCount > 0 ? `${cycleCount} cycles completed` : 'Ready to begin'}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Preset info */}
-      {showLabels && (
-        <div className="text-center">
-          <div className="text-xs text-muted-foreground">
-            {currentPreset.name} • {currentPreset.inhale}:{currentPreset.hold1}:{currentPreset.exhale}:{currentPreset.hold2}
+            {/* Breathing rings */}
+            {isActive && (
+              <>
+                {[1, 2, 3].map((ring) => (
+                  <motion.div
+                    key={ring}
+                    animate={{
+                      scale: currentPhase === 'inhale' || currentPhase === 'hold1' ? 
+                        1 + (ring * 0.2) : 0.8 + (ring * 0.1),
+                      opacity: 0.3 - (ring * 0.1)
+                    }}
+                    transition={{
+                      duration: currentPreset[currentPhase],
+                      ease: "easeInOut",
+                      delay: ring * 0.1
+                    }}
+                    className="absolute inset-0 rounded-full border border-white/30"
+                    style={{
+                      width: `${100 + ring * 25}%`,
+                      height: `${100 + ring * 25}%`,
+                    }}
+                  />
+                ))}
+              </>
+            )}
           </div>
-        </div>
-      )}
+
+          {/* Phase labels */}
+          {showLabels && (
+            <div className="text-center space-y-1">
+              {isActive ? (
+                <>
+                  <div className="text-sm font-medium text-primary">
+                    {getPhaseLabel(currentPhase)}
+                  </div>
+                  <div className="text-xs text-muted-foreground italic">
+                    {getPhaseMessage(currentPhase)}
+                  </div>
+                </>
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  {cycleCount > 0 ? `${cycleCount} cycles completed` : 'Ready to begin'}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Preset info */}
+          {showLabels && (
+            <div className="text-center">
+              <div className="text-xs text-muted-foreground">
+                {currentPreset.name} • {currentPreset.inhale}:{currentPreset.hold1}:{currentPreset.exhale}:{currentPreset.hold2}
+              </div>
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="ventilation">
+          <SacredVentilation />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
