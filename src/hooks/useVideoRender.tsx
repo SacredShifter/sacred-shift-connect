@@ -74,6 +74,13 @@ export const useVideoRender = () => {
         .order('created_at', { ascending: false });
 
       if (planId) {
+        // Validate UUID format before querying
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(planId)) {
+          console.warn('Invalid UUID format for plan_id:', planId);
+          setRenderJobs([]);
+          return [];
+        }
         query = query.eq('plan_id', planId);
       }
 

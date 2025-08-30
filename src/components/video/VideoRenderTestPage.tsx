@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 // Test component to demonstrate the video rendering pipeline
 export const VideoRenderTestPage = () => {
-  // Mock content plan data
-  const mockPlanId = 'test-plan-id';
+  // Generate a valid UUID for testing
+  const mockPlanId = 'a0b1c2d3-4567-89ab-cdef-123456789abc';
   const mockPlanTitle = 'Sacred Geometry Meditation: Golden Ratio Journey';
 
   return (
