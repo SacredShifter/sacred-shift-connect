@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Play, 
   Pause, 
@@ -13,11 +15,17 @@ import {
   Layers,
   RotateCcw,
   Sparkles,
-  Eye
+  Eye,
+  Shield,
+  Award,
+  AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGAAEngine } from '@/hooks/useGAAEngine';
 import { GAAGeometryVisualizer } from './GAAGeometryVisualizer';
+import { PresetManager } from '@/utils/gaa/PresetManager';
+import { SafetySystem } from '@/utils/gaa/SafetySystem';
+import { COSMIC_STRUCTURE_PRESETS } from '@/utils/gaa/CosmicStructurePresets';
 
 export const GAAControlPanel = () => {
   const {
@@ -37,6 +45,10 @@ export const GAAControlPanel = () => {
   const [volume, setVolume] = useState([50]);
   const [oscillatorCount, setOscillatorCountLocal] = useState([8]);
   const [showVisualization, setShowVisualization] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<string>('');
+  const [presetManager] = useState(() => new PresetManager());
+  const [safetySystem] = useState(() => new SafetySystem());
+  const [safetyStatus, setSafetyStatus] = useState(safetySystem.getSafetyStatus());
   
   // Layer visibility states
   const layerStates = getLayerStates();
@@ -46,6 +58,48 @@ export const GAAControlPanel = () => {
       initializeGAA();
     }
   }, [isInitialized, initializeGAA]);
+
+  // Initialize safety monitoring
+  useEffect(() => {
+    if (isPlaying) {
+      safetySystem.startMonitoring();
+    } else {
+      safetySystem.stopMonitoring();
+    }
+
+    // Safety alert handler
+    const handleSafetyAlert = (alert: any) => {
+      setSafetyStatus(safetySystem.getSafetyStatus());
+      
+      if (alert.action === 'stop' || alert.action === 'pause') {
+        stopGAA();
+      }
+    };
+
+    safetySystem.onAlert(handleSafetyAlert);
+
+    // Update safety status every second
+    const interval = setInterval(() => {
+      setSafetyStatus(safetySystem.getSafetyStatus());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isPlaying, safetySystem, stopGAA]);
+
+  // Handle preset loading
+  const handlePresetChange = async (presetId: string) => {
+    setSelectedPreset(presetId);
+    
+    if (presetId) {
+      const result = await presetManager.loadPreset(presetId);
+      if (result.success && result.geometry) {
+        // Update GAA engine with new geometry parameters
+        // This would require extending the useGAAEngine hook
+        console.log('Loaded preset:', result.preset?.name);
+        console.log('Geometry:', result.geometry);
+      }
+    }
+  };
 
   const handlePlayPause = () => {
     if (isPlaying) {
@@ -84,25 +138,70 @@ export const GAAControlPanel = () => {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-violet-500/10 to-indigo-500/5 border-violet-500/20 relative overflow-hidden">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Waves className="w-4 h-4 text-violet-400" />
-          GAA Engine
-          <Badge 
-            variant={isInitialized ? "default" : "secondary"} 
-            className={`ml-auto text-xs ${
-              isInitialized 
-                ? 'bg-violet-500/20 text-violet-300 border-violet-500/30' 
-                : 'bg-muted/20'
-            }`}
-          >
-            {isInitialized ? 'Ready' : 'Initializing'}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
+    <div className="space-y-6">
+      {/* Safety Status Alert */}
+      {safetyStatus.level !== 'safe' && (
+        <Alert variant={safetyStatus.level === 'critical' ? 'destructive' : 'default'}>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            {safetyStatus.level === 'critical' ? 'Critical safety alert: ' : 'Safety warning: '}
+            {safetyStatus.activeAlerts[0]?.message}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Card className="bg-gradient-to-br from-violet-500/10 to-indigo-500/5 border-violet-500/20 relative overflow-hidden">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Waves className="w-4 h-4 text-violet-400" />
+            GAA Engine
+            <Badge variant={safetyStatus.level === 'safe' ? 'default' : safetyStatus.level === 'warning' ? 'secondary' : 'destructive'}>
+              <Shield className="h-3 w-3 mr-1" />
+              {safetyStatus.level}
+            </Badge>
+            <Badge 
+              variant={isInitialized ? "default" : "secondary"} 
+              className={`ml-auto text-xs ${
+                isInitialized 
+                  ? 'bg-violet-500/20 text-violet-300 border-violet-500/30' 
+                  : 'bg-muted/20'
+              }`}
+            >
+              {isInitialized ? 'Ready' : 'Initializing'}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
       
-      <CardContent className="space-y-4">
+        <CardContent className="space-y-4">
+          
+          {/* Cosmic Structure Preset Selection */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Cosmic Structure Preset</label>
+            <div className="flex gap-2">
+              <Select value={selectedPreset} onValueChange={handlePresetChange}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select a cosmic structure..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {COSMIC_STRUCTURE_PRESETS.map((preset) => (
+                    <SelectItem key={preset.id} value={preset.id}>
+                      <div className="flex items-center gap-2">
+                        <span>{preset.name}</span>
+                        {preset.evidence.confidence === 'confirmed' && (
+                          <Award className="h-3 w-3 text-yellow-500" />
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedPreset && (
+              <div className="text-xs text-muted-foreground">
+                {COSMIC_STRUCTURE_PRESETS.find(p => p.id === selectedPreset)?.description}
+              </div>
+            )}
+          </div>
         {/* Playback Controls */}
         <div className="flex items-center gap-3">
           <Button
@@ -234,7 +333,8 @@ export const GAAControlPanel = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
