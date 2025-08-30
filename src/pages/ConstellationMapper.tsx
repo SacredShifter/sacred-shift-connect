@@ -25,7 +25,11 @@ export default function ConstellationMapper() {
         </div>
 
         {/* Bridge Moment Notification */}
-        <BridgeMomentNotification trigger={bridgeTrigger} />
+        <BridgeMomentNotification 
+          isVisible={true} 
+          currentModule="constellation"
+          onDismiss={() => {}} 
+        />
 
         {/* Deeper Knowledge Section */}
         <div className="text-center max-w-7xl mx-auto">

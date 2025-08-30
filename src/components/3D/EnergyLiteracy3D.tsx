@@ -75,13 +75,35 @@ function EnergyField({ energyLevel, drainSources, restorationActive, phase }: an
   return (
     <group>
       <group ref={fieldRef}>
-        <mesh><sphereGeometry args={[2, 32, 32]} /><meshStandardMaterial color={fieldColor} transparent opacity={fieldOpacity} emissive={fieldColor} emissiveIntensity={0.3} /></mesh>
-        {[3, 4, 5].map((radius, index) => (<mesh key={index}><sphereGeometry args={[radius, 16, 16]} /><meshStandardMaterial color={fieldColor} transparent opacity={0.1 * (energyLevel / 10)} wireframe /></mesh>))}
+        <mesh>
+          <sphereGeometry args={[2, 32, 32]} />
+          <meshStandardMaterial color={fieldColor} transparent opacity={fieldOpacity} emissive={fieldColor} emissiveIntensity={0.3} />
+        </mesh>
+        {[3, 4, 5].map((radius, index) => (
+          <mesh key={index}>
+            <sphereGeometry args={[radius, 16, 16]} />
+            <meshStandardMaterial color={fieldColor} transparent opacity={0.1 * (energyLevel / 10)} wireframe />
+          </mesh>
+        ))}
       </group>
       <group ref={drainRef}>
-        {drainSources.map((_: any, index: number) => (<mesh key={index} position={[Math.cos(index * Math.PI * 0.4) * 6, Math.sin(index * Math.PI * 0.3) * 3, Math.sin(index * Math.PI * 0.4) * 6]}><sphereGeometry args={[0.3, 8, 8]} /><meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.5} /></mesh>))}
+        {drainSources.map((_: any, index: number) => (
+          <mesh key={index} position={[Math.cos(index * Math.PI * 0.4) * 6, Math.sin(index * Math.PI * 0.3) * 3, Math.sin(index * Math.PI * 0.4) * 6]}>
+            <sphereGeometry args={[0.3, 8, 8]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.5} />
+          </mesh>
+        ))}
       </group>
-      {restorationActive && (<group>{[0, 1, 2, 3, 4, 5].map((index) => (<mesh key={index} position={[Math.cos(index * Math.PI / 3) * 7, Math.sin(index * Math.PI / 6) * 2, Math.sin(index * Math.PI / 3) * 7]}><sphereGeometry args={[0.1, 8, 8]} /><meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={0.8} /></mesh>))}</group>)}
+      {restorationActive && (
+        <group>
+          {[0, 1, 2, 3, 4, 5].map((index) => (
+            <mesh key={index} position={[Math.cos(index * Math.PI / 3) * 7, Math.sin(index * Math.PI / 6) * 2, Math.sin(index * Math.PI / 3) * 7]}>
+              <sphereGeometry args={[0.1, 8, 8]} />
+              <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={0.8} />
+            </mesh>
+          ))}
+        </group>
+      )}
       <Text position={[0, 6, 0]} fontSize={0.8} color={fieldColor} anchorX="center" anchorY="middle">{phase.toUpperCase()}</Text>
     </group>
   );

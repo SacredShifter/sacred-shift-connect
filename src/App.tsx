@@ -43,6 +43,7 @@ import Meditation from './pages/Meditation';
 import Breath from './pages/Breath';
 import Learning3D from './pages/Learning3D';
 import FeaturesComingSoon from './pages/FeaturesComingSoon';
+import AdminLogs from './pages/AdminLogs';
 import { DevSitemap } from './components/SacredSitemap/DevSitemap';
 import { UserSitemap } from './components/SacredSitemap/UserSitemap';
 import Ethos from './pages/Ethos';
@@ -115,6 +116,7 @@ function App() {
                   {/* Admin Routes */}
                   <Route path="/ai-admin" element={<AdminRoute><JusticeQuantumCommandNexus /></AdminRoute>} />
                   <Route path="/admin/curation" element={<AdminRoute><VideoLibrary /></AdminRoute>} />
+                  <Route path="/admin/logs" element={<AdminRoute><AdminLogs /></AdminRoute>} />
                   <Route path="/labs" element={<AdminRoute><FeaturesComingSoon /></AdminRoute>} />
                   
                   {/* Legacy Routes */}
