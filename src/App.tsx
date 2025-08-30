@@ -42,6 +42,7 @@ import Learning3D from './pages/Learning3D';
 import FeaturesComingSoon from './pages/FeaturesComingSoon';
 import { DevSitemap } from './components/SacredSitemap/DevSitemap';
 import { UserSitemap } from './components/SacredSitemap/UserSitemap';
+import Ethos from './pages/Ethos';
 
 
 function App() {
@@ -96,6 +97,7 @@ function App() {
                   <Route path="/features-coming-soon" element={<FeaturesComingSoon />} />
                   <Route path="/sitemap" element={<UserSitemap />} />
                   <Route path="/dev/sitemap" element={<DevSitemap />} />
+                  <Route path="/ethos" element={<Ethos />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

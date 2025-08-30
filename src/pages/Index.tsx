@@ -227,9 +227,31 @@ const Index = () => {
             />
           </div>
           
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-2">
-            A sovereign platform where consciousness meets frontier technology. 
-            Encrypted mesh networks, sacred wisdom, and digital sovereignty united.
+          {/* Sacred Shifter Manifesto */}
+          <div className="space-y-4 max-w-4xl mx-auto">
+            <h1 className="text-2xl md:text-3xl font-bold font-sacred bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+              Sacred Shifter is the resonance field for awakening
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              We dissolve distortion through <span className="text-secondary font-medium">pattern</span>, 
+              <span className="text-accent font-medium"> awe</span>, and 
+              <span className="text-primary font-medium"> Truth</span> — guiding individuals and communities into coherence.
+            </p>
+            <div className="flex justify-center">
+              <Link 
+                to="/ethos" 
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all duration-300 text-primary font-medium"
+              >
+                <Scroll className="h-4 w-4" />
+                Read Our Sacred Ethos
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+          
+          <p className="text-sm text-muted-foreground/70 max-w-2xl mx-auto leading-relaxed italic">
+            This is not social media. It is a living mandala where geometry, breath, sound, 
+            and collective intention become technology for remembering who we are.
           </p>
         </div>
 
