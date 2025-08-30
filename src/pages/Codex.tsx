@@ -6,7 +6,7 @@ import { CodexConstellation } from '@/components/Codex/CodexConstellation';
 import { CodexList } from '@/components/Codex/CodexList';
 import { CollectiveCodexConstellation } from '@/components/CollectiveAkashicConstellation/CollectiveCodexConstellation';
 import { useRegistryOfResonance } from '@/hooks/useRegistryOfResonance';
-import { SacredInitiationManual } from '@/components/SacredInitiationManual';
+import { SacredInitiationTest } from '@/components/SacredInitiationTest';
 import { TeachingLayer } from '@/components/TeachingLayer';
 import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 import { Button } from '@/components/ui/button';
@@ -99,7 +99,7 @@ export default function Codex() {
         </TabsContent>
 
         <TabsContent value="initiation" className="space-y-6">
-          <SacredInitiationManual />
+          <SacredInitiationTest />
         </TabsContent>
       </Tabs>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,26 +6,43 @@ import { useUserRoutine } from '@/hooks/useUserRoutine';
 import { useRoutineProgress } from '@/hooks/useRoutineProgress';
 import { useRoutineTemplate } from '@/hooks/useRoutineTemplates';
 import { RoutineTemplateSelector } from './RoutineTemplateSelector';
-import { LineageBadge } from './LineageBadge';
-import { LineageOathDialog } from './LineageOathDialog';
+import { LineageBadge, BadgeLevel } from './LineageBadge';
 import { SacredGeometry3D } from '@/components/SacredGeometry3D';
+import { SacredInitiationCeremony } from '@/components/SacredInitiationCeremony';
+import { useCurrentSeal, useSacredProgress, useCheckSeals, useUserInitiations } from '@/hooks/useSacredInitiations';
 import { Sparkles, Calendar, Flame, Target, Settings } from 'lucide-react';
 
 export const SacredRoutineDashboard: React.FC = () => {
   const { data: userRoutine } = useUserRoutine();
   const { data: progress } = useRoutineProgress();
   const { data: template } = useRoutineTemplate(userRoutine?.template_id || '');
+  const { data: currentSeal } = useCurrentSeal();
+  const { data: sacredProgress } = useSacredProgress();
+  const { data: initiations } = useUserInitiations();
+  const { mutate: checkSeals } = useCheckSeals();
+  
   const [showTemplateSelector, setShowTemplateSelector] = useState(!userRoutine);
-  const [showOathDialog, setShowOathDialog] = useState(false);
-  const [pendingBadge, setPendingBadge] = useState<any>(null);
+  const [showInitiationCeremony, setShowInitiationCeremony] = useState(false);
+  const [ceremonyInitiation, setCeremonyInitiation] = useState<any>(null);
+
+  // Check for new seals when routine is completed
+  useEffect(() => {
+    if (progress?.totalCompletions && progress.totalCompletions > 0) {
+      checkSeals();
+    }
+  }, [progress?.totalCompletions, checkSeals]);
+
+  // Check for uncompleted ceremonies
+  useEffect(() => {
+    const uncompletedCeremony = initiations?.find(i => !i.ceremony_completed);
+    if (uncompletedCeremony) {
+      setCeremonyInitiation(uncompletedCeremony);
+      setShowInitiationCeremony(true);
+    }
+  }, [initiations]);
 
   const handleTemplateSelect = (templateId: string) => {
     setShowTemplateSelector(false);
-    // Check if badge level changed and show oath dialog
-    if (progress?.badge) {
-      setPendingBadge(progress.badge);
-      setShowOathDialog(true);
-    }
   };
 
   if (showTemplateSelector) {
@@ -56,14 +73,14 @@ export const SacredRoutineDashboard: React.FC = () => {
       <div className="text-center space-y-6">
         <div className="flex items-center justify-center gap-4">
           <h1 className="font-sacred text-3xl text-truth">Sacred Routine Command Center</h1>
-          {progress?.badge && (
+          {currentSeal && (
             <LineageBadge 
-              level={progress.badge} 
+              level={currentSeal.seal.seal_name as BadgeLevel} 
               size="md" 
               showLabel={false}
               onClick={() => {
-                setPendingBadge(progress.badge);
-                setShowOathDialog(true);
+                setCeremonyInitiation(currentSeal);
+                setShowInitiationCeremony(true);
               }}
             />
           )}
@@ -113,7 +130,7 @@ export const SacredRoutineDashboard: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center space-y-1">
               <div className="text-2xl font-sacred text-truth">
-                {progress?.totalCompletions || 0}
+                {sacredProgress?.total_routines || progress?.totalCompletions || 0}
               </div>
               <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                 <Target className="h-3 w-3" />
@@ -123,7 +140,7 @@ export const SacredRoutineDashboard: React.FC = () => {
             
             <div className="text-center space-y-1">
               <div className="text-2xl font-sacred text-resonance">
-                {progress?.currentStreak || 0}
+                {sacredProgress?.current_streak || progress?.currentStreak || 0}
               </div>
               <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                 <Flame className="h-3 w-3" />
@@ -133,7 +150,7 @@ export const SacredRoutineDashboard: React.FC = () => {
             
             <div className="text-center space-y-1">
               <div className="text-2xl font-sacred text-purpose">
-                {progress?.longestStreak || 0}
+                {sacredProgress?.longest_streak || progress?.longestStreak || 0}
               </div>
               <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                 <Flame className="h-3 w-3" />
@@ -143,11 +160,11 @@ export const SacredRoutineDashboard: React.FC = () => {
             
             <div className="text-center space-y-1">
               <div className="text-2xl font-sacred text-alignment">
-                {progress?.nextBadgeRequirement || 1}
+                {sacredProgress?.community_contributions || 0}
               </div>
               <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                 <Sparkles className="h-3 w-3" />
-                Next Seal
+                Community
               </div>
             </div>
           </div>
@@ -188,20 +205,15 @@ export const SacredRoutineDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Oath Dialog */}
-      <AnimatePresence>
-        {showOathDialog && pendingBadge && (
-          <LineageOathDialog
-            isOpen={showOathDialog}
-            onClose={() => setShowOathDialog(false)}
-            badgeLevel={pendingBadge}
-            onAccept={() => {
-              setShowOathDialog(false);
-              setPendingBadge(null);
-            }}
-          />
-        )}
-      </AnimatePresence>
+      {/* Sacred Initiation Ceremony */}
+      <SacredInitiationCeremony
+        initiation={ceremonyInitiation}
+        open={showInitiationCeremony}
+        onClose={() => {
+          setShowInitiationCeremony(false);
+          setCeremonyInitiation(null);
+        }}
+      />
     </div>
   );
 };
