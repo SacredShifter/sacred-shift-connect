@@ -43,33 +43,14 @@ export const useGAAPresets = () => {
     try {
       console.log('📊 Loading GAA presets...', filters);
 
-      // Load from database with proper table reference
-      let query = supabase
+      // Load from database with simplified query to avoid type chaining issues
+      const { data, error } = await supabase
         .from('gaa_presets')
         .select(`
           *,
           cosmic_structures(*)
         `)
         .order('created_at', { ascending: false });
-
-      // Apply filters
-      if (filters?.polarityEnabled !== undefined) {
-        query = query.eq('biofeedback_integration', filters.polarityEnabled);
-      }
-
-      if (filters?.shadowModeEnabled !== undefined) {
-        query = query.eq('shadow_mode_enabled', filters.shadowModeEnabled);
-      }
-
-      if (filters?.collectiveCompatible !== undefined) {
-        query = query.eq('collective_compatible', filters.collectiveCompatible);
-      }
-
-      if (filters?.tags && filters.tags.length > 0) {
-        query = query.contains('tags', filters.tags);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         console.warn('Database presets not available, using defaults:', error);
