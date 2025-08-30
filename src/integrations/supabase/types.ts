@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      ab_tests: {
+        Row: {
+          content_id: string
+          created_at: string
+          created_by: string
+          ended_at: string | null
+          id: string
+          performance_data: Json | null
+          status: string
+          test_type: string
+          variants: Json
+          winner_variant: string | null
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          created_by: string
+          ended_at?: string | null
+          id?: string
+          performance_data?: Json | null
+          status?: string
+          test_type: string
+          variants: Json
+          winner_variant?: string | null
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          created_by?: string
+          ended_at?: string | null
+          id?: string
+          performance_data?: Json | null
+          status?: string
+          test_type?: string
+          variants?: Json
+          winner_variant?: string | null
+        }
+        Relationships: []
+      }
       active_user_metrics: {
         Row: {
           activity_count: number
@@ -619,6 +658,39 @@ export type Database = {
           id?: string
           is_primary?: boolean
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      audit_trail: {
+        Row: {
+          action_type: string
+          changes: Json | null
+          compliance_hash: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          changes?: Json | null
+          compliance_hash: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          changes?: Json | null
+          compliance_hash?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -3229,6 +3301,45 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_items: {
+        Row: {
+          added_at: string | null
+          added_by: string | null
+          collection_id: string
+          content_item_id: string
+          order_index: number | null
+        }
+        Insert: {
+          added_at?: string | null
+          added_by?: string | null
+          collection_id: string
+          content_item_id: string
+          order_index?: number | null
+        }
+        Update: {
+          added_at?: string | null
+          added_by?: string | null
+          collection_id?: string
+          content_item_id?: string
+          order_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "content_collection"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_items_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "content_item"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collective_field_echoes: {
         Row: {
           contributor_hash: string
@@ -3906,6 +4017,304 @@ export type Database = {
         }
         Relationships: []
       }
+      content_adaptations: {
+        Row: {
+          adaptation_type: string
+          adapted_data: Json
+          applied_at: string | null
+          created_at: string | null
+          id: string
+          original_content_id: string
+          original_data: Json
+          performance_impact: Json | null
+          platform: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          adaptation_type: string
+          adapted_data: Json
+          applied_at?: string | null
+          created_at?: string | null
+          id?: string
+          original_content_id: string
+          original_data: Json
+          performance_impact?: Json | null
+          platform: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          adaptation_type?: string
+          adapted_data?: Json
+          applied_at?: string | null
+          created_at?: string | null
+          id?: string
+          original_content_id?: string
+          original_data?: Json
+          performance_impact?: Json | null
+          platform?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      content_collection: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          ethos_verified: boolean | null
+          id: string
+          is_featured: boolean | null
+          sort_order: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          ethos_verified?: boolean | null
+          id?: string
+          is_featured?: boolean | null
+          sort_order?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          ethos_verified?: boolean | null
+          id?: string
+          is_featured?: boolean | null
+          sort_order?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      content_collection_items: {
+        Row: {
+          added_at: string
+          collection_id: string
+          content_item_id: string
+          id: string
+          position_index: number | null
+        }
+        Insert: {
+          added_at?: string
+          collection_id: string
+          content_item_id: string
+          id?: string
+          position_index?: number | null
+        }
+        Update: {
+          added_at?: string
+          collection_id?: string
+          content_item_id?: string
+          id?: string
+          position_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "content_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_collection_items_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_collections: {
+        Row: {
+          auto_curation_rules: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          updated_at: string
+          user_id: string
+          visual_theme: Json | null
+        }
+        Insert: {
+          auto_curation_rules?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          updated_at?: string
+          user_id: string
+          visual_theme?: Json | null
+        }
+        Update: {
+          auto_curation_rules?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+          visual_theme?: Json | null
+        }
+        Relationships: []
+      }
+      content_item: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_s: number | null
+          embed_html: string | null
+          embed_type: Database["public"]["Enums"]["embed_kind"]
+          hash: string
+          id: string
+          platform: Database["public"]["Enums"]["platform"]
+          platform_id: string
+          published_at: string | null
+          source_id: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          url: string
+          visibility: Database["public"]["Enums"]["visibility"] | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_s?: number | null
+          embed_html?: string | null
+          embed_type: Database["public"]["Enums"]["embed_kind"]
+          hash: string
+          id?: string
+          platform: Database["public"]["Enums"]["platform"]
+          platform_id: string
+          published_at?: string | null
+          source_id?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          url: string
+          visibility?: Database["public"]["Enums"]["visibility"] | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_s?: number | null
+          embed_html?: string | null
+          embed_type?: Database["public"]["Enums"]["embed_kind"]
+          hash?: string
+          id?: string
+          platform?: Database["public"]["Enums"]["platform"]
+          platform_id?: string
+          published_at?: string | null
+          source_id?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          url?: string
+          visibility?: Database["public"]["Enums"]["visibility"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_item_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "content_source"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_items: {
+        Row: {
+          author_name: string | null
+          author_url: string | null
+          content_type: Database["public"]["Enums"]["content_item_type"]
+          content_url: string
+          created_at: string
+          curation_notes: string | null
+          curation_status: string | null
+          description: string | null
+          duration_seconds: number | null
+          engagement_score: number | null
+          external_id: string
+          id: string
+          published_at: string | null
+          raw_metadata: Json | null
+          source_id: string
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          author_name?: string | null
+          author_url?: string | null
+          content_type: Database["public"]["Enums"]["content_item_type"]
+          content_url: string
+          created_at?: string
+          curation_notes?: string | null
+          curation_status?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          engagement_score?: number | null
+          external_id: string
+          id?: string
+          published_at?: string | null
+          raw_metadata?: Json | null
+          source_id: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          author_name?: string | null
+          author_url?: string | null
+          content_type?: Database["public"]["Enums"]["content_item_type"]
+          content_url?: string
+          created_at?: string
+          curation_notes?: string | null
+          curation_status?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          engagement_score?: number | null
+          external_id?: string
+          id?: string
+          published_at?: string | null
+          raw_metadata?: Json | null
+          source_id?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_items_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "content_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_plans: {
         Row: {
           approval_notes: string | null
@@ -4019,6 +4428,111 @@ export type Database = {
           tri_law_status?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      content_source: {
+        Row: {
+          auth_id: string | null
+          base_period_min: number
+          cadence_mode: string
+          created_at: string | null
+          display_name: string
+          fail_count: number
+          handle: string | null
+          id: string
+          last_ingested_at: string | null
+          phase: number
+          platform: Database["public"]["Enums"]["platform"]
+          status: string | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          auth_id?: string | null
+          base_period_min?: number
+          cadence_mode?: string
+          created_at?: string | null
+          display_name: string
+          fail_count?: number
+          handle?: string | null
+          id?: string
+          last_ingested_at?: string | null
+          phase?: number
+          platform: Database["public"]["Enums"]["platform"]
+          status?: string | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          auth_id?: string | null
+          base_period_min?: number
+          cadence_mode?: string
+          created_at?: string | null
+          display_name?: string
+          fail_count?: number
+          handle?: string | null
+          id?: string
+          last_ingested_at?: string | null
+          phase?: number
+          platform?: Database["public"]["Enums"]["platform"]
+          status?: string | null
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
+      content_sources: {
+        Row: {
+          api_credentials: Json | null
+          created_at: string
+          id: string
+          last_sync_at: string | null
+          next_sync_at: string | null
+          petal_position: number | null
+          source_name: string
+          source_type: Database["public"]["Enums"]["content_source_type"]
+          source_url: string | null
+          sync_frequency_hours: number | null
+          sync_metadata: Json | null
+          sync_status: Database["public"]["Enums"]["sync_status"] | null
+          updated_at: string
+          user_id: string
+          visual_config: Json | null
+        }
+        Insert: {
+          api_credentials?: Json | null
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          next_sync_at?: string | null
+          petal_position?: number | null
+          source_name: string
+          source_type: Database["public"]["Enums"]["content_source_type"]
+          source_url?: string | null
+          sync_frequency_hours?: number | null
+          sync_metadata?: Json | null
+          sync_status?: Database["public"]["Enums"]["sync_status"] | null
+          updated_at?: string
+          user_id: string
+          visual_config?: Json | null
+        }
+        Update: {
+          api_credentials?: Json | null
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          next_sync_at?: string | null
+          petal_position?: number | null
+          source_name?: string
+          source_type?: Database["public"]["Enums"]["content_source_type"]
+          source_url?: string | null
+          sync_frequency_hours?: number | null
+          sync_metadata?: Json | null
+          sync_status?: Database["public"]["Enums"]["sync_status"] | null
+          updated_at?: string
+          user_id?: string
+          visual_config?: Json | null
         }
         Relationships: []
       }
@@ -4340,6 +4854,60 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      curation_rule: {
+        Row: {
+          auto_add: boolean | null
+          collection_id: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          keywords: string[] | null
+          name: string
+          source_id: string | null
+          tag_patterns: string[] | null
+        }
+        Insert: {
+          auto_add?: boolean | null
+          collection_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          keywords?: string[] | null
+          name: string
+          source_id?: string | null
+          tag_patterns?: string[] | null
+        }
+        Update: {
+          auto_add?: boolean | null
+          collection_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          keywords?: string[] | null
+          name?: string
+          source_id?: string | null
+          tag_patterns?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curation_rule_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "content_collection"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curation_rule_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "content_source"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       data_access_log: {
         Row: {
@@ -8995,6 +9563,42 @@ export type Database = {
         }
         Relationships: []
       }
+      policy_checks: {
+        Row: {
+          auto_fix_available: boolean | null
+          check_type: string
+          created_by: string
+          id: string
+          last_checked: string
+          message: string
+          status: string
+          suggestions: Json | null
+          video_id: string
+        }
+        Insert: {
+          auto_fix_available?: boolean | null
+          check_type: string
+          created_by: string
+          id?: string
+          last_checked?: string
+          message: string
+          status: string
+          suggestions?: Json | null
+          video_id: string
+        }
+        Update: {
+          auto_fix_available?: boolean | null
+          check_type?: string
+          created_by?: string
+          id?: string
+          last_checked?: string
+          message?: string
+          status?: string
+          suggestions?: Json | null
+          video_id?: string
+        }
+        Relationships: []
+      }
       post_reactions: {
         Row: {
           created_at: string | null
@@ -10246,6 +10850,39 @@ export type Database = {
           yt_subscribers_gained?: number | null
           yt_views?: number | null
           yt_watch_time_minutes?: number | null
+        }
+        Relationships: []
+      }
+      resonance_scores: {
+        Row: {
+          calculated_at: string
+          community_coherence: Json | null
+          consciousness_metrics: Json | null
+          id: string
+          overall_score: number | null
+          user_id: string
+          video_id: string
+          youtube_metrics: Json | null
+        }
+        Insert: {
+          calculated_at?: string
+          community_coherence?: Json | null
+          consciousness_metrics?: Json | null
+          id?: string
+          overall_score?: number | null
+          user_id: string
+          video_id: string
+          youtube_metrics?: Json | null
+        }
+        Update: {
+          calculated_at?: string
+          community_coherence?: Json | null
+          consciousness_metrics?: Json | null
+          id?: string
+          overall_score?: number | null
+          user_id?: string
+          video_id?: string
+          youtube_metrics?: Json | null
         }
         Relationships: []
       }
@@ -13079,6 +13716,45 @@ export type Database = {
           total_policies?: number | null
           total_risks?: number | null
           total_settings?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sync_orchestration: {
+        Row: {
+          active_sources_count: number | null
+          created_at: string
+          global_sync_rhythm: unknown | null
+          id: string
+          last_orchestration_at: string | null
+          metadata: Json | null
+          orchestration_health: number | null
+          phi_cycle_position: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_sources_count?: number | null
+          created_at?: string
+          global_sync_rhythm?: unknown | null
+          id?: string
+          last_orchestration_at?: string | null
+          metadata?: Json | null
+          orchestration_health?: number | null
+          phi_cycle_position?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_sources_count?: number | null
+          created_at?: string
+          global_sync_rhythm?: unknown | null
+          id?: string
+          last_orchestration_at?: string | null
+          metadata?: Json | null
+          orchestration_health?: number | null
+          phi_cycle_position?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -16358,6 +17034,51 @@ export type Database = {
         }
         Relationships: []
       }
+      video_performance_metrics: {
+        Row: {
+          compliance_score: number | null
+          created_at: string | null
+          ctr: number | null
+          engagement_rate: number | null
+          id: string
+          measured_at: string | null
+          performance_data: Json | null
+          platform: string
+          resonance_score: number | null
+          user_id: string
+          video_id: string
+          watch_time: number | null
+        }
+        Insert: {
+          compliance_score?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          engagement_rate?: number | null
+          id?: string
+          measured_at?: string | null
+          performance_data?: Json | null
+          platform?: string
+          resonance_score?: number | null
+          user_id: string
+          video_id: string
+          watch_time?: number | null
+        }
+        Update: {
+          compliance_score?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          engagement_rate?: number | null
+          id?: string
+          measured_at?: string | null
+          performance_data?: Json | null
+          platform?: string
+          resonance_score?: number | null
+          user_id?: string
+          video_id?: string
+          watch_time?: number | null
+        }
+        Relationships: []
+      }
       video_tags: {
         Row: {
           created_at: string | null
@@ -17718,6 +18439,16 @@ export type Database = {
       }
       l2_normalize: {
         Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: string
+      }
+      log_audit_event: {
+        Args: {
+          p_action_type: string
+          p_changes?: Json
+          p_entity_id: string
+          p_entity_type: string
+          p_user_id: string
+        }
         Returns: string
       }
       log_data_access: {
@@ -19120,14 +19851,34 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "initiate"
+      content_item_type:
+        | "video"
+        | "post"
+        | "audio"
+        | "image"
+        | "article"
+        | "story"
+      content_source_type:
+        | "youtube"
+        | "facebook"
+        | "tiktok"
+        | "instagram"
+        | "twitter"
+        | "linkedin"
+        | "spotify"
+        | "soundcloud"
+      embed_kind: "iframe" | "oembed" | "link"
       module_status: "active" | "dev" | "locked"
+      platform: "youtube" | "facebook" | "tiktok" | "vimeo" | "rss" | "custom"
       seed_status: "pending" | "accepted" | "declined" | "dormant"
+      sync_status: "active" | "paused" | "error" | "syncing"
       user_role:
         | "admin"
         | "project_manager"
         | "migration_specialist"
         | "stakeholder"
         | "viewer"
+      visibility: "public" | "restricted"
     }
     CompositeTypes: {
       geometry_dump: {
@@ -19264,8 +20015,29 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user", "initiate"],
+      content_item_type: [
+        "video",
+        "post",
+        "audio",
+        "image",
+        "article",
+        "story",
+      ],
+      content_source_type: [
+        "youtube",
+        "facebook",
+        "tiktok",
+        "instagram",
+        "twitter",
+        "linkedin",
+        "spotify",
+        "soundcloud",
+      ],
+      embed_kind: ["iframe", "oembed", "link"],
       module_status: ["active", "dev", "locked"],
+      platform: ["youtube", "facebook", "tiktok", "vimeo", "rss", "custom"],
       seed_status: ["pending", "accepted", "declined", "dormant"],
+      sync_status: ["active", "paused", "error", "syncing"],
       user_role: [
         "admin",
         "project_manager",
@@ -19273,6 +20045,7 @@ export const Constants = {
         "stakeholder",
         "viewer",
       ],
+      visibility: ["public", "restricted"],
     },
   },
 } as const

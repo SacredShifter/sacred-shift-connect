@@ -18,7 +18,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ selectedPlatform
   const { sources, loading, toggleSource, syncSource } = useContentSources();
 
   const filteredSources = selectedPlatform 
-    ? sources.filter(source => source.platform === selectedPlatform)
+    ? sources.filter(source => source.source_type === selectedPlatform)
     : sources;
 
   if (loading) {
@@ -86,25 +86,25 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ selectedPlatform
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className={`${!source.is_active ? 'opacity-60' : ''}`}>
+              <Card className={`${source.sync_status !== 'active' ? 'opacity-60' : ''}`}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <CardTitle className="text-lg">{source.name}</CardTitle>
-                      <Badge variant={source.platform === 'youtube' ? 'destructive' : 'secondary'}>
-                        {source.platform}
+                      <CardTitle className="text-lg">{source.source_name}</CardTitle>
+                      <Badge variant={source.source_type === 'youtube' ? 'destructive' : 'secondary'}>
+                        {source.source_type}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
                       <Switch
-                        checked={source.is_active}
+                        checked={source.sync_status === 'active'}
                         onCheckedChange={(checked) => toggleSource(source.id, checked)}
                       />
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => syncSource(source.id)}
-                        disabled={!source.is_active}
+                        disabled={source.sync_status !== 'active'}
                         className="gap-1"
                       >
                         <RefreshCw className="w-3 h-3" />
@@ -119,10 +119,10 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ selectedPlatform
                       {source.source_url}
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Sync: {source.sync_frequency}</span>
+                      <span>Sync: Every {source.sync_frequency_hours || 24}h</span>
                       <span>
-                        Last sync: {source.last_sync 
-                          ? new Date(source.last_sync).toLocaleDateString()
+                        Last sync: {source.last_sync_at 
+                          ? new Date(source.last_sync_at).toLocaleDateString()
                           : 'Never'
                         }
                       </span>

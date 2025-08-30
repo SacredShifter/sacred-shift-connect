@@ -46,7 +46,7 @@ export const useContentSources = () => {
   const fetchSources = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('content_sources')
         .select('*')
         .order('created_at', { ascending: false });
@@ -67,7 +67,7 @@ export const useContentSources = () => {
   const fetchItems = async (sourceId?: string) => {
     try {
       setLoading(true);
-      let query = supabase
+      let query = (supabase as any)
         .from('content_items')
         .select('*')
         .order('published_at', { ascending: false });
@@ -97,7 +97,7 @@ export const useContentSources = () => {
     sync_frequency_hours?: number;
   }) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('content_sources')
         .insert({
           ...sourceData,
@@ -128,7 +128,7 @@ export const useContentSources = () => {
 
   const toggleSource = async (id: string, active: boolean) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('content_sources')
         .update({ 
           sync_status: active ? 'active' : 'paused',

@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { useContentSources } from '@/hooks/useContentSources';
 import { ContentPlatform } from '@/components/PetalLotus';
 
@@ -68,11 +67,11 @@ const PLATFORM_OPTIONS: { value: ContentPlatform; label: string; examples: strin
 ];
 
 const SYNC_FREQUENCIES = [
-  { value: 'realtime', label: 'Real-time' },
-  { value: 'hourly', label: 'Every hour' },
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'manual', label: 'Manual only' }
+  { value: 1, label: 'Every hour' },
+  { value: 6, label: 'Every 6 hours' },
+  { value: 12, label: 'Every 12 hours' },
+  { value: 24, label: 'Daily' },
+  { value: 168, label: 'Weekly' }
 ];
 
 export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
@@ -81,16 +80,15 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
   defaultPlatform
 }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    platform: defaultPlatform || 'youtube' as ContentPlatform,
+    source_name: '',
+    source_type: defaultPlatform || 'youtube' as ContentPlatform,
     source_url: '',
-    sync_frequency: 'daily',
-    is_active: true
+    sync_frequency_hours: 24
   });
   const [loading, setLoading] = useState(false);
   const { addSource } = useContentSources();
 
-  const selectedPlatform = PLATFORM_OPTIONS.find(p => p.value === formData.platform);
+  const selectedPlatform = PLATFORM_OPTIONS.find(p => p.value === formData.source_type);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,11 +98,10 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
       await addSource(formData);
       onOpenChange(false);
       setFormData({
-        name: '',
-        platform: defaultPlatform || 'youtube',
+        source_name: '',
+        source_type: defaultPlatform || 'youtube',
         source_url: '',
-        sync_frequency: 'daily',
-        is_active: true
+        sync_frequency_hours: 24
       });
     } catch (error) {
       // Error is handled in the hook
@@ -122,22 +119,22 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Source Name</Label>
+            <Label htmlFor="source_name">Source Name</Label>
             <Input
-              id="name"
+              id="source_name"
               placeholder="My YouTube Channel"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              value={formData.source_name}
+              onChange={(e) => setFormData(prev => ({ ...prev, source_name: e.target.value }))}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="platform">Platform</Label>
+            <Label htmlFor="source_type">Platform</Label>
             <Select
-              value={formData.platform}
+              value={formData.source_type}
               onValueChange={(value: ContentPlatform) => 
-                setFormData(prev => ({ ...prev, platform: value }))
+                setFormData(prev => ({ ...prev, source_type: value }))
               }
             >
               <SelectTrigger>
@@ -173,11 +170,11 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="sync_frequency">Sync Frequency</Label>
+            <Label htmlFor="sync_frequency_hours">Sync Frequency</Label>
             <Select
-              value={formData.sync_frequency}
+              value={formData.sync_frequency_hours.toString()}
               onValueChange={(value) => 
-                setFormData(prev => ({ ...prev, sync_frequency: value }))
+                setFormData(prev => ({ ...prev, sync_frequency_hours: parseInt(value) }))
               }
             >
               <SelectTrigger>
@@ -185,7 +182,7 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {SYNC_FREQUENCIES.map(freq => (
-                  <SelectItem key={freq.value} value={freq.value}>
+                  <SelectItem key={freq.value} value={freq.value.toString()}>
                     {freq.label}
                   </SelectItem>
                 ))}
