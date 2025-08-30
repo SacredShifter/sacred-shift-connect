@@ -42,6 +42,12 @@ verify_jwt = true
 [functions.ai-assistant]
 verify_jwt = true
 
+[functions.render-video]
+verify_jwt = true
+
+[functions.publish-youtube]
+verify_jwt = true
+
 [[functions]]
 name = "ingest-seed"
 verify_jwt = false
