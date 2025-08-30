@@ -64,15 +64,24 @@ export default function SacredVentilation() {
           onError: (error: number) => {
             console.warn('YouTube player error:', error);
             if (error === 150 || error === 101 || error === 100) {
-              // Video unavailable or restricted - try fallback
-              console.log('Trying fallback playlist...');
-              // You could implement fallback logic here
+              // Video unavailable or restricted - disable music mode
+              console.log('Video unavailable, disabling music mode');
+              send({ type: 'TOGGLE_MUSIC' }); // Turn off music
+              toast.info('Background music unavailable, continuing without music');
+            } else if (error === 2) {
+              console.log('Invalid parameter, trying alternative approach');
+            } else {
+              console.log('YouTube player error, continuing without music');
+              send({ type: 'TOGGLE_MUSIC' }); // Turn off music
             }
           }
         });
         setYoutubePlayer(player);
       } catch (error) {
         console.warn('YouTube player failed to initialize:', error);
+        // Auto-disable music if YouTube fails
+        send({ type: 'TOGGLE_MUSIC' });
+        toast.info('Background music unavailable, continuing without music');
       }
     }
   }, [context.musicEnabled]);

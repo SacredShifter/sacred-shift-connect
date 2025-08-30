@@ -23,6 +23,19 @@ export function SafetyNotice({ isOpen, onClose, onAcknowledge }: SafetyNoticePro
   const [hasRead, setHasRead] = useState(false);
   const [isAcknowledging, setIsAcknowledging] = useState(false);
 
+  // Cleanup intersection observer on unmount
+  useEffect(() => {
+    return () => {
+      // Clean up any remaining observers
+      const elements = document.querySelectorAll('[data-scroll-detector]');
+      elements.forEach((el: any) => {
+        if (el._cleanup) {
+          el._cleanup();
+        }
+      });
+    };
+  }, []);
+
   const contraindications = [
     'Heart disease or severe cardiovascular conditions',
     'Severe hypertension (high blood pressure)',
@@ -230,6 +243,7 @@ export function SafetyNotice({ isOpen, onClose, onAcknowledge }: SafetyNoticePro
         {/* Scroll detection */}
         <div
           className="absolute bottom-0 left-0 w-1 h-1 opacity-0"
+          data-scroll-detector
           ref={(el) => {
             if (el) {
               const observer = new IntersectionObserver(
@@ -241,7 +255,8 @@ export function SafetyNotice({ isOpen, onClose, onAcknowledge }: SafetyNoticePro
                 { threshold: 1.0 }
               );
               observer.observe(el);
-              return () => observer.disconnect();
+              // Store cleanup function to call later
+              (el as any)._cleanup = () => observer.disconnect();
             }
           }}
         />

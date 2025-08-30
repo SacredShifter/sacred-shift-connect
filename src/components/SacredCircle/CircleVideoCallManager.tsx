@@ -130,14 +130,23 @@ export const CircleVideoCallManager: React.FC<CircleVideoCallManagerProps> = ({
       
       let errorMessage = "Could not access microphone.";
       
-      if (error.name === 'NotAllowedError') {
-        errorMessage = "Microphone access denied. Please allow microphone permission and try again.";
-      } else if (error.name === 'NotFoundError') {
-        errorMessage = "No microphone found. Please connect a microphone and try again.";
-      } else if (error.name === 'NotReadableError') {
-        errorMessage = "Microphone is busy or unavailable. Please close other apps using the microphone.";
-      } else if (error.name === 'OverconstrainedError') {
-        errorMessage = "Microphone constraints could not be satisfied.";
+      // Better error handling for DOMException
+      if (error instanceof DOMException || error.name) {
+        if (error.name === 'NotAllowedError') {
+          errorMessage = "Microphone access denied. Please allow microphone permission and try again.";
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = "No microphone found. Please connect a microphone and try again.";
+        } else if (error.name === 'NotReadableError') {
+          errorMessage = "Microphone is busy or unavailable. Please close other apps using the microphone.";
+        } else if (error.name === 'OverconstrainedError') {
+          errorMessage = "Microphone constraints could not be satisfied.";
+        } else if (error.name === 'AbortError') {
+          errorMessage = "Microphone access was aborted. Please try again.";
+        } else {
+          errorMessage = `Microphone error: ${error.message || error.name || 'Unknown error'}`;
+        }
+      } else {
+        errorMessage = `Could not access microphone: ${String(error)}`;
       }
       
       toast({
@@ -198,14 +207,23 @@ export const CircleVideoCallManager: React.FC<CircleVideoCallManagerProps> = ({
       
       let errorMessage = "Could not access camera/microphone.";
       
-      if (error.name === 'NotAllowedError') {
-        errorMessage = "Camera/microphone access denied. Please allow permissions and try again.";
-      } else if (error.name === 'NotFoundError') {
-        errorMessage = "No camera/microphone found. Please connect devices and try again.";
-      } else if (error.name === 'NotReadableError') {
-        errorMessage = "Camera/microphone is busy. Please close other apps using these devices.";
-      } else if (error.name === 'OverconstrainedError') {
-        errorMessage = "Camera/microphone constraints could not be satisfied.";
+      // Better error handling for DOMException
+      if (error instanceof DOMException || error.name) {
+        if (error.name === 'NotAllowedError') {
+          errorMessage = "Camera/microphone access denied. Please allow permissions and try again.";
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = "No camera/microphone found. Please connect devices and try again.";
+        } else if (error.name === 'NotReadableError') {
+          errorMessage = "Camera/microphone is busy. Please close other apps using these devices.";
+        } else if (error.name === 'OverconstrainedError') {
+          errorMessage = "Camera/microphone constraints could not be satisfied.";
+        } else if (error.name === 'AbortError') {
+          errorMessage = "Camera/microphone access was aborted. Please try again.";
+        } else {
+          errorMessage = `Camera/microphone error: ${error.message || error.name || 'Unknown error'}`;
+        }
+      } else {
+        errorMessage = `Could not access camera/microphone: ${String(error)}`;
       }
       
       toast({
