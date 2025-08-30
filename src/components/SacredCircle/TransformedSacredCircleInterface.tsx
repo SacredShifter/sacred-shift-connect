@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Settings, UserPlus, Phone, Video, Send, Image, Paperclip, Smile, X } from 'lucide-react';
+import { ArrowLeft, Settings, UserPlus, Phone, Video, Send, Image, Paperclip, Smile, X, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 import { useSacredCircles } from '@/hooks/useSacredCircles';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { CircleVideoCallManager } from './CircleVideoCallManager';
+import { CircleMembersList } from './CircleMembersList';
 
 interface TransformedSacredCircleInterfaceProps {
   circleId?: string;
@@ -30,6 +32,7 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
   const [messageText, setMessageText] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
+  const [showMembersList, setShowMembersList] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 
   // Mock member data
@@ -199,34 +202,31 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
               <span>{mockMembers.filter(m => m.isOnline).length} active</span>
             </div>
             <span>•</span>
-            <span>{mockMembers.length} members</span>
+            <button 
+              className="hover:text-foreground transition-colors cursor-pointer"
+              onClick={() => setShowMembersList(true)}
+            >
+              {mockMembers.length} members
+            </button>
           </div>
         </div>
 
         <div className="flex items-center gap-1">
+          {/* Real Voice and Video Call Integration for Circle */}
+          {circleId && (
+            <CircleVideoCallManager 
+              circleId={circleId}
+              circleName={circleName}
+            />
+          )}
           <Button 
             variant="ghost" 
             size="sm" 
             className="h-9 w-9 p-0"
-            onClick={() => toast({ title: "Voice call", description: "Starting voice call...", })}
+            onClick={() => setShowMembersList(true)}
+            title="View members"
           >
-            <Phone className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-9 w-9 p-0"
-            onClick={() => toast({ title: "Video call", description: "Starting video call...", })}
-          >
-            <Video className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-9 w-9 p-0"
-            onClick={() => setShowAddMember(true)}
-          >
-            <UserPlus className="h-4 w-4" />
+            <Users className="h-4 w-4" />
           </Button>
           <Button 
             variant="ghost" 
@@ -335,31 +335,14 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
         </div>
       </div>
 
-      {/* Settings Modal */}
-      {showSettings && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Group Settings</h3>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Group Name</label>
-                <Input value={circleName} disabled />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <Input placeholder="Add a group description..." />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={() => setShowSettings(false)}>
-                Cancel
-              </Button>
-              <Button onClick={() => setShowSettings(false)}>
-                Save
-              </Button>
-            </div>
-          </div>
-        </div>
+      {/* Members List Modal */}
+      {showMembersList && circleId && (
+        <CircleMembersList
+          circleId={circleId}
+          isOpen={showMembersList}
+          onClose={() => setShowMembersList(false)}
+          userRole="member" // TODO: Get actual user role
+        />
       )}
       
       {/* Add Member Modal */}
@@ -389,6 +372,40 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
               </Button>
               <Button onClick={() => setShowAddMember(false)}>
                 Add Members
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-4">Circle Settings</h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Circle Name</label>
+                <Input value={circleName} disabled />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Description</label>
+                <Input placeholder="Add a circle description..." />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Privacy</label>
+                <select className="w-full p-2 border rounded-md bg-background">
+                  <option value="public">Public</option>
+                  <option value="private">Private</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => setShowSettings(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => setShowSettings(false)}>
+                Save Changes
               </Button>
             </div>
           </div>
