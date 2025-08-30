@@ -1,0 +1,65 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="logoGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(280, 80%, 70%)" />
+      <stop offset="100%" stop-color="hsl(320, 70%, 60%)" />
+    </radialGradient>
+    <filter id="logoGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer ring -->
+  <circle 
+    cx="48" 
+    cy="48" 
+    r="44" 
+    fill="none" 
+    stroke="url(#logoGradient)" 
+    stroke-width="2"
+    opacity="0.8"
+    filter="url(#logoGlow)"
+  />
+  
+  <!-- Inner sacred geometry -->
+  <g transform="translate(48,48)">
+    <!-- Center point -->
+    <circle r="3" fill="url(#logoGradient)" />
+    
+    <!-- Resonance waves -->
+    <circle r="12" fill="none" stroke="url(#logoGradient)" stroke-width="1.5" opacity="0.6" />
+    <circle r="20" fill="none" stroke="url(#logoGradient)" stroke-width="1" opacity="0.4" />
+    <circle r="28" fill="none" stroke="url(#logoGradient)" stroke-width="1" opacity="0.3" />
+    
+    <!-- Sacred triangles -->
+    <polygon 
+      points="0,-15 13,7.5 -13,7.5" 
+      fill="none" 
+      stroke="url(#logoGradient)" 
+      stroke-width="1.5" 
+      opacity="0.7"
+    />
+    <polygon 
+      points="0,15 -13,-7.5 13,-7.5" 
+      fill="none" 
+      stroke="url(#logoGradient)" 
+      stroke-width="1.5" 
+      opacity="0.7"
+    />
+  </g>
+  
+  <!-- Subtle outer glow -->
+  <circle 
+    cx="48" 
+    cy="48" 
+    r="46" 
+    fill="none" 
+    stroke="url(#logoGradient)" 
+    stroke-width="1" 
+    opacity="0.2"
+  />
+</svg>
