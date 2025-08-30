@@ -30,6 +30,7 @@ import AkashicConstellationPage from "./pages/AkashicConstellation";
 import Guidebook from "./pages/Guidebook";
 import Support from "./pages/Support";
 import Help from "./pages/Help";
+import Status from "./pages/Status";
 import Auth from "./pages/Auth";
 import AuthConfirm from "./pages/AuthConfirm";
 import NotFound from "./pages/NotFound";
@@ -105,6 +106,7 @@ function App() {
                   <Route path="/guidebook" element={<Guidebook />} />
                   <Route path="/sitemap" element={<UserSitemap />} />
                   <Route path="/support" element={<Support />} />
+                  <Route path="/status" element={<Status />} />
                   
                   {/* Account Routes */}
                   <Route path="/profile" element={<Profile />} />
