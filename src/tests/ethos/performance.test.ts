@@ -110,28 +110,30 @@ describe('Ethos: Performance & Stability Verification', () => {
       }
     });
 
-    it('Largest Contentful Paint enables quick ceremony entry', (done) => {
+    it('Largest Contentful Paint enables quick ceremony entry', (ctx) => {
       const observer = new PerformanceObserver((list) => {
         const lcpEntries = list.getEntries().filter(entry => entry.entryType === 'largest-contentful-paint');
         
         if (lcpEntries.length > 0) {
-          const lcp = lcpEntries[0].value || lcpEntries[0].startTime;
+          const entry = lcpEntries[0] as MockPerformanceEntry;
+          const lcp = entry.value || entry.startTime;
           expect(lcp, 'LCP must enable quick ceremony access').toBeLessThan(SACRED_PERFORMANCE_BUDGETS.lcp);
-          done();
         }
       });
       
       observer.observe();
     });
 
-    it('Cumulative Layout Shift maintains visual coherence', (done) => {
+    it('Cumulative Layout Shift maintains visual coherence', (ctx) => {
       const observer = new PerformanceObserver((list) => {
         const clsEntries = list.getEntries().filter(entry => entry.entryType === 'layout-shift');
         
         if (clsEntries.length > 0) {
-          const totalCLS = clsEntries.reduce((sum, entry) => sum + (entry.value || 0), 0);
+          const totalCLS = clsEntries.reduce((sum, entry) => {
+            const mockEntry = entry as MockPerformanceEntry;
+            return sum + (mockEntry.value || 0);
+          }, 0);
           expect(totalCLS, 'CLS must maintain sacred visual stability').toBeLessThan(SACRED_PERFORMANCE_BUDGETS.cls);
-          done();
         }
       });
       

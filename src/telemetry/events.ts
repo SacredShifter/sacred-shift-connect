@@ -156,8 +156,8 @@ interface ConsentState {
   ceremony: boolean;
   field_sync: boolean;
   data_sharing: boolean;
-  granted_at?: Date;
-  revoked_at?: Date;
+  granted_at?: number;
+  revoked_at?: number;
 }
 
 class EthosAnalytics {
@@ -215,12 +215,10 @@ class EthosAnalytics {
    */
   grantConsent(categories: (keyof ConsentState)[]): void {
     categories.forEach(category => {
-      if (category in this.consentState) {
-        this.consentState[category] = true;
-      }
+      (this.consentState as any)[category] = true;
     });
     
-    this.consentState.granted_at = new Date();
+    this.consentState.granted_at = Date.now();
     this.saveConsentState();
     
     // Process queued events
@@ -246,12 +244,10 @@ class EthosAnalytics {
     const categoriesToRevoke = categories || Object.keys(this.consentState) as (keyof ConsentState)[];
     
     categoriesToRevoke.forEach(category => {
-      if (category in this.consentState) {
-        this.consentState[category] = false;
-      }
+      (this.consentState as any)[category] = false;
     });
     
-    this.consentState.revoked_at = new Date();
+    this.consentState.revoked_at = Date.now();
     this.saveConsentState();
     
     // Clear event queue
@@ -342,8 +338,8 @@ class EthosAnalytics {
         this.consentState = {
           ...this.consentState,
           ...parsed,
-          granted_at: parsed.granted_at ? new Date(parsed.granted_at) : undefined,
-          revoked_at: parsed.revoked_at ? new Date(parsed.revoked_at) : undefined
+          granted_at: parsed.granted_at ? parsed.granted_at : undefined,
+          revoked_at: parsed.revoked_at ? parsed.revoked_at : undefined
         };
       }
     } catch (error) {
