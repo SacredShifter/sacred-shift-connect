@@ -88,9 +88,18 @@ export const CircleVideoCallManager: React.FC<CircleVideoCallManagerProps> = ({
     if (!user || !callChannel) return;
 
     try {
-      // Get audio-only stream
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('getUserMedia is not supported in this browser');
+      }
+
+      // Request microphone permission with better constraints
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
         video: false
       });
 
@@ -116,11 +125,24 @@ export const CircleVideoCallManager: React.FC<CircleVideoCallManagerProps> = ({
         description: `Connected to ${circleName} voice channel`,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting voice call:', error);
+      
+      let errorMessage = "Could not access microphone.";
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = "Microphone access denied. Please allow microphone permission and try again.";
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = "No microphone found. Please connect a microphone and try again.";
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = "Microphone is busy or unavailable. Please close other apps using the microphone.";
+      } else if (error.name === 'OverconstrainedError') {
+        errorMessage = "Microphone constraints could not be satisfied.";
+      }
+      
       toast({
         title: "Call Failed",
-        description: "Could not access microphone. Please check permissions.",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -130,10 +152,23 @@ export const CircleVideoCallManager: React.FC<CircleVideoCallManagerProps> = ({
     if (!user || !callChannel) return;
 
     try {
-      // Get audio and video stream
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('getUserMedia is not supported in this browser');
+      }
+
+      // Request camera and microphone permission with better constraints
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: true
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "user"
+        }
       });
 
       setLocalStream(stream);
@@ -158,11 +193,24 @@ export const CircleVideoCallManager: React.FC<CircleVideoCallManagerProps> = ({
         description: `Connected to ${circleName} video channel`,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting video call:', error);
+      
+      let errorMessage = "Could not access camera/microphone.";
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = "Camera/microphone access denied. Please allow permissions and try again.";
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = "No camera/microphone found. Please connect devices and try again.";
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = "Camera/microphone is busy. Please close other apps using these devices.";
+      } else if (error.name === 'OverconstrainedError') {
+        errorMessage = "Camera/microphone constraints could not be satisfied.";
+      }
+      
       toast({
         title: "Call Failed",
-        description: "Could not access camera/microphone. Please check permissions.",
+        description: errorMessage,
         variant: "destructive"
       });
     }
