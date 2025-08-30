@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Filter, Calendar, Sparkles, MoreHorizontal, Edit, Trash2, Eye, ArrowUpDown } from 'lucide-react';
+import { Search, Plus, Filter, Calendar, Sparkles, MoreHorizontal, Edit, Trash2, Eye, ArrowUpDown, Grid3X3, List } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,7 @@ export function CodexList() {
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [sortField, setSortField] = useState<'created_at' | 'title' | 'type'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [displayMode, setDisplayMode] = useState<'table' | 'grid'>('table');
 
   // Fetch bookmarked entries when view mode changes
   useEffect(() => {
@@ -193,6 +194,28 @@ export function CodexList() {
               </Select>
             </TooltipWrapper>
             
+            {/* Display Mode Toggle */}
+            <div className="flex border rounded-lg p-1 bg-background">
+              <Button
+                variant={displayMode === 'table' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setDisplayMode('table')}
+                className="gap-2"
+              >
+                <List className="h-4 w-4" />
+                Table
+              </Button>
+              <Button
+                variant={displayMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setDisplayMode('grid')}
+                className="gap-2"
+              >
+                <Grid3X3 className="h-4 w-4" />
+                Grid
+              </Button>
+            </div>
+            
             <TooltipWrapper content={HelpTooltips.search}>
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -308,7 +331,7 @@ export function CodexList() {
         >
           <p className="text-muted-foreground">No entries match your current filters.</p>
         </motion.div>
-      ) : (
+        ) : displayMode === 'table' ? (
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -427,6 +450,83 @@ export function CodexList() {
               ))}
             </TableBody>
           </Table>
+        </motion.div>
+        ) : (
+        /* Grid View */
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {filteredAndSortedEntries.map((entry, index) => (
+            <motion.div
+              key={entry.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="bg-card/50 backdrop-blur border rounded-lg p-6 hover:bg-card/70 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <Badge variant="secondary" className="text-xs">
+                  {entry.type}
+                </Badge>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur border-border/50">
+                    <DropdownMenuItem 
+                      onClick={() => handleEditEntry(entry)}
+                      className="cursor-pointer"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => deleteEntry(entry.id)}
+                      className="cursor-pointer text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              
+              <h3 className="font-semibold text-lg mb-2 line-clamp-2">
+                {entry.title}
+              </h3>
+              
+              {entry.content && (
+                <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+                  {entry.content}
+                </p>
+              )}
+              
+              {entry.resonance_tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {entry.resonance_tags.slice(0, 4).map((tag, idx) => (
+                    <Badge key={idx} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                  {entry.resonance_tags.length > 4 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{entry.resonance_tags.length - 4}
+                    </Badge>
+                  )}
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{entry.source_module || 'Manual'}</span>
+                <span>{format(new Date(entry.created_at), 'MMM d, yyyy')}</span>
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
       )}
 
