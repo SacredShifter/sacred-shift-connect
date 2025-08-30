@@ -3,10 +3,12 @@ import { BreathingVisualizer } from '@/components/BreathingVisualizer';
 import { TeachingLayer } from '@/components/TeachingLayer';
 import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 import { Button } from '@/components/ui/button';
+import { BridgeMomentNotification } from '@/components/BridgeMomentNotification';
 import { BookOpen, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 
 export default function Breath() {
   const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
+  const [showBridgeNotification, setShowBridgeNotification] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -21,6 +23,13 @@ export default function Breath() {
         </div>
         
         <BreathingVisualizer />
+        
+        {/* Bridge Moment Notification */}
+        <BridgeMomentNotification 
+          isVisible={showBridgeNotification} 
+          currentModule="breath"
+          onDismiss={() => setShowBridgeNotification(false)} 
+        />
         
         {/* Deeper Knowledge Toggle */}
         <div className="mt-8">

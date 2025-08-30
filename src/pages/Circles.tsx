@@ -17,6 +17,7 @@ import { SacredEvents } from '@/components/SacredEvents';
 import { useToast } from '@/hooks/use-toast';
 import { Slogan } from '@/components/ui/Slogan';
 import { TeachingLayer } from '@/components/TeachingLayer';
+import { BridgeMomentNotification } from '@/components/BridgeMomentNotification';
 import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 
 interface FilterOption {
@@ -45,6 +46,7 @@ const Circles = () => {
   const [isCircleMaximized, setIsCircleMaximized] = useState(false);
   const [isCircleMinimized, setIsCircleMinimized] = useState(false);
   const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
+  const [showBridgeNotification, setShowBridgeNotification] = useState(false);
 
   // Get joined circle IDs from the actual circles data
   const joinedCircleIds = new Set(
