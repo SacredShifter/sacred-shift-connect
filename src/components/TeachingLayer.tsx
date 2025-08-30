@@ -177,7 +177,7 @@ export const TeachingLayer: React.FC<TeachingLayerProps> = ({
                           }}
                            transition={{
                              duration: 2,
-                             repeat: Infinity,
+                             repeat: 9999,
                              ease: "easeInOut"
                            }}
                         />
@@ -226,7 +226,7 @@ export const TeachingLayer: React.FC<TeachingLayerProps> = ({
                               `0 0 0px ${tier.color.includes('blue') ? 'rgba(59, 130, 246, 0)' : tier.color.includes('purple') ? 'rgba(147, 51, 234, 0)' : 'rgba(245, 158, 11, 0)'}`
                             ]
                           }}
-                          transition={{ duration: 3, repeat: Infinity }}
+                          transition={{ duration: 3, repeat: 9999 }}
                         />
                       </div>
                       <div>

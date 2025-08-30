@@ -332,7 +332,7 @@ export const SacredGeometryVisualizer: React.FC<SacredGeometryVisualizerProps> =
                   'rgba(139, 92, 246, 0.3)'
                 ]
               }}
-              transition={{ duration: 2, repeat: Infinity }}
+              transition={{ duration: 2, repeat: 9999 }}
             />
           )}
         </div>

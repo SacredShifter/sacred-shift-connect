@@ -5,9 +5,17 @@ import { TeachingLayer } from '@/components/TeachingLayer';
 import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 import { Button } from '@/components/ui/button';
 import { BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { BridgeMomentNotification } from '@/components/BridgeMomentNotification';
 
 export default function ConstellationMapper() {
   const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
+  const [bridgeTrigger, setBridgeTrigger] = useState<string | undefined>();
+
+  // Simulate bridge moment trigger when constellation is updated
+  const handleConstellationUpdate = () => {
+    setBridgeTrigger('constellation_update');
+    setTimeout(() => setBridgeTrigger(undefined), 15000); // Clear after 15 seconds
+  };
 
   return (
     <ProtectedRoute>
@@ -15,6 +23,9 @@ export default function ConstellationMapper() {
         <div className="max-w-7xl mx-auto">
           <ConsciousnessConstellationMapper />
         </div>
+
+        {/* Bridge Moment Notification */}
+        <BridgeMomentNotification trigger={bridgeTrigger} />
 
         {/* Deeper Knowledge Section */}
         <div className="text-center max-w-7xl mx-auto">

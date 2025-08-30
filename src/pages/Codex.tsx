@@ -6,6 +6,7 @@ import { CodexConstellation } from '@/components/Codex/CodexConstellation';
 import { CodexList } from '@/components/Codex/CodexList';
 import { CollectiveCodexConstellation } from '@/components/CollectiveAkashicConstellation/CollectiveCodexConstellation';
 import { useRegistryOfResonance } from '@/hooks/useRegistryOfResonance';
+import { SacredInitiationManual } from '@/components/SacredInitiationManual';
 import { TeachingLayer } from '@/components/TeachingLayer';
 import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 import { Button } from '@/components/ui/button';
@@ -28,7 +29,7 @@ export default function Codex() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
           <TabsTrigger value="personal" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             Personal Codex
@@ -36,6 +37,10 @@ export default function Codex() {
           <TabsTrigger value="collective" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Collective Codex
+          </TabsTrigger>
+          <TabsTrigger value="initiation" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            Initiation Manual
           </TabsTrigger>
         </TabsList>
 
@@ -91,6 +96,10 @@ export default function Codex() {
               }}
             />
           </div>
+        </TabsContent>
+
+        <TabsContent value="initiation" className="space-y-6">
+          <SacredInitiationManual />
         </TabsContent>
       </Tabs>
 
