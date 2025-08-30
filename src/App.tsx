@@ -26,7 +26,7 @@ import VideoLibrary from "./pages/VideoLibrary";
 import VideoStudio from "./pages/VideoStudio";
 import CollectiveAkashicConstellationPage from "./pages/CollectiveAkashicConstellation";
 import RegistryEntry from "./pages/RegistryEntry";
-import AkashicConstellationPage from "./pages/AkashicConstellation";
+import Codex from "./pages/Codex";
 import Guidebook from "./pages/Guidebook";
 import Support from "./pages/Support";
 import Help from "./pages/Help";
@@ -95,7 +95,7 @@ function App() {
                   {/* Community Routes */}
                   <Route path="/circles" element={<Circles />} />
                   <Route path="/messages" element={<Messages />} />
-                  <Route path="/codex" element={<AkashicConstellationPage />} />
+                  <Route path="/codex" element={<Codex />} />
                   <Route path="/constellation" element={<ConstellationMapper />} />
                   
                   {/* Library Routes */}
