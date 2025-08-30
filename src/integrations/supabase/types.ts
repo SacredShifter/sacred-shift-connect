@@ -2009,6 +2009,44 @@ export type Database = {
         }
         Relationships: []
       }
+      biofeedback_streams: {
+        Row: {
+          data_point: number
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          stream_type: string
+          timestamp: string | null
+          user_id: string
+        }
+        Insert: {
+          data_point: number
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          stream_type: string
+          timestamp?: string | null
+          user_id: string
+        }
+        Update: {
+          data_point?: number
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          stream_type?: string
+          timestamp?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "biofeedback_streams_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "gaa_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       breath_sessions: {
         Row: {
           achievements: string[] | null
@@ -4777,6 +4815,92 @@ export type Database = {
           },
         ]
       }
+      cosmic_events: {
+        Row: {
+          event_data: Json
+          event_type: string
+          generated_preset_id: string | null
+          id: string
+          ingested_at: string | null
+          processed: boolean | null
+          source_url: string | null
+        }
+        Insert: {
+          event_data: Json
+          event_type: string
+          generated_preset_id?: string | null
+          id?: string
+          ingested_at?: string | null
+          processed?: boolean | null
+          source_url?: string | null
+        }
+        Update: {
+          event_data?: Json
+          event_type?: string
+          generated_preset_id?: string | null
+          id?: string
+          ingested_at?: string | null
+          processed?: boolean | null
+          source_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cosmic_events_generated_preset_id_fkey"
+            columns: ["generated_preset_id"]
+            isOneToOne: false
+            referencedRelation: "gaa_presets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cosmic_structures: {
+        Row: {
+          coordinates: Json | null
+          created_at: string | null
+          description: string | null
+          discovery_year: number | null
+          firmament_state: Json | null
+          gaa_mapping: Json | null
+          id: string
+          name: string
+          redshift_range: number[] | null
+          size_gly: number | null
+          source_papers: Json | null
+          structure_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          coordinates?: Json | null
+          created_at?: string | null
+          description?: string | null
+          discovery_year?: number | null
+          firmament_state?: Json | null
+          gaa_mapping?: Json | null
+          id?: string
+          name: string
+          redshift_range?: number[] | null
+          size_gly?: number | null
+          source_papers?: Json | null
+          structure_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          coordinates?: Json | null
+          created_at?: string | null
+          description?: string | null
+          discovery_year?: number | null
+          firmament_state?: Json | null
+          gaa_mapping?: Json | null
+          id?: string
+          name?: string
+          redshift_range?: number[] | null
+          size_gly?: number | null
+          source_papers?: Json | null
+          structure_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       council_sessions: {
         Row: {
           average_resonance: number | null
@@ -6531,6 +6655,151 @@ export type Database = {
           visual_url?: string
         }
         Relationships: []
+      }
+      gaa_presets: {
+        Row: {
+          accessibility_level: string | null
+          audio_config: Json | null
+          created_at: string | null
+          created_by: string | null
+          dark_energy_enabled: boolean | null
+          dark_energy_params: Json | null
+          dark_weight: number | null
+          description: string | null
+          evidence_refs: Json | null
+          evidence_status: string | null
+          id: string
+          is_public: boolean | null
+          light_weight: number | null
+          manifest_dark_phase: Json | null
+          name: string
+          params: Json
+          polarity_enabled: boolean | null
+          safety_constraints: Json | null
+          shadow_mode_default: boolean | null
+          tags: string[] | null
+          updated_at: string | null
+          visual_config: Json | null
+        }
+        Insert: {
+          accessibility_level?: string | null
+          audio_config?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          dark_energy_enabled?: boolean | null
+          dark_energy_params?: Json | null
+          dark_weight?: number | null
+          description?: string | null
+          evidence_refs?: Json | null
+          evidence_status?: string | null
+          id?: string
+          is_public?: boolean | null
+          light_weight?: number | null
+          manifest_dark_phase?: Json | null
+          name: string
+          params?: Json
+          polarity_enabled?: boolean | null
+          safety_constraints?: Json | null
+          shadow_mode_default?: boolean | null
+          tags?: string[] | null
+          updated_at?: string | null
+          visual_config?: Json | null
+        }
+        Update: {
+          accessibility_level?: string | null
+          audio_config?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          dark_energy_enabled?: boolean | null
+          dark_energy_params?: Json | null
+          dark_weight?: number | null
+          description?: string | null
+          evidence_refs?: Json | null
+          evidence_status?: string | null
+          id?: string
+          is_public?: boolean | null
+          light_weight?: number | null
+          manifest_dark_phase?: Json | null
+          name?: string
+          params?: Json
+          polarity_enabled?: boolean | null
+          safety_constraints?: Json | null
+          shadow_mode_default?: boolean | null
+          tags?: string[] | null
+          updated_at?: string | null
+          visual_config?: Json | null
+        }
+        Relationships: []
+      }
+      gaa_session_participants: {
+        Row: {
+          joined_at: string | null
+          session_id: string
+          user_uid: string
+        }
+        Insert: {
+          joined_at?: string | null
+          session_id: string
+          user_uid: string
+        }
+        Update: {
+          joined_at?: string | null
+          session_id?: string
+          user_uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gaa_session_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "gaa_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gaa_sessions: {
+        Row: {
+          collective_phase: number | null
+          created_at: string | null
+          host_uid: string
+          id: string
+          is_public: boolean | null
+          preset_id: string | null
+          settings: Json | null
+          started_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          collective_phase?: number | null
+          created_at?: string | null
+          host_uid: string
+          id?: string
+          is_public?: boolean | null
+          preset_id?: string | null
+          settings?: Json | null
+          started_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          collective_phase?: number | null
+          created_at?: string | null
+          host_uid?: string
+          id?: string
+          is_public?: boolean | null
+          preset_id?: string | null
+          settings?: Json | null
+          started_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gaa_sessions_preset_id_fkey"
+            columns: ["preset_id"]
+            isOneToOne: false
+            referencedRelation: "gaa_presets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       gateway_reflections: {
         Row: {

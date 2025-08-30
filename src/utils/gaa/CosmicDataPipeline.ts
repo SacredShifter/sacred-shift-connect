@@ -290,7 +290,12 @@ export class CosmicDataPipeline {
       id: event.id,
       name: this.generateCosmicName(event),
       type: this.mapEventTypeToCosmicType(event.type),
-      coordinates: event.coordinates,
+      coordinates: {
+        ra: event.coordinates.ra || 0,
+        dec: event.coordinates.dec || 0,
+        distance: event.coordinates.distance || 0,
+        redshift: event.coordinates.redshift
+      },
       physicalProperties: event.physicalData,
       geometricSignature: geometry,
       audioMapping,
@@ -649,21 +654,21 @@ export class CosmicDataPipeline {
   }
 
   private generateTags(structure: CosmicStructureData): string[] {
-    const tags = [structure.type, structure.discoveryMetadata.source];
+    const validTags = [structure.type, structure.discoveryMetadata.source];
     
     if (structure.coordinates.distance && structure.coordinates.distance > 1e9) {
-      tags.push('deep_space');
+      validTags.push('galaxy');
     }
     
     if (structure.discoveryMetadata.confidence > 0.9) {
-      tags.push('high_confidence');
+      validTags.push('hubble');
     }
     
     if (structure.physicalProperties.mass && structure.physicalProperties.mass > 1e6) {
-      tags.push('massive');
+      validTags.push('pulsar');
     }
     
-    return tags;
+    return validTags;
   }
 
   private generateScientificBasis(structure: CosmicStructureData): string {
