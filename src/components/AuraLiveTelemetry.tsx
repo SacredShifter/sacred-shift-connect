@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useAuraPlatformContext } from '@/contexts/AuraPlatformContext';
+import { useJusticePlatformContext } from '@/contexts/JusticePlatformContext';
 
 interface LiveMetric {
   id: string;
@@ -31,7 +31,7 @@ interface LiveMetric {
 
 export const AuraLiveTelemetry: React.FC = () => {
   const { user } = useAuth();
-  const { platformState } = useAuraPlatformContext();
+  const { platformState } = useJusticePlatformContext();
   const [isConnected, setIsConnected] = useState(false);
   const [liveMetrics, setLiveMetrics] = useState<LiveMetric[]>([]);
   const [autoSync, setAutoSync] = useState(true);

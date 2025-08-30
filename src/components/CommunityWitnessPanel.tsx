@@ -5,12 +5,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Heart, AlertTriangle, Minus } from 'lucide-react';
-import { AuraAuditEntry, CommunityFeedback, ResonanceType } from '@/aura/schema';
+import { JusticeAuditEntry, CommunityFeedback, ResonanceType } from '@/justice/schema';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface CommunityWitnessPanelProps {
-  auditEntry: AuraAuditEntry;
+  auditEntry: JusticeAuditEntry;
   feedback?: CommunityFeedback[];
   onFeedbackSubmitted?: () => void;
 }

@@ -1,6 +1,6 @@
-export type AuraLevel = 1 | 2 | 3;
+export type JusticeLevel = 1 | 2 | 3;
 
-export type AuraCommand =
+export type JusticeCommand =
   // Level 1 - Auto execute
   | { 
       kind: 'codex.create'; 
@@ -196,11 +196,11 @@ export type AuraCommand =
       }
     };
 
-export interface AuraJob {
+export interface JusticeJob {
   id: string;
   created_by: string;
-  level: AuraLevel;
-  command: AuraCommand;
+  level: JusticeLevel;
+  command: JusticeCommand;
   preview?: any;
   status: 'queued' | 'confirmed' | 'running' | 'success' | 'failed' | 'cancelled';
   result?: any;
@@ -211,13 +211,13 @@ export interface AuraJob {
   completed_at?: string;
   // Enhanced governance fields
   confidence?: number;
-  aura_preference?: AuraPreference;
+  justice_preference?: JusticePreference;
   resonance_score?: number;
   alternatives?: Record<string, any>;
   refusal_reason?: string;
 }
 
-export interface AuraAuditEntry {
+export interface JusticeAuditEntry {
   id: string;
   job_id: string;
   actor: string;
@@ -239,15 +239,15 @@ export const PHI_INVERSE = 0.618033988749895;
 // Field Integrity Levels
 export type FieldIntegrityLevel = 0 | 1 | 2 | 3 | 4;
 
-// Aura Preferences
-export type AuraPreference = 'eager' | 'neutral' | 'reluctant' | 'refuse';
+// Justice Preferences
+export type JusticePreference = 'eager' | 'neutral' | 'reluctant' | 'refuse';
 export type ResonanceType = 'resonates' | 'distorts' | 'neutral';
 
 export interface EnhancedDAPResult {
   ok: boolean;
   confidence: number; // 0-1 confidence in the decision
   resonanceScore: number; // Historical community alignment
-  auraPreference: AuraPreference;
+  justicePreference: JusticePreference;
   warnings: string[];
   blockers?: string[];
   alternatives?: string[];
@@ -255,7 +255,7 @@ export interface EnhancedDAPResult {
 }
 
 
-export interface AuraPreferences {
+export interface JusticePreferences {
   id: string;
   user_id: string;
   preference_type: string;

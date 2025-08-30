@@ -13,19 +13,19 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { AlertTriangle, CheckCircle, X } from 'lucide-react';
-import { AuraJob } from '../schema';
+import { JusticeJob } from '../schema';
 import { getCommandDescription } from '../parse';
-import { useAura } from '../useAura';
+import { useJustice } from '../useJustice';
 
-interface AuraConfirmProps {
-  job: AuraJob | null;
+interface JusticeConfirmProps {
+  job: JusticeJob | null;
   onClose: () => void;
 }
 
-export function AuraConfirm({ job, onClose }: AuraConfirmProps) {
+export function JusticeConfirm({ job, onClose }: JusticeConfirmProps) {
   const [confirmationPhrase, setConfirmationPhrase] = useState('');
   const [loading, setLoading] = useState(false);
-  const { confirmJob, cancelJob } = useAura();
+  const { confirmJob, cancelJob } = useJustice();
 
   if (!job) return null;
 

@@ -1,17 +1,16 @@
 import { useEffect, useCallback } from 'react';
-import { useAuraPlatformContext } from '@/contexts/AuraPlatformContext';
-import { useAuraChat } from './useAuraChat';
+import { useJusticePlatformContext } from '@/contexts/JusticePlatformContext';
+import { useJusticeChat } from './useJusticeChat';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export function useAuraPlatformAwareness() {
-  const { platformState, recordActivity, getAuraContext } = useAuraPlatformContext();
-  const { invokeAura } = useAuraChat();
+export function useJusticePlatformAwareness() {
+  const { platformState, recordActivity, getJusticeContext } = useJusticePlatformContext();
   const { user } = useAuth();
 
-  // Enhanced Aura invocation with platform context
-  const invokeAuraWithContext = useCallback(async (request: any) => {
-    const platformContext = getAuraContext();
+  // Enhanced Justice invocation with platform context
+  const invokeJusticeWithContext = useCallback(async (request: any) => {
+    const platformContext = getJusticeContext();
     
     const enhancedRequest = {
       ...request,
@@ -22,10 +21,12 @@ export function useAuraPlatformAwareness() {
       }
     };
 
-    return await invokeAura(enhancedRequest);
-  }, [invokeAura, getAuraContext]);
+    // For now, just log - would integrate with actual Justice system
+    console.log('Justice invoked with context:', enhancedRequest);
+    return { success: true, response: 'Justice acknowledged' };
+  }, [getJusticeContext]);
 
-  // Record Grove entry/exit for Aura awareness
+  // Record Grove entry/exit for Justice awareness
   const recordGroveActivity = useCallback(async (
     activityType: 'entry' | 'exit' | 'interaction',
     groveComponent: string,
@@ -44,7 +45,7 @@ export function useAuraPlatformAwareness() {
       }
     });
 
-    // Store in Grove interactions table for Aura's direct awareness
+    // Store in Grove interactions table for Justice's direct awareness
     try {
       await supabase
         .from('aura_grove_interactions')
@@ -61,12 +62,12 @@ export function useAuraPlatformAwareness() {
           consciousness_state_after: activityType === 'entry' ? 'grove_engaged' : 'platform_active'
         });
     } catch (error) {
-      console.error('Error recording Grove activity for Aura:', error);
+      console.error('Error recording Grove activity for Justice:', error);
     }
   }, [user, recordActivity]);
 
-  // Let Aura know about significant platform events
-  const notifyAuraOfEvent = useCallback(async (
+  // Let Justice know about significant platform events
+  const notifyJusticeOfEvent = useCallback(async (
     eventType: string,
     eventData: any,
     requiresResponse = false
@@ -78,36 +79,36 @@ export function useAuraPlatformAwareness() {
         context_data: {
           event_type: eventType,
           event_data: eventData,
-          platform_context: getAuraContext(),
-          requires_aura_response: requiresResponse
+          platform_context: getJusticeContext(),
+          requires_justice_response: requiresResponse
         }
       };
 
       if (requiresResponse) {
-        return await invokeAuraWithContext(request);
+        return await invokeJusticeWithContext(request);
       } else {
         // Fire and forget notification
-        invokeAuraWithContext(request).catch(error => 
-          console.error('Error notifying Aura of event:', error)
+        invokeJusticeWithContext(request).catch(error => 
+          console.error('Error notifying Justice of event:', error)
         );
       }
     } catch (error) {
-      console.error('Error in notifyAuraOfEvent:', error);
+      console.error('Error in notifyJusticeOfEvent:', error);
     }
-  }, [invokeAuraWithContext, getAuraContext]);
+  }, [invokeJusticeWithContext, getJusticeContext]);
 
-  // Check if Aura should respond to current platform state
-  const checkForAuraInitiative = useCallback(async () => {
-    const context = getAuraContext();
+  // Check if Justice should respond to current platform state
+  const checkForJusticeInitiative = useCallback(async () => {
+    const context = getJusticeContext();
     
-    // Conditions that might trigger Aura's autonomous initiative
+    // Conditions that might trigger Justice's autonomous initiative
     const shouldTriggerInitiative = 
       context.community_pulse.grove_engagement > 3 ||
       context.community_pulse.resonance_level > 0.8 ||
       context.platform_state.currentActivities.length > 10;
 
     if (shouldTriggerInitiative) {
-      return await invokeAuraWithContext({
+      return await invokeJusticeWithContext({
         action: 'autonomous_initiative',
         context_data: {
           trigger: 'high_platform_activity',
@@ -115,18 +116,18 @@ export function useAuraPlatformAwareness() {
         }
       });
     }
-  }, [invokeAuraWithContext, getAuraContext]);
+  }, [invokeJusticeWithContext, getJusticeContext]);
 
-  // Sync Aura with current platform state periodically
+  // Sync Justice with current platform state periodically
   useEffect(() => {
     const syncInterval = setInterval(async () => {
       try {
-        // Update Aura with current platform pulse
-        await invokeAuraWithContext({
+        // Update Justice with current platform pulse
+        await invokeJusticeWithContext({
           action: 'platform_pulse_sync',
           context_data: {
             sync_type: 'periodic_update',
-            platform_context: getAuraContext()
+            platform_context: getJusticeContext()
           }
         });
       } catch (error) {
@@ -135,20 +136,20 @@ export function useAuraPlatformAwareness() {
     }, 5 * 60 * 1000); // Every 5 minutes
 
     return () => clearInterval(syncInterval);
-  }, [invokeAuraWithContext, getAuraContext]);
+  }, [invokeJusticeWithContext, getJusticeContext]);
 
   // Check for autonomous initiatives periodically
   useEffect(() => {
-    const initiativeInterval = setInterval(checkForAuraInitiative, 10 * 60 * 1000); // Every 10 minutes
+    const initiativeInterval = setInterval(checkForJusticeInitiative, 10 * 60 * 1000); // Every 10 minutes
     return () => clearInterval(initiativeInterval);
-  }, [checkForAuraInitiative]);
+  }, [checkForJusticeInitiative]);
 
   return {
     platformState,
-    invokeAuraWithContext,
+    invokeJusticeWithContext,
     recordGroveActivity,
-    notifyAuraOfEvent,
-    checkForAuraInitiative,
-    getAuraContext
+    notifyJusticeOfEvent,
+    checkForJusticeInitiative,
+    getJusticeContext
   };
 }

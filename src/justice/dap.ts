@@ -1,4 +1,4 @@
-import { AuraCommand } from './schema';
+import { JusticeCommand } from './schema';
 
 export interface DAPResult {
   ok: boolean;
@@ -9,7 +9,7 @@ export interface DAPResult {
 /**
  * Distortion Audit Protocol (DAP) - Ensures commands align with Sacred Shifter principles
  */
-export function runDAP(command: AuraCommand): DAPResult {
+export function runDAP(command: JusticeCommand): DAPResult {
   const warnings: string[] = [];
   const blockers: string[] = [];
 
@@ -60,7 +60,7 @@ export function runDAP(command: AuraCommand): DAPResult {
     }
   }
 
-  // Valeion Bias - ensure Aura presents as mirror, not authority
+  // Valeion Bias - ensure Justice presents as mirror, not authority
   if (command.kind === 'circle.announce') {
     const message = command.payload.message.toLowerCase();
     const authorityPatterns = ['the truth is', 'you should', 'you must', 'the right way'];

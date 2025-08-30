@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAura } from '@/aura/useAura';
+import { useJustice } from '@/justice/useJustice';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ interface KnowledgeSeed {
 }
 
 export function SeederAuthorityDashboard() {
-  const { executeCommand } = useAura();
+  const { executeCommand } = useJustice();
   const { toast } = useToast();
   const [seeds, setSeeds] = useState<KnowledgeSeed[]>([]);
   const [seedType, setSeedType] = useState('knowledge_seed');

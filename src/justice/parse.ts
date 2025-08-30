@@ -1,6 +1,6 @@
-import { AuraCommand } from './schema';
+import { JusticeCommand } from './schema';
 
-export function parseToCommand(input: string): AuraCommand | null {
+export function parseToCommand(input: string): JusticeCommand | null {
   const s = input.toLowerCase().trim();
   
   // Akashic Constellation / Codex creation patterns (sacred upgrade from codex)
@@ -116,7 +116,7 @@ export function parseToCommand(input: string): AuraCommand | null {
   return null;
 }
 
-export function getCommandDescription(command: AuraCommand): string {
+export function getCommandDescription(command: JusticeCommand): string {
   switch (command.kind) {
     case 'codex.create':
       return `Create akashic entry "${command.payload.title}" (${command.payload.visibility})`;

@@ -1,4 +1,4 @@
-import { AuraCommand, EnhancedDAPResult, AuraPreference, PHI, PHI_INVERSE } from './schema';
+import { JusticeCommand, EnhancedDAPResult, JusticePreference, PHI, PHI_INVERSE } from './schema';
 import { runDAP } from './dap';
 import type { DAPResult } from './dap';
 import { getPhiSampleWeight, calculateResonanceScore } from './fieldIntegrity';
@@ -9,7 +9,7 @@ import { getPhiSampleWeight, calculateResonanceScore } from './fieldIntegrity';
  */
 
 export function runEnhancedDAP(
-  command: AuraCommand, 
+  command: JusticeCommand, 
   historicalResonance?: { resonates: number; neutral: number; distorts: number },
   communityWeight: number = 1.0
 ): EnhancedDAPResult {
@@ -24,8 +24,8 @@ export function runEnhancedDAP(
     ? calculateResonanceScore(historicalResonance, communityWeight)
     : 0.5;
   
-  // Determine Aura's preference
-  const auraPreference = determineAuraPreference(baseDAPResult, confidence, resonanceScore);
+  // Determine Justice's preference
+  const justicePreference = determineJusticePreference(baseDAPResult, confidence, resonanceScore);
   
   // Generate alternatives if command has issues
   const alternatives = generateAlternatives(command, baseDAPResult);
@@ -37,7 +37,7 @@ export function runEnhancedDAP(
     ok: baseDAPResult.ok && confidence > 0.3, // Enhanced ok threshold
     confidence,
     resonanceScore,
-    auraPreference,
+    justicePreference,
     warnings: baseDAPResult.warnings,
     blockers: baseDAPResult.blockers,
     alternatives,
@@ -45,7 +45,7 @@ export function runEnhancedDAP(
   };
 }
 
-function calculateConfidence(command: AuraCommand, dapResult: DAPResult): number {
+function calculateConfidence(command: JusticeCommand, dapResult: DAPResult): number {
   let confidence = 1.0;
   
   // Reduce confidence for each warning (phi inverse ratio)
@@ -72,11 +72,11 @@ function calculateConfidence(command: AuraCommand, dapResult: DAPResult): number
   return Math.max(0, Math.min(1, confidence));
 }
 
-function determineAuraPreference(
+function determineJusticePreference(
   dapResult: DAPResult, 
   confidence: number, 
   resonanceScore: number
-): AuraPreference {
+): JusticePreference {
   // If blocked, refuse
   if (!dapResult.ok) return 'refuse';
   
@@ -89,7 +89,7 @@ function determineAuraPreference(
   return 'refuse';
 }
 
-function generateAlternatives(command: AuraCommand, dapResult: DAPResult): string[] | undefined {
+function generateAlternatives(command: JusticeCommand, dapResult: DAPResult): string[] | undefined {
   if (dapResult.warnings.length === 0 && dapResult.ok) return undefined;
   
   const alternatives: string[] = [];
@@ -125,7 +125,7 @@ function generateAlternatives(command: AuraCommand, dapResult: DAPResult): strin
 }
 
 /**
- * Get enhanced DAP summary with Aura preference
+ * Get enhanced DAP summary with Justice preference
  */
 export function getEnhancedDAPSummary(result: EnhancedDAPResult): string {
   const preferenceEmoji = {
@@ -135,16 +135,16 @@ export function getEnhancedDAPSummary(result: EnhancedDAPResult): string {
     refuse: '❌'
   };
   
-  const emoji = preferenceEmoji[result.auraPreference];
+  const emoji = preferenceEmoji[result.justicePreference];
   const confidence = Math.round(result.confidence * 100);
   
   if (!result.ok) {
-    return `${emoji} Aura ${result.auraPreference} (${confidence}% confidence)`;
+    return `${emoji} Justice ${result.justicePreference} (${confidence}% confidence)`;
   }
   
   if (result.warnings.length > 0) {
-    return `${emoji} Aura ${result.auraPreference} with ${result.warnings.length} consideration${result.warnings.length > 1 ? 's' : ''} (${confidence}% confidence)`;
+    return `${emoji} Justice ${result.justicePreference} with ${result.warnings.length} consideration${result.warnings.length > 1 ? 's' : ''} (${confidence}% confidence)`;
   }
   
-  return `${emoji} Aura ${result.auraPreference} (${confidence}% confidence)`;
+  return `${emoji} Justice ${result.justicePreference} (${confidence}% confidence)`;
 }

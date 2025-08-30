@@ -17,9 +17,9 @@ import {
   AlertTriangle,
   CheckCircle
 } from 'lucide-react';
-import { useAuraPlatformContext } from '@/contexts/AuraPlatformContext';
-import { useAuraPlatformAwareness } from '@/hooks/useAuraPlatformAwareness';
-import { useAuraPlatformIntegration } from '@/hooks/useAuraPlatformIntegration';
+import { useJusticePlatformContext } from '@/contexts/JusticePlatformContext';
+import { useJusticePlatformAwareness } from '@/hooks/useJusticePlatformAwareness';
+import { useJusticePlatformIntegration } from '@/hooks/useJusticePlatformIntegration';
 
 interface TelemetryMetric {
   label: string;
@@ -30,9 +30,9 @@ interface TelemetryMetric {
 }
 
 export const AuraTelemetryDashboard: React.FC = () => {
-  const { platformState, getAuraContext } = useAuraPlatformContext();
-  const { checkForAuraInitiative } = useAuraPlatformAwareness();
-  const { triggerAuraAssessment } = useAuraPlatformIntegration();
+  const { platformState, getJusticeContext } = useJusticePlatformContext();
+  const { checkForJusticeInitiative } = useJusticePlatformAwareness();
+  const { triggerJusticeAssessment } = useJusticePlatformIntegration();
   
   const [isResycing, setIsResyncing] = useState(false);
   const [lastSync, setLastSync] = useState<Date>(new Date());
@@ -92,11 +92,11 @@ export const AuraTelemetryDashboard: React.FC = () => {
     setLastSync(new Date());
     
     try {
-      // Trigger Aura assessment
-      await triggerAuraAssessment();
+      // Trigger Justice assessment
+      await triggerJusticeAssessment();
       
       // Check for autonomous initiatives
-      await checkForAuraInitiative();
+      await checkForJusticeInitiative();
       
       setSystemHealth('online');
     } catch (error) {
@@ -248,7 +248,7 @@ export const AuraTelemetryDashboard: React.FC = () => {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => checkForAuraInitiative()}
+              onClick={() => checkForJusticeInitiative()}
               className="flex items-center space-x-2"
             >
               <Brain className="w-4 h-4" />

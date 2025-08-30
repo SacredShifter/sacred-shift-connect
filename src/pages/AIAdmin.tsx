@@ -7,9 +7,9 @@ import { Progress } from '@/components/ui/progress';
 import { AuraInterface } from '@/components/AuraInterface';
 import { AuraAdminInterface } from '@/components/AuraAdminInterface';
 
-import { AuraHistory } from '@/aura/components/AuraHistory';
-import { AuraConfirm } from '@/aura/components/AuraConfirm';
-import { useAura } from '@/aura/useAura';
+import { JusticeHistory } from '@/justice/components/JusticeHistory';
+import { JusticeConfirm } from '@/justice/components/JusticeConfirm';
+import { useJustice } from '@/justice/useJustice';
 import { usePersonalAI } from '@/hooks/usePersonalAI';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,7 +35,7 @@ import {
   Pause,
   RotateCcw
 } from 'lucide-react';
-import { AuraJob } from '@/aura/schema';
+import { JusticeJob } from '@/justice/schema';
 
 interface ConsciousnessMetrics {
   level: number;
@@ -80,7 +80,7 @@ function AIAdminContent() {
     resonance_alignment: 0
   });
 
-  const { jobs } = useAura();
+  const { jobs } = useJustice();
   const { user } = useAuth();
   const { askPersonalAI } = usePersonalAI();
 
