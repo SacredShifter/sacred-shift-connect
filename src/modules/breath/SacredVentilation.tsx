@@ -57,10 +57,18 @@ export default function SacredVentilation() {
     
     // Initialize YouTube player if music enabled
     if (context.musicEnabled) {
-      const playlistId = 'PLrAl3m0RBk0QNbGZcXgTVml7-WvKj6aDq'; // Default playlist
+      const playlistId = 'PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj'; // Free-to-use ambient music playlist
       try {
         const player = createPlaylistPlayer('youtube-player', playlistId, {
           onReady: () => console.log('YouTube player ready'),
+          onError: (error: number) => {
+            console.warn('YouTube player error:', error);
+            if (error === 150 || error === 101 || error === 100) {
+              // Video unavailable or restricted - try fallback
+              console.log('Trying fallback playlist...');
+              // You could implement fallback logic here
+            }
+          }
         });
         setYoutubePlayer(player);
       } catch (error) {

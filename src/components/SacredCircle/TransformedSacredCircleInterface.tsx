@@ -175,13 +175,9 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
   };
 
   return (
-    <div className={cn(
-      "flex flex-col h-full bg-background",
-      className
-    )}>
-      
-      {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur">
+    <div className={cn("h-screen flex flex-col bg-background", className)}>
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 flex items-center gap-3 p-4 border-b bg-card shadow-sm">
         <Button variant="ghost" size="sm" onClick={onClose} className="p-2">
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -212,7 +208,6 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
         </div>
 
         <div className="flex items-center gap-1">
-          {/* Real Voice and Video Call Integration for Circle */}
           {circleId && (
             <CircleVideoCallManager 
               circleId={circleId}
@@ -239,34 +234,29 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-hidden flex flex-col bg-background">
-        <div 
-          ref={scrollAreaRef}
-          className="flex-1 px-4 py-4 overflow-y-auto"
-          style={{ paddingBottom: '120px' }}
-        >
-          <div className="space-y-4">
-            {loading ? (
-              <div className="text-center text-muted-foreground py-8">
-                Loading messages...
-              </div>
-            ) : messages.length === 0 ? (
-              <div className="text-center space-y-3 py-12">
-                <p className="text-lg font-medium text-foreground">No messages yet</p>
-                <p className="text-sm text-muted-foreground">
-                  Start the conversation with your first message
-                </p>
-              </div>
-            ) : (
-              messages.map(formatMessage)
-            )}
+      {/* Scrollable Messages Area */}
+      <div 
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+        ref={scrollAreaRef}
+      >
+        {loading ? (
+          <div className="text-center text-muted-foreground py-8">
+            Loading messages...
           </div>
-        </div>
+        ) : messages.length === 0 ? (
+          <div className="text-center space-y-3 py-12">
+            <p className="text-lg font-medium text-foreground">No messages yet</p>
+            <p className="text-sm text-muted-foreground">
+              Start the conversation with your first message
+            </p>
+          </div>
+        ) : (
+          messages.map(formatMessage)
+        )}
       </div>
 
-      {/* Message Input - Fixed at Bottom */}
-      <div className="border-t bg-card border-border shadow-lg">
+      {/* Fixed Message Input at Bottom - ALWAYS VISIBLE */}
+      <div className="flex-shrink-0 border-t bg-card shadow-lg" style={{ minHeight: '80px' }}>
         {/* Attached Files Preview */}
         {attachedFiles.length > 0 && (
           <div className="p-3 bg-muted/30 border-b">
@@ -288,56 +278,57 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
           </div>
         )}
         
-        <div className="p-4">
-          <div className="flex items-center gap-3">
+        {/* Message Input Row - GUARANTEED VISIBLE */}
+        <div className="p-4 bg-background border-t border-border">
+          <div className="flex items-center gap-3 w-full min-h-[48px]">
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
-              className="h-10 w-10 p-0 hover:bg-muted shrink-0"
+              className="h-10 w-10 p-0 shrink-0 border-2"
               onClick={handleFileAttach}
               title="Attach file"
             >
-              <Paperclip className="h-5 w-5 text-muted-foreground" />
+              <Paperclip className="h-4 w-4" />
             </Button>
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
-              className="h-10 w-10 p-0 hover:bg-muted shrink-0"
+              className="h-10 w-10 p-0 shrink-0 border-2"
               onClick={handleImageAttach}
               title="Attach image"
             >
-              <Image className="h-5 w-5 text-muted-foreground" />
+              <Image className="h-4 w-4" />
             </Button>
             
-            <div className="flex-1 relative">
+            <div className="flex-1 flex items-center gap-2">
               <Input
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
                 placeholder="Type your message here..."
-                className="h-12 pl-4 pr-12 rounded-full bg-background border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-foreground text-base shadow-sm transition-all duration-200"
+                className="flex-1 h-12 bg-muted border-2 border-border focus:border-primary text-foreground text-base"
                 disabled={loading}
                 autoComplete="off"
+                style={{ 
+                  backgroundColor: 'var(--muted)',
+                  color: 'var(--foreground)',
+                  border: '2px solid var(--border)'
+                }}
               />
               <Button 
-                variant="ghost" 
-                size="sm" 
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted rounded-full"
-                title="Add emoji"
+                onClick={handleSendMessage}
+                disabled={(!messageText.trim() && attachedFiles.length === 0) || loading}
+                size="sm"
+                className="h-12 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium border-2 border-primary"
               >
-                <Smile className="h-4 w-4 text-muted-foreground" />
+                Send
               </Button>
             </div>
-            
-            <Button 
-              onClick={handleSendMessage}
-              disabled={(!messageText.trim() && attachedFiles.length === 0) || loading}
-              size="sm"
-              className="h-10 w-10 p-0 rounded-full bg-primary hover:bg-primary/90 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Send message"
-            >
-              <Send className="h-4 w-4 text-primary-foreground" />
-            </Button>
           </div>
         </div>
       </div>
