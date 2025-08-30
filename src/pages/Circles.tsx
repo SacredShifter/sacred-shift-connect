@@ -323,15 +323,21 @@ const Circles = () => {
 
         {/* Deeper Knowledge Section */}
         <div className="text-center mt-8">
-          <Button
-            variant="outline"
-            onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
-            className="gap-2"
-          >
-            <BookOpen className="w-4 h-4" />
-            {showDeeperKnowledge ? 'Hide' : 'Show'} Deeper Knowledge
-            {showDeeperKnowledge ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </Button>
+          <div className="bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-blue-500/20 backdrop-blur-sm border border-purple-400/30 rounded-xl p-6 max-w-2xl mx-auto">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 text-xl gap-4 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-0"
+              size="lg"
+            >
+              <Sparkles className="w-6 h-6" />
+              {showDeeperKnowledge ? 'Hide' : 'Unlock'} Sacred Wisdom
+              <BookOpen className="w-6 h-6" />
+            </Button>
+            <p className="text-sm text-muted-foreground mt-3">
+              Discover the deeper meaning of sacred circles and community consciousness evolution
+            </p>
+          </div>
         </div>
 
         {/* Teaching Layer */}

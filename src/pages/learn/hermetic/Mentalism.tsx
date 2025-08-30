@@ -3,8 +3,10 @@ import { useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, BookOpen } from 'lucide-react'
+import { ChevronDown, BookOpen, Sparkles } from 'lucide-react'
 import { Slogan } from '@/components/ui/Slogan'
+import { TeachingLayer } from '@/components/TeachingLayer'
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings'
 
 const vertexShader = `
   uniform float u_time;
@@ -77,6 +79,7 @@ export default function Mentalism(){
   const [coherence, setCoherence] = useState(0.5)
   const [thought, setThought] = useState('I move with clarity.')
   const [showInfo, setShowInfo] = useState(false)
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false)
 
   return (
     <div className="w-screen h-screen relative">
@@ -119,6 +122,34 @@ export default function Mentalism(){
             </motion.div>
         )}
         </AnimatePresence>
+      </div>
+
+      {/* Deeper Knowledge Section - Positioned prominently */}
+      <div className="absolute bottom-4 left-4 right-4">
+        <div className="bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-indigo-500/20 backdrop-blur-sm border border-purple-400/30 rounded-xl p-4">
+          <Button
+            onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 text-lg gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
+            size="lg"
+          >
+            <Sparkles className="w-5 h-5" />
+            {showDeeperKnowledge ? 'Hide' : 'Unlock'} Sacred Wisdom
+            <BookOpen className="w-5 h-5" />
+          </Button>
+          
+          {showDeeperKnowledge && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 max-h-96 overflow-y-auto"
+            >
+              <TeachingLayer
+                content={ALL_MODULE_TEACHINGS.mentalism}
+                moduleId="mentalism"
+              />
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   )

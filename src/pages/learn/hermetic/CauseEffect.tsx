@@ -4,8 +4,10 @@ import { Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, BookOpen } from 'lucide-react'
+import { ChevronDown, BookOpen, Sparkles } from 'lucide-react'
 import { Slogan } from '@/components/ui/Slogan'
+import { TeachingLayer } from '@/components/TeachingLayer'
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings'
 
 const nodes = [
   { id: 'A', position: new THREE.Vector3(-3, 2, 0) }, { id: 'B', position: new THREE.Vector3(-1, 0, 0) },
@@ -64,6 +66,7 @@ const SceneContent = () => (
 
 export default function CauseEffect() {
   const [showInfo, setShowInfo] = useState(false)
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false)
   return (
     <div className="w-screen h-screen relative">
       <Canvas camera={{ position: [0, 0, 8] }}>
@@ -93,6 +96,34 @@ export default function CauseEffect() {
             </motion.div>
         )}
         </AnimatePresence>
+      </div>
+
+      {/* Deeper Knowledge Section - Positioned prominently */}
+      <div className="absolute bottom-4 right-4 w-96">
+        <div className="bg-gradient-to-r from-orange-500/20 via-red-500/20 to-pink-500/20 backdrop-blur-sm border border-orange-400/30 rounded-xl p-4">
+          <Button
+            onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+            className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold py-3 text-lg gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
+            size="lg"
+          >
+            <Sparkles className="w-5 h-5" />
+            {showDeeperKnowledge ? 'Hide' : 'Unlock'} Sacred Wisdom
+            <BookOpen className="w-5 h-5" />
+          </Button>
+          
+          {showDeeperKnowledge && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 max-h-96 overflow-y-auto"
+            >
+              <TeachingLayer
+                content={ALL_MODULE_TEACHINGS.causeeffect}
+                moduleId="causeeffect"
+              />
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   );

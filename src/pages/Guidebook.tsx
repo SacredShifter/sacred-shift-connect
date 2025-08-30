@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import { 
   Scroll, 
   Star, 
@@ -20,8 +21,13 @@ import {
   Sparkles,
   Wifi,
   Shield,
-  Video
+  Video,
+  BookOpen,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
+import { TeachingLayer } from '@/components/TeachingLayer';
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 
 const sections = [
   {
@@ -214,6 +220,8 @@ const sections = [
 ];
 
 const Guidebook: React.FC = () => {
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
+  
   return (
     <div className="h-full p-6">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -269,6 +277,38 @@ const Guidebook: React.FC = () => {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Prominent Sacred Wisdom Button */}
+        <div className="text-center my-8">
+          <div className="bg-gradient-to-r from-primary/20 via-purple/20 to-indigo/20 backdrop-blur-sm border border-primary/30 rounded-xl p-6 max-w-2xl mx-auto">
+            <Button
+              onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+              className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple/90 text-white font-bold py-4 px-8 text-xl gap-4 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+              size="lg"
+            >
+              <Sparkles className="w-6 h-6" />
+              {showDeeperKnowledge ? 'Hide' : 'Unlock'} Sacred Wisdom
+              <BookOpen className="w-6 h-6" />
+            </Button>
+            <p className="text-sm text-muted-foreground mt-3">
+              Discover the deeper spiritual and scientific understanding behind this sacred technology
+            </p>
+          </div>
+        </div>
+
+        {/* Teaching Layer */}
+        {showDeeperKnowledge && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <TeachingLayer
+              content={ALL_MODULE_TEACHINGS.guidebook}
+              moduleId="guidebook"
+            />
+          </motion.div>
+        )}
 
         {/* Sacred Grove Special Section */}
         <motion.div
