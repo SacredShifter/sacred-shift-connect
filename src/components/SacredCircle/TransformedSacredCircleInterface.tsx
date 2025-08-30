@@ -263,11 +263,11 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
           </div>
         </div>
 
-        {/* Message Input - Fixed and Visible */}
-        <div className="sticky bottom-0 p-4 border-t bg-background/95 backdrop-blur-sm border-border shadow-lg z-10">
+        {/* Message Input - Always Visible at Bottom */}
+        <div className="mt-auto border-t bg-card/95 backdrop-blur-sm shadow-lg">
           {/* Attached Files Preview */}
           {attachedFiles.length > 0 && (
-            <div className="mb-3 p-3 bg-muted/30 rounded-lg">
+            <div className="p-3 bg-muted/30 border-b">
               <div className="flex flex-wrap gap-2">
                 {attachedFiles.map((file, index) => (
                   <div key={index} className="flex items-center gap-2 bg-background px-3 py-2 rounded-full text-sm">
@@ -286,56 +286,57 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
             </div>
           )}
           
-          <div className="flex items-center gap-3 max-w-4xl mx-auto">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-10 w-10 p-0 hover:bg-muted shrink-0"
-              onClick={handleFileAttach}
-              title="Attach file"
-            >
-              <Paperclip className="h-5 w-5 text-muted-foreground" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-10 w-10 p-0 hover:bg-muted shrink-0"
-              onClick={handleImageAttach}
-              title="Attach image"
-            >
-              <Image className="h-5 w-5 text-muted-foreground" />
-            </Button>
-            
-            <div className="flex-1 relative">
-              <Input
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message here..."
-                className="h-12 pl-4 pr-12 rounded-full bg-background border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-base shadow-sm transition-all duration-200"
-                disabled={loading}
-                autoComplete="off"
-                autoFocus
-              />
+          <div className="p-4">
+            <div className="flex items-center gap-3">
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-background rounded-full"
-                title="Add emoji"
+                className="h-10 w-10 p-0 hover:bg-muted shrink-0"
+                onClick={handleFileAttach}
+                title="Attach file"
               >
-                <Smile className="h-4 w-4 text-muted-foreground" />
+                <Paperclip className="h-5 w-5 text-muted-foreground" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-10 w-10 p-0 hover:bg-muted shrink-0"
+                onClick={handleImageAttach}
+                title="Attach image"
+              >
+                <Image className="h-5 w-5 text-muted-foreground" />
+              </Button>
+              
+              <div className="flex-1 relative">
+                <Input
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type your message here..."
+                  className="h-12 pl-4 pr-12 rounded-full bg-background border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-foreground text-base shadow-sm transition-all duration-200"
+                  disabled={loading}
+                  autoComplete="off"
+                />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted rounded-full"
+                  title="Add emoji"
+                >
+                  <Smile className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </div>
+              
+              <Button 
+                onClick={handleSendMessage}
+                disabled={(!messageText.trim() && attachedFiles.length === 0) || loading}
+                size="sm"
+                className="h-10 w-10 p-0 rounded-full bg-primary hover:bg-primary/90 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Send message"
+              >
+                <Send className="h-4 w-4 text-primary-foreground" />
               </Button>
             </div>
-            
-            <Button 
-              onClick={handleSendMessage}
-              disabled={(!messageText.trim() && attachedFiles.length === 0) || loading}
-              size="sm"
-              className="h-10 w-10 p-0 rounded-full bg-primary hover:bg-primary/90 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Send message"
-            >
-              <Send className="h-4 w-4 text-primary-foreground" />
-            </Button>
           </div>
         </div>
       </div>
