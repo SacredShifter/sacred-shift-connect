@@ -45,6 +45,12 @@ export interface SacredProgress {
   module_diversity_score: number;
   consistency_score: number;
   leadership_score: number;
+  // Shadow Path metrics
+  resistance_logs: number;
+  micro_practices_completed: number;
+  comeback_count: number;
+  support_given: number;
+  silence_reflections: number;
 }
 
 // Fetch all sacred seals
