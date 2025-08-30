@@ -20,6 +20,8 @@ import { useTeachingProgress } from '@/hooks/useTeachingProgress';
 import { SacredResonanceIndicator } from '@/components/SacredResonanceIndicator';
 import { WisdomPathways } from '@/components/WisdomPathways';
 import { InitiationProgressTracker } from '@/components/InitiationProgressTracker';
+import { SacredGeometryVisualizer } from '@/components/SacredGeometryVisualizer';
+import { SacredIntegrationErrorBoundary } from '@/components/SacredIntegrationErrorBoundary';
 
 export interface TeachingContent {
   scientific: {
@@ -53,6 +55,8 @@ export const TeachingLayer: React.FC<TeachingLayerProps> = ({
   const { getUnlockedTiers, recordEngagement, getInitiationStage } = useTeachingProgress();
   const [activeTab, setActiveTab] = useState('scientific');
   const [showSacredIntegration, setShowSacredIntegration] = useState(false);
+  
+  console.log('🔧 TeachingLayer - Sacred Integration state:', showSacredIntegration);
   
   const unlockedTiers = getUnlockedTiers();
   const initiationStage = getInitiationStage();
@@ -100,7 +104,10 @@ export const TeachingLayer: React.FC<TeachingLayerProps> = ({
       {/* Sacred Integration Toggle */}
       <div className="text-center">
         <Button
-          onClick={() => setShowSacredIntegration(!showSacredIntegration)}
+          onClick={() => {
+            console.log('🔧 Sacred Integration toggle clicked, current state:', showSacredIntegration);
+            setShowSacredIntegration(!showSacredIntegration);
+          }}
           variant="outline"
           className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold py-3 px-6 text-lg gap-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-0"
         >
@@ -121,12 +128,22 @@ export const TeachingLayer: React.FC<TeachingLayerProps> = ({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className="space-y-4"
+            onAnimationStart={() => console.log('🔧 Rendering Sacred Integration components')}
           >
             <div className="grid md:grid-cols-2 gap-4">
-              <SacredResonanceIndicator />
-              <InitiationProgressTracker />
+              <SacredIntegrationErrorBoundary componentName="SacredResonanceIndicator">
+                <SacredResonanceIndicator />
+              </SacredIntegrationErrorBoundary>
+              <SacredIntegrationErrorBoundary componentName="InitiationProgressTracker">
+                <InitiationProgressTracker />
+              </SacredIntegrationErrorBoundary>
             </div>
-            <WisdomPathways currentModule={moduleId} />
+            <SacredIntegrationErrorBoundary componentName="WisdomPathways">
+              <WisdomPathways currentModule={moduleId} />
+            </SacredIntegrationErrorBoundary>
+            <SacredIntegrationErrorBoundary componentName="SacredGeometryVisualizer">
+              <SacredGeometryVisualizer isActive={true} coherenceLevel={75} />
+            </SacredIntegrationErrorBoundary>
           </motion.div>
         )}
       </AnimatePresence>
