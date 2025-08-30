@@ -14,6 +14,7 @@ import { Heart, Sparkles, BookOpen, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { VentilationContext } from '../hooks/useSacredVentilationMachine';
+import { useAuth } from '@/hooks/useAuth';
 
 interface PostSessionDialogProps {
   isOpen: boolean;
@@ -52,6 +53,7 @@ export function PostSessionDialog({
   sessionContext, 
   totalCycles 
 }: PostSessionDialogProps) {
+  const { user } = useAuth();
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [selectedResonance, setSelectedResonance] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
@@ -74,6 +76,11 @@ export function PostSessionDialog({
   };
 
   const saveToJournal = async () => {
+    if (!user) {
+      toast.error('You must be logged in to save sessions');
+      return;
+    }
+
     setIsSaving(true);
     
     try {
@@ -83,6 +90,7 @@ export function PostSessionDialog({
       const duration = Math.round((endTime.getTime() - startTime.getTime()) / 60000); // minutes
 
       const sessionData = {
+        user_id: user.id, // This is the critical missing field!
         duration,
         cycles_completed: totalCycles,
         breath_pattern: {
