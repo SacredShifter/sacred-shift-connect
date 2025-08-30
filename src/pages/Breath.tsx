@@ -1,5 +1,6 @@
 import React from 'react';
 import { BreathingVisualizer } from '@/components/BreathingVisualizer';
+import { VideoRenderTestPage } from '@/components/video/VideoRenderTestPage';
 
 export default function Breath() {
   return (
@@ -15,6 +16,11 @@ export default function Breath() {
         </div>
         
         <BreathingVisualizer />
+        
+        {/* Video Render Pipeline Test */}
+        <div className="mt-12">
+          <VideoRenderTestPage />
+        </div>
       </div>
     </div>
   );
