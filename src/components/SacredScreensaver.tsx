@@ -20,8 +20,12 @@ export default function SacredScreensaver({
 
   const handleExit = useCallback(() => {
     setIsActive(false);
-    resume();
+    if (resumeRef.current) {
+      resumeRef.current();
+    }
   }, []);
+
+  const resumeRef = useRef<(() => void) | null>(null);
 
   const { 
     getRemainingTime, 
@@ -43,16 +47,18 @@ export default function SacredScreensaver({
     crossTab: true
   });
 
+  // Store resume function in ref to avoid dependency issues
+  useEffect(() => {
+    resumeRef.current = resume;
+  }, [resume]);
+
   // Initialize after mount
   useEffect(() => {
     const timer = setTimeout(() => setIsInitialized(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  // Optional: Log screensaver events
-  // const logScreensaverEvent = useCallback((action: string, type: string) => {
-  //   console.log(`Screensaver ${action}:`, { type, timestamp: new Date().toISOString() });
-  // }, []);
+  console.log('SacredScreensaver render:', { isActive, enabled, isInitialized });
 
   if (!enabled || !isInitialized) {
     return <>{children}</>;

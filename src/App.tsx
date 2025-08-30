@@ -7,7 +7,6 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
 import { MainLayout } from "@/components/MainLayout";
 import { ToolbarWithComponents } from "@/components/ToolbarWithComponents";
-import { RouteRedirectManager } from "@/components/RouteRedirectManager";
 
 import { ErrorBoundary, UIErrorBoundary } from "@/components/ErrorBoundary";
 import { ProductionReadyErrorBoundary } from "@/components/production/ProductionReadyErrorBoundary";
