@@ -282,25 +282,25 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={particleCount}
+          count={particleData.count}
           array={particleData.positions}
           itemSize={3}
         />
         <bufferAttribute
           attach="attributes-color"
-          count={particleCount}
+          count={particleData.count}
           array={particleData.colors}
           itemSize={3}
         />
         <bufferAttribute
           attach="attributes-phase"
-          count={particleCount}
+          count={particleData.count}
           array={particleData.phases}
           itemSize={1}
         />
         <bufferAttribute
           attach="attributes-size"
-          count={particleCount}
+          count={particleData.count}
           array={particleData.sizes}
           itemSize={1}
         />
