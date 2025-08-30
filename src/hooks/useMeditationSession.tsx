@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTeachingProgress } from '@/hooks/useTeachingProgress';
 
 type MeditationType = 'breathing' | 'loving-kindness' | 'chakra' | 'mindfulness' | 'body-scan';
 
@@ -26,6 +27,7 @@ interface SessionMetrics {
 export function useMeditationSession() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { recordSession } = useTeachingProgress();
   
   const [currentSession, setCurrentSession] = useState<{
     practice: MeditationPractice;
@@ -129,6 +131,9 @@ export function useMeditationSession() {
       // Update user meditation stats
       await updateUserMeditationStats(sessionDuration);
 
+      // Record session for teaching progression
+      recordSession();
+
       toast({
         title: "Session Recorded 📿",
         description: `${sessionDuration} minutes of ${currentSession.practice.name} saved to your journey`,
@@ -148,7 +153,7 @@ export function useMeditationSession() {
       setCurrentSession(null);
       setIsLoading(false);
     }
-  }, [currentSession, user, toast]);
+  }, [currentSession, user, toast, recordSession]);
 
   // Cancel the current session
   const cancelSession = useCallback(() => {

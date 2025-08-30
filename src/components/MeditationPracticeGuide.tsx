@@ -14,9 +14,13 @@ import {
   Play, 
   X,
   CheckCircle2,
-  ChevronDown
+  ChevronDown,
+  BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { TeachingLayer } from '@/components/TeachingLayer';
+import { meditationTeachings } from '@/data/meditationTeachings';
+import { TeachingProgressIndicator } from '@/components/TeachingProgressIndicator';
 
 interface MeditationPractice {
   id: string;
@@ -42,6 +46,7 @@ export const MeditationPracticeGuide: React.FC<MeditationPracticeGuideProps> = (
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
   const [expandedPractice, setExpandedPractice] = useState<string>('');
+  const [showTeachings, setShowTeachings] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     console.log('🔍 MeditationPracticeGuide - Checking if user has seen guide before');
@@ -76,6 +81,13 @@ export const MeditationPracticeGuide: React.FC<MeditationPracticeGuideProps> = (
   const handleStartPractice = (practiceId: string) => {
     onSelectPractice(practiceId);
     handleClose();
+  };
+
+  const toggleTeachings = (practiceId: string) => {
+    setShowTeachings(prev => ({
+      ...prev,
+      [practiceId]: !prev[practiceId]
+    }));
   };
 
   if (!isVisible) {
@@ -125,6 +137,11 @@ export const MeditationPracticeGuide: React.FC<MeditationPracticeGuideProps> = (
           </CardHeader>
           
           <CardContent className="h-[calc(100%-5rem)] overflow-y-auto">
+            {/* Teaching Progress Indicator */}
+            <div className="mb-6">
+              <TeachingProgressIndicator />
+            </div>
+            
             <div className="space-y-4">
               {practices.map((practice, index) => (
                 <motion.div
@@ -192,8 +209,28 @@ export const MeditationPracticeGuide: React.FC<MeditationPracticeGuideProps> = (
                             </ol>
                           </div>
 
-                          {/* Start Practice Button */}
+                          {/* Deeper Knowledge Toggle */}
                           <div className="pt-4 border-t border-border/50">
+                            <Button
+                              onClick={() => toggleTeachings(practice.id)}
+                              variant="outline"
+                              className="w-full mb-3 bg-muted/50 hover:bg-muted"
+                            >
+                              <BookOpen className="w-4 h-4 mr-2" />
+                              {showTeachings[practice.id] ? 'Hide' : 'Show'} Deeper Knowledge
+                            </Button>
+                            
+                            {/* Teaching Layer */}
+                            {showTeachings[practice.id] && meditationTeachings[practice.id] && (
+                              <div className="mb-4">
+                                <TeachingLayer
+                                  content={meditationTeachings[practice.id]}
+                                  moduleId={`meditation-${practice.id}`}
+                                />
+                              </div>
+                            )}
+
+                            {/* Start Practice Button */}
                             <Button
                               onClick={() => handleStartPractice(practice.id)}
                               className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
