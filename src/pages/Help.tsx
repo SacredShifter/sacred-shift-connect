@@ -1,9 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LifeBuoy, Book, MessageCircle, ExternalLink } from "lucide-react";
+import { LifeBuoy, Book, MessageCircle, ExternalLink, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TeachingLayer } from '@/components/TeachingLayer';
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
+import { useState } from 'react';
 
 export default function Help() {
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
   const helpCategories = [
     {
       title: "Getting Started",
@@ -109,6 +113,29 @@ export default function Help() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Deeper Knowledge Section */}
+      <div className="text-center">
+        <Button
+          variant="outline"
+          onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+          className="gap-2"
+        >
+          <BookOpen className="w-4 h-4" />
+          {showDeeperKnowledge ? 'Hide' : 'Show'} Deeper Knowledge
+          {showDeeperKnowledge ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </Button>
+      </div>
+
+      {/* Teaching Layer */}
+      {showDeeperKnowledge && (
+        <div className="mt-6">
+          <TeachingLayer
+            content={ALL_MODULE_TEACHINGS.help}
+            moduleId="help"
+          />
+        </div>
+      )}
     </div>
   );
 }

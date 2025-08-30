@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, User, BookOpen, Sparkles } from 'lucide-react';
+import { Users, User, BookOpen, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { CodexConstellation } from '@/components/Codex/CodexConstellation';
 import { CodexList } from '@/components/Codex/CodexList';
 import { CollectiveCodexConstellation } from '@/components/CollectiveAkashicConstellation/CollectiveCodexConstellation';
 import { useRegistryOfResonance } from '@/hooks/useRegistryOfResonance';
+import { TeachingLayer } from '@/components/TeachingLayer';
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
+import { Button } from '@/components/ui/button';
 
 export default function Codex() {
   const [activeTab, setActiveTab] = useState('personal');
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
   const { entries: collectiveEntries } = useRegistryOfResonance();
 
   return (
@@ -89,6 +93,29 @@ export default function Codex() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Deeper Knowledge Section */}
+      <div className="text-center mt-8">
+        <Button
+          variant="outline"
+          onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+          className="gap-2"
+        >
+          <BookOpen className="w-4 h-4" />
+          {showDeeperKnowledge ? 'Hide' : 'Show'} Deeper Knowledge
+          {showDeeperKnowledge ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </Button>
+      </div>
+
+      {/* Teaching Layer */}
+      {showDeeperKnowledge && (
+        <div className="mt-6">
+          <TeachingLayer
+            content={ALL_MODULE_TEACHINGS.codex}
+            moduleId="codex"
+          />
+        </div>
+      )}
     </div>
   );
 }

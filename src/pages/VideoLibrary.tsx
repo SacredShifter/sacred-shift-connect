@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Grid, Flower, Plus } from 'lucide-react';
-
+import { Grid, Flower, Plus, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { YouTubeLibrary } from '@/components/YouTubeLibrary/YouTubeLibrary';
 import { PetalLotus, ContentPlatform } from '@/components/PetalLotus';
 import { ContentManager } from '@/components/ContentManager';
+import { TeachingLayer } from '@/components/TeachingLayer';
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 
 const VideoLibrary: React.FC = () => {
   const [viewMode, setViewMode] = useState<'lotus' | 'grid' | 'manage'>('lotus');
   const [selectedPlatform, setSelectedPlatform] = useState<ContentPlatform | undefined>();
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
 
   return (
     <div className="h-full overflow-y-auto">
@@ -94,6 +96,29 @@ const VideoLibrary: React.FC = () => {
             <ContentManager selectedPlatform={selectedPlatform} />
           ) : (
             <YouTubeLibrary />
+          )}
+
+          {/* Deeper Knowledge Section */}
+          <div className="text-center mt-8">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+              className="gap-2"
+            >
+              <BookOpen className="w-4 h-4" />
+              {showDeeperKnowledge ? 'Hide' : 'Show'} Deeper Knowledge
+              {showDeeperKnowledge ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </Button>
+          </div>
+
+          {/* Teaching Layer */}
+          {showDeeperKnowledge && (
+            <div className="mt-6">
+              <TeachingLayer
+                content={ALL_MODULE_TEACHINGS.library}
+                moduleId="library"
+              />
+            </div>
           )}
         </motion.div>
       </div>

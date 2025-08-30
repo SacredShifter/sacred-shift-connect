@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, Users, Lock, Globe, Filter, TrendingUp, Clock, Star, Calendar, Heart, Sparkles, User, Zap } from 'lucide-react';
+import { Search, Plus, Users, Lock, Globe, Filter, TrendingUp, Clock, Star, Calendar, Heart, Sparkles, User, Zap, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { CreateCircleModal } from '@/components/CreateCircleModal';
 import { SacredCircleInterface } from '@/components/SacredCircleInterface';
 import { TransformedSacredCircleInterface } from '@/components/SacredCircle/TransformedSacredCircleInterface';
@@ -16,6 +16,8 @@ import { SacredProfile } from '@/components/SacredProfile';
 import { SacredEvents } from '@/components/SacredEvents';
 import { useToast } from '@/hooks/use-toast';
 import { Slogan } from '@/components/ui/Slogan';
+import { TeachingLayer } from '@/components/TeachingLayer';
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 
 interface FilterOption {
   id: string;
@@ -42,6 +44,7 @@ const Circles = () => {
   const [selectedCircle, setSelectedCircle] = useState<string | null>(null);
   const [isCircleMaximized, setIsCircleMaximized] = useState(false);
   const [isCircleMinimized, setIsCircleMinimized] = useState(false);
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
 
   // Get joined circle IDs from the actual circles data
   const joinedCircleIds = new Set(
@@ -317,6 +320,29 @@ const Circles = () => {
           open={createModalOpen}
           onOpenChange={setCreateModalOpen}
         />
+
+        {/* Deeper Knowledge Section */}
+        <div className="text-center mt-8">
+          <Button
+            variant="outline"
+            onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+            className="gap-2"
+          >
+            <BookOpen className="w-4 h-4" />
+            {showDeeperKnowledge ? 'Hide' : 'Show'} Deeper Knowledge
+            {showDeeperKnowledge ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </Button>
+        </div>
+
+        {/* Teaching Layer */}
+        {showDeeperKnowledge && (
+          <div className="mt-6">
+            <TeachingLayer
+              content={ALL_MODULE_TEACHINGS.circles}
+              moduleId="circles"
+            />
+          </div>
+        )}
       </div>
 
       {/* Full-Screen Sacred Circle Interface */}
