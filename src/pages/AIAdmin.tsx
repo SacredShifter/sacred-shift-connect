@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -189,6 +190,15 @@ const AIAdmin = () => {
     }
   };
 
+  const getStatusBadgeVariant = (threatLevel: string) => {
+    switch (threatLevel) {
+      case 'low': return 'secondary';
+      case 'medium': return 'outline';
+      case 'high': return 'destructive';
+      default: return 'secondary';
+    }
+  };
+
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="text-center space-y-2">
@@ -243,7 +253,7 @@ const AIAdmin = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span>Threat Level</span>
-                <Badge variant={securityMetrics.threatLevel === 'low' ? 'success' : (securityMetrics.threatLevel === 'medium' ? 'warning' : 'destructive')}>
+                <Badge variant={getStatusBadgeVariant(securityMetrics.threatLevel)}>
                   {securityMetrics.threatLevel}
                 </Badge>
               </div>
@@ -340,38 +350,41 @@ const AIAdmin = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {jobs.map((job) => (
-                        <tr key={job.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">{job.id}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{job.command.kind}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <getStatusIcon status={job.status} className={`h-4 w-4 mr-1 ${getStatusColor(job.status)}`} />
-                              <span className={getStatusColor(job.status)}>{job.status}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {new Date(job.created_at).toLocaleString()}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right">
-                            {job.status === 'queued' && (
-                              <>
-                                <Button variant="outline" size="sm" onClick={() => handleConfirmJob(job.id)}>
-                                  Confirm
+                      {jobs.map((job) => {
+                        const StatusIcon = getStatusIcon(job.status);
+                        return (
+                          <tr key={job.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">{job.id}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{job.command.kind}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <StatusIcon className={`h-4 w-4 mr-1 ${getStatusColor(job.status)}`} />
+                                <span className={getStatusColor(job.status)}>{job.status}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {new Date(job.created_at).toLocaleString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                              {job.status === 'queued' && (
+                                <>
+                                  <Button variant="outline" size="sm" onClick={() => handleConfirmJob(job.id)}>
+                                    Confirm
+                                  </Button>
+                                  <Button variant="ghost" size="sm" onClick={() => handleCancelJob(job.id)}>
+                                    Cancel
+                                  </Button>
+                                </>
+                              )}
+                              {job.status !== 'success' && job.status !== 'failed' && job.status !== 'cancelled' && (
+                                <Button variant="ghost" size="sm">
+                                  View Details
                                 </Button>
-                                <Button variant="ghost" size="sm" onClick={() => handleCancelJob(job.id)}>
-                                  Cancel
-                                </Button>
-                              </>
-                            )}
-                            {job.status !== 'success' && job.status !== 'failed' && job.status !== 'cancelled' && (
-                              <Button variant="ghost" size="sm">
-                                View Details
-                              </Button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
