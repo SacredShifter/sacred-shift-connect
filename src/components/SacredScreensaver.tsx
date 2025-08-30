@@ -39,7 +39,6 @@ export default function SacredScreensaver({
     },
     onActive: handleExit,
     onAction: handleExit,
-    debounce: 500,
     throttle: 500,
     crossTab: true
   });

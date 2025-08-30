@@ -62,7 +62,6 @@ function App() {
           enabled={true}
         >
           <div className="min-h-screen relative w-full bg-black">
-            <RouteRedirectManager />
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/confirm" element={<AuthConfirm />} />
@@ -106,8 +105,8 @@ function App() {
                   <Route path="/guidebook" element={<Guidebook />} />
                   <Route path="/sitemap" element={<UserSitemap />} />
                   <Route path="/support" element={<Support />} />
-            <Route path="/status" element={<Status />} />
-            <Route path="/screensaver" element={<ScreensaverPage />} />
+                  <Route path="/status" element={<Status />} />
+                  <Route path="/screensaver" element={<ScreensaverPage />} />
                   
                   {/* Account Routes */}
                   <Route path="/profile" element={<Profile />} />
