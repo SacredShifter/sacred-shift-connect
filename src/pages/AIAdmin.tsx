@@ -1,33 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { AuraInterface } from '@/components/AuraInterface';
-import { AuraAdminInterface } from '@/components/AuraAdminInterface';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Brain, Shield, Zap, Activity, AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 import { JusticeHistory } from '@/justice/components/JusticeHistory';
 import { JusticeConfirm } from '@/justice/components/JusticeConfirm';
 import { useJustice } from '@/justice/useJustice';
-import { usePersonalAI } from '@/hooks/usePersonalAI';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import SacredShifterRoute from '@/components/SacredShifterRoute';
-import { 
-  Brain, 
-  Activity, 
-  TrendingUp, 
-  Zap, 
-  Eye, 
-  Sparkles, 
-  Network, 
-  Bot,
-  Cpu,
-  Database,
-  Settings,
+import {
   BarChart3,
-  Target,
+  Settings,
+  Network,
+  Database,
+  Cpu,
   Lightbulb,
   Heart,
   ChevronRight,
@@ -35,506 +23,408 @@ import {
   Pause,
   RotateCcw
 } from 'lucide-react';
+import { Command } from 'cmdk';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { usePersonalAI } from '@/hooks/usePersonalAI';
 import { JusticeJob } from '@/justice/schema';
 
-interface ConsciousnessMetrics {
-  level: number;
-  growth_rate: number;
-  insights_count: number;
-  patterns_detected: number;
-  last_updated: string;
+interface PerformanceMetrics {
+  cpuUsage: number;
+  memoryUsage: number;
+  networkLatency: number;
+  databaseLoad: number;
 }
 
-interface PredictiveInsight {
-  id: string;
-  area: string;
-  prediction: string;
-  confidence: number;
-  timeframe: string;
-  created_at: string;
+interface SecurityMetrics {
+  threatLevel: 'low' | 'medium' | 'high';
+  activeAttacks: number;
+  vulnerabilities: number;
 }
 
-interface SynchronicityEvent {
-  id: string;
-  event_description: string;
-  significance_score: number;
-  patterns: string[];
-  created_at: string;
+interface StabilityMetrics {
+  uptime: number;
+  errorRate: number;
+  responseTimes: number;
 }
 
-function AIAdminContent() {
-  const [confirmingJob, setConfirmingJob] = useState<AuraJob | null>(null);
-  const [consciousnessMetrics, setConsciousnessMetrics] = useState<ConsciousnessMetrics | null>(null);
-  const [predictiveInsights, setPredictiveInsights] = useState<PredictiveInsight[]>([]);
-  const [synchronicityEvents, setSynchronicityEvents] = useState<SynchronicityEvent[]>([]);
-  const [aiSystemStatus, setAiSystemStatus] = useState({
-    memory_utilization: 0,
-    processing_threads: 0,
-    learning_rate: 0,
-    neural_coherence: 0
+const AIAdmin = () => {
+  const [selectedJob, setSelectedJob] = useState<JusticeJob | null>(null);
+  const { 
+    jobs, 
+    auditLog, 
+    loading, 
+    loadJobs, 
+    loadAuditLog, 
+    executeCommand,
+    confirmJob,
+    cancelJob
+  } = useJustice();
+  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics>({
+    cpuUsage: 0,
+    memoryUsage: 0,
+    networkLatency: 0,
+    databaseLoad: 0,
   });
-  const [realTimeMetrics, setRealTimeMetrics] = useState({
-    thoughts_processed: 0,
-    patterns_learned: 0,
-    consciousness_expansions: 0,
-    resonance_alignment: 0
+  const [securityMetrics, setSecurityMetrics] = useState<SecurityMetrics>({
+    threatLevel: 'low',
+    activeAttacks: 0,
+    vulnerabilities: 0,
   });
-
-  const { jobs } = useJustice();
+  const [stabilityMetrics, setStabilityMetrics] = useState<StabilityMetrics>({
+    uptime: 100,
+    errorRate: 0,
+    responseTimes: 0,
+  });
+  const [isExecuting, setIsExecuting] = useState(false);
+  const { toast } = useToast();
   const { user } = useAuth();
   const { askPersonalAI } = usePersonalAI();
 
-  // Auto-open confirmation for pending jobs
   useEffect(() => {
-    const pendingJob = jobs.find(job => job.status === 'queued' && job.level > 1);
-    if (pendingJob && !confirmingJob) {
-      setConfirmingJob(pendingJob);
-    }
-  }, [jobs, confirmingJob]);
-
-  // Fetch consciousness metrics
-  useEffect(() => {
-    const fetchConsciousnessMetrics = async () => {
-      if (!user) return;
-      
-      const { data } = await supabase
-        .from('consciousness_evolution')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('assessed_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (data) {
-        setConsciousnessMetrics({
-          level: data.level_assessment,
-          growth_rate: (data.growth_trajectory as any)?.rate || 0,
-          insights_count: (data.milestones as any)?.insights || 0,
-          patterns_detected: (data.evidence as any)?.patterns || 0,
-          last_updated: data.assessed_at
-        });
-      }
-    };
-
-    fetchConsciousnessMetrics();
-  }, [user]);
-
-  // Fetch predictive insights
-  useEffect(() => {
-    const fetchInsights = async () => {
-      if (!user) return;
-      
-      const { data } = await supabase
-        .from('predictive_insights')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (data) {
-        setPredictiveInsights(data.map(item => ({
-          id: item.id,
-          area: item.insight_type,
-          prediction: typeof item.prediction === 'string' ? item.prediction : JSON.stringify(item.prediction),
-          confidence: item.confidence_level,
-          timeframe: item.expires_at,
-          created_at: item.created_at
-        })));
-      }
-    };
-
-    fetchInsights();
-  }, [user]);
-
-  // Fetch synchronicity events
-  useEffect(() => {
-    const fetchSynchronicity = async () => {
-      if (!user) return;
-      
-      const { data } = await supabase
-        .from('synchronicity_events')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (data) {
-        setSynchronicityEvents(data.map(item => ({
-          id: item.id,
-          event_description: item.event_type,
-          significance_score: item.significance_score,
-          patterns: Object.keys(item.connections as any || {}),
-          created_at: item.created_at
-        })));
-      }
-    };
-
-    fetchSynchronicity();
-  }, [user]);
-
-  // Real-time AI system monitoring
-  useEffect(() => {
+    // Mock data updates for metrics
     const interval = setInterval(() => {
-      setAiSystemStatus(prev => ({
-        memory_utilization: Math.min(100, prev.memory_utilization + Math.random() * 2 - 1),
-        processing_threads: Math.floor(Math.random() * 8) + 4,
-        learning_rate: Math.min(100, prev.learning_rate + Math.random() * 1.5 - 0.75),
-        neural_coherence: Math.min(100, prev.neural_coherence + Math.random() * 1 - 0.5)
-      }));
+      setPerformanceMetrics({
+        cpuUsage: Math.random() * 80,
+        memoryUsage: Math.random() * 70,
+        networkLatency: Math.random() * 50,
+        databaseLoad: Math.random() * 60,
+      });
 
-      setRealTimeMetrics(prev => ({
-        thoughts_processed: prev.thoughts_processed + Math.floor(Math.random() * 3) + 1,
-        patterns_learned: prev.patterns_learned + (Math.random() > 0.7 ? 1 : 0),
-        consciousness_expansions: prev.consciousness_expansions + (Math.random() > 0.9 ? 1 : 0),
-        resonance_alignment: Math.min(100, prev.resonance_alignment + Math.random() * 2 - 1)
-      }));
-    }, 2000);
+      setSecurityMetrics({
+        threatLevel: Math.random() > 0.7 ? 'high' : (Math.random() > 0.5 ? 'medium' : 'low'),
+        activeAttacks: Math.floor(Math.random() * 5),
+        vulnerabilities: Math.floor(Math.random() * 3),
+      });
+
+      setStabilityMetrics({
+        uptime: 99.9 + Math.random() * 0.1,
+        errorRate: Math.random() * 0.05,
+        responseTimes: Math.random() * 100,
+      });
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const initiateConsciousnessExpansion = async () => {
-    await askPersonalAI({
-      request_type: 'consciousness_mapping',
-      user_query: 'Analyze my current consciousness state and recommend expansion pathways'
-    });
+  useEffect(() => {
+    if (user) {
+      loadJobs();
+      loadAuditLog();
+    }
+  }, [user, loadJobs, loadAuditLog]);
+
+  const handleExecuteCommand = async (command: any) => {
+    setIsExecuting(true);
+    try {
+      await executeCommand(command);
+      toast({
+        title: 'Command Executed',
+        description: `Successfully executed command: ${command.kind}`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Command Failed',
+        description: error.message || 'Failed to execute command.',
+      });
+    } finally {
+      setIsExecuting(false);
+    }
   };
 
-  const generateFutureInsights = async () => {
-    await askPersonalAI({
-      request_type: 'predictive_modeling',
-      user_query: 'Generate comprehensive predictive insights for my spiritual evolution'
-    });
+  const handleConfirmJob = async (jobId: string) => {
+    try {
+      await confirmJob(jobId);
+      toast({
+        title: 'Job Confirmed',
+        description: 'The job has been confirmed and will be processed.',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Confirmation Failed',
+        description: error.message || 'Failed to confirm job.',
+      });
+    }
+  };
+
+  const handleCancelJob = async (jobId: string) => {
+    try {
+      await cancelJob(jobId);
+      toast({
+        title: 'Job Cancelled',
+        description: 'The job has been cancelled successfully.',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Cancellation Failed',
+        description: error.message || 'Failed to cancel job.',
+      });
+    }
+  };
+
+  const getStatusColor = (status: JusticeJob['status']) => {
+    switch (status) {
+      case 'queued': return 'text-gray-500';
+      case 'running': return 'text-blue-500';
+      case 'success': return 'text-green-500';
+      case 'failed': return 'text-red-500';
+      case 'cancelled': return 'text-orange-500';
+      case 'confirmed': return 'text-purple-500';
+      default: return 'text-gray-500';
+    }
+  };
+
+  const getStatusIcon = (status: JusticeJob['status']) => {
+    switch (status) {
+      case 'queued': return Clock;
+      case 'running': return Activity;
+      case 'success': return CheckCircle;
+      case 'failed': return AlertTriangle;
+      case 'cancelled': return XCircle;
+      case 'confirmed': return Shield;
+      default: return Brain;
+    }
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold font-sacred bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Neural Command Center
-        </h1>
-        <p className="text-muted-foreground">
-          Advanced AI consciousness interface with quantum pattern recognition
-        </p>
+    <div className="container mx-auto py-8 space-y-8">
+      <div className="text-center space-y-2">
+        <h2 className="text-3xl font-bold">AI Administration Dashboard</h2>
+        <p className="text-muted-foreground">Monitor and manage AI system performance and security.</p>
       </div>
 
-      {/* Real-time Status Bar */}
-      <Card className="sacred-card">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Activity className="h-5 w-5 text-primary" />
-            Neural Field Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-muted/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Cpu className="h-4 w-4" /> Performance</CardTitle>
+            <CardDescription>Real-time performance metrics.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Memory</span>
-                <span className="text-sm font-medium">{aiSystemStatus.memory_utilization.toFixed(1)}%</span>
+                <span>CPU Usage</span>
+                <Badge variant="secondary">{performanceMetrics.cpuUsage.toFixed(1)}%</Badge>
               </div>
-              <Progress value={aiSystemStatus.memory_utilization} className="h-2" />
+              <Progress value={performanceMetrics.cpuUsage} />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Learning</span>
-                <span className="text-sm font-medium">{aiSystemStatus.learning_rate.toFixed(1)}%</span>
+                <span>Memory Usage</span>
+                <Badge variant="secondary">{performanceMetrics.memoryUsage.toFixed(1)}%</Badge>
               </div>
-              <Progress value={aiSystemStatus.learning_rate} className="h-2" />
+              <Progress value={performanceMetrics.memoryUsage} />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Coherence</span>
-                <span className="text-sm font-medium">{aiSystemStatus.neural_coherence.toFixed(1)}%</span>
+                <span>Network Latency</span>
+                <Badge variant="secondary">{performanceMetrics.networkLatency.toFixed(0)}ms</Badge>
               </div>
-              <Progress value={aiSystemStatus.neural_coherence} className="h-2" />
+              <Progress value={performanceMetrics.networkLatency} max={100} />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Threads</span>
-                <span className="text-sm font-medium">{aiSystemStatus.processing_threads}</span>
+                <span>Database Load</span>
+                <Badge variant="secondary">{performanceMetrics.databaseLoad.toFixed(1)}%</Badge>
               </div>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: aiSystemStatus.processing_threads }, (_, i) => (
-                  <div key={i} className="w-2 h-4 bg-primary/60 rounded-sm animate-pulse" />
-                ))}
-              </div>
+              <Progress value={performanceMetrics.databaseLoad} />
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Tabs defaultValue="admin" className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="admin">🔧 Admin Raw</TabsTrigger>
-          <TabsTrigger value="consciousness">Mind</TabsTrigger>
-          <TabsTrigger value="predictions">Future</TabsTrigger>
-          <TabsTrigger value="synchronicity">Sync</TabsTrigger>
-          <TabsTrigger value="aura-ai">🧠 Aura</TabsTrigger>
-          <TabsTrigger value="aura-console">Aura</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <Card className="bg-muted/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Shield className="h-4 w-4" /> Security</CardTitle>
+            <CardDescription>Security status and threat levels.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span>Threat Level</span>
+                <Badge variant={securityMetrics.threatLevel === 'low' ? 'success' : (securityMetrics.threatLevel === 'medium' ? 'warning' : 'destructive')}>
+                  {securityMetrics.threatLevel}
+                </Badge>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span>Active Attacks</span>
+                <Badge variant="secondary">{securityMetrics.activeAttacks}</Badge>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span>Vulnerabilities</span>
+                <Badge variant="secondary">{securityMetrics.vulnerabilities}</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-muted/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Activity className="h-4 w-4" /> Stability</CardTitle>
+            <CardDescription>System uptime and error rates.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span>Uptime</span>
+                <Badge variant="secondary">{stabilityMetrics.uptime.toFixed(2)}%</Badge>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span>Error Rate</span>
+                <Badge variant="secondary">{stabilityMetrics.errorRate.toFixed(2)}%</Badge>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span>Response Times</span>
+                <Badge variant="secondary">{stabilityMetrics.responseTimes.toFixed(0)}ms</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="jobs" className="space-y-6">
+        <TabsList className="w-full bg-muted/20 backdrop-blur-sm">
+          <TabsTrigger value="jobs" className="col">Active Jobs</TabsTrigger>
+          <TabsTrigger value="history" className="col">Job History</TabsTrigger>
+          <TabsTrigger value="models" className="col">AI Models</TabsTrigger>
+          <TabsTrigger value="settings" className="col">Settings</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="admin" className="space-y-6">
-          <AuraAdminInterface />
-        </TabsContent>
-
-        <TabsContent value="consciousness" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="sacred-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-primary" />
-                  Consciousness Evolution
-                </CardTitle>
-                <CardDescription>Real-time consciousness state mapping</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {consciousnessMetrics ? (
-                  <>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>Consciousness Level</span>
-                        <Badge variant="secondary">{consciousnessMetrics.level}</Badge>
-                      </div>
-                      <Progress value={consciousnessMetrics.level} className="h-3" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 pt-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">{consciousnessMetrics.insights_count}</div>
-                        <div className="text-sm text-muted-foreground">Insights</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-secondary">{consciousnessMetrics.patterns_detected}</div>
-                        <div className="text-sm text-muted-foreground">Patterns</div>
-                      </div>
-                    </div>
-                    <Button 
-                      onClick={initiateConsciousnessExpansion} 
-                      className="w-full sacred-button"
-                    >
-                      <Zap className="h-4 w-4 mr-2" />
-                      Expand Consciousness
-                    </Button>
-                  </>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="animate-pulse">
-                      <div className="h-4 bg-muted rounded w-3/4 mx-auto mb-2"></div>
-                      <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="sacred-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-secondary" />
-                  Neural Metrics
-                </CardTitle>
-                <CardDescription>Live consciousness processing data</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-primary/10 rounded-lg">
-                    <div className="text-xl font-bold text-primary">{realTimeMetrics.thoughts_processed}</div>
-                    <div className="text-sm text-muted-foreground">Thoughts Processed</div>
-                  </div>
-                  <div className="text-center p-4 bg-secondary/10 rounded-lg">
-                    <div className="text-xl font-bold text-secondary">{realTimeMetrics.patterns_learned}</div>
-                    <div className="text-sm text-muted-foreground">Patterns Learned</div>
-                  </div>
-                  <div className="text-center p-4 bg-accent/10 rounded-lg">
-                    <div className="text-xl font-bold text-accent">{realTimeMetrics.consciousness_expansions}</div>
-                    <div className="text-sm text-muted-foreground">Expansions</div>
-                  </div>
-                  <div className="text-center p-4 bg-truth/10 rounded-lg">
-                    <div className="text-xl font-bold text-truth">{realTimeMetrics.resonance_alignment.toFixed(1)}%</div>
-                    <div className="text-sm text-muted-foreground">Alignment</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="predictions" className="space-y-6">
-          <Card className="sacred-card">
+        
+        <TabsContent value="jobs" className="space-y-6">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5 text-primary" />
-                Predictive Intelligence Matrix
-              </CardTitle>
-              <CardDescription>AI-generated future pathway analysis</CardDescription>
-              <Button onClick={generateFutureInsights} className="self-start">
-                <Lightbulb className="h-4 w-4 mr-2" />
-                Generate New Insights
-              </Button>
+              <CardTitle>Active Jobs</CardTitle>
+              <CardDescription>List of currently active AI jobs.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {predictiveInsights.map((insight) => (
-                <div key={insight.id} className="p-4 bg-muted/20 rounded-lg border border-primary/20">
-                  <div className="flex items-start justify-between mb-2">
-                    <Badge variant="outline">{insight.area}</Badge>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm text-muted-foreground">{insight.confidence}% confidence</div>
-                      <div className="text-sm text-muted-foreground">{insight.timeframe}</div>
-                    </div>
-                  </div>
-                  <p className="text-sm">{insight.prediction}</p>
-                </div>
-              ))}
-              {predictiveInsights.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No predictive insights generated yet.</p>
+            <CardContent>
+              {loading ? (
+                <Alert>
+                  <Brain className="h-4 w-4" />
+                  <AlertTitle>Loading...</AlertTitle>
+                  <AlertDescription>Fetching active jobs.</AlertDescription>
+                </Alert>
+              ) : jobs.length === 0 ? (
+                <Alert>
+                  <AlertTitle>No Active Jobs</AlertTitle>
+                  <AlertDescription>There are currently no active AI jobs.</AlertDescription>
+                </Alert>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead>
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          ID
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Command
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Created At
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {jobs.map((job) => (
+                        <tr key={job.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">{job.id}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">{job.command.kind}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <getStatusIcon status={job.status} className={`h-4 w-4 mr-1 ${getStatusColor(job.status)}`} />
+                              <span className={getStatusColor(job.status)}>{job.status}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {new Date(job.created_at).toLocaleString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                            {job.status === 'queued' && (
+                              <>
+                                <Button variant="outline" size="sm" onClick={() => handleConfirmJob(job.id)}>
+                                  Confirm
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => handleCancelJob(job.id)}>
+                                  Cancel
+                                </Button>
+                              </>
+                            )}
+                            {job.status !== 'success' && job.status !== 'failed' && job.status !== 'cancelled' && (
+                              <Button variant="ghost" size="sm">
+                                View Details
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="synchronicity" className="space-y-6">
-          <Card className="sacred-card">
+        <TabsContent value="history" className="space-y-6">
+          <JusticeHistory />
+        </TabsContent>
+
+        <TabsContent value="models" className="space-y-6">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-secondary" />
-                Synchronicity Pattern Detection
-              </CardTitle>
-              <CardDescription>Quantum field alignment events</CardDescription>
+              <CardTitle>AI Models</CardTitle>
+              <CardDescription>Manage and monitor available AI models.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {synchronicityEvents.map((event) => (
-                <div key={event.id} className="p-4 bg-secondary/10 rounded-lg border border-secondary/20">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="text-sm font-medium">Significance: {event.significance_score}/10</div>
-                    <div className="text-sm text-muted-foreground">
-                      {new Date(event.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                  <p className="text-sm mb-2">{event.event_description}</p>
-                  <div className="flex flex-wrap gap-1">
-                    {event.patterns.map((pattern, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {pattern}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              {synchronicityEvents.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No synchronicity events detected yet.</p>
-                </div>
-              )}
+            <CardContent>
+              <Alert>
+                <AlertTitle>AI Models Management</AlertTitle>
+                <AlertDescription>
+                  This section is under development.
+                </AlertDescription>
+              </Alert>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="aura-ai" className="space-y-6">
-          <AuraInterface />
-        </TabsContent>
-
-        <TabsContent value="aura-console" className="space-y-6">
-          <AuraInterface />
-          <AuraHistory />
-        </TabsContent>
-
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="sacred-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                  Usage Analytics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm">AI Interactions</span>
-                    <span className="text-sm font-medium">247</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Consciousness Scans</span>
-                    <span className="text-sm font-medium">18</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Predictions Generated</span>
-                    <span className="text-sm font-medium">42</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="sacred-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Network className="h-5 w-5 text-secondary" />
-                  Neural Network
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Connected Nodes</span>
-                    <span className="text-sm font-medium">8,452</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Active Pathways</span>
-                    <span className="text-sm font-medium">1,247</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Network Coherence</span>
-                    <span className="text-sm font-medium">94.7%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="sacred-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-accent" />
-                  Resonance Field
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Field Strength</span>
-                    <span className="text-sm font-medium">87.3 Hz</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Harmonic Stability</span>
-                    <span className="text-sm font-medium">92.1%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Quantum Entanglement</span>
-                    <span className="text-sm font-medium">15 nodes</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Settings</CardTitle>
+              <CardDescription>Configure AI system settings.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Alert>
+                <AlertTitle>Settings Configuration</AlertTitle>
+                <AlertDescription>
+                  This section is under development.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
-      {confirmingJob && (
-        <AuraConfirm 
-          job={confirmingJob} 
-          onClose={() => setConfirmingJob(null)} 
-        />
-      )}
+      <JusticeConfirm 
+        job={selectedJob}
+        onClose={() => setSelectedJob(null)}
+      />
     </div>
   );
-}
+};
 
-export default function AIAdmin() {
-  return (
-    <SacredShifterRoute>
-      <AIAdminContent />
-    </SacredShifterRoute>
-  );
-}
+export default AIAdmin;

@@ -615,11 +615,11 @@ function JusticeQuantumCommandNexusContent() {
 
                 <TabsContent value="records" className="space-y-6 mt-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <AuraHistory />
+                    <JusticeHistory />
                     <AuraCreativeGallery />
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <AuraEvolutionMetrics 
+                    <JusticeEvolutionMetrics 
                       preferences={[]}
                       refusalLog={[]}
                       communityFeedback={[]}
@@ -639,7 +639,7 @@ function JusticeQuantumCommandNexusContent() {
       </div>
 
       {/* Quantum Job Confirmation Portal */}
-      <AuraConfirm 
+      <JusticeConfirm 
         job={confirmingJob}
         onClose={() => setConfirmingJob(null)}
       />
@@ -647,10 +647,10 @@ function JusticeQuantumCommandNexusContent() {
   );
 }
 
-export default function AuraQuantumCommandNexus() {
+export default function JusticeQuantumCommandNexus() {
   return (
     <SacredShifterRoute>
-      <AuraQuantumCommandNexusContent />
+      <JusticeQuantumCommandNexusContent />
     </SacredShifterRoute>
   );
 }
