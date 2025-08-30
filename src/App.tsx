@@ -75,9 +75,9 @@ function App() {
                 }
                 >
                   <Route path="/" element={<Index />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
                   
                   {/* Redirects for old routes */}
-                  <Route path="/dashboard" element={<Navigate to="/" replace />} />
                   <Route path="/youtube" element={<Navigate to="/library" replace />} />
                   <Route path="/videos" element={<Navigate to="/library" replace />} />
                   
