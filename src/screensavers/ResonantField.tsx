@@ -598,40 +598,64 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
                       }}
                       className="text-center max-w-2xl"
                     >
-                      <p 
-                        className={`text-lg md:text-xl font-mystical leading-relaxed ${
-                          currentMessage.category.includes('daily_') || 
+                      <div className="relative">
+                        {/* Enhanced background for daily messages */}
+                        {(currentMessage.category.includes('daily_') || 
                           currentMessage.category === 'progress_celebration' ||
                           currentMessage.category === 'morning_encouragement' ||
-                          currentMessage.category === 'evening_reflection'
-                            ? 'text-white/90' 
-                            : 'text-white/80'
-                        }`}
-                        style={{
-                          textShadow: currentMessage.category.includes('daily_') || 
-                                    currentMessage.category === 'progress_celebration'
-                            ? `0 0 20px rgba(0, 0, 0, 1),
-                               0 2px 8px rgba(0, 0, 0, 1),
-                               0 0 30px rgba(189, 147, 249, 0.6)`
-                            : `0 0 15px rgba(0, 0, 0, 1),
-                               0 2px 8px rgba(0, 0, 0, 1),
-                               0 0 25px rgba(189, 147, 249, 0.4)`
-                        }}
-                      >
-                        {currentMessage.text}
-                      </p>
+                          currentMessage.category === 'evening_reflection') && (
+                          <div 
+                            className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/15 to-teal-500/20 rounded-2xl blur-lg"
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                        )}
+                        
+                        <p 
+                          className={`relative text-xl md:text-2xl font-mystical leading-relaxed ${
+                            currentMessage.category.includes('daily_') || 
+                            currentMessage.category === 'progress_celebration' ||
+                            currentMessage.category === 'morning_encouragement' ||
+                            currentMessage.category === 'evening_reflection'
+                              ? 'text-white font-bold' 
+                              : 'text-white/85'
+                          }`}
+                          style={{
+                            textShadow: currentMessage.category.includes('daily_') || 
+                                      currentMessage.category === 'progress_celebration'
+                              ? `0 0 25px rgba(0, 0, 0, 1),
+                                 0 4px 12px rgba(0, 0, 0, 1),
+                                 0 0 40px rgba(147, 51, 234, 0.8),
+                                 0 0 60px rgba(59, 130, 246, 0.4)`
+                              : `0 0 20px rgba(0, 0, 0, 1),
+                                 0 2px 8px rgba(0, 0, 0, 1),
+                                 0 0 30px rgba(189, 147, 249, 0.5)`
+                          }}
+                        >
+                          {currentMessage.text}
+                        </p>
+                      </div>
                       
                       {/* Enhanced category indicator for daily messages */}
-                      <div className="mt-3 opacity-60">
+                      <div className="mt-4 opacity-80">
                         {currentMessage.category.includes('daily_') || 
-                         currentMessage.category === 'progress_celebration' ? (
-                          <div className="flex items-center justify-center space-x-2">
-                            <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-purple-400/60 to-transparent" />
-                            <div className="w-1.5 h-1.5 rounded-full bg-purple-400/60 animate-pulse" />
-                            <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-purple-400/60 to-transparent" />
-                          </div>
+                         currentMessage.category === 'progress_celebration' ||
+                         currentMessage.category === 'morning_encouragement' ||
+                         currentMessage.category === 'evening_reflection' ? (
+                          <motion.div 
+                            className="flex items-center justify-center space-x-3"
+                            animate={{ scale: [1, 1.05, 1] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          >
+                            <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-purple-400/40" />
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                              <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                            </div>
+                            <div className="w-12 h-0.5 bg-gradient-to-l from-transparent via-teal-400 to-teal-400/40" />
+                          </motion.div>
                         ) : (
-                          <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-white/50 to-transparent mx-auto" />
+                          <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-white/50 to-transparent mx-auto" />
                         )}
                       </div>
                     </motion.div>
@@ -643,17 +667,17 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
         </div>
       </div>
       
-      {/* Daily Routine Nudge */}
+      {/* Enhanced Daily Routine Nudge */}
       <DailyNudge isVisible={true} />
       
-      {/* Subtle hint */}
+      {/* Refined hint */}
       <motion.div 
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-4 left-1/2 -translate-x-1/2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5, duration: 0.8 }}
+        transition={{ delay: 2.0, duration: 0.8 }}
       >
-        <p className="text-sm text-white/60 text-center">Touch or press ESC to return</p>
+        <p className="text-xs text-white/50 text-center">Touch or press ESC to return</p>
       </motion.div>
     </motion.div>
   );
