@@ -96,19 +96,20 @@ export function AppSidebar() {
 
   return (
     <Sidebar 
-      className={`${isCollapsed ? "w-16" : "w-64"} min-h-screen border-r border-border/30`} 
+      className={`${isCollapsed ? "w-16" : "w-64"} h-screen border-r border-border/30`} 
       collapsible="icon" 
       data-tour="navigation-sidebar"
     >
-      <SidebarContent className="bg-background/20 backdrop-blur-sm overflow-visible sidebar-no-scrollbar">
-        {navigationGroups.map((group) => {          
-          return (
-            <SidebarGroup 
-              key={group.id}
-            >
-              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
+      <SidebarContent className="bg-background/20 backdrop-blur-sm h-full flex flex-col overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
+          {navigationGroups.map((group) => {          
+            return (
+              <SidebarGroup 
+                key={group.id}
+              >
+                <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
                   {group.children.map((item) => {
                     const isItemActive = isActive(item.path || "");
                     
@@ -166,11 +167,12 @@ export function AppSidebar() {
               </SidebarGroupContent>
             </SidebarGroup>
           );
-        })}
+          })}
+        </div>
 
         {/* User Info */}
         {user && !isCollapsed && (
-          <div className="mt-auto p-4 border-t" data-tour="profile-section">
+          <div className="mt-auto p-4 border-t flex-shrink-0" data-tour="profile-section">
             <div className="flex items-center space-x-3">
               <Avatar className="w-8 h-8">
                 <AvatarImage src={userProfile?.avatar_url || ""} />
