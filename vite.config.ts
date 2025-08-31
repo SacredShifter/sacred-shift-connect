@@ -2,13 +2,11 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react-swc'
 import path from "path"
 import { sentryVitePlugin } from "@sentry/vite-plugin";
-import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
+// Sacred Shifter development configuration
 export default defineConfig(({ mode }) => {
   const plugins = [
     react(),
-    componentTagger(),
   ];
 
   // Only add Sentry plugin in production with auth token

@@ -91,7 +91,7 @@ export default function Correspondence() {
   return (
     <div className="w-screen h-screen relative">
       <Canvas>
-        <color attach="background" args={["#0b0c10"]} />
+        <color args={["#0b0c10"]} />
         <ambientLight intensity={0.6} />
         <Scene progress={progress} showPhi={showPhi} showBranching={showBranching} />
       </Canvas>

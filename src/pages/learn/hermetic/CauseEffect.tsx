@@ -70,7 +70,7 @@ export default function CauseEffect() {
   return (
     <div className="w-screen h-screen relative">
       <Canvas camera={{ position: [0, 0, 8] }}>
-        <color attach="background" args={["#0b0c10"]} />
+        <color args={["#0b0c10"]} />
         <SceneContent />
       </Canvas>
       <div className="absolute top-4 left-4 space-y-2 bg-black/50 p-4 rounded-lg w-96 border border-white/10">

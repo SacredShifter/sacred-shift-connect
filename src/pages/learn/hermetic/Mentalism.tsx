@@ -84,7 +84,7 @@ export default function Mentalism(){
   return (
     <div className="w-screen h-screen relative">
       <Canvas camera={{ position:[0,0,4] }}>
-        <color attach="background" args={["#0b0c10"]} />
+        <color args={["#0b0c10"]} />
         <ambientLight intensity={0.6}/>
         <Lattice coherence={coherence} />
       </Canvas>

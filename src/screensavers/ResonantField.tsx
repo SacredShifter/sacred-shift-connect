@@ -337,7 +337,7 @@ const Scene: React.FC<{ safeRadius: number; particleCount: number }> = ({
   
   return (
     <>
-      <color attach="background" args={['#0a0f1c']} />
+      <color args={['#0a0f1c']} />
       
       {/* Background gradient effect */}
       <ambientLight intensity={0.1} />

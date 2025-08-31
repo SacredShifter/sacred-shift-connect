@@ -246,7 +246,7 @@ export default function HermeticAtrium(){
   return (
     <div className="w-screen h-screen relative">
       <Canvas camera={{ position: [0, 2, 8], fov: 60 }}>
-        <color attach="background" args={["hsl(var(--background))"]} />
+        <color args={["hsl(var(--background))"]} />
         <ambientLight intensity={0.3} />
         <directionalLight position={[3, 5, 2]} intensity={1.2} color="#ffffff" />
         <pointLight position={[0, 5, 0]} intensity={0.5} color="#8b5cf6" />

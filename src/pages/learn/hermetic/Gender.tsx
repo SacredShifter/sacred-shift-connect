@@ -65,7 +65,7 @@ export default function Gender() {
   return (
     <div className="w-screen h-screen relative">
       <Canvas camera={{ position: [0, 0, 5] }}>
-        <color attach="background" args={["#0b0c10"]} />
+        <color args={["#0b0c10"]} />
         <SceneContent will={will} receptivity={receptivity} />
       </Canvas>
       <div className="absolute top-4 left-4 space-y-2 bg-black/50 p-4 rounded-lg w-96 border border-white/10">
