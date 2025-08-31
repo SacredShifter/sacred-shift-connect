@@ -5,6 +5,7 @@ import { Users, User, BookOpen, Sparkles, ChevronDown, ChevronUp } from 'lucide-
 import { CodexConstellation } from '@/components/Codex/CodexConstellation';
 import { CodexList } from '@/components/Codex/CodexList';
 import { CollectiveCodexConstellation } from '@/components/CollectiveAkashicConstellation/CollectiveCodexConstellation';
+import { CollectiveCodexList } from '@/components/CollectiveCodex/CollectiveCodexList';
 import { useRegistryOfResonance } from '@/hooks/useRegistryOfResonance';
 import { SacredInitiationTest } from '@/components/SacredInitiationTest';
 import { TeachingLayer } from '@/components/TeachingLayer';
@@ -81,20 +82,29 @@ export default function Codex() {
                 Collective Sacred Codex
               </CardTitle>
               <CardDescription>
-                Explore the shared wisdom of the Sacred Shifter community. Discover insights, teachings, 
-                and revelations contributed by fellow travelers on the path of awakening.
+                Explore and contribute to the shared wisdom of the Sacred Shifter community. Create, edit, 
+                and discover collective insights, teachings, and revelations.
               </CardDescription>
             </CardHeader>
           </Card>
 
-          <div className="min-h-[600px]">
-            <CollectiveCodexConstellation 
-              entries={collectiveEntries || []}
-              onEntryClick={(entry) => {
-                // Navigate to entry detail or open modal
-                console.log('Collective entry clicked:', entry);
-              }}
-            />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Constellation View</h3>
+              <div className="min-h-[400px]">
+                <CollectiveCodexConstellation 
+                  entries={collectiveEntries || []}
+                  onEntryClick={(entry) => {
+                    console.log('Collective entry clicked:', entry);
+                  }}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">List View</h3>
+              <CollectiveCodexList />
+            </div>
           </div>
         </TabsContent>
 
