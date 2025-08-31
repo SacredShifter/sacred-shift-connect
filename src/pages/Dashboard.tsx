@@ -20,7 +20,8 @@ import {
   Plus,
   User,
   Settings as SettingsIcon,
-  BarChart3
+  BarChart3,
+  Waves
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardMetrics } from '@/components/Dashboard/DashboardMetrics';
@@ -39,6 +40,7 @@ import { DailyResonanceWeather } from '@/components/dashboard/DailyResonanceWeat
 import { CommunityMirrorPulse } from '@/components/dashboard/CommunityMirrorPulse';
 import { GlowWrapper } from '@/components/dashboard/GlowWrapper';
 import { GAAControlPanel } from '@/components/dashboard/GAAControlPanel';
+import { GAADashboard } from '@/components/gaa/GAADashboard';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -113,10 +115,14 @@ const Dashboard = () => {
 
         {/* Tabbed Interface */}
         <Tabs defaultValue="journey" className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 mb-8">
             <TabsTrigger value="journey" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Journey
+            </TabsTrigger>
+            <TabsTrigger value="gaa" className="flex items-center gap-2">
+              <Waves className="w-4 h-4" />
+              GAA Engine
             </TabsTrigger>
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="w-4 h-4" />
@@ -303,6 +309,11 @@ const Dashboard = () => {
                 <CommunityMirrorPulse />
               </GlowWrapper>
             </div>
+          </TabsContent>
+
+          {/* GAA Engine Tab Content */}
+          <TabsContent value="gaa" className="space-y-8">
+            <GAADashboard />
           </TabsContent>
 
           {/* Profile Tab Content */}

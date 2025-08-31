@@ -23,7 +23,8 @@ import {
   Brain,
   FlaskConical,
   FileSearch,
-  BarChart3
+  BarChart3,
+  Waves
 } from "lucide-react";
 
 export type Role = "seeker" | "creator" | "admin";
@@ -112,6 +113,13 @@ export const NAV_CONFIG: NavGroup[] = [
         icon: TreePine, 
         path: "/grove",
         tooltip: "Community rituals & ceremonies"
+      },
+      { 
+        id: "gaa", 
+        label: "GAA Engine", 
+        icon: Waves, 
+        path: "/gaa",
+        tooltip: "Geometrically Aligned Audio - Advanced consciousness harmonization technology"
       },
     ]
   },

@@ -16,7 +16,9 @@ import {
   Users,
   Brain,
   Sun,
-  Moon as MoonIcon
+  Moon as MoonIcon,
+  Info,
+  BookOpen
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useGAAEngine } from '@/hooks/useGAAEngine';
@@ -24,6 +26,7 @@ import { useEmbodiedBiofeedback } from '@/hooks/useEmbodiedBiofeedback';
 import { useCollectiveGAA } from '@/hooks/useCollectiveGAA';
 import { SessionMetrics } from './SessionMetrics';
 import { CosmicVisualization } from './CosmicVisualization';
+import { GAAInfoPanel } from './GAAInfoPanel';
 import { PolarityProtocol, TarotTradition } from '@/types/gaa-polarity';
 import { FLAGS } from '@/config/flags';
 
@@ -56,6 +59,7 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
     darkEnergyDrift: { driftRate: 0.05, expansionFactor: 1.2 }
   });
   const [sessionStartTime] = useState(Date.now());
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
 
   // Core hooks
   const gaaEngine = useGAAEngine();
@@ -129,6 +133,15 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
           <p className="text-muted-foreground">
             Geometrically Aligned Audio • Deep5 Protocol
           </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowInfoPanel(true)}
+            className="mt-3"
+          >
+            <Info className="w-4 h-4 mr-2" />
+            Learn GAA
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant={gaaEngine.isPlaying ? 'default' : 'secondary'}>
@@ -483,6 +496,12 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
           )}
         </div>
       </div>
+
+      {/* Info Panel */}
+      <GAAInfoPanel 
+        isOpen={showInfoPanel}
+        onClose={() => setShowInfoPanel(false)}
+      />
     </div>
   );
 };
