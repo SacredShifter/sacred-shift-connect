@@ -16,8 +16,13 @@ export class SacredMesh {
   private isInitialized = false;
   private messageHandlers: Set<(message: SacredMeshMessage, senderId: string) => void> = new Set();
 
-  constructor(config: MeshConfig = {}) {
+  constructor(config: Partial<MeshConfig> = {}) {
     this.config = {
+      autoMode: true,
+      maxHops: 5,
+      defaultTtl: 3600,
+      maxQueueSize: 100,
+      retryInterval: 5000,
       enableLightAdapter: false,
       enableFrequencyAdapter: false,
       enableNatureAdapter: false,
@@ -37,19 +42,19 @@ export class SacredMesh {
       
       // Initialize enabled adapters
       if (this.config.enableLightAdapter) {
-        await this.initializeAdapter('light');
+        await this.initializeAdapter(TransportType.LIGHT);
       }
       
       if (this.config.enableFrequencyAdapter) {
-        await this.initializeAdapter('frequency');
+        await this.initializeAdapter(TransportType.FREQUENCY);
       }
       
       if (this.config.enableNatureAdapter) {
-        await this.initializeAdapter('nature');
+        await this.initializeAdapter(TransportType.NATURE);
       }
       
       // Always enable file adapter as fallback
-      await this.initializeAdapter('file');
+      await this.initializeAdapter(TransportType.FILE);
       
       this.isInitialized = true;
       console.log('🌟 Sacred Mesh initialized successfully');
@@ -72,13 +77,13 @@ export class SacredMesh {
 
   private async createAdapter(type: TransportType): Promise<TransportAdapter> {
     switch (type) {
-      case 'light':
+      case TransportType.LIGHT:
         return new LightAdapter();
-      case 'frequency':
+      case TransportType.FREQUENCY:
         return new FrequencyAdapter();
-      case 'nature':
+      case TransportType.NATURE:
         return new NatureAdapter();
-      case 'file':
+      case TransportType.FILE:
         return new FileAdapter();
       default:
         throw new Error(`Unknown adapter type: ${type}`);
@@ -131,11 +136,16 @@ export class SacredMesh {
 
   async getStatus(): Promise<MeshStatus> {
     const transports: Record<TransportType, boolean> = {
-      light: false,
-      frequency: false,
-      nature: false,
-      quantum: false,
-      file: false
+      [TransportType.WEBSOCKET]: false,
+      [TransportType.MULTIPEER]: false,
+      [TransportType.WIFI_AWARE]: false,
+      [TransportType.BLUETOOTH_LE]: false,
+      [TransportType.MESHTASTIC]: false,
+      [TransportType.LIGHT]: false,
+      [TransportType.FREQUENCY]: false,
+      [TransportType.NATURE]: false,
+      [TransportType.QUANTUM]: false,
+      [TransportType.FILE]: false
     };
 
     this.adapters.forEach((adapter, type) => {
@@ -164,7 +174,7 @@ export class SacredMesh {
 
 // Basic adapter implementations
 class LightAdapter implements TransportAdapter {
-  type: TransportType = 'light';
+  type: TransportType = TransportType.LIGHT;
   private active = false;
 
   async initialize(): Promise<void> {
@@ -192,7 +202,7 @@ class LightAdapter implements TransportAdapter {
 }
 
 class FrequencyAdapter implements TransportAdapter {
-  type: TransportType = 'frequency';
+  type: TransportType = TransportType.FREQUENCY;
   private active = false;
 
   async initialize(): Promise<void> {
@@ -202,7 +212,7 @@ class FrequencyAdapter implements TransportAdapter {
 
   async send(message: SacredMeshMessage): Promise<void> {
     // Encode as frequency patterns
-    console.log('🌟 Sending via frequency patterns:', message.resonancePattern);
+    console.log('🌟 Sending via frequency patterns:', message.resonancePattern || 'default-pattern');
   }
 
   async receive(): Promise<SacredMeshMessage | null> {
@@ -219,7 +229,7 @@ class FrequencyAdapter implements TransportAdapter {
 }
 
 class NatureAdapter implements TransportAdapter {
-  type: TransportType = 'nature';
+  type: TransportType = TransportType.NATURE;
   private active = false;
 
   async initialize(): Promise<void> {
@@ -228,7 +238,7 @@ class NatureAdapter implements TransportAdapter {
   }
 
   async send(message: SacredMeshMessage): Promise<void> {
-    console.log('🌟 Sending via nature patterns:', message.intentionVector);
+    console.log('🌟 Sending via nature patterns:', message.intentionVector || 'default-vector');
   }
 
   async receive(): Promise<SacredMeshMessage | null> {
@@ -245,7 +255,7 @@ class NatureAdapter implements TransportAdapter {
 }
 
 class FileAdapter implements TransportAdapter {
-  type: TransportType = 'file';
+  type: TransportType = TransportType.FILE;
   private active = false;
 
   async initialize(): Promise<void> {
