@@ -50,7 +50,14 @@ export const VideoCallModal: React.FC<VideoCallModalProps> = ({
   // Setup local video stream
   useEffect(() => {
     if (localVideoRef.current && localStream) {
+      console.log('Setting up local video stream', localStream);
+      console.log('Video tracks:', localStream.getVideoTracks());
       localVideoRef.current.srcObject = localStream;
+      
+      // Ensure video plays
+      localVideoRef.current.play().catch(error => {
+        console.error('Error playing local video:', error);
+      });
     }
   }, [localStream]);
 
@@ -67,14 +74,35 @@ export const VideoCallModal: React.FC<VideoCallModalProps> = ({
       const videoTrack = localStream.getVideoTracks()[0];
       const audioTrack = localStream.getAudioTracks()[0];
       
-      setIsVideoEnabled(videoTrack?.enabled ?? false);
-      setIsAudioEnabled(audioTrack?.enabled ?? false);
+      // Update video enabled state based on track existence and enabled status
+      setIsVideoEnabled(videoTrack ? videoTrack.enabled : false);
+      setIsAudioEnabled(audioTrack ? audioTrack.enabled : false);
+
+      console.log('Video track found:', !!videoTrack);
+      console.log('Video track enabled:', videoTrack?.enabled);
+      console.log('Audio track found:', !!audioTrack);
+      console.log('Audio track enabled:', audioTrack?.enabled);
+    } else {
+      setIsVideoEnabled(false);
+      setIsAudioEnabled(false);
+      console.log('No local stream available');
     }
   }, [localStream]);
 
   const handleToggleVideo = () => {
+    console.log('Toggling video, current state:', isVideoEnabled);
     onToggleVideo();
-    setIsVideoEnabled(!isVideoEnabled);
+    
+    // Update state immediately, then sync with actual track state
+    setTimeout(() => {
+      if (localStream) {
+        const videoTrack = localStream.getVideoTracks()[0];
+        if (videoTrack) {
+          setIsVideoEnabled(videoTrack.enabled);
+          console.log('Video toggled, new state:', videoTrack.enabled);
+        }
+      }
+    }, 100);
   };
 
   const handleToggleAudio = () => {
@@ -162,19 +190,31 @@ export const VideoCallModal: React.FC<VideoCallModalProps> = ({
 
           {/* Local Video (Picture-in-Picture) */}
           <div className="absolute top-20 right-4 z-10 w-48 h-36 bg-black rounded-lg overflow-hidden border-2 border-white/20">
-            {localStream && isVideoEnabled ? (
-              <video
-                ref={localVideoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover transform scale-x-[-1]"
-              />
+            {localStream ? (
+              <>
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className={`w-full h-full object-cover transform scale-x-[-1] ${
+                    isVideoEnabled ? 'block' : 'hidden'
+                  }`}
+                />
+                {!isVideoEnabled && (
+                  <div className="flex items-center justify-center w-full h-full bg-gray-800">
+                    <div className="text-center text-white">
+                      <Video className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-xs opacity-70">Video Off</p>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="flex items-center justify-center w-full h-full bg-gray-800">
                 <div className="text-center text-white">
                   <Video className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-xs opacity-70">Video Off</p>
+                  <p className="text-xs opacity-70">No Stream</p>
                 </div>
               </div>
             )}
