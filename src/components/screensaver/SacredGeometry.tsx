@@ -126,22 +126,12 @@ export function FlowerOfLife({ isActive, breathPhase }: { isActive: boolean; bre
   
   return (
     <group ref={groupRef}>
-      <points material={material}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={geometry.count}
-            array={geometry.positions}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={geometry.count}
-            array={geometry.colors}
-            itemSize={3}
-          />
-        </bufferGeometry>
-      </points>
+      <points material={material} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(geometry.positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(geometry.colors, 3));
+        return geo;
+      }, [geometry.positions, geometry.colors])} />
     </group>
   );
 }
@@ -285,22 +275,12 @@ export function MerkabaField({ isActive, breathPhase }: { isActive: boolean; bre
   
   return (
     <group ref={groupRef}>
-      <points material={material}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={geometry.count}
-            array={geometry.positions}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={geometry.count}
-            array={geometry.colors}
-            itemSize={3}
-          />
-        </bufferGeometry>
-      </points>
+      <points material={material} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(geometry.positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(geometry.colors, 3));
+        return geo;
+      }, [geometry.positions, geometry.colors])} />
     </group>
   );
 }
@@ -423,22 +403,12 @@ export function TorusField({ isActive, breathPhase }: { isActive: boolean; breat
   
   return (
     <group ref={groupRef}>
-      <points material={material}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={geometry.count}
-            array={geometry.positions}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={geometry.count}
-            array={geometry.colors}
-            itemSize={3}
-          />
-        </bufferGeometry>
-      </points>
+      <points material={material} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(geometry.positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(geometry.colors, 3));
+        return geo;
+      }, [geometry.positions, geometry.colors])} />
     </group>
   );
 }

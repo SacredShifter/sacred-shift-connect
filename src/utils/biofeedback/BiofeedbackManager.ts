@@ -47,21 +47,24 @@ export class BiofeedbackManager {
    * Initialize Web Serial for direct device connection
    */
   private async initializeWebSerial(): Promise<void> {
-    if ('serial' in navigator) {
-      try {
+    try {
+      // Check if serial API is available and allowed
+      if ('serial' in navigator && typeof (navigator as any).serial !== 'undefined') {
         // Listen for device connections
-        (navigator as any).serial.addEventListener('connect', (event: any) => {
+        (navigator as any).serial?.addEventListener('connect', (event: any) => {
           console.log('Serial device connected:', event);
           this.handleDeviceConnection(event.target);
         });
 
-        (navigator as any).serial.addEventListener('disconnect', (event: any) => {
+        (navigator as any).serial?.addEventListener('disconnect', (event: any) => {
           console.log('Serial device disconnected:', event);
           this.handleDeviceDisconnection(event.target);
         });
-      } catch (error) {
-        console.warn('Web Serial not available:', error);
+      } else {
+        console.log('Web Serial API not available in this environment');
       }
+    } catch (error) {
+      console.log('Web Serial initialization skipped:', error.message || error);
     }
   }
 

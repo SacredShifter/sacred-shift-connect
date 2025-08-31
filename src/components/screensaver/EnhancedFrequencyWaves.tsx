@@ -190,27 +190,12 @@ export function EnhancedFrequencyWaves({
   });
   
   return (
-    <points ref={particlesRef} material={material}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleData.count}
-          array={particleData.positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          count={particleData.count}
-          array={particleData.colors}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-phase"
-          count={particleData.count}
-          array={particleData.phases}
-          itemSize={1}
-        />
-      </bufferGeometry>
-    </points>
+    <points ref={particlesRef} material={material} geometry={useMemo(() => {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(particleData.positions, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(particleData.colors, 3));
+      geo.setAttribute('phase', new THREE.BufferAttribute(particleData.phases, 1));
+      return geo;
+    }, [particleData.positions, particleData.colors, particleData.phases])} />
   );
 }

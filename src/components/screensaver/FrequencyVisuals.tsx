@@ -564,22 +564,12 @@ function HeartOpening({ isActive }: { isActive: boolean }) {
   return (
     <group ref={groupRef}>
       {/* Enhanced Heart Particles */}
-      <points material={heartMaterial}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={heartPoints.length / 3}
-            array={heartPoints}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={heartColors.length / 3}
-            array={heartColors}
-            itemSize={3}
-          />
-        </bufferGeometry>
-      </points>
+      <points material={heartMaterial} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(heartPoints, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(heartColors, 3));
+        return geo;
+      }, [heartPoints, heartColors])} />
       
       {/* Heart Energy Aura */}
       <mesh ref={glowRef} material={glowMaterial} scale={[2, 2, 0.5]}>
@@ -735,21 +725,12 @@ function EnhancedChakraOrb({ position, color, isActive, delay, chakraIndex }: {
       </mesh>
       
       {/* Chakra Particles */}
-      <points ref={particlesRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={particles.positions.length / 3}
-            array={particles.positions}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={particles.colors.length / 3}
-            array={particles.colors}
-            itemSize={3}
-          />
-        </bufferGeometry>
+      <points ref={particlesRef} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(particles.positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(particles.colors, 3));
+        return geo;
+      }, [particles.positions, particles.colors])}>
         <pointsMaterial
           size={0.03}
           vertexColors
@@ -925,28 +906,13 @@ function GalaxyMind({ isActive }: { isActive: boolean }) {
       </mesh>
       
       {/* Enhanced Spiral Galaxy */}
-      <points ref={spiralRef} material={spiralMaterial}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={spiralPositions.length / 3}
-            array={spiralPositions}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={spiralColors.length / 3}
-            array={spiralColors}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-size"
-            count={spiralSizes.length}
-            array={spiralSizes}
-            itemSize={1}
-          />
-        </bufferGeometry>
-      </points>
+      <points ref={spiralRef} material={spiralMaterial} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(spiralPositions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(spiralColors, 3));
+        geo.setAttribute('size', new THREE.BufferAttribute(spiralSizes, 1));
+        return geo;
+      }, [spiralPositions, spiralColors, spiralSizes])} />
     </group>
   );
 }
