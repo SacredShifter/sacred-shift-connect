@@ -32,7 +32,7 @@ export function CollectiveCodexList() {
   const [verifiedFilter, setVerifiedFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
-  const [viewMode, setViewMode] = useState('collective');
+  const [isEditingMode, setIsEditingMode] = useState(false);
   const [sortField, setSortField] = useState<'created_at' | 'title' | 'entry_type' | 'resonance_rating'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [displayMode, setDisplayMode] = useState<'table' | 'grid'>('table');
@@ -112,8 +112,21 @@ export function CollectiveCodexList() {
     }
   };
 
+  const handleViewEntry = (entry) => {
+    setSelectedEntry(entry);
+    setIsEditingMode(false);
+    setIsModalOpen(true);
+  };
+
   const handleEditEntry = (entry) => {
     setSelectedEntry(entry);
+    setIsEditingMode(true);
+    setIsModalOpen(true);
+  };
+
+  const handleCreateNewEntry = () => {
+    setSelectedEntry(null);
+    setIsEditingMode(false);
     setIsModalOpen(true);
   };
 
@@ -178,7 +191,7 @@ export function CollectiveCodexList() {
           </div>
           
           <TooltipWrapper content="Contribute to the collective wisdom">
-            <Button onClick={() => setIsModalOpen(true)} className="gap-2">
+            <Button onClick={handleCreateNewEntry} className="gap-2">
               <Plus className="h-4 w-4" />
               New Entry
             </Button>
@@ -319,7 +332,7 @@ export function CollectiveCodexList() {
             <p className="text-muted-foreground mb-6">
               Be among the first to contribute to our shared wisdom repository. What sacred knowledge would you like to share?
             </p>
-            <Button onClick={() => setIsModalOpen(true)} className="gap-2">
+            <Button onClick={handleCreateNewEntry} className="gap-2">
               <Plus className="h-4 w-4" />
               Share Your First Insight
             </Button>
@@ -391,7 +404,8 @@ export function CollectiveCodexList() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03 }}
-                  className="border-border/30 hover:bg-muted/20 transition-colors"
+                  className="border-border/30 hover:bg-muted/20 transition-colors cursor-pointer"
+                  onClick={() => handleViewEntry(entry)}
                 >
                   <TableCell className="font-medium">
                     <div className="max-w-[300px]">
@@ -458,13 +472,18 @@ export function CollectiveCodexList() {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 w-8 p-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur border-border/50">
                         <DropdownMenuItem 
-                          onClick={() => setSelectedEntry(entry)}
+                          onClick={() => handleViewEntry(entry)}
                           className="cursor-pointer"
                         >
                           <Eye className="h-4 w-4 mr-2" />
@@ -510,7 +529,8 @@ export function CollectiveCodexList() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-card/50 backdrop-blur border rounded-lg p-6 hover:bg-card/70 transition-colors"
+              className="bg-card/50 backdrop-blur border rounded-lg p-6 hover:bg-card/70 transition-colors cursor-pointer"
+              onClick={() => handleViewEntry(entry)}
             >
               <div className="flex justify-between items-start mb-4">
                 <Badge variant="secondary" className="text-xs">
@@ -518,12 +538,17 @@ export function CollectiveCodexList() {
                 </Badge>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setSelectedEntry(entry)}>
+                    <DropdownMenuItem onClick={() => handleViewEntry(entry)}>
                       <Eye className="h-4 w-4 mr-2" />
                       View
                     </DropdownMenuItem>
@@ -599,11 +624,12 @@ export function CollectiveCodexList() {
         onClose={() => {
           setIsModalOpen(false);
           setSelectedEntry(null);
+          setIsEditingMode(false);
         }}
-        onSubmit={selectedEntry ? handleUpdateEntry : handleCreateEntry}
+        onSubmit={isEditingMode && selectedEntry ? handleUpdateEntry : handleCreateEntry}
         initialData={selectedEntry}
-        isEditing={!!selectedEntry}
-        onView={selectedEntry ? () => setSelectedEntry(selectedEntry) : undefined}
+        isEditing={isEditingMode}
+        onView={selectedEntry && !isEditingMode ? () => setSelectedEntry(selectedEntry) : undefined}
       />
     </div>
   );
