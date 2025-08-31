@@ -163,17 +163,25 @@ export const SessionMetrics: React.FC<SessionMetricsProps> = ({
     ];
   };
 
-  // Generate session insights
+  // Generate session insights - memoized to prevent infinite loops
   useEffect(() => {
-    if (!isActive || !biofeedbackState) return;
+    if (!isActive || !biofeedbackState) {
+      setSessionInsights([]);
+      return;
+    }
 
     const insights: string[] = [];
     
-    if (biofeedbackState.brainwaveAlpha > 0.4) {
+    // Extract stable values to avoid object reference changes
+    const alphaLevel = biofeedbackState.brainwaveAlpha || 0;
+    const hrvLevel = biofeedbackState.heartRateVariability || 0;
+    const alertCount = safetyAlerts.length;
+    
+    if (alphaLevel > 0.4) {
       insights.push('Strong alpha wave activity detected - excellent meditation state');
     }
     
-    if (biofeedbackState.heartRateVariability > 50) {
+    if (hrvLevel > 50) {
       insights.push('High heart rate variability indicates good autonomic balance');
     }
     
@@ -181,12 +189,25 @@ export const SessionMetrics: React.FC<SessionMetricsProps> = ({
       insights.push('Extended session duration - deepening practice detected');
     }
     
-    if (safetyAlerts.length === 0 && sessionDuration > 300000) {
+    if (alertCount === 0 && sessionDuration > 300000) {
       insights.push('Stable physiological state maintained throughout session');
     }
 
-    setSessionInsights(insights);
-  }, [biofeedbackState, sessionDuration, safetyAlerts, isActive]);
+    // Only update if insights actually changed
+    setSessionInsights(prev => {
+      if (prev.length !== insights.length || 
+          !prev.every((insight, index) => insight === insights[index])) {
+        return insights;
+      }
+      return prev;
+    });
+  }, [
+    isActive, 
+    biofeedbackState?.brainwaveAlpha, 
+    biofeedbackState?.heartRateVariability,
+    sessionDuration, 
+    safetyAlerts.length
+  ]);
 
   const safetyStatus = getSafetyStatus();
   const metricCards = getMetricCards();
