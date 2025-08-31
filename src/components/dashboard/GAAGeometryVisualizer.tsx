@@ -95,21 +95,12 @@ const GeometryPoints = ({
   return (
     <>
       {/* Geometry Points */}
-      <points ref={pointsRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            array={positions}
-            itemSize={3}
-            count={positions.length / 3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            array={colors}
-            itemSize={3}
-            count={colors.length / 3}
-          />
-        </bufferGeometry>
+      <points ref={pointsRef} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        return geo;
+      }, [positions, colors])}>
         <pointsMaterial
           size={0.1}
           vertexColors
@@ -121,15 +112,11 @@ const GeometryPoints = ({
 
       {/* Connecting Lines */}
       {connections.length > 0 && (
-        <lineSegments ref={linesRef}>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              array={connections}
-              itemSize={3}
-              count={connections.length / 3}
-            />
-          </bufferGeometry>
+        <lineSegments ref={linesRef} geometry={useMemo(() => {
+          const geo = new THREE.BufferGeometry();
+          geo.setAttribute('position', new THREE.BufferAttribute(connections, 3));
+          return geo;
+        }, [connections])}>
           <lineBasicMaterial
             color="#8b5cf6"
             transparent

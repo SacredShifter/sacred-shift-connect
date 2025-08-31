@@ -136,21 +136,12 @@ export function ParticleSystem({ phase, particles, setParticles }: ParticleSyste
   });
   
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleData.count}
-          array={particleData.positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          count={particleData.count}
-          array={particleData.colors}
-          itemSize={3}
-        />
-      </bufferGeometry>
+    <points ref={pointsRef} geometry={useMemo(() => {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(particleData.positions, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(particleData.colors, 3));
+      return geo;
+    }, [particleData.positions, particleData.colors])}>
       <pointsMaterial
         ref={materialRef}
         size={0.02}
