@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
 import { useSceneResize } from './useSceneResize';
 import config from './config.json';
@@ -9,8 +10,9 @@ const SacredShifterLogo = ({ className, style }: { className?: string; style?: R
   <svg className={className} style={style} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <radialGradient id="logoGradient" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="hsl(280, 80%, 70%)" />
-        <stop offset="100%" stopColor="hsl(320, 70%, 60%)" />
+        <stop offset="0%" stopColor="#8B5CF6" stopOpacity="1" />
+        <stop offset="50%" stopColor="#A78BFA" stopOpacity="0.8" />
+        <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.6" />
       </radialGradient>
       <filter id="logoGlow" x="-50%" y="-50%" width="200%" height="200%">
         <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -21,55 +23,31 @@ const SacredShifterLogo = ({ className, style }: { className?: string; style?: R
       </filter>
     </defs>
     
-    <circle 
-      cx="48" 
-      cy="48" 
-      r="44" 
-      fill="none" 
-      stroke="url(#logoGradient)" 
-      strokeWidth="3"
-      opacity="0.9"
+    {/* Sacred Infinity Symbol */}
+    <path
+      d="M24 48C24 35.85 32.95 26 44 26C55.05 26 64 35.85 64 48C64 60.15 55.05 70 44 70C32.95 70 24 60.15 24 48Z"
+      fill="url(#logoGradient)"
       filter="url(#logoGlow)"
+      opacity="0.9"
+    />
+    <path
+      d="M32 48C32 60.15 40.95 70 52 70C63.05 70 72 60.15 72 48C72 35.85 63.05 26 52 26C40.95 26 32 35.85 32 48Z"
+      fill="url(#logoGradient)"
+      filter="url(#logoGlow)"
+      opacity="0.7"
     />
     
-    <g transform="translate(48,48)">
-      <circle r="4" fill="url(#logoGradient)" />
-      <circle r="12" fill="none" stroke="url(#logoGradient)" strokeWidth="2" opacity="0.7" />
-      <circle r="20" fill="none" stroke="url(#logoGradient)" strokeWidth="1.5" opacity="0.5" />
-      <circle r="28" fill="none" stroke="url(#logoGradient)" strokeWidth="1" opacity="0.4" />
-      
-      <polygon 
-        points="0,-15 13,7.5 -13,7.5" 
-        fill="none" 
-        stroke="url(#logoGradient)" 
-        strokeWidth="2" 
-        opacity="0.8"
-      />
-      <polygon 
-        points="0,15 -13,-7.5 13,-7.5" 
-        fill="none" 
-        stroke="url(#logoGradient)" 
-        strokeWidth="2" 
-        opacity="0.8"
-      />
-    </g>
-    
-    <circle 
-      cx="48" 
-      cy="48" 
-      r="46" 
-      fill="none" 
-      stroke="url(#logoGradient)" 
-      strokeWidth="1" 
-      opacity="0.3"
-    />
+    {/* Central Mandala */}
+    <circle cx="48" cy="48" r="8" fill="#FFD700" opacity="0.8" filter="url(#logoGlow)" />
+    <circle cx="48" cy="48" r="12" fill="none" stroke="#8B5CF6" strokeWidth="1" opacity="0.6" />
+    <circle cx="48" cy="48" r="16" fill="none" stroke="#A78BFA" strokeWidth="0.5" opacity="0.4" />
   </svg>
 );
 
 interface ResonantFieldProps {
   tagline?: string;
   safeRadiusScale?: number;
-  onExit?: () => void;
+  onExit: () => void;
 }
 
 interface ParticleSystemProps {
@@ -77,6 +55,14 @@ interface ParticleSystemProps {
   particleCount: number;
   exposure: number;
   lumaCap: number;
+}
+
+interface CosmicGridProps {
+  safeRadius: number;
+}
+
+interface EthericBubblesProps {
+  safeRadius: number;
 }
 
 // Device performance detection
@@ -94,11 +80,164 @@ const getDeviceTier = () => {
     return 'mobile';
   }
   
-  const memory = (navigator as any).deviceMemory || 4;
-  return memory >= 8 ? 'high' : 'medium';
+  // Check device memory if available
+  const deviceMemory = (navigator as any).deviceMemory;
+  if (deviceMemory && deviceMemory < 4) {
+    return 'low';
+  }
+  
+  return 'high';
 };
 
-const ParticleSystem: React.FC<ParticleSystemProps> = ({ 
+// Cosmic Grid Background
+const CosmicGrid: React.FC<CosmicGridProps> = ({ safeRadius }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  
+  const gridMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uSafeRadius: { value: safeRadius },
+        uGridScale: { value: 2.0 },
+        uOpacity: { value: 0.3 }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        varying vec3 vWorldPosition;
+        
+        void main() {
+          vUv = uv;
+          vec4 worldPos = modelMatrix * vec4(position, 1.0);
+          vWorldPosition = worldPos.xyz;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform float uSafeRadius;
+        uniform float uGridScale;
+        uniform float uOpacity;
+        
+        varying vec2 vUv;
+        varying vec3 vWorldPosition;
+        
+        float grid(vec2 st, float res) {
+          vec2 grid = fract(st * res);
+          return (step(res * 0.02, grid.x) * step(res * 0.02, grid.y));
+        }
+        
+        void main() {
+          vec2 st = vUv * uGridScale;
+          
+          // Animated grid
+          st += sin(uTime * 0.1) * 0.1;
+          
+          // Create grid pattern
+          float pattern = 1.0 - grid(st, 10.0);
+          
+          // Dracula purple/pink theme
+          vec3 color1 = vec3(0.741, 0.576, 0.976); // #BD93F9 (Dracula purple)
+          vec3 color2 = vec3(1.0, 0.471, 0.776);   // #FF79C6 (Dracula pink)
+          
+          vec3 finalColor = mix(color1, color2, sin(uTime * 0.2 + vUv.x * 2.0) * 0.5 + 0.5);
+          
+          // Distance fade from center
+          float distFromCenter = length(vUv - 0.5) * 2.0;
+          float safeFade = smoothstep(uSafeRadius - 0.1, uSafeRadius + 0.2, distFromCenter);
+          
+          gl_FragColor = vec4(finalColor * pattern, uOpacity * safeFade * pattern);
+        }
+      `,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+  }, [safeRadius]);
+  
+  useFrame(({ clock }) => {
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = clock.getElapsedTime();
+    }
+  });
+  
+  return (
+    <mesh ref={meshRef} position={[0, 0, -5]} material={gridMaterial}>
+      <planeGeometry args={[50, 50]} />
+    </mesh>
+  );
+};
+
+// Etheric Bubble System
+const EthericBubbles: React.FC<EthericBubblesProps> = ({ safeRadius }) => {
+  const groupRef = useRef<THREE.Group>(null);
+  const bubblesRef = useRef<THREE.Mesh[]>([]);
+  
+  const bubbleCount = 15;
+  
+  const bubbles = useMemo(() => {
+    return Array.from({ length: bubbleCount }, (_, i) => {
+      const angle = (i / bubbleCount) * Math.PI * 2;
+      const radius = 8 + Math.random() * 10;
+      const y = (Math.random() - 0.5) * 16;
+      
+      return {
+        position: [
+          Math.cos(angle) * radius,
+          y,
+          Math.sin(angle) * radius
+        ] as [number, number, number],
+        scale: 0.5 + Math.random() * 1.5,
+        speed: 0.5 + Math.random() * 0.5,
+        phase: Math.random() * Math.PI * 2
+      };
+    });
+  }, []);
+  
+  useFrame(({ clock }) => {
+    if (groupRef.current) {
+      const time = clock.getElapsedTime();
+      
+      bubblesRef.current.forEach((bubble, i) => {
+        if (bubble) {
+          const bubbleData = bubbles[i];
+          // Floating animation
+          bubble.position.y += Math.sin(time * bubbleData.speed + bubbleData.phase) * 0.01;
+          // Gentle rotation
+          bubble.rotation.x = time * 0.1 + bubbleData.phase;
+          bubble.rotation.y = time * 0.15 + bubbleData.phase;
+          // Breathing scale
+          const breathe = 1 + Math.sin(time * 0.8 + bubbleData.phase) * 0.1;
+          bubble.scale.setScalar(bubbleData.scale * breathe);
+        }
+      });
+    }
+  });
+  
+  return (
+    <group ref={groupRef}>
+      {bubbles.map((bubble, i) => (
+        <mesh
+          key={i}
+          ref={(el) => {
+            if (el) bubblesRef.current[i] = el;
+          }}
+          position={bubble.position}
+        >
+          <sphereGeometry args={[1, 16, 16]} />
+          <meshBasicMaterial
+            color="#50FA7B" // Dracula green
+            transparent
+            opacity={0.15}
+            wireframe
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
+// Fractal Particle System
+const FractalParticleSystem: React.FC<ParticleSystemProps> = ({ 
   safeRadius, 
   particleCount, 
   exposure, 
@@ -113,72 +252,61 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
     const phases = new Float32Array(particleCount);
     const sizes = new Float32Array(particleCount);
     
-    const brandColors = [
-      [0.6, 0.2, 1.0], // Violet
-      [1.0, 0.8, 0.2], // Gold  
-      [0.2, 1.0, 0.8], // Aquamarine
-      [0.8, 0.3, 0.9], // Purple
+    // Dracula color palette
+    const draculaColors = [
+      [0.741, 0.576, 0.976], // Purple #BD93F9
+      [1.0, 0.471, 0.776],   // Pink #FF79C6  
+      [0.314, 0.980, 0.482], // Green #50FA7B
+      [1.0, 0.733, 0.157],   // Yellow #F1FA8C
+      [0.518, 0.886, 1.0],   // Cyan #8BE9FD
     ];
     
     let validParticles = 0;
     
-    // Always generate at least a few particles for safety
-    const minParticles = Math.min(10, particleCount);
-    
     for (let i = 0; i < particleCount; i++) {
-      // Generate position and check if it's outside safe area
       let x, y, z, distance;
       let attempts = 0;
       
       do {
-        x = (Math.random() - 0.5) * 16;
-        y = (Math.random() - 0.5) * 16;
-        z = (Math.random() - 0.5) * 16;
+        // Create fractal distribution
+        const r = Math.pow(Math.random(), 0.5) * 20;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
         
-        // Check distance from center in screen space
-        distance = Math.sqrt(x * x + y * y) / 8; // Normalize to screen space
+        x = r * Math.sin(phi) * Math.cos(theta);
+        y = r * Math.sin(phi) * Math.sin(theta);
+        z = r * Math.cos(phi);
+        
+        // Add fractal noise
+        x += (Math.random() - 0.5) * 4;
+        y += (Math.random() - 0.5) * 4;
+        z += (Math.random() - 0.5) * 4;
+        
+        distance = Math.sqrt(x * x + y * y) / 8;
         attempts++;
-      } while (distance < safeRadius && attempts < 50 && validParticles >= minParticles);
+      } while (distance < safeRadius && attempts < 50);
       
-      // Add particle if it's outside safe area OR we need minimum particles
-      if (distance >= safeRadius || validParticles < minParticles) {
+      if (distance >= safeRadius || validParticles < 10) {
         const i3 = validParticles * 3;
         
         positions[i3] = x;
         positions[i3 + 1] = y;
         positions[i3 + 2] = z;
         
-        // Random brand color
-        const colorIndex = Math.floor(Math.random() * brandColors.length);
-        const baseColor = brandColors[colorIndex];
+        // Dracula color selection
+        const colorIndex = Math.floor(Math.random() * draculaColors.length);
+        const baseColor = draculaColors[colorIndex];
         
-        colors[i3] = Math.max(0, Math.min(1, baseColor[0] + (Math.random() - 0.5) * 0.2));
-        colors[i3 + 1] = Math.max(0, Math.min(1, baseColor[1] + (Math.random() - 0.5) * 0.2));
-        colors[i3 + 2] = Math.max(0, Math.min(1, baseColor[2] + (Math.random() - 0.5) * 0.2));
+        colors[i3] = baseColor[0];
+        colors[i3 + 1] = baseColor[1];
+        colors[i3 + 2] = baseColor[2];
         
         phases[validParticles] = Math.random() * Math.PI * 2;
-        sizes[validParticles] = 12 + Math.random() * 8;
+        sizes[validParticles] = 8 + Math.random() * 12;
         
         validParticles++;
-        
-        if (validParticles >= particleCount) break;
       }
     }
-    
-    // Ensure we have at least minimum particles
-    if (validParticles === 0) {
-      validParticles = 1;
-      positions[0] = 0;
-      positions[1] = 0;
-      positions[2] = 5;
-      colors[0] = 0.6;
-      colors[1] = 0.2;
-      colors[2] = 1.0;
-      phases[0] = 0;
-      sizes[0] = 15;
-    }
-    
-    console.log(`Generated ${validParticles} particles outside safe radius ${safeRadius}`);
     
     return { 
       positions: new Float32Array(positions.buffer.slice(0, validParticles * 3 * 4)), 
@@ -189,130 +317,92 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
     };
   }, [particleCount, safeRadius]);
   
-  // Custom shader material
+  // Fractal shader material
   const material = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uSafeRadius: { value: safeRadius },
-        uCenter: { value: new THREE.Vector2(0, 0) },
-        uLumaCap: { value: lumaCap },
         uExposure: { value: exposure },
-        uBloomThreshold: { value: config.bloomThreshold },
-        uResolution: { value: new THREE.Vector2(size.width, size.height) }
+        uLumaCap: { value: lumaCap }
       },
       vertexShader: `
-        uniform float uTime;
-        uniform float uSafeRadius;
-        uniform vec2 uCenter;
-        uniform vec2 uResolution;
-        
         attribute float phase;
         attribute float size;
         
+        uniform float uTime;
+        
         varying vec3 vColor;
         varying float vAlpha;
-        varying vec2 vNdc;
         
         void main() {
           vColor = color;
           
-          // Animate position
           vec3 pos = position;
-          pos.x += sin(uTime * 0.5 + phase) * 0.5;
-          pos.y += cos(uTime * 0.7 + phase * 1.2) * 0.3;
-          pos.z += sin(uTime * 0.3 + phase * 0.8) * 0.4;
           
-          // Calculate NDC for safe area check
+          // Fractal motion
+          pos.x += sin(uTime * 0.5 + phase) * 2.0;
+          pos.y += cos(uTime * 0.3 + phase * 1.5) * 1.5;
+          pos.z += sin(uTime * 0.7 + phase * 0.8) * 1.0;
+          
+          // Etheric floating
+          pos += sin(uTime * 0.2 + phase) * 0.5;
+          
+          vAlpha = 0.6 + sin(uTime * 2.0 + phase) * 0.3;
+          
           vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-          vec4 projected = projectionMatrix * mvPosition;
-          vNdc = projected.xy / projected.w;
-          
-          // Safe area masking with soft falloff
-          float distanceFromCenter = length(vNdc);
-          float falloffStart = uSafeRadius;
-          float falloffEnd = uSafeRadius + 0.06;
-          
-          vAlpha = 1.0;
-          if (distanceFromCenter < falloffEnd) {
-            if (distanceFromCenter < falloffStart) {
-              vAlpha = 0.0; // Fully hidden in safe area
-            } else {
-              // Soft falloff
-              vAlpha = smoothstep(falloffStart, falloffEnd, distanceFromCenter);
-            }
-          }
-          
           gl_PointSize = size * (300.0 / -mvPosition.z);
-          gl_Position = projected;
+          gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
-        uniform float uLumaCap;
         uniform float uExposure;
+        uniform float uLumaCap;
         
         varying vec3 vColor;
         varying float vAlpha;
         
         void main() {
-          // Circular point sprite
           float r = length(gl_PointCoord - vec2(0.5));
           if (r > 0.5) discard;
           
-          // Fresnel-like rim effect
-          float rim = 1.0 - r * 2.0;
-          rim = pow(rim, 2.0);
+          float alpha = (1.0 - r * 2.0) * vAlpha;
           
-          // Soft glow
-          float glow = exp(-r * 3.0);
+          vec3 finalColor = vColor * uExposure;
+          finalColor = min(finalColor, vec3(uLumaCap));
           
-          vec3 finalColor = vColor * rim * uExposure;
-          finalColor = min(finalColor, vec3(uLumaCap)); // Luminance clamp
-          
-          float alpha = glow * rim * vAlpha * 0.8;
-          
-          gl_FragColor = vec4(finalColor, alpha);
+          gl_FragColor = vec4(finalColor, alpha * 0.8);
         }
       `,
       transparent: true,
       blending: THREE.AdditiveBlending,
       vertexColors: true
     });
-  }, [safeRadius, lumaCap, exposure, size]);
+  }, [exposure, lumaCap]);
   
   useFrame(({ clock }) => {
-    if (!meshRef.current) return;
-    
-    material.uniforms.uTime.value = clock.getElapsedTime();
-    material.uniforms.uResolution.value.set(size.width, size.height);
-    
-    // Gentle camera orbit (respects reduced motion)
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reduceMotion) {
-      const time = clock.getElapsedTime();
-      meshRef.current.rotation.y = Math.sin(time * 0.1) * 0.02;
-      meshRef.current.rotation.x = Math.cos(time * 0.15) * 0.01;
+    if (meshRef.current && material) {
+      material.uniforms.uTime.value = clock.getElapsedTime();
+      material.uniforms.uExposure.value = exposure;
     }
   });
   
-  if (!particleData || particleData.count === 0) {
-    return null;
-  }
-
-  const geometry = useMemo(() => {
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(particleData.positions, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(particleData.colors, 3));
-    geo.setAttribute('phase', new THREE.BufferAttribute(particleData.phases, 1));
-    geo.setAttribute('size', new THREE.BufferAttribute(particleData.sizes, 1));
-    return geo;
-  }, [particleData]);
-
   return (
-    <points ref={meshRef} geometry={geometry} material={material} />
+    <points 
+      ref={meshRef} 
+      material={material}
+      geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(particleData.positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(particleData.colors, 3));
+        geo.setAttribute('phase', new THREE.BufferAttribute(particleData.phases, 1));
+        geo.setAttribute('size', new THREE.BufferAttribute(particleData.sizes, 1));
+        return geo;
+      }, [particleData.positions, particleData.colors, particleData.phases, particleData.sizes])}
+    />
   );
 };
 
+// Main Scene Component
 const Scene: React.FC<{ safeRadius: number; particleCount: number }> = ({ 
   safeRadius, 
   particleCount 
@@ -320,10 +410,8 @@ const Scene: React.FC<{ safeRadius: number; particleCount: number }> = ({
   const [exposure, setExposure] = useState(1.0);
   const [lumaCap] = useState(config.lumaCap);
   
-  // Light governor - monitor and adjust exposure
+  // Light governor
   useFrame(() => {
-    // Simplified luminance monitoring
-    // In a real implementation, this would sample the render target
     const targetExposure = 1.0;
     setExposure(prev => {
       if (prev > targetExposure) {
@@ -337,12 +425,12 @@ const Scene: React.FC<{ safeRadius: number; particleCount: number }> = ({
   
   return (
     <>
-      <color args={['#0a0f1c']} />
-      
-      {/* Background gradient effect */}
+      <color args={['#282A36']} /> {/* Dracula background */}      
       <ambientLight intensity={0.1} />
       
-      <ParticleSystem 
+      <CosmicGrid safeRadius={safeRadius} />
+      <EthericBubbles safeRadius={safeRadius} />
+      <FractalParticleSystem 
         safeRadius={safeRadius}
         particleCount={particleCount}
         exposure={exposure}
@@ -352,7 +440,7 @@ const Scene: React.FC<{ safeRadius: number; particleCount: number }> = ({
       <EffectComposer>
         <Bloom
           luminanceThreshold={config.bloomThreshold}
-          intensity={0.6}
+          intensity={0.8}
         />
       </EffectComposer>
     </>
@@ -367,34 +455,32 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
   const { width, height } = useSceneResize();
   const [showFallback, setShowFallback] = useState(false);
   
-  // Calculate safe area - MUCH LARGER with safety checks
+  // Calculate safe area with generous padding
   const safeRadius = useMemo(() => {
-    if (!width || !height || width <= 0 || height <= 0) {
-      console.warn('Invalid dimensions detected:', { width, height });
-      return 0.4; // Fallback value
-    }
-    const calculated = Math.min(width, height) * 0.4;
-    console.log('SafeRadius calculated:', calculated, 'from dimensions:', { width, height });
-    return calculated;
+    const minDimension = Math.min(width, height);
+    const calculatedRadius = (minDimension * safeRadiusScale) / Math.min(width, height);
+    return Math.max(0.15, Math.min(0.4, calculatedRadius));
+  }, [width, height, safeRadiusScale]);
+  
+  // Dynamic particle count based on device performance
+  const particleCount = useMemo(() => {
+    const deviceTier = getDeviceTier();
+    const baseCount = {
+      'low': 150,
+      'mobile': 300,
+      'high': 600
+    }[deviceTier];
+    
+    // Adjust based on screen size
+    const screenMultiplier = Math.max(0.5, Math.min(2.0, (width * height) / (1920 * 1080)));
+    return Math.floor(baseCount * screenMultiplier);
   }, [width, height]);
   
-  // Device-responsive particle count
-  const particleCount = useMemo(() => {
-    const tier = getDeviceTier();
-    switch (tier) {
-      case 'high': return config.particleCountDesktop;
-      case 'medium': return Math.floor(config.particleCountDesktop * 0.7);
-      case 'mobile': 
-      case 'low': 
-      default: return config.particleCountMobile;
-    }
-  }, []);
-  
-  // Keyboard exit handler
+  // Exit handlers
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onExit?.();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' || event.key === ' ') {
+        onExit();
       }
     };
     
@@ -412,26 +498,41 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
   }, []);
   
   if (showFallback) {
-    // Canvas2D fallback would go here
     return (
-      <div className="fixed inset-0 bg-gradient-radial from-purple-900/20 via-teal-900/10 to-black">
+      <motion.div 
+        className="fixed inset-0"
+        style={{ background: 'linear-gradient(135deg, #282A36 0%, #44475A 50%, #282A36 100%)' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1.0 }}
+      >
         <div className="pointer-events-none absolute inset-0 grid place-items-center">
-          <div className="text-center px-6">
-            <div className="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-primary to-secondary animate-pulse" />
-            <p className="mt-4 text-balance text-lg md:text-xl text-white/90 drop-shadow-[0_1px_8px_rgba(0,0,0,.55)]">
+          <motion.div 
+            className="text-center px-6"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            <div className="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 animate-pulse mb-8" />
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
               {tagline}
-            </p>
-          </div>
+            </h1>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
   
   return (
-    <div 
+    <motion.div 
       className="fixed inset-0 cursor-pointer"
       onClick={onExit}
       onTouchStart={onExit}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1.2 }}
     >
       {/* WebGL Canvas */}
       <Canvas
@@ -439,66 +540,69 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
         dpr={[1, 2]}
         performance={{ min: 0.8 }}
       >
-        <Scene safeRadius={safeRadius} particleCount={Math.min(particleCount, 800)} />
+        <Scene safeRadius={safeRadius} particleCount={particleCount} />
       </Canvas>
       
-      {/* Logo Overlay - MAXIMUM PROMINENCE */}
-      <div className="pointer-events-none absolute inset-0 grid place-items-center z-[99999]" 
-           style={{ 
-             background: 'radial-gradient(circle at center, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 25%, transparent 40%)',
-           }}>
-        <div className="text-center px-6 relative">
+      {/* Sacred Shifter Logo Overlay - MAXIMUM PROMINENCE */}
+      <div className="pointer-events-none absolute inset-0 grid place-items-center z-[99999]">
+        <motion.div 
+          className="text-center px-6 relative"
+          initial={{ scale: 0.8, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 1.0, ease: "easeOut" }}
+        >
           {/* MASSIVE Logo with extreme contrast */}
-          <div className="mx-auto w-64 h-64 mb-12 relative">
-            {/* Multiple shadow layers for maximum contrast */}
-            <div className="absolute inset-0 rounded-full bg-black blur-3xl scale-150 opacity-80" />
-            <div className="absolute inset-0 rounded-full bg-black blur-2xl scale-125 opacity-60" />
-            <div className="absolute inset-0 rounded-full bg-black blur-xl scale-110 opacity-40" />
-            
-            {/* Bright white background for logo */}
-            <div className="absolute inset-0 rounded-full bg-white/20 blur-lg" />
-            
-            {/* Logo with maximum brightness and contrast */}
+          <motion.div 
+            className="mx-auto w-48 h-48 mb-8 relative"
+            animate={{ 
+              rotate: 360,
+              scale: [1, 1.05, 1]
+            }}
+            transition={{ 
+              rotate: { duration: 60, repeat: Infinity, ease: "linear" },
+              scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+            }}
+          >
             <SacredShifterLogo 
-              className="relative z-20 w-full h-full" 
+              className="w-full h-full drop-shadow-[0_0_30px_rgba(139,92,246,0.8)]"
               style={{ 
-                filter: 'brightness(2) contrast(2) drop-shadow(0 0 40px rgba(255,255,255,0.8)) drop-shadow(0 0 80px rgba(255,255,255,0.4))',
-              }} 
+                filter: 'brightness(1.8) contrast(1.5) drop-shadow(0 0 20px rgba(255,255,255,0.6))'
+              }}
             />
+          </motion.div>
             
-            {/* Animated glow ring */}
-            <div className="absolute inset-0 rounded-full border-4 border-white/60 animate-pulse scale-105" 
-                 style={{
-                   boxShadow: '0 0 60px rgba(255,255,255,0.6), inset 0 0 60px rgba(255,255,255,0.2)'
-                 }} />
-          </div>
-          
-          {/* MASSIVE tagline with extreme contrast */}
-          <div className="relative">
-            {/* Multiple text shadow layers */}
-            <div className="absolute inset-0 bg-black/70 blur-2xl rounded-2xl scale-110" />
-            
-            <h1 className="relative text-4xl md:text-6xl font-bold text-white max-w-[54ch] mx-auto leading-tight" 
-               style={{ 
-                 textShadow: `
-                   0 0 30px rgba(0,0,0,1),
-                   0 0 60px rgba(0,0,0,0.8),
-                   0 0 90px rgba(0,0,0,0.6),
-                   0 8px 16px rgba(0,0,0,1),
-                   0 0 20px rgba(255,255,255,0.3)
-                 `,
-                 filter: 'brightness(1.5) contrast(1.5)'
-               }}>
-              {tagline}
-            </h1>
-          </div>
-        </div>
+          {/* Tagline with massive shadow and glow */}
+          <motion.h1 
+            className="relative text-3xl md:text-5xl lg:text-6xl font-bold text-white max-w-[54ch] mx-auto leading-tight" 
+            style={{ 
+              textShadow: `
+                0 0 30px rgba(0,0,0,1),
+                0 0 60px rgba(0,0,0,0.8),
+                0 0 90px rgba(0,0,0,0.6),
+                0 8px 16px rgba(0,0,0,1),
+                0 0 20px rgba(189,147,249,0.8),
+                0 0 40px rgba(255,121,198,0.6)
+              `,
+              filter: 'brightness(1.5) contrast(1.5)'
+            }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 1.2 }}
+          >
+            {tagline}
+          </motion.h1>
+        </motion.div>
       </div>
       
       {/* Subtle hint */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-        <p className="text-sm text-white/60">Touch or move to return</p>
-      </div>
-    </div>
+      <motion.div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.5, duration: 0.8 }}
+      >
+        <p className="text-sm text-white/60 text-center">Touch or press ESC to return</p>
+      </motion.div>
+    </motion.div>
   );
 };
