@@ -220,6 +220,24 @@ export interface EmergencyProtocol {
   responseActions: ('pause' | 'stop' | 'alert_facilitator' | 'medical_alert')[];
 }
 
+// Tarot tradition types
+export type TarotTradition = 'marseille' | 'rws' | 'thoth' | 'etteilla';
+
+// GAA Engine State
+export interface GAAEngineState {
+  isInitialized: boolean;
+  isPlaying: boolean;
+  currentPhase: 'idle' | 'activation' | 'processing' | 'integration';
+  oscillatorCount: number;
+  currentGeometry?: {
+    complexity: number;
+    vertices: number;
+    faces: number;
+  };
+  biofeedbackIntegration: boolean;
+  lastUpdate: number;
+}
+
 // Real-time event structure
 export interface GAARealtimeEvent {
   type: 'participant_update' | 'polarity_sync' | 'emergency' | 'session_state';
