@@ -16,6 +16,16 @@ import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { useSacredCircles } from '@/hooks/useSacredCircles';
 
+const chakraOptions = [
+  { value: 'root', label: 'Root Chakra' },
+  { value: 'sacral', label: 'Sacral Chakra' },
+  { value: 'solar_plexus', label: 'Solar Plexus Chakra' },
+  { value: 'heart', label: 'Heart Chakra' },
+  { value: 'throat', label: 'Throat Chakra' },
+  { value: 'third_eye', label: 'Third Eye Chakra' },
+  { value: 'crown', label: 'Crown Chakra' },
+];
+
 interface SacredPost {
   id: string;
   user_id: string;

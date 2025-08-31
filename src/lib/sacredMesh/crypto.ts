@@ -53,14 +53,22 @@ export class SacredMeshCrypto {
 
   // Generate identity key pair (Ed25519 for signing)
   async generateIdentityKeyPair(): Promise<CryptoKeyPair> {
-    return await crypto.subtle.generateKey(
-      {
-        name: 'ECDSA',
-        namedCurve: 'P-256'
-      },
-      true,
-      ['sign', 'verify']
-    );
+    console.log('🔑 Generating identity key pair...');
+    try {
+      const keyPair = await crypto.subtle.generateKey(
+        {
+          name: 'ECDSA',
+          namedCurve: 'P-256'
+        },
+        true,
+        ['sign', 'verify']
+      );
+      console.log('🔑 Identity key pair generated successfully');
+      return keyPair;
+    } catch (error) {
+      console.error('🔑 Failed to generate identity key pair:', error);
+      throw error;
+    }
   }
 
   // Generate ephemeral key pair (X25519 for ECDH)
