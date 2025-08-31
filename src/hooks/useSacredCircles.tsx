@@ -115,7 +115,7 @@ export const useSacredCircles = () => {
       let query = supabase
         .from('circle_posts')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: true })
         .limit(50);
 
       if (groupId) {
@@ -368,7 +368,7 @@ export const useSacredCircles = () => {
     onPayload: (payload) => {
       if (payload.eventType === 'INSERT') {
         const newMessage = payload.new as CircleMessage;
-        setMessages(prev => [newMessage, ...prev]);
+        setMessages(prev => [...prev, newMessage]);
       } else if (payload.eventType === 'UPDATE') {
         const updatedMessage = payload.new as CircleMessage;
         setMessages(prev =>
