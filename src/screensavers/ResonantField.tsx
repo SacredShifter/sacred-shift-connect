@@ -7,6 +7,7 @@ import { useSceneResize } from './useSceneResize';
 import config from './config.json';
 import sacredShifterLogo from '@/assets/sacred-shifter-logo.png';
 import { useScreensaverMessages } from '@/hooks/useScreensaverMessages';
+import { DailyNudge } from '@/components/screensaver/DailyNudge';
 
 interface ResonantFieldProps {
   tagline?: string;
@@ -419,10 +420,10 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
   const { width, height } = useSceneResize();
   const [showFallback, setShowFallback] = useState(false);
   
-  // Sacred rotating messages
-  const { currentMessage, isVisible } = useScreensaverMessages({
+  // Sacred rotating messages with daily routine integration
+  const { currentMessage, isVisible, dailyContext } = useScreensaverMessages({
     isActive: true,
-    rotationInterval: 12000, // 12 seconds between messages
+    rotationInterval: 15000, // 15 seconds between messages (slightly slower for better reading)
     preventRepeats: 4
   });
   
@@ -582,7 +583,7 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
                 {tagline}
               </p>
 
-              {/* Rotating Sacred Messages */}
+              {/* Rotating Sacred Messages with Daily Context */}
               <div className="min-h-[80px] flex items-center justify-center">
                 <AnimatePresence mode="wait">
                   {currentMessage && isVisible && (
@@ -598,21 +599,40 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
                       className="text-center max-w-2xl"
                     >
                       <p 
-                        className="text-lg md:text-xl text-white/80 font-mystical leading-relaxed"
+                        className={`text-lg md:text-xl font-mystical leading-relaxed ${
+                          currentMessage.category.includes('daily_') || 
+                          currentMessage.category === 'progress_celebration' ||
+                          currentMessage.category === 'morning_encouragement' ||
+                          currentMessage.category === 'evening_reflection'
+                            ? 'text-white/90' 
+                            : 'text-white/80'
+                        }`}
                         style={{
-                          textShadow: `
-                            0 0 15px rgba(0, 0, 0, 1),
-                            0 2px 8px rgba(0, 0, 0, 1),
-                            0 0 25px rgba(189, 147, 249, 0.4)
-                          `
+                          textShadow: currentMessage.category.includes('daily_') || 
+                                    currentMessage.category === 'progress_celebration'
+                            ? `0 0 20px rgba(0, 0, 0, 1),
+                               0 2px 8px rgba(0, 0, 0, 1),
+                               0 0 30px rgba(189, 147, 249, 0.6)`
+                            : `0 0 15px rgba(0, 0, 0, 1),
+                               0 2px 8px rgba(0, 0, 0, 1),
+                               0 0 25px rgba(189, 147, 249, 0.4)`
                         }}
                       >
                         {currentMessage.text}
                       </p>
                       
-                      {/* Subtle category indicator */}
+                      {/* Enhanced category indicator for daily messages */}
                       <div className="mt-3 opacity-60">
-                        <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-white/50 to-transparent mx-auto" />
+                        {currentMessage.category.includes('daily_') || 
+                         currentMessage.category === 'progress_celebration' ? (
+                          <div className="flex items-center justify-center space-x-2">
+                            <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-purple-400/60 to-transparent" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-purple-400/60 animate-pulse" />
+                            <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-purple-400/60 to-transparent" />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-white/50 to-transparent mx-auto" />
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -622,6 +642,9 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
           </motion.div>
         </div>
       </div>
+      
+      {/* Daily Routine Nudge */}
+      <DailyNudge isVisible={true} />
       
       {/* Subtle hint */}
       <motion.div 

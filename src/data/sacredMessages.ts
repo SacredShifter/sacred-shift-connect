@@ -1,10 +1,17 @@
-export type MessageCategory = 'truth_anchors' | 'integration_reminders' | 'collective_seeds' | 'sacred_shifter_identity' | 'subtle_micro_teachings';
+export type MessageCategory = 'truth_anchors' | 'integration_reminders' | 'collective_seeds' | 'sacred_shifter_identity' | 'subtle_micro_teachings' | 'daily_routine_nudges' | 'progress_celebration' | 'morning_encouragement' | 'evening_reflection';
 
 export interface SacredMessage {
   id: string;
   text: string;
   category: MessageCategory;
   weight?: number; // For category weighting
+  timeOfDay?: 'morning' | 'afternoon' | 'evening' | 'any';
+  routineContext?: {
+    stepId?: string;
+    stepTitle?: string;
+    practice?: string;
+    estimatedMinutes?: number;
+  };
 }
 
 export const sacredMessages: SacredMessage[] = [
@@ -316,6 +323,98 @@ export const sacredMessages: SacredMessage[] = [
     text: 'You are more than the sum of thoughts.',
     category: 'subtle_micro_teachings',
     weight: 1.1
+  },
+
+  // Daily Routine Nudges
+  {
+    id: 'dr1',
+    text: 'Ready for today\'s practice?',
+    category: 'daily_routine_nudges',
+    weight: 2.0,
+    timeOfDay: 'morning'
+  },
+  {
+    id: 'dr2',
+    text: 'Your sacred practice awaits...',
+    category: 'daily_routine_nudges',
+    weight: 2.0,
+    timeOfDay: 'any'
+  },
+  {
+    id: 'dr3',
+    text: 'Continue your journey. The flow is calling.',
+    category: 'daily_routine_nudges',
+    weight: 2.0,
+    timeOfDay: 'any'
+  },
+
+  // Progress Celebration
+  {
+    id: 'pc1',
+    text: '🔥 You\'re building sacred momentum.',
+    category: 'progress_celebration',
+    weight: 2.5,
+    timeOfDay: 'any'
+  },
+  {
+    id: 'pc2',
+    text: '✨ Each practice deepens your alignment.',
+    category: 'progress_celebration',
+    weight: 2.5,
+    timeOfDay: 'any'
+  },
+  {
+    id: 'pc3',
+    text: 'Your consistency is transforming you.',
+    category: 'progress_celebration',
+    weight: 2.5,
+    timeOfDay: 'any'
+  },
+
+  // Morning Encouragement
+  {
+    id: 'me1',
+    text: 'A new day, a fresh alignment.',
+    category: 'morning_encouragement',
+    weight: 2.0,
+    timeOfDay: 'morning'
+  },
+  {
+    id: 'me2',
+    text: 'Your practice creates your reality.',
+    category: 'morning_encouragement',
+    weight: 2.0,
+    timeOfDay: 'morning'
+  },
+  {
+    id: 'me3',
+    text: 'Today\'s step will reveal itself.',
+    category: 'morning_encouragement',
+    weight: 2.0,
+    timeOfDay: 'morning'
+  },
+
+  // Evening Reflection
+  {
+    id: 'er1',
+    text: 'How did today\'s practice land?',
+    category: 'evening_reflection',
+    weight: 2.0,
+    timeOfDay: 'evening'
+  },
+  {
+    id: 'er2',
+    text: 'Integration happens in stillness.',
+    category: 'evening_reflection',
+    weight: 2.0,
+    timeOfDay: 'evening'
+  },
+  {
+    id: 'er3',
+    text: 'Rest into what you\'ve become today.',
+    category: 'evening_reflection',
+    weight: 2.0,
+    timeOfDay: 'evening'
   }
 ];
 
@@ -325,5 +424,17 @@ export const categoryWeights: Record<MessageCategory, number> = {
   integration_reminders: 1.2, // Slightly favored for practice
   collective_seeds: 0.8,
   sacred_shifter_identity: 1.0,
-  subtle_micro_teachings: 1.1 // Gentle wisdom teaching
+  subtle_micro_teachings: 1.1, // Gentle wisdom teaching
+  daily_routine_nudges: 3.0, // High priority for active practices
+  progress_celebration: 2.5, // Celebrate achievements
+  morning_encouragement: 2.0, // Morning motivation
+  evening_reflection: 2.0 // Evening integration
+};
+
+// Helper function to get current time of day
+export const getCurrentTimeOfDay = (): 'morning' | 'afternoon' | 'evening' => {
+  const hour = new Date().getHours();
+  if (hour >= 6 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 18) return 'afternoon';
+  return 'evening';
 };
