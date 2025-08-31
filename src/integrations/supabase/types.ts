@@ -10765,6 +10765,7 @@ export type Database = {
           gender_identity: string | null
           id: string
           is_admin: boolean
+          is_discoverable: boolean | null
           journey_stage: string | null
           last_level_up: string | null
           last_login: string | null
@@ -10776,6 +10777,7 @@ export type Database = {
           onboarding_completed: boolean
           primary_language: string | null
           resonance_tags: string[] | null
+          show_email_to_circle_members: boolean | null
           soul_identity: string | null
           streak_days: number | null
           synchronicity_chain: string[] | null
@@ -10804,6 +10806,7 @@ export type Database = {
           gender_identity?: string | null
           id: string
           is_admin?: boolean
+          is_discoverable?: boolean | null
           journey_stage?: string | null
           last_level_up?: string | null
           last_login?: string | null
@@ -10815,6 +10818,7 @@ export type Database = {
           onboarding_completed?: boolean
           primary_language?: string | null
           resonance_tags?: string[] | null
+          show_email_to_circle_members?: boolean | null
           soul_identity?: string | null
           streak_days?: number | null
           synchronicity_chain?: string[] | null
@@ -10843,6 +10847,7 @@ export type Database = {
           gender_identity?: string | null
           id?: string
           is_admin?: boolean
+          is_discoverable?: boolean | null
           journey_stage?: string | null
           last_level_up?: string | null
           last_login?: string | null
@@ -10854,6 +10859,7 @@ export type Database = {
           onboarding_completed?: boolean
           primary_language?: string | null
           resonance_tags?: string[] | null
+          show_email_to_circle_members?: boolean | null
           soul_identity?: string | null
           streak_days?: number | null
           synchronicity_chain?: string[] | null
@@ -19400,6 +19406,16 @@ export type Database = {
       get_current_auth_info: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      get_discoverable_users: {
+        Args: { requesting_user_id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          email: string
+          id: string
+          is_circle_member: boolean
+        }[]
       }
       get_journey_audio_mapping: {
         Args: { template_id: string }
