@@ -58,6 +58,18 @@ export default function SacredScreensaver({
     return () => clearTimeout(timer);
   }, []);
 
+  // Listen for force screensaver event
+  useEffect(() => {
+    const handleForceScreensaver = () => {
+      if (enabled && isInitialized) {
+        setIsActive(true);
+      }
+    };
+
+    window.addEventListener('forceScreensaver', handleForceScreensaver);
+    return () => window.removeEventListener('forceScreensaver', handleForceScreensaver);
+  }, [enabled, isInitialized]);
+
   console.log('SacredScreensaver render:', { isActive, enabled, isInitialized });
 
   if (!enabled || !isInitialized) {
