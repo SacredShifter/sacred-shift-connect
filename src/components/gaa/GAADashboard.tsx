@@ -77,12 +77,20 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
 
   // Transport controls
   const handlePlay = async () => {
-    console.log('🎮 Play button pressed');
+    console.log('🎮 Play button pressed - START OF FUNCTION');
+    alert('Play button clicked!'); // Visual feedback
+    
     try {
+      console.log('🔍 Current GAA Engine state:', {
+        isInitialized: gaaEngine.isInitialized,
+        isPlaying: gaaEngine.isPlaying,
+        activeOscillators: gaaEngine.activeOscillators
+      });
+      
       if (!gaaEngine.isInitialized) {
         console.log('🔧 Engine not initialized, initializing...');
-        await gaaEngine.initializeGAA();
-        console.log('✅ Engine initialized successfully');
+        const result = await gaaEngine.initializeGAA();
+        console.log('🔧 Initialize result:', result);
       }
       
       console.log('▶️ Starting GAA...');
@@ -90,16 +98,20 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
       console.log('✅ GAA started successfully');
     } catch (error) {
       console.error('❌ Error in handlePlay:', error);
+      alert(`Error: ${error.message}`);
     }
   };
 
   const handleStop = async () => {
-    console.log('⏹️ Stop button pressed');
+    console.log('⏹️ Stop button pressed - START OF FUNCTION');
+    alert('Stop button clicked!'); // Visual feedback
+    
     try {
       await gaaEngine.stopGAA();
       console.log('✅ GAA stopped successfully');
     } catch (error) {
       console.error('❌ Error in handleStop:', error);
+      alert(`Error: ${error.message}`);
     }
   };
 

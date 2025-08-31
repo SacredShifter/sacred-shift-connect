@@ -86,35 +86,66 @@ export const useGAAEngine = () => {
     try {
       console.log('🎵 Initializing GAA Audio Engine...');
       
+      // Try Web Audio API first
+      console.log('🔧 Testing Web Audio API availability...');
+      if (!window.AudioContext && !(window as any).webkitAudioContext) {
+        throw new Error('Web Audio API not supported');
+      }
+      
       // Initialize Web Audio API
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      console.log('✅ AudioContext created:', audioContextRef.current.state);
       
       if (audioContextRef.current.state === 'suspended') {
         console.log('🎵 Resuming suspended audio context...');
         await audioContextRef.current.resume();
+        console.log('✅ AudioContext resumed:', audioContextRef.current.state);
       }
 
+      // Test basic audio functionality first
+      console.log('🧪 Testing basic audio functionality...');
+      const testOsc = audioContextRef.current.createOscillator();
+      const testGain = audioContextRef.current.createGain();
+      testOsc.connect(testGain);
+      testGain.connect(audioContextRef.current.destination);
+      testGain.gain.setValueAtTime(0.1, audioContextRef.current.currentTime);
+      testOsc.frequency.setValueAtTime(440, audioContextRef.current.currentTime);
+      testOsc.start();
+      
+      // Play a brief test tone
+      setTimeout(() => {
+        try {
+          testOsc.stop();
+          console.log('✅ Basic audio test completed successfully');
+        } catch (e) {
+          console.log('⚠️ Test oscillator already stopped');
+        }
+      }, 200);
+
       // Initialize Tone.js
+      console.log('🎼 Initializing Tone.js...');
       const { start } = await import('tone');
       await start();
-      console.log('🎵 Tone.js started successfully');
+      console.log('✅ Tone.js started successfully');
 
       // Initialize geometric oscillator
       const config: GeometricOscillatorConfig = {
         baseFrequency: 220,
-        gainLevel: 0.3, // Increased volume
+        gainLevel: 0.5, // Increased volume for testing
         waveform: 'sine',
         modulationDepth: 0.2,
         spatialPanning: false // Disable for better compatibility
       };
       
       geometricOscillatorRef.current = new GeometricOscillator(audioContextRef.current, config);
-      console.log('🎵 GeometricOscillator created successfully');
+      console.log('✅ GeometricOscillator created successfully');
       
       setState(prev => ({ ...prev, isInitialized: true }));
+      console.log('✅ GAA Engine fully initialized');
       return true;
     } catch (error) {
       console.error('❌ Failed to initialize GAA engine:', error);
+      alert(`GAA Initialization failed: ${error.message}`);
       return false;
     }
   }, []);
