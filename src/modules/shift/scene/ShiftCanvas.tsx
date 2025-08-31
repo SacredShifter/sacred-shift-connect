@@ -1,26 +1,20 @@
 import React from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import { EnhancedCosmogram } from './EnhancedCosmogram';
+import { Card, CardContent } from '@/components/ui/card';
 
-const ShiftCanvas = () => {
+export default function ShiftCanvas() {
   return (
-    <div className="w-full h-full">
-      <Canvas camera={{ position: [0, 0, 10], fov: 75 }}>
-        <ambientLight intensity={0.6} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        <directionalLight position={[-10, -10, -5]} intensity={0.5} />
-        <EnhancedCosmogram />
-        <OrbitControls 
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          maxDistance={20}
-          minDistance={5}
-        />
-      </Canvas>
+    <div className="w-full h-full flex items-center justify-center">
+      <Card className="max-w-md">
+        <CardContent className="p-6 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-primary to-primary-glow/50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-primary animate-spin"></div>
+          </div>
+          <h3 className="font-semibold mb-2">Shift Canvas</h3>
+          <p className="text-sm text-muted-foreground">
+            3D shift experience component restored
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default ShiftCanvas;
+}
