@@ -38,6 +38,11 @@ interface SacredPost {
   consciousness_metadata?: any;
   engagement_stats?: any;
   mood_signature?: string;
+  circle_groups?: {
+    id: string;
+    name: string;
+    description?: string;
+  };
   user_profiles?: {
     display_name?: string;
     avatar_url?: string;
@@ -99,7 +104,14 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
       setLoading(true);
       let query = supabase
         .from('circle_posts')
-        .select('*')
+        .select(`
+          *,
+          circle_groups!left(
+            id,
+            name,
+            description
+          )
+        `)
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -486,6 +498,11 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
                         {post.mood_signature && (
                           <Badge variant="secondary" className="text-xs">
                             {consciousnessStates.find(s => s.value === post.mood_signature)?.label || post.mood_signature}
+                          </Badge>
+                        )}
+                        {feedType === 'circles' && post.circle_groups && (
+                          <Badge variant="outline" className="text-xs">
+                            📿 {post.circle_groups.name}
                           </Badge>
                         )}
                       </div>
