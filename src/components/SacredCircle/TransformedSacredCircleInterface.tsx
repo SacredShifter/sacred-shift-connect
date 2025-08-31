@@ -241,7 +241,8 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
         style={{ 
           flex: '1 1 auto',
           minHeight: '200px',
-          paddingBottom: '20px'
+          paddingBottom: '180px', // Extra space for raised input area
+          marginBottom: '0px'
         }}
       >
         {loading ? (
@@ -260,17 +261,20 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
         )}
       </div>
 
-      {/* Fixed Message Input at Bottom - ALWAYS VISIBLE */}
+      {/* Fixed Message Input at Bottom - ALWAYS VISIBLE - ABOVE NAVIGATION */}
       <div 
-        className="flex-shrink-0 border-t bg-card shadow-lg z-20" 
+        className="flex-shrink-0 border-t bg-card shadow-lg z-[55]" 
         style={{ 
           minHeight: '100px',
           maxHeight: '200px',
-          position: 'sticky',
-          bottom: 0,
+          position: 'fixed',
+          bottom: '70px', // Raised above the Sacred Shifter navigation bar
+          left: 0,
+          right: 0,
+          zIndex: 55, // Above bottom toolbar (z-50) but below floating components (z-60)
           backgroundColor: 'hsl(var(--card))',
           borderTop: '2px solid hsl(var(--border))',
-          boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 -8px 16px -4px rgba(0, 0, 0, 0.15)'
         }}
       >
         {/* Attached Files Preview */}
