@@ -121,6 +121,13 @@ export const NAV_CONFIG: NavGroup[] = [
         path: "/gaa",
         tooltip: "Geometrically Aligned Audio - Advanced consciousness harmonization technology"
       },
+      { 
+        id: "learning3d", 
+        label: "3D Learning", 
+        icon: Sparkles, 
+        path: "/learning-3d",
+        tooltip: "Interactive 3D learning modules for consciousness exploration"
+      },
     ]
   },
   {
