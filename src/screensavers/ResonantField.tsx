@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { useSceneResize } from './useSceneResize';
 import config from './config.json';
 import sacredShifterLogo from '@/assets/sacred-shifter-logo.png';
+import { useScreensaverMessages } from '@/hooks/useScreensaverMessages';
 
 interface ResonantFieldProps {
   tagline?: string;
@@ -418,6 +419,13 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
   const { width, height } = useSceneResize();
   const [showFallback, setShowFallback] = useState(false);
   
+  // Sacred rotating messages
+  const { currentMessage, isVisible } = useScreensaverMessages({
+    isActive: true,
+    rotationInterval: 12000, // 12 seconds between messages
+    preventRepeats: 4
+  });
+  
   // Calculate safe area with generous padding
   const safeRadius = useMemo(() => {
     const minDimension = Math.min(width, height);
@@ -553,12 +561,14 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
               </div>
             </motion.div>
             
-            {/* CLEAN TAGLINE ONLY */}
+            {/* CLEAN TAGLINE + ROTATING MESSAGES */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 1.0 }}
+              className="space-y-6"
             >
+              {/* Static Tagline */}
               <p 
                 className="text-2xl md:text-3xl text-white/90 font-codex italic"
                 style={{
@@ -571,6 +581,43 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
               >
                 {tagline}
               </p>
+
+              {/* Rotating Sacred Messages */}
+              <div className="min-h-[80px] flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  {currentMessage && isVisible && (
+                    <motion.div
+                      key={currentMessage.id}
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                      transition={{ 
+                        duration: 0.6,
+                        ease: "easeInOut"
+                      }}
+                      className="text-center max-w-2xl"
+                    >
+                      <p 
+                        className="text-lg md:text-xl text-white/80 font-codex leading-relaxed"
+                        style={{
+                          textShadow: `
+                            0 0 15px rgba(0, 0, 0, 1),
+                            0 2px 8px rgba(0, 0, 0, 1),
+                            0 0 25px rgba(189, 147, 249, 0.4)
+                          `
+                        }}
+                      >
+                        {currentMessage.text}
+                      </p>
+                      
+                      {/* Subtle category indicator */}
+                      <div className="mt-3 opacity-60">
+                        <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-white/50 to-transparent mx-auto" />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </motion.div>
           </motion.div>
         </div>
