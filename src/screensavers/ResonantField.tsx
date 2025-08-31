@@ -598,7 +598,7 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
                       className="text-center max-w-2xl"
                     >
                       <p 
-                        className="text-lg md:text-xl text-white/80 font-codex leading-relaxed"
+                        className="text-lg md:text-xl text-white/80 font-mystical leading-relaxed"
                         style={{
                           textShadow: `
                             0 0 15px rgba(0, 0, 0, 1),

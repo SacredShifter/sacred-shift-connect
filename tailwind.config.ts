@@ -22,6 +22,7 @@ export default {
 				'sacred': ['Syne', 'system-ui', 'sans-serif'],
 				'body': ['Inter', 'system-ui', 'sans-serif'],
 				'codex': ['Crimson Text', 'serif'],
+				'mystical': ['Cinzel', 'serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
