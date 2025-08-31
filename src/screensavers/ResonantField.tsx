@@ -544,9 +544,9 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
       </Canvas>
       
       {/* Sacred Shifter Logo Overlay - MAXIMUM PROMINENCE */}
-      <div className="pointer-events-none absolute inset-0 grid place-items-center z-[99999]">
+      <div className="pointer-events-none absolute inset-0 grid place-items-center z-[99999] p-8">
         <motion.div 
-          className="text-center px-6 relative"
+          className="text-center px-6 relative bg-black/20 backdrop-blur-sm rounded-3xl p-12 border border-white/10"
           initial={{ scale: 0.8, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 1.0, ease: "easeOut" }}
@@ -564,26 +564,27 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
             }}
           >
             <SacredShifterLogo 
-              className="w-full h-full drop-shadow-[0_0_30px_rgba(139,92,246,0.8)]"
+              className="w-full h-full"
               style={{ 
-                filter: 'brightness(1.8) contrast(1.5) drop-shadow(0 0 20px rgba(255,255,255,0.6))'
+                filter: 'brightness(2.5) contrast(2) saturate(1.5) drop-shadow(0 0 30px rgba(139,92,246,1)) drop-shadow(0 0 60px rgba(255,255,255,0.8))'
               }}
             />
           </motion.div>
             
           {/* Tagline with massive shadow and glow */}
           <motion.h1 
-            className="relative text-3xl md:text-5xl lg:text-6xl font-bold text-white max-w-[54ch] mx-auto leading-tight" 
+            className="relative text-4xl md:text-6xl lg:text-7xl font-bold text-white max-w-[54ch] mx-auto leading-tight font-sacred" 
             style={{ 
               textShadow: `
                 0 0 30px rgba(0,0,0,1),
                 0 0 60px rgba(0,0,0,0.8),
                 0 0 90px rgba(0,0,0,0.6),
                 0 8px 16px rgba(0,0,0,1),
-                0 0 20px rgba(189,147,249,0.8),
-                0 0 40px rgba(255,121,198,0.6)
+                0 0 20px rgba(189,147,249,1),
+                0 0 40px rgba(255,121,198,0.8),
+                0 0 60px rgba(80,250,123,0.6)
               `,
-              filter: 'brightness(1.5) contrast(1.5)'
+              filter: 'brightness(2) contrast(1.8) saturate(1.3)'
             }}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -591,6 +592,19 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
           >
             {tagline}
           </motion.h1>
+
+          {/* Sacred subtitle */}
+          <motion.p 
+            className="text-xl md:text-2xl text-white/80 mt-6 font-codex italic"
+            style={{
+              textShadow: '0 0 20px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,1)'
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2, duration: 1.0 }}
+          >
+            Consciousness evolution platform
+          </motion.p>
         </motion.div>
       </div>
       

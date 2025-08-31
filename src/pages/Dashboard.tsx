@@ -42,10 +42,12 @@ import { GlowWrapper } from '@/components/dashboard/GlowWrapper';
 import { GAAControlPanel } from '@/components/dashboard/GAAControlPanel';
 import { GAAQuickAccess } from '@/components/dashboard/GAAQuickAccess';
 import { GAADashboard } from '@/components/gaa/GAADashboard';
+import { useDailyRoutine } from '@/providers/DailyRoutineProvider';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
+  const { state: dailyState } = useDailyRoutine();
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [isMirrorOpen, setIsMirrorOpen] = useState(false);
   const [mirrorContent, setMirrorContent] = useState('');
@@ -159,12 +161,14 @@ const Dashboard = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-accent mb-1">Next Practice</h3>
-                      <p className="text-sm text-muted-foreground">Morning Meditation</p>
+                      <h3 className="font-semibold text-accent mb-1">Today's Practice</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {dailyState.todaysStep?.title || 'Sacred Ritual Available'}
+                      </p>
                     </div>
-                    <Link to="/meditation">
+                    <Link to="/daily-ritual">
                       <Button size="sm" className="bg-accent hover:bg-accent/90">
-                        Start
+                        Begin
                         <ChevronRight className="w-3 h-3 ml-1" />
                       </Button>
                     </Link>

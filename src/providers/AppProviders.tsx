@@ -8,6 +8,7 @@ import { CosmicDataProvider } from './CosmicDataProvider';
 import { PresetProvider } from './PresetProvider';
 import { RealtimeOrchestraProvider } from './RealtimeOrchestraProvider';
 import { SafetyProvider } from './SafetyProvider';
+import { DailyRoutineProvider } from './DailyRoutineProvider';
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -20,7 +21,9 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
         <PresetProvider>
           <RealtimeOrchestraProvider>
             <SafetyProvider>
-              {children}
+              <DailyRoutineProvider>
+                {children}
+              </DailyRoutineProvider>
             </SafetyProvider>
           </RealtimeOrchestraProvider>
         </PresetProvider>

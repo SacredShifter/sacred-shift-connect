@@ -18,6 +18,7 @@ import { PerformanceMonitor } from "@/components/production/PerformanceMonitor";
 import SacredScreensaver from "@/components/SacredScreensaver";
 
 import Dashboard from './pages/Dashboard';
+import DailyRitual from './pages/DailyRitual';
 import Index from "./pages/Index";
 import Feed from "./pages/Feed";
 import Messages from "./pages/Messages";
@@ -133,6 +134,7 @@ function App() {
                 >
                   <Route path="/" element={<Index />} />
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/daily-ritual" element={<DailyRitual />} />
                   
                   {/* Redirects for old routes */}
                   <Route path="/youtube" element={<Navigate to="/library" replace />} />
