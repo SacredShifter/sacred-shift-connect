@@ -668,7 +668,7 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
       </div>
       
       {/* Enhanced Daily Routine Nudge */}
-      <DailyNudge isVisible={true} />
+      <DailyNudge isVisible={true} onNavigate={onExit} />
       
       {/* Refined hint */}
       <motion.div 

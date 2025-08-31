@@ -1,13 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useDailyRoutine } from '@/providers/DailyRoutineProvider';
 import { getCurrentTimeOfDay } from '@/data/sacredMessages';
 
 interface DailyNudgeProps {
   isVisible: boolean;
+  onNavigate?: () => void; // Callback when user clicks to navigate
 }
 
-export function DailyNudge({ isVisible }: DailyNudgeProps) {
+export function DailyNudge({ isVisible, onNavigate }: DailyNudgeProps) {
+  const navigate = useNavigate();
   const dailyRoutine = useDailyRoutine();
   const todaysStep = dailyRoutine?.getTodaysStep();
   const timeOfDay = getCurrentTimeOfDay();
@@ -16,6 +19,24 @@ export function DailyNudge({ isVisible }: DailyNudgeProps) {
   
   const { state } = dailyRoutine;
   const badgeProgress = dailyRoutine.getProgressToNextBadge();
+
+  const handlePracticeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Navigate to today's practice
+    navigate('/practice/daily');
+    onNavigate?.();
+  };
+
+  const handleStreakClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Navigate to progress/stats page
+    navigate('/progress');
+    onNavigate?.();
+  };
   
   return (
     <motion.div
@@ -33,8 +54,11 @@ export function DailyNudge({ isVisible }: DailyNudgeProps) {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
-          <div 
-            className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-full px-6 py-3 border border-white/30"
+          <motion.div 
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-full px-6 py-3 border border-white/30 cursor-pointer hover:scale-105 transition-transform"
+            onClick={handleStreakClick}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.98 }}
             style={{
               boxShadow: `
                 0 0 30px rgba(147, 51, 234, 0.4),
@@ -52,17 +76,20 @@ export function DailyNudge({ isVisible }: DailyNudgeProps) {
                 • {badgeProgress.needed - badgeProgress.current} to {badgeProgress.badgeName}
               </div>
             )}
-          </div>
+          </motion.div>
         </motion.div>
       )}
       
       {/* Enhanced Today's practice status */}
       {!todaysStep.completedAt && (
         <motion.div
-          className="relative"
+          className="relative cursor-pointer"
           initial={{ scale: 0.8, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
+          onClick={handlePracticeClick}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           {/* Glowing background */}
           <div 
@@ -74,7 +101,7 @@ export function DailyNudge({ isVisible }: DailyNudgeProps) {
           
           {/* Main content card */}
           <div 
-            className="relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-3xl p-8 border border-white/30"
+            className="relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg rounded-3xl p-8 border border-white/30 hover:border-white/40 transition-all duration-300"
             style={{
               boxShadow: `
                 0 0 40px rgba(147, 51, 234, 0.3),
@@ -112,6 +139,7 @@ export function DailyNudge({ isVisible }: DailyNudgeProps) {
                 </div>
               </div>
               
+              {/* Click indicator */}
               <motion.div 
                 className="mt-6 flex items-center justify-center"
                 animate={{ scale: [1, 1.05, 1] }}
@@ -122,6 +150,16 @@ export function DailyNudge({ isVisible }: DailyNudgeProps) {
                   <div className="w-16 h-0.5 bg-gradient-to-r from-purple-400/60 via-white/60 to-teal-400/60" />
                   <div className="w-3 h-3 rounded-full bg-gradient-to-r from-teal-400 to-blue-400 animate-pulse" />
                 </div>
+              </motion.div>
+              
+              {/* Subtle "tap to begin" hint */}
+              <motion.div
+                className="mt-4 text-white/60 text-sm font-medium"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+              >
+                Tap to begin your practice
               </motion.div>
             </motion.div>
           </div>
