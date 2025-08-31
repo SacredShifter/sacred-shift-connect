@@ -116,6 +116,23 @@ export class SacredMesh {
     }
   }
 
+  // Alias for backward compatibility
+  async send(message: SacredMeshMessage, recipientId?: string): Promise<void> {
+    return this.sendMessage(message, recipientId);
+  }
+
+  // Add contact method for compatibility
+  async addContact(contactId: string, keyBundle?: any): Promise<any> {
+    console.log('🌟 Adding contact:', contactId);
+    // Basic implementation for now
+    return { id: contactId, keyBundle };
+  }
+
+  // Disconnect method for cleanup
+  async disconnect(): Promise<void> {
+    this.destroy();
+  }
+
   onMessage(handler: (message: SacredMeshMessage, senderId: string) => void): void {
     this.messageHandlers.add(handler);
   }
@@ -158,7 +175,8 @@ export class SacredMesh {
       activeConnections: Array.from(this.adapters.values()).filter(a => a.isActive()).length,
       queue: {
         size: 0,
-        pending: 0
+        pending: 0,
+        oldestAge: 0
       },
       lastActivity: new Date()
     };

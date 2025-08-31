@@ -92,6 +92,7 @@ export interface MeshStatus {
   queue: {
     size: number;
     pending: number;
+    oldestAge: number;
   };
   lastActivity: Date;
 }
