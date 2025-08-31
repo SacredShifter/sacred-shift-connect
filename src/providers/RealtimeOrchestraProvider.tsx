@@ -74,6 +74,27 @@ export const RealtimeOrchestraProvider: React.FC<RealtimeOrchestraProviderProps>
     setPhaseError(maxDeviation);
   }, [participants]);
 
+  const processPresenceState = (presenceState: any) => {
+    const newParticipants: OrchestraParticipant[] = [];
+    
+    Object.entries(presenceState).forEach(([key, presenceArray]) => {
+      const presenceList = presenceArray as any[];
+      if (presenceList && presenceList.length > 0) {
+        const presence = presenceList[0];
+        newParticipants.push({
+          id: key,
+          userId: presence?.userId || key,
+          isLeader: presence?.isLeader || false,
+          phaseOffset: presence?.phaseOffset || 0,
+          lastSync: presence?.lastSync || Date.now(),
+          biofeedback: presence?.biofeedback || null
+        });
+      }
+    });
+    
+    setParticipants(newParticipants);
+  };
+
   const createSession = async (): Promise<string | null> => {
     try {
       const newSessionId = `orchestra_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -82,23 +103,7 @@ export const RealtimeOrchestraProvider: React.FC<RealtimeOrchestraProviderProps>
       const newChannel = supabase.channel(`orchestra:${newSessionId}`)
         .on('presence', { event: 'sync' }, () => {
           const presenceState = newChannel.presenceState();
-          const newParticipants: OrchestraParticipant[] = [];
-          
-          Object.keys(presenceState).forEach(key => {
-            const presence = presenceState[key][0];
-            if (presence) {
-              newParticipants.push({
-                id: key,
-                userId: presence.userId,
-                isLeader: presence.isLeader || false,
-                phaseOffset: presence.phaseOffset || 0,
-                lastSync: presence.lastSync || Date.now(),
-                biofeedback: presence.biofeedback
-              });
-            }
-          });
-          
-          setParticipants(newParticipants);
+          processPresenceState(presenceState);
         })
         .on('presence', { event: 'join' }, ({ key, newPresences }) => {
           console.log('Orchestra participant joined:', key);
@@ -135,23 +140,7 @@ export const RealtimeOrchestraProvider: React.FC<RealtimeOrchestraProviderProps>
       const newChannel = supabase.channel(`orchestra:${targetSessionId}`)
         .on('presence', { event: 'sync' }, () => {
           const presenceState = newChannel.presenceState();
-          const newParticipants: OrchestraParticipant[] = [];
-          
-          Object.keys(presenceState).forEach(key => {
-            const presence = presenceState[key][0];
-            if (presence) {
-              newParticipants.push({
-                id: key,
-                userId: presence.userId,
-                isLeader: presence.isLeader || false,
-                phaseOffset: presence.phaseOffset || 0,
-                lastSync: presence.lastSync || Date.now(),
-                biofeedback: presence.biofeedback
-              });
-            }
-          });
-          
-          setParticipants(newParticipants);
+          processPresenceState(presenceState);
         })
         .on('presence', { event: 'join' }, ({ key, newPresences }) => {
           console.log('Orchestra participant joined:', key);

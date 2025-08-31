@@ -57,11 +57,10 @@ const createDefaultPresets = (): GAAPreset[] => {
       tradition,
       archetype: 'moon',
       polarity: {
-        darkWeight: tradition === 'etteilla' ? 0.6 : 0.4,
-        lightBias: false,
-        adaptiveResponse: true,
-        maxDarkDepth: 0.8,
-        emergencyLight: false
+        lightChannel: { enabled: true, amplitude: tradition === 'etteilla' ? 0.4 : 0.6, phase: 0, resonanceMode: 'harmonic' },
+        darkChannel: { enabled: true, amplitude: tradition === 'etteilla' ? 0.6 : 0.4, phase: Math.PI, resonanceMode: 'chaotic' },
+        polarityBalance: tradition === 'etteilla' ? -0.2 : 0.2,
+        darkEnergyDrift: { driftRate: 0.05, expansionFactor: 1.2 }
       },
       audioParams: {
         darkPhaseHonor: tradition === 'rws' ? 120 : tradition === 'marseille' ? 150 : tradition === 'thoth' ? 140 : 90,
@@ -79,11 +78,10 @@ const createDefaultPresets = (): GAAPreset[] => {
       tradition,
       archetype: 'tower',
       polarity: {
-        darkWeight: 0.7,
-        lightBias: false,
-        adaptiveResponse: true,
-        maxDarkDepth: 0.9,
-        emergencyLight: false
+        lightChannel: { enabled: true, amplitude: 0.3, phase: 0, resonanceMode: 'harmonic' },
+        darkChannel: { enabled: true, amplitude: 0.7, phase: Math.PI, resonanceMode: 'chaotic' },
+        polarityBalance: -0.7,
+        darkEnergyDrift: { driftRate: 0.1, expansionFactor: 1.5 }
       },
       audioParams: {
         darkPhaseHonor: 60,
@@ -101,11 +99,10 @@ const createDefaultPresets = (): GAAPreset[] => {
       tradition,
       archetype: 'devil',
       polarity: {
-        darkWeight: 0.8,
-        lightBias: false,
-        adaptiveResponse: false, // Fixed for trap effect
-        maxDarkDepth: 0.95,
-        emergencyLight: false
+        lightChannel: { enabled: true, amplitude: 0.2, phase: 0, resonanceMode: 'harmonic' },
+        darkChannel: { enabled: true, amplitude: 0.8, phase: Math.PI, resonanceMode: 'chaotic' },
+        polarityBalance: -0.8,
+        darkEnergyDrift: { driftRate: 0.15, expansionFactor: 1.8 }
       },
       audioParams: {
         darkPhaseHonor: 30,
@@ -123,11 +120,10 @@ const createDefaultPresets = (): GAAPreset[] => {
       tradition,
       archetype: 'death',
       polarity: {
-        darkWeight: 0.5,
-        lightBias: false,
-        adaptiveResponse: true,
-        maxDarkDepth: 0.9,
-        emergencyLight: false
+        lightChannel: { enabled: true, amplitude: 0.5, phase: 0, resonanceMode: 'harmonic' },
+        darkChannel: { enabled: true, amplitude: 0.5, phase: Math.PI, resonanceMode: 'adaptive' },
+        polarityBalance: 0,
+        darkEnergyDrift: { driftRate: 0.08, expansionFactor: 1.3 }
       },
       audioParams: {
         darkPhaseHonor: 45,
@@ -145,11 +141,10 @@ const createDefaultPresets = (): GAAPreset[] => {
       tradition,
       archetype: 'sun',
       polarity: {
-        darkWeight: 0.2,
-        lightBias: true,
-        adaptiveResponse: true,
-        maxDarkDepth: 0.5,
-        emergencyLight: false
+        lightChannel: { enabled: true, amplitude: 0.8, phase: 0, resonanceMode: 'harmonic' },
+        darkChannel: { enabled: true, amplitude: 0.2, phase: Math.PI, resonanceMode: 'harmonic' },
+        polarityBalance: 0.8,
+        darkEnergyDrift: { driftRate: 0.02, expansionFactor: 1.1 }
       },
       audioParams: {
         darkPhaseHonor: 25,

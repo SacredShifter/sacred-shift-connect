@@ -94,7 +94,7 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
   const safetyAlerts = [
     ...(biofeedback.biofeedbackState?.heartRateVariability && 
         biofeedback.biofeedbackState.heartRateVariability < 20 ? ['HRV low - monitoring'] : []),
-    ...(gaaEngine.shadowEngine?.currentPhase !== 'activation' ? ['Shadow engine active'] : []),
+    ...(gaaEngine.shadowEngine ? ['Shadow engine active'] : []),
     ...(orchestra.connectionStatus === 'error' ? ['Orchestra connection error'] : [])
   ];
 
@@ -330,21 +330,21 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
                   <div>
                     <div className="text-sm text-muted-foreground">Breathing</div>
                     <div className="text-lg font-bold">
-                      {biofeedback.biofeedbackState?.breathingPattern?.rate?.toFixed(1) || '--'}/min
+                      {biofeedback.biofeedbackState?.breathingRate?.toFixed(1) || '--'}/min
                     </div>
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground">Alpha</div>
                     <div className="text-lg font-bold">
-                      {biofeedback.biofeedbackState?.brainwaveActivity?.alpha ? 
-                        `${(biofeedback.biofeedbackState.brainwaveActivity.alpha * 100).toFixed(0)}%` : '--'}
+                      {biofeedback.biofeedbackState?.brainwaveAlpha ? 
+                        `${(biofeedback.biofeedbackState.brainwaveAlpha * 100).toFixed(0)}%` : '--'}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground">Balance</div>
+                    <div className="text-sm text-muted-foreground">Skin Conductance</div>
                     <div className="text-lg font-bold">
-                      {biofeedback.biofeedbackState?.autonomicBalance?.sympathetic ? 
-                        `${(biofeedback.biofeedbackState.autonomicBalance.sympathetic * 100).toFixed(0)}%` : '--'}
+                      {biofeedback.biofeedbackState?.skinConductance ? 
+                        `${(biofeedback.biofeedbackState.skinConductance * 100).toFixed(0)}%` : '--'}
                     </div>
                   </div>
                 </div>
@@ -380,7 +380,7 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
               gaaEngineState={{
                 isInitialized: gaaEngine.isInitialized,
                 isPlaying: gaaEngine.isPlaying,
-                currentPhase: gaaEngine.shadowEngine?.currentPhase || 'idle',
+                currentPhase: 'idle' as const,
                 oscillatorCount: gaaEngine.activeOscillators,
                 currentGeometry: {
                   complexity: 0.5,
@@ -396,7 +396,7 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
               onExportSession={() => {
                 const sessionData = {
                   duration: sessionDuration,
-                  darkPhaseSeconds: gaaEngine.shadowEngine?.isActive ? 30 : 0,
+                  darkPhaseSeconds: gaaEngine.shadowEngine ? 30 : 0,
                   avgPolarityBalance: polarity.polarityBalance,
                   archetype: selectedArchetype,
                   tradition,
