@@ -5,38 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
 import { useSceneResize } from './useSceneResize';
 import config from './config.json';
-
-const SacredShifterLogo = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
-  <svg className={className} style={style} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="ssLogoGradient" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#BD93F9" stopOpacity="1" />
-        <stop offset="50%" stopColor="#FF79C6" stopOpacity="0.9" />
-        <stop offset="100%" stopColor="#50FA7B" stopOpacity="0.8" />
-      </radialGradient>
-    </defs>
-    
-    {/* Sacred Infinity Symbol - MUCH MORE VISIBLE */}
-    <path
-      d="M24 48C24 35.85 32.95 26 44 26C55.05 26 64 35.85 64 48C64 60.15 55.05 70 44 70C32.95 70 24 60.15 24 48Z"
-      fill="url(#ssLogoGradient)"
-      stroke="#FFFFFF"
-      strokeWidth="2"
-    />
-    <path
-      d="M32 48C32 60.15 40.95 70 52 70C63.05 70 72 60.15 72 48C72 35.85 63.05 26 52 26C40.95 26 32 35.85 32 48Z"
-      fill="url(#ssLogoGradient)"
-      stroke="#FFFFFF"
-      strokeWidth="2"
-      opacity="0.8"
-    />
-    
-    {/* Central Mandala - BRIGHT GOLD */}
-    <circle cx="48" cy="48" r="8" fill="#FFD700" stroke="#FFFFFF" strokeWidth="2" />
-    <circle cx="48" cy="48" r="12" fill="none" stroke="#FFFFFF" strokeWidth="2" opacity="0.8" />
-    <circle cx="48" cy="48" r="16" fill="none" stroke="#BD93F9" strokeWidth="1" opacity="0.6" />
-  </svg>
-);
+import sacredShifterLogo from '@/assets/sacred-shifter-logo.png';
 
 interface ResonantFieldProps {
   tagline?: string;
@@ -577,8 +546,10 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
                   `
                 }}
               >
-                <SacredShifterLogo 
-                  className="w-5/6 h-5/6"
+                <img 
+                  src={sacredShifterLogo}
+                  alt="Sacred Shifter Logo"
+                  className="w-5/6 h-5/6 object-contain"
                   style={{ 
                     filter: 'drop-shadow(0 0 20px rgba(189, 147, 249, 0.8))'
                   }}
