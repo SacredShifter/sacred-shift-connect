@@ -84,53 +84,78 @@ export const useGAAEngine = () => {
 
   const initializeGAA = useCallback(async (): Promise<boolean> => {
     try {
+      console.log('🎵 Initializing GAA Audio Engine...');
+      
       // Initialize Web Audio API
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       
       if (audioContextRef.current.state === 'suspended') {
+        console.log('🎵 Resuming suspended audio context...');
         await audioContextRef.current.resume();
       }
+
+      // Initialize Tone.js
+      const { start } = await import('tone');
+      await start();
+      console.log('🎵 Tone.js started successfully');
 
       // Initialize geometric oscillator
       const config: GeometricOscillatorConfig = {
         baseFrequency: 220,
-        gainLevel: 0.15,
+        gainLevel: 0.3, // Increased volume
         waveform: 'sine',
         modulationDepth: 0.2,
-        spatialPanning: true
+        spatialPanning: false // Disable for better compatibility
       };
       
       geometricOscillatorRef.current = new GeometricOscillator(audioContextRef.current, config);
+      console.log('🎵 GeometricOscillator created successfully');
       
       setState(prev => ({ ...prev, isInitialized: true }));
       return true;
     } catch (error) {
-      console.error('Failed to initialize GAA engine:', error);
+      console.error('❌ Failed to initialize GAA engine:', error);
       return false;
     }
   }, []);
 
   const startGAA = useCallback(async () => {
+    console.log('🚀 Starting GAA Engine...');
+    
     if (!state.isInitialized) {
+      console.log('🔧 GAA not initialized, initializing now...');
       const initialized = await initializeGAA();
-      if (!initialized) return;
+      if (!initialized) {
+        console.error('❌ Failed to initialize GAA engine');
+        return;
+      }
     }
 
     // Start safety monitoring
     if (safetySystemRef.current) {
       safetySystemRef.current.startMonitoring();
+      console.log('✅ Safety monitoring started');
     }
 
     // Start cosmic data streaming
     if (cosmicStreamRef.current) {
       cosmicStreamRef.current.startStreaming();
+      console.log('✅ Cosmic data streaming started');
     }
 
     // Generate initial geometry and start oscillators
     if (layerManager && geometricOscillatorRef.current) {
+      console.log('🎼 Generating composite geometry...');
       const geometries = layerManager.generateCompositeGeometry(8);
+      console.log(`📐 Generated ${geometries.length} geometries`);
       
       geometries.forEach((geometry, index) => {
+        console.log(`🎵 Creating oscillator ${index} with geometry:`, {
+          vertices: geometry.vertices.length,
+          center: geometry.center,
+          radius: geometry.radius
+        });
+        
         geometricOscillatorRef.current!.createGeometricOscillator(
           geometry, 
           `gaa-osc-${index}`, 
@@ -144,8 +169,47 @@ export const useGAAEngine = () => {
         activeOscillators: geometries.length,
         currentGeometry: geometries
       }));
+      
+      console.log(`✅ GAA Engine started with ${geometries.length} active oscillators`);
     } else {
-      setState(prev => ({ ...prev, isPlaying: true, activeOscillators: 8 }));
+      // Fallback: create simple test oscillators with mock geometry
+      console.log('⚠️ No layer manager available, creating fallback oscillators...');
+      
+      if (geometricOscillatorRef.current) {
+        for (let i = 0; i < 4; i++) {
+          const mockGeometry: NormalizedGeometry = {
+            vertices: Array.from({ length: 8 }, (_, idx) => [
+              Math.cos(idx * Math.PI / 4) * (1 + i * 0.2),
+              Math.sin(idx * Math.PI / 4) * (1 + i * 0.2),
+              i * 0.5
+            ]),
+            faces: [[0, 1, 2], [2, 3, 0]],
+            normals: [[0, 0, 1], [0, 0, 1]],
+            center: [i * 0.3, 0, 0],
+            radius: 1 + i * 0.3,
+            sacredRatios: {
+              phi: 1.618033988749895,
+              pi: Math.PI,
+              sqrt2: Math.sqrt(2)
+            }
+          };
+          
+          console.log(`🎵 Creating fallback oscillator ${i}`);
+          geometricOscillatorRef.current.createGeometricOscillator(
+            mockGeometry, 
+            `fallback-osc-${i}`, 
+            4
+          );
+        }
+        
+        setState(prev => ({ 
+          ...prev, 
+          isPlaying: true, 
+          activeOscillators: 4
+        }));
+        
+        console.log('✅ GAA Engine started with 4 fallback oscillators');
+      }
     }
   }, [state.isInitialized, initializeGAA, layerManager]);
 

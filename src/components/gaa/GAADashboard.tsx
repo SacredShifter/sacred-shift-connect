@@ -77,14 +77,30 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
 
   // Transport controls
   const handlePlay = async () => {
-    if (!gaaEngine.isInitialized) {
-      await gaaEngine.initializeGAA();
+    console.log('🎮 Play button pressed');
+    try {
+      if (!gaaEngine.isInitialized) {
+        console.log('🔧 Engine not initialized, initializing...');
+        await gaaEngine.initializeGAA();
+        console.log('✅ Engine initialized successfully');
+      }
+      
+      console.log('▶️ Starting GAA...');
+      await gaaEngine.startGAA();
+      console.log('✅ GAA started successfully');
+    } catch (error) {
+      console.error('❌ Error in handlePlay:', error);
     }
-    await gaaEngine.startGAA();
   };
 
   const handleStop = async () => {
-    await gaaEngine.stopGAA();
+    console.log('⏹️ Stop button pressed');
+    try {
+      await gaaEngine.stopGAA();
+      console.log('✅ GAA stopped successfully');
+    } catch (error) {
+      console.error('❌ Error in handleStop:', error);
+    }
   };
 
   const handlePanic = () => {

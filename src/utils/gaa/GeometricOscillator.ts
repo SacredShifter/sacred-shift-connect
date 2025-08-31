@@ -22,7 +22,6 @@ export interface NormalizedGeometry {
 }
 
 export class GeometricOscillator {
-  private audioContext: AudioContext;
   private config: GeometricOscillatorConfig;
   private oscillators: Map<string, {
     osc: Tone.Oscillator;
@@ -35,10 +34,11 @@ export class GeometricOscillator {
   private masterCompressor: Tone.Compressor;
 
   constructor(audioContext: AudioContext, config: GeometricOscillatorConfig) {
-    this.audioContext = audioContext;
     this.config = config;
     
-    // Setup master audio chain
+    console.log('🎛️ Setting up GAA master audio chain...');
+    
+    // Setup master audio chain - Tone.js handles the AudioContext internally
     this.masterGain = new Tone.Gain(config.gainLevel);
     this.masterCompressor = new Tone.Compressor({
       threshold: -24,
@@ -49,6 +49,8 @@ export class GeometricOscillator {
     
     this.masterGain.connect(this.masterCompressor);
     this.masterCompressor.toDestination();
+    
+    console.log('✅ GAA master audio chain ready');
   }
 
   /**
@@ -59,57 +61,67 @@ export class GeometricOscillator {
     id: string, 
     harmonics: number = 4
   ): void {
+    console.log(`🎼 Creating geometric oscillator: ${id}`);
+    
     if (this.oscillators.has(id)) {
+      console.log(`🔄 Stopping existing oscillator: ${id}`);
       this.stopOscillator(id);
     }
 
-    // Calculate frequency based on geometry
-    const frequency = this.calculateGeometricFrequency(geometry);
-    
-    // Create oscillator with harmonic content
-    const osc = new Tone.Oscillator({
-      frequency: frequency,
-      type: this.config.waveform
-    });
+    try {
+      // Calculate frequency based on geometry
+      const frequency = this.calculateGeometricFrequency(geometry);
+      console.log(`🎵 Calculated frequency for ${id}: ${frequency.toFixed(2)}Hz`);
+      
+      // Create oscillator with harmonic content
+      const osc = new Tone.Oscillator({
+        frequency: frequency,
+        type: this.config.waveform
+      });
 
-    // Create filter based on geometric complexity
-    const cutoff = this.calculateFilterFrequency(geometry);
-    const filter = new Tone.Filter(cutoff, 'lowpass', -12);
+      // Create filter based on geometric complexity
+      const cutoff = this.calculateFilterFrequency(geometry);
+      const filter = new Tone.Filter(cutoff, 'lowpass', -12);
 
-    // Create gain envelope based on geometry
-    const gain = new Tone.Gain(0);
-    const envelope = new Tone.AmplitudeEnvelope({
-      attack: 0.1,
-      decay: 0.2,
-      sustain: 0.8,
-      release: 0.5
-    });
+      // Create gain envelope based on geometry
+      const gain = new Tone.Gain(0.5);
+      const envelope = new Tone.AmplitudeEnvelope({
+        attack: 0.2,
+        decay: 0.3,
+        sustain: 0.7,
+        release: 0.8
+      });
 
-    // Create 3D panner for spatial positioning
-    const panner = new Tone.Panner3D({
-      positionX: geometry.center[0] * 10,
-      positionY: geometry.center[1] * 10,
-      positionZ: geometry.center[2] * 10
-    });
+      // Create 3D panner for spatial positioning
+      const panner = new Tone.Panner3D({
+        positionX: geometry.center[0] * 5,
+        positionY: geometry.center[1] * 5,
+        positionZ: geometry.center[2] * 5
+      });
 
-    // Connect audio chain
-    osc.connect(filter);
-    filter.connect(envelope);
-    envelope.connect(gain);
-    
-    if (this.config.spatialPanning) {
-      gain.connect(panner);
-      panner.connect(this.masterGain);
-    } else {
-      gain.connect(this.masterGain);
+      // Connect audio chain
+      osc.connect(filter);
+      filter.connect(envelope);
+      envelope.connect(gain);
+      
+      if (this.config.spatialPanning) {
+        gain.connect(panner);
+        panner.connect(this.masterGain);
+      } else {
+        gain.connect(this.masterGain);
+      }
+
+      // Store oscillator components
+      this.oscillators.set(id, { osc, filter, gain, panner, envelope });
+
+      // Start oscillator
+      osc.start();
+      envelope.triggerAttack();
+      
+      console.log(`✅ Oscillator ${id} started successfully`);
+    } catch (error) {
+      console.error(`❌ Failed to create oscillator ${id}:`, error);
     }
-
-    // Store oscillator components
-    this.oscillators.set(id, { osc, filter, gain, panner, envelope });
-
-    // Start oscillator
-    osc.start();
-    envelope.triggerAttack();
   }
 
   /**
@@ -187,31 +199,46 @@ export class GeometricOscillator {
     const components = this.oscillators.get(id);
     if (!components) return;
 
+    console.log(`🛑 Stopping oscillator: ${id}`);
     const { osc, filter, gain, panner, envelope } = components;
     
-    // Graceful release
-    envelope.triggerRelease();
-    
-    // Stop after release time
-    setTimeout(() => {
-      osc.stop();
-      osc.disconnect();
-      filter.disconnect();
-      gain.disconnect();
-      panner.disconnect();
-      envelope.disconnect();
+    try {
+      // Graceful release
+      envelope.triggerRelease();
       
+      // Stop after release time
+      setTimeout(() => {
+        try {
+          osc.stop();
+          osc.disconnect();
+          filter.disconnect();
+          gain.disconnect();
+          panner.disconnect();
+          envelope.disconnect();
+          
+          this.oscillators.delete(id);
+          console.log(`✅ Oscillator ${id} stopped and cleaned up`);
+        } catch (error) {
+          console.error(`❌ Error cleaning up oscillator ${id}:`, error);
+          this.oscillators.delete(id);
+        }
+      }, 900); // Wait for release
+    } catch (error) {
+      console.error(`❌ Error stopping oscillator ${id}:`, error);
       this.oscillators.delete(id);
-    }, 600); // Wait for release
+    }
   }
 
   /**
    * Stop all oscillators
    */
   stopAll(): void {
-    Array.from(this.oscillators.keys()).forEach(id => {
+    console.log(`🛑 Stopping all ${this.oscillators.size} oscillators`);
+    const oscillatorIds = Array.from(this.oscillators.keys());
+    oscillatorIds.forEach(id => {
       this.stopOscillator(id);
     });
+    console.log('✅ All oscillators stopped');
   }
 
   /**
