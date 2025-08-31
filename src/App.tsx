@@ -177,7 +177,9 @@ function App() {
                   
                   {/* Account Routes */}
                   <Route path="/profile" element={<Profile />} />
-                  <Route path="/settings" element={<Settings />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
                   <Route path="/support-the-shift" element={<Support />} />
                   
                   {/* Admin Routes */}

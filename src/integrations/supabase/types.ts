@@ -3500,6 +3500,78 @@ export type Database = {
           },
         ]
       }
+      compliance_audit_trail: {
+        Row: {
+          action_type: string
+          actor_id: string | null
+          after_state: Json | null
+          australian_privacy_principle: string | null
+          before_state: Json | null
+          breach_notification_sent: boolean | null
+          compliance_hash: string
+          created_at: string
+          data_categories: string[] | null
+          data_controller: string | null
+          entity_id: string | null
+          entity_type: string
+          gdpr_lawful_basis: string | null
+          id: string
+          legal_basis: string | null
+          processing_purpose: string | null
+          retention_period: number | null
+          session_id: string | null
+          source_ip: unknown | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          actor_id?: string | null
+          after_state?: Json | null
+          australian_privacy_principle?: string | null
+          before_state?: Json | null
+          breach_notification_sent?: boolean | null
+          compliance_hash: string
+          created_at?: string
+          data_categories?: string[] | null
+          data_controller?: string | null
+          entity_id?: string | null
+          entity_type: string
+          gdpr_lawful_basis?: string | null
+          id?: string
+          legal_basis?: string | null
+          processing_purpose?: string | null
+          retention_period?: number | null
+          session_id?: string | null
+          source_ip?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          actor_id?: string | null
+          after_state?: Json | null
+          australian_privacy_principle?: string | null
+          before_state?: Json | null
+          breach_notification_sent?: boolean | null
+          compliance_hash?: string
+          created_at?: string
+          data_categories?: string[] | null
+          data_controller?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          gdpr_lawful_basis?: string | null
+          id?: string
+          legal_basis?: string | null
+          processing_purpose?: string | null
+          retention_period?: number | null
+          session_id?: string | null
+          source_ip?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       conscious_cloud_capsules: {
         Row: {
           capsule_id: string
@@ -3992,6 +4064,54 @@ export type Database = {
           user_id?: string
           valid_until?: string
           weather_type?: string
+        }
+        Relationships: []
+      }
+      consent_logs: {
+        Row: {
+          consent_given: boolean
+          consent_method: string | null
+          consent_timestamp: string
+          consent_type: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          policy_version: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+          withdrawal_reason: string | null
+          withdrawal_timestamp: string | null
+        }
+        Insert: {
+          consent_given: boolean
+          consent_method?: string | null
+          consent_timestamp?: string
+          consent_type: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          policy_version?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+          withdrawal_reason?: string | null
+          withdrawal_timestamp?: string | null
+        }
+        Update: {
+          consent_given?: boolean
+          consent_method?: string | null
+          consent_timestamp?: string
+          consent_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          policy_version?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+          withdrawal_reason?: string | null
+          withdrawal_timestamp?: string | null
         }
         Relationships: []
       }
@@ -5144,6 +5264,132 @@ export type Database = {
           submitted_at?: string
           user_agent?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      data_access_requests_enhanced: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          delivery_method: string | null
+          id: string
+          legal_basis_override: string | null
+          processor_notes: string | null
+          request_details: Json
+          request_type: string
+          requested_at: string
+          response_data: Json | null
+          retention_override_days: number | null
+          status: string
+          updated_at: string
+          user_id: string
+          user_verification_method: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          delivery_method?: string | null
+          id?: string
+          legal_basis_override?: string | null
+          processor_notes?: string | null
+          request_details?: Json
+          request_type: string
+          requested_at?: string
+          response_data?: Json | null
+          retention_override_days?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          user_verification_method?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          delivery_method?: string | null
+          id?: string
+          legal_basis_override?: string | null
+          processor_notes?: string | null
+          request_details?: Json
+          request_type?: string
+          requested_at?: string
+          response_data?: Json | null
+          retention_override_days?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          user_verification_method?: string | null
+        }
+        Relationships: []
+      }
+      data_breach_notifications: {
+        Row: {
+          affected_user_ids: string[] | null
+          affected_users_count: number
+          breach_contained_at: string | null
+          breach_discovered_at: string
+          breach_id: string
+          breach_occurred_at: string | null
+          breach_type: string
+          ccpa_notification_sent: boolean | null
+          created_at: string
+          created_by: string
+          data_categories_affected: string[]
+          description: string
+          gdpr_dpa_notified_at: string | null
+          id: string
+          impact_assessment: Json
+          oaic_notified_at: string | null
+          remediation_actions: string[] | null
+          severity: string
+          status: string
+          updated_at: string
+          users_notified_at: string | null
+        }
+        Insert: {
+          affected_user_ids?: string[] | null
+          affected_users_count?: number
+          breach_contained_at?: string | null
+          breach_discovered_at: string
+          breach_id: string
+          breach_occurred_at?: string | null
+          breach_type: string
+          ccpa_notification_sent?: boolean | null
+          created_at?: string
+          created_by: string
+          data_categories_affected: string[]
+          description: string
+          gdpr_dpa_notified_at?: string | null
+          id?: string
+          impact_assessment?: Json
+          oaic_notified_at?: string | null
+          remediation_actions?: string[] | null
+          severity: string
+          status?: string
+          updated_at?: string
+          users_notified_at?: string | null
+        }
+        Update: {
+          affected_user_ids?: string[] | null
+          affected_users_count?: number
+          breach_contained_at?: string | null
+          breach_discovered_at?: string
+          breach_id?: string
+          breach_occurred_at?: string | null
+          breach_type?: string
+          ccpa_notification_sent?: boolean | null
+          created_at?: string
+          created_by?: string
+          data_categories_affected?: string[]
+          description?: string
+          gdpr_dpa_notified_at?: string | null
+          id?: string
+          impact_assessment?: Json
+          oaic_notified_at?: string | null
+          remediation_actions?: string[] | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          users_notified_at?: string | null
         }
         Relationships: []
       }
@@ -6794,6 +7040,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "gaa_sessions_preset_id_fkey"
+            columns: ["preset_id"]
+            isOneToOne: false
+            referencedRelation: "gaa_presets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gaa_sessions_extended: {
+        Row: {
+          collective_state: Json
+          created_at: string
+          ended_at: string | null
+          id: string
+          participant_ids: string[]
+          preset_id: string | null
+          session_analytics: Json | null
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          collective_state?: Json
+          created_at?: string
+          ended_at?: string | null
+          id: string
+          participant_ids?: string[]
+          preset_id?: string | null
+          session_analytics?: Json | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          collective_state?: Json
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          participant_ids?: string[]
+          preset_id?: string | null
+          session_analytics?: Json | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gaa_sessions_extended_preset_id_fkey"
             columns: ["preset_id"]
             isOneToOne: false
             referencedRelation: "gaa_presets"
@@ -8482,6 +8775,96 @@ export type Database = {
           thematic_clusters?: string[] | null
           title?: string
           tool_reference?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      local_encryption_keys: {
+        Row: {
+          algorithm: string
+          created_at: string
+          encrypted_master_key: string
+          id: string
+          key_derivation_salt: string
+          key_version: number
+          last_used_at: string | null
+          rotation_scheduled_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          algorithm?: string
+          created_at?: string
+          encrypted_master_key: string
+          id?: string
+          key_derivation_salt: string
+          key_version?: number
+          last_used_at?: string | null
+          rotation_scheduled_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          algorithm?: string
+          created_at?: string
+          encrypted_master_key?: string
+          id?: string
+          key_derivation_salt?: string
+          key_version?: number
+          last_used_at?: string | null
+          rotation_scheduled_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      local_sync_queue: {
+        Row: {
+          created_at: string
+          data_payload: Json
+          error_message: string | null
+          id: string
+          max_retries: number
+          operation: string
+          priority: number
+          record_id: string
+          retry_count: number
+          sync_attempted_at: string | null
+          sync_completed_at: string | null
+          sync_status: string
+          table_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_payload?: Json
+          error_message?: string | null
+          id?: string
+          max_retries?: number
+          operation: string
+          priority?: number
+          record_id: string
+          retry_count?: number
+          sync_attempted_at?: string | null
+          sync_completed_at?: string | null
+          sync_status?: string
+          table_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_payload?: Json
+          error_message?: string | null
+          id?: string
+          max_retries?: number
+          operation?: string
+          priority?: number
+          record_id?: string
+          retry_count?: number
+          sync_attempted_at?: string | null
+          sync_completed_at?: string | null
+          sync_status?: string
+          table_name?: string
           user_id?: string
         }
         Relationships: []
@@ -10261,6 +10644,51 @@ export type Database = {
           session_tracking_opt_in?: boolean | null
           social_visibility?: Json | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      privacy_preferences_enhanced: {
+        Row: {
+          category: string
+          created_at: string
+          data_controller: string | null
+          data_retention_days: number | null
+          id: string
+          last_updated: string
+          legal_basis: string | null
+          preference_key: string
+          preference_value: boolean
+          processing_purpose: string | null
+          subcategory: string | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          data_controller?: string | null
+          data_retention_days?: number | null
+          id?: string
+          last_updated?: string
+          legal_basis?: string | null
+          preference_key: string
+          preference_value?: boolean
+          processing_purpose?: string | null
+          subcategory?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          data_controller?: string | null
+          data_retention_days?: number | null
+          id?: string
+          last_updated?: string
+          legal_basis?: string | null
+          preference_key?: string
+          preference_value?: boolean
+          processing_purpose?: string | null
+          subcategory?: string | null
           user_id?: string
         }
         Relationships: []
@@ -14571,6 +14999,27 @@ export type Database = {
         }
         Relationships: []
       }
+      tarot_cards: {
+        Row: {
+          created_at: string | null
+          id: string
+          index_small: number
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          index_small: number
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          index_small?: number
+          title?: string
+        }
+        Relationships: []
+      }
       tarot_module_progress: {
         Row: {
           completion_date: string | null
@@ -14661,6 +15110,120 @@ export type Database = {
             columns: ["tarot_progress_id"]
             isOneToOne: false
             referencedRelation: "tarot_module_progress"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tarot_traditions: {
+        Row: {
+          created_at: string | null
+          era: string | null
+          id: string
+          label: string
+          provenance: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          era?: string | null
+          id: string
+          label: string
+          provenance?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          era?: string | null
+          id?: string
+          label?: string
+          provenance?: Json | null
+        }
+        Relationships: []
+      }
+      tarot_variant_media: {
+        Row: {
+          card_id: string
+          created_at: string | null
+          credit: string | null
+          kind: string
+          tradition_id: string
+          url: string | null
+        }
+        Insert: {
+          card_id: string
+          created_at?: string | null
+          credit?: string | null
+          kind: string
+          tradition_id: string
+          url?: string | null
+        }
+        Update: {
+          card_id?: string
+          created_at?: string | null
+          credit?: string | null
+          kind?: string
+          tradition_id?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarot_variant_media_card_id_tradition_id_fkey"
+            columns: ["card_id", "tradition_id"]
+            isOneToOne: false
+            referencedRelation: "tarot_variants"
+            referencedColumns: ["card_id", "tradition_id"]
+          },
+        ]
+      }
+      tarot_variants: {
+        Row: {
+          card_id: string
+          correspondences: Json | null
+          created_at: string | null
+          doctrine: Json
+          iconography: Json
+          preset_id: string | null
+          tradition_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          card_id: string
+          correspondences?: Json | null
+          created_at?: string | null
+          doctrine?: Json
+          iconography?: Json
+          preset_id?: string | null
+          tradition_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          card_id?: string
+          correspondences?: Json | null
+          created_at?: string | null
+          doctrine?: Json
+          iconography?: Json
+          preset_id?: string | null
+          tradition_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarot_variants_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "tarot_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarot_variants_preset_id_fkey"
+            columns: ["preset_id"]
+            isOneToOne: false
+            referencedRelation: "gaa_presets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarot_variants_tradition_id_fkey"
+            columns: ["tradition_id"]
+            isOneToOne: false
+            referencedRelation: "tarot_traditions"
             referencedColumns: ["id"]
           },
         ]
@@ -18500,6 +19063,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      delete_user_data_compliant: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       disablelongtransactions: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -19077,6 +19644,19 @@ export type Database = {
           p_changes?: Json
           p_entity_id: string
           p_entity_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
+      log_compliance_event: {
+        Args: {
+          p_action_type: string
+          p_actor_id: string
+          p_after_state?: Json
+          p_before_state?: Json
+          p_entity_id: string
+          p_entity_type: string
+          p_legal_basis?: string
           p_user_id: string
         }
         Returns: string
