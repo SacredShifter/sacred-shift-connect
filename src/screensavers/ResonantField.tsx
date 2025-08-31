@@ -506,7 +506,7 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
         <Scene safeRadius={safeRadius} particleCount={particleCount} />
       </Canvas>
       
-      {/* SACRED SHIFTER LOGO - BULLETPROOF VISIBILITY */}
+      {/* SACRED SHIFTER LOGO - CLEAN AND SIMPLE */}
       <div 
         className="pointer-events-none fixed inset-0 z-[999999]" 
         style={{ 
@@ -521,70 +521,51 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 1.0 }}
           >
-            {/* GIANT LOGO */}
+            {/* CLEAN LOGO - NO SPINNING */}
             <motion.div 
               className="mx-auto mb-12"
               style={{ width: '300px', height: '300px' }}
               animate={{ 
-                rotate: [0, 360],
-                scale: [0.95, 1.05, 0.95]
+                scale: [0.98, 1.02, 0.98]
               }}
               transition={{ 
-                rotate: { duration: 40, repeat: Infinity, ease: "linear" },
-                scale: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+                scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
               }}
             >
               <div 
-                className="w-full h-full bg-white rounded-full shadow-2xl flex items-center justify-center"
+                className="w-full h-full bg-white/10 backdrop-blur-sm rounded-3xl shadow-2xl flex items-center justify-center border border-white/20"
                 style={{
                   boxShadow: `
-                    0 0 0 8px rgba(189, 147, 249, 0.5),
-                    0 0 0 16px rgba(255, 121, 198, 0.3),
-                    0 0 0 24px rgba(80, 250, 123, 0.2),
-                    0 0 60px rgba(255, 255, 255, 0.8),
-                    inset 0 0 60px rgba(189, 147, 249, 0.3)
+                    0 0 60px rgba(255, 255, 255, 0.3),
+                    0 0 120px rgba(189, 147, 249, 0.2),
+                    inset 0 0 60px rgba(255, 255, 255, 0.1)
                   `
                 }}
               >
                 <img 
                   src={sacredShifterLogo}
                   alt="Sacred Shifter Logo"
-                  className="w-5/6 h-5/6 object-contain"
+                  className="w-4/5 h-4/5 object-contain"
                   style={{ 
-                    filter: 'drop-shadow(0 0 20px rgba(189, 147, 249, 0.8))'
+                    filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.5))'
                   }}
                 />
               </div>
             </motion.div>
             
-            {/* GIANT TEXT */}
+            {/* CLEAN TAGLINE ONLY */}
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 1.0 }}
             >
-              <h1 
-                className="text-7xl md:text-8xl lg:text-9xl font-bold text-white mb-6 font-sacred"
-                style={{ 
-                  textShadow: `
-                    0 0 40px rgba(0, 0, 0, 1),
-                    0 0 80px rgba(0, 0, 0, 0.8),
-                    0 8px 32px rgba(0, 0, 0, 1),
-                    0 0 40px rgba(189, 147, 249, 1),
-                    0 0 80px rgba(255, 121, 198, 0.8)
-                  `
-                }}
-              >
-                SACRED SHIFTER
-              </h1>
-              
               <p 
-                className="text-3xl md:text-4xl text-white/90 font-codex italic"
+                className="text-2xl md:text-3xl text-white/90 font-codex italic"
                 style={{
                   textShadow: `
                     0 0 20px rgba(0, 0, 0, 1),
                     0 4px 16px rgba(0, 0, 0, 1),
-                    0 0 20px rgba(80, 250, 123, 0.6)
+                    0 0 20px rgba(255, 255, 255, 0.3)
                   `
                 }}
               >
