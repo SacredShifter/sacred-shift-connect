@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Settings, UserPlus, Phone, Video, Send, Image, Paperclip, Smile, X, Users } from 'lucide-react';
+import { ArrowLeft, Settings, UserPlus, Phone, Video, Send, Image, Paperclip, Smile, X, Users, Link } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -34,6 +34,8 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
   const [showAddMember, setShowAddMember] = useState(false);
   const [showMembersList, setShowMembersList] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [showSigilPicker, setShowSigilPicker] = useState(false);
+  const [selectedSigils, setSelectedSigils] = useState<string[]>([]);
 
   // Mock member data
   const mockMembers = [
@@ -43,12 +45,55 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
     { id: '4', name: 'David Wilson', role: 'member', avatar: '', isOnline: true },
   ];
 
+  // Sacred Shifter Sigils
+  const sacredSigils = [
+    '🌟', '✨', '🔮', '🧿', '🌙', '☯️', '🕯️', '🌀', '⚡', '💫',
+    '🦋', '🌸', '🍃', '🌊', '🔥', '🌈', '👁️', '💎', '🌺', '🦅'
+  ];
+
   const {
     messages,
     loading,
     sendMessage,
     fetchRecentMessages,
   } = useSacredCircles();
+
+  // Handle sigil selection
+  const handleSigilSelect = (sigil: string) => {
+    if (selectedSigils.includes(sigil)) {
+      setSelectedSigils(prev => prev.filter(s => s !== sigil));
+    } else if (selectedSigils.length < 3) {
+      setSelectedSigils(prev => [...prev, sigil]);
+    }
+  };
+
+  // Add sigil to message text
+  const addSigilToMessage = (sigil: string) => {
+    setMessageText(prev => prev + sigil);
+  };
+
+  // Detect and render links in text
+  const renderMessageContent = (content: string) => {
+    const urlPattern = /(https?:\/\/[^\s]+)/g;
+    const parts = content.split(urlPattern);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlPattern)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:text-blue-300 underline break-all"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
 
   // Handle message sending
   const handleSendMessage = async () => {
@@ -58,11 +103,12 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
       await sendMessage(messageText, 'circle', {
         circleId,
         attachedFiles: attachedFiles,
-        selectedSigils: []
+        selectedSigils: selectedSigils
       });
       
       setMessageText('');
       setAttachedFiles([]);
+      setSelectedSigils([]);
       
       toast({
         title: "Message sent",
@@ -124,15 +170,37 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
   // Format message for display
   const formatMessage = (message: any) => {
     const isOwn = message.user_id === user?.id;
-    const authorName = message.author?.display_name || 'Unknown User';
-    const time = new Date(message.created_at).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+    const authorName = message.author?.display_name || 'Sacred Soul';
+    
+    // Enhanced date/time formatting
+    const messageDate = new Date(message.created_at);
+    const now = new Date();
+    const isToday = messageDate.toDateString() === now.toDateString();
+    const isYesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString() === messageDate.toDateString();
+    
+    let timeDisplay;
+    if (isToday) {
+      timeDisplay = messageDate.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    } else if (isYesterday) {
+      timeDisplay = `Yesterday ${messageDate.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })}`;
+    } else {
+      timeDisplay = messageDate.toLocaleDateString([], { 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
 
     return (
       <div key={message.id} className={cn(
-        "flex gap-3 group",
+        "flex gap-3 group mb-4",
         isOwn ? "flex-row-reverse" : "flex-row"
       )}>
         {!isOwn && (
@@ -148,22 +216,29 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
           "flex flex-col max-w-[70%]",
           isOwn ? "items-end" : "items-start"
         )}>
-          {!isOwn && (
-            <span className="text-xs text-muted-foreground mb-1 px-3">
-              {authorName}
+          {/* Author and timestamp header */}
+          <div className={cn(
+            "flex items-center gap-2 mb-1 px-3",
+            isOwn ? "flex-row-reverse" : "flex-row"
+          )}>
+            <span className="text-xs font-medium text-primary">
+              {isOwn ? 'You' : authorName}
             </span>
-          )}
+            <span className="text-xs text-muted-foreground">
+              {timeDisplay}
+            </span>
+          </div>
           
           <div className={cn(
-            "rounded-2xl overflow-hidden",
+            "rounded-2xl overflow-hidden shadow-sm",
             isOwn 
               ? "bg-primary text-primary-foreground" 
               : "bg-muted"
           )}>
-            {/* Text Content */}
+            {/* Text Content with link detection */}
             {message.content && (
               <div className="px-4 py-2 text-sm break-words">
-                {message.content}
+                {renderMessageContent(message.content)}
               </div>
             )}
             
@@ -186,12 +261,24 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
             )}
           </div>
           
-          <span className={cn(
-            "text-xs text-muted-foreground mt-1 px-3 opacity-0 group-hover:opacity-100 transition-opacity",
-            isOwn ? "text-right" : "text-left"
-          )}>
-            {time}
-          </span>
+          {/* Metadata tags */}
+          {(message.chakra_tag || message.tone) && (
+            <div className={cn(
+              "flex items-center gap-1 mt-1 px-3",
+              isOwn ? "justify-end" : "justify-start"
+            )}>
+              {message.chakra_tag && (
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                  {message.chakra_tag}
+                </span>
+              )}
+              {message.tone && (
+                <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                  {message.tone}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -320,6 +407,51 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
             </div>
           </div>
         )}
+
+        {/* Selected Sigils Preview */}
+        {selectedSigils.length > 0 && (
+          <div className="px-4 py-2 bg-primary/5 border-b">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Sacred Sigils:</span>
+              <div className="flex gap-1">
+                {selectedSigils.map((sigil, index) => (
+                  <span key={index} className="text-lg animate-pulse" style={{ animationDelay: `${index * 0.2}s` }}>
+                    {sigil}
+                  </span>
+                ))}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-4 w-4 p-0 ml-2"
+                onClick={() => setSelectedSigils([])}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Sigil Picker */}
+        {showSigilPicker && (
+          <div className="p-4 bg-muted/20 border-b">
+            <div className="grid grid-cols-10 gap-2 max-w-md">
+              {sacredSigils.map((sigil, index) => (
+                <button
+                  key={index}
+                  onClick={() => addSigilToMessage(sigil)}
+                  className="text-xl p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                  title={`Add ${sigil} to message`}
+                >
+                  {sigil}
+                </button>
+              ))}
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              Click sigils to add them to your message
+            </div>
+          </div>
+        )}
         
         {/* Message Input Row - GUARANTEED VISIBLE */}
         <div 
@@ -367,6 +499,23 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
               }}
             >
               <Image className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={cn(
+                "h-12 w-12 p-0 shrink-0 border-2 bg-muted hover:bg-muted/80",
+                showSigilPicker && "bg-primary/20 border-primary"
+              )}
+              onClick={() => setShowSigilPicker(!showSigilPicker)}
+              title="Sacred Sigils"
+              style={{
+                backgroundColor: showSigilPicker ? 'hsl(var(--primary) / 0.2)' : 'hsl(var(--muted))',
+                border: `2px solid ${showSigilPicker ? 'hsl(var(--primary))' : 'hsl(var(--border))'}`,
+                color: 'hsl(var(--foreground))'
+              }}
+            >
+              <Smile className="h-5 w-5" />
             </Button>
             
             <div 
