@@ -1,354 +1,221 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { 
   TreePine, 
   Sparkles, 
   Heart, 
   Users, 
-  MessageCircle, 
-  Zap,
-  Eye,
-  Compass,
-  Leaf,
-  Sun,
-  Moon,
-  Wind,
-  Mountain
+  BookOpen,
+  Brain,
+  Globe
 } from 'lucide-react';
-import { useJusticePlatformAwareness } from '@/hooks/useJusticePlatformAwareness';
+import { useNavigate } from 'react-router-dom';
 
-interface GroveSession {
+interface Pathway {
   id: string;
   title: string;
   description: string;
-  participants: number;
-  maxParticipants: number;
-  isActive: boolean;
-  startTime: string;
-  type: 'meditation' | 'ceremony' | 'sharing' | 'healing';
+  icon: React.ReactNode;
+  color: string;
+  route: string;
+  features: string[];
 }
 
 const SacredGrove: React.FC = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [communityPulse, setCommunityPulse] = useState({
-    engagement: 75,
-    resonance: 88,
-    growth: 62
-  });
-  
-  const [activeSessions] = useState<GroveSession[]>([
+  const navigate = useNavigate();
+  const [selectedPathway, setSelectedPathway] = useState<string | null>(null);
+
+  const pathways: Pathway[] = [
     {
-      id: '1',
-      title: 'Sacred Circle Meditation',
-      description: 'Join us for a collective consciousness meditation in the heart of the grove.',
-      participants: 12,
-      maxParticipants: 20,
-      isActive: true,
-      startTime: '2024-01-15T19:00:00Z',
-      type: 'meditation'
+      id: 'inner-wisdom',
+      title: 'Inner Wisdom',
+      description: 'Journey deep within to discover your authentic truth and inner guidance.',
+      icon: <Heart className="h-8 w-8" />,
+      color: 'from-rose-500 to-pink-600',
+      route: '/journal',
+      features: [
+        'Sacred Self-Reflection',
+        'Intuitive Guidance',
+        'Heart-Centered Awareness',
+        'Emotional Integration'
+      ]
     },
     {
-      id: '2', 
-      title: 'Healing Ceremony',
-      description: 'Ancient healing practices with modern consciousness techniques.',
-      participants: 8,
-      maxParticipants: 15,
-      isActive: true,
-      startTime: '2024-01-15T20:30:00Z',
-      type: 'healing'
+      id: 'collective-consciousness',
+      title: 'Collective Consciousness',
+      description: 'Connect with the shared wisdom and collective awakening of humanity.',
+      icon: <Users className="h-8 w-8" />,
+      color: 'from-blue-500 to-indigo-600',
+      route: '/circles',
+      features: [
+        'Sacred Circles',
+        'Community Wisdom',
+        'Collective Healing',
+        'Shared Experiences'
+      ]
     },
     {
-      id: '3',
-      title: 'Moon Circle Sharing',
-      description: 'Share your transformative experiences under the sacred moon.',
-      participants: 15,
-      maxParticipants: 25,
-      isActive: false,
-      startTime: '2024-01-16T21:00:00Z',
-      type: 'sharing'
+      id: 'cosmic-connection',
+      title: 'Cosmic Connection',
+      description: 'Expand your awareness to the infinite wisdom of the cosmos.',
+      icon: <Globe className="h-8 w-8" />,
+      color: 'from-purple-500 to-violet-600',
+      route: '/learning-3d',
+      features: [
+        'Universal Patterns',
+        'Sacred Geometry',
+        'Cosmic Consciousness',
+        'Infinite Perspectives'
+      ]
     }
-  ]);
+  ];
 
-  const [groveStats] = useState({
-    totalMembers: 2847,
-    activeNow: 34,
-    ceremoniesThisWeek: 12,
-    transformationsShared: 156
-  });
-
-  const platformAwareness = useJusticePlatformAwareness();
-
-  useEffect(() => {
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      setCommunityPulse(prev => ({
-        engagement: Math.max(60, Math.min(95, prev.engagement + (Math.random() - 0.5) * 10)),
-        resonance: Math.max(70, Math.min(100, prev.resonance + (Math.random() - 0.5) * 8)),
-        growth: Math.max(40, Math.min(85, prev.growth + (Math.random() - 0.5) * 6))
-      }));
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const getSessionIcon = (type: GroveSession['type']) => {
-    switch (type) {
-      case 'meditation': return <Sparkles className="h-4 w-4" />;
-      case 'ceremony': return <Sun className="h-4 w-4" />;
-      case 'sharing': return <MessageCircle className="h-4 w-4" />;
-      case 'healing': return <Heart className="h-4 w-4" />;
-    }
-  };
-
-  const getTypeColor = (type: GroveSession['type']) => {
-    switch (type) {
-      case 'meditation': return 'bg-blue-500/20 text-blue-700 border-blue-300';
-      case 'ceremony': return 'bg-yellow-500/20 text-yellow-700 border-yellow-300';
-      case 'sharing': return 'bg-green-500/20 text-green-700 border-green-300';
-      case 'healing': return 'bg-pink-500/20 text-pink-700 border-pink-300';
-    }
+  const handlePathwaySelect = (pathway: Pathway) => {
+    setSelectedPathway(pathway.id);
+    navigate(pathway.route);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       {/* Grove Header */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-4"
+        className="text-center py-12 space-y-6"
       >
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <TreePine className="h-12 w-12 text-green-600" />
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <TreePine className="h-16 w-16 text-emerald-600" />
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent">
               Sacred Grove
             </h1>
-            <p className="text-muted-foreground">
-              Community consciousness in sacred communion
+            <p className="text-xl text-muted-foreground mt-2">
+              Three pathways to collective wisdom and sacred community
             </p>
           </div>
         </div>
 
-        {/* Community Pulse */}
-        <Card className="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 border-green-200">
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Zap className="h-5 w-5 text-blue-600" />
-                  <span className="font-semibold">Engagement</span>
-                </div>
-                <Progress value={communityPulse.engagement} className="h-3 mb-2" />
-                <span className="text-sm text-muted-foreground">{Math.round(communityPulse.engagement)}%</span>
+        {/* Sacred Quote */}
+        <div className="max-w-2xl mx-auto">
+          <blockquote className="text-lg italic text-foreground/80">
+            "In the sacred grove, three paths converge - the journey within, the journey with others, 
+            and the journey to the infinite. Choose your path, but know that all paths lead home."
+          </blockquote>
+          <cite className="text-sm text-muted-foreground mt-2 block">— Ancient Grove Teachings</cite>
+        </div>
+      </motion.div>
+
+      {/* Three Sacred Pathways */}
+      <div className="max-w-7xl mx-auto px-6 pb-12">
+        <div className="grid md:grid-cols-3 gap-8">
+          {pathways.map((pathway, index) => (
+            <motion.div
+              key={pathway.id}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.2 + 0.3 }}
+              className="group"
+            >
+              <Card 
+                className="h-full cursor-pointer transform transition-all duration-500 hover:scale-105 hover:shadow-2xl border-2 border-transparent hover:border-primary/20 bg-white/80 backdrop-blur-sm overflow-hidden"
+                onClick={() => handlePathwaySelect(pathway)}
+              >
+                <div className={`h-2 bg-gradient-to-r ${pathway.color}`} />
+                
+                <CardContent className="p-8 text-center space-y-6">
+                  {/* Pathway Icon */}
+                  <div className={`mx-auto w-20 h-20 rounded-full bg-gradient-to-r ${pathway.color} flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow duration-300`}>
+                    {pathway.icon}
+                  </div>
+
+                  {/* Pathway Title */}
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                      {pathway.title}
+                    </h2>
+                    <p className="text-muted-foreground mt-3 leading-relaxed">
+                      {pathway.description}
+                    </p>
+                  </div>
+
+                  {/* Pathway Features */}
+                  <div className="space-y-3">
+                    {pathway.features.map((feature, featureIndex) => (
+                      <motion.div
+                        key={feature}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.2 + featureIndex * 0.1 + 0.5 }}
+                        className="flex items-center gap-3 text-sm text-muted-foreground"
+                      >
+                        <Sparkles className="h-4 w-4 text-primary/60" />
+                        <span>{feature}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Pathway CTA */}
+                  <div className="pt-4">
+                    <Button 
+                      variant="outline" 
+                      className={`w-full border-2 transition-all duration-300 group-hover:bg-gradient-to-r group-hover:${pathway.color} group-hover:text-white group-hover:border-transparent group-hover:shadow-lg`}
+                    >
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Enter Sacred Path
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Sacred Grove Wisdom */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1 }}
+          className="mt-16 text-center"
+        >
+          <Card className="bg-gradient-to-r from-emerald-100/50 to-teal-100/50 border-emerald-200/50 backdrop-blur-sm">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <Heart className="h-8 w-8 text-emerald-600" />
+                <Users className="h-8 w-8 text-blue-600" />
+                <Globe className="h-8 w-8 text-purple-600" />
               </div>
               
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Heart className="h-5 w-5 text-pink-600" />
-                  <span className="font-semibold">Resonance</span>
-                </div>
-                <Progress value={communityPulse.resonance} className="h-3 mb-2" />
-                <span className="text-sm text-muted-foreground">{Math.round(communityPulse.resonance)}%</span>
-              </div>
+              <h3 className="text-2xl font-semibold text-foreground mb-4">
+                The Sacred Grove Awaits
+              </h3>
               
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Sparkles className="h-5 w-5 text-purple-600" />
-                  <span className="font-semibold">Growth</span>
+              <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+                Each pathway offers unique gifts, yet all are interconnected in the web of sacred wisdom. 
+                Whether you seek to heal, to connect, or to explore the mysteries of existence, 
+                the grove holds space for your journey. Choose with your heart, and trust that 
+                your path will reveal exactly what you need when you need it.
+              </p>
+              
+              <div className="mt-8 flex items-center justify-center gap-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-emerald-600">∞</div>
+                  <div className="text-xs text-muted-foreground">Infinite Wisdom</div>
                 </div>
-                <Progress value={communityPulse.growth} className="h-3 mb-2" />
-                <span className="text-sm text-muted-foreground">{Math.round(communityPulse.growth)}%</span>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">◉</div>
+                  <div className="text-xs text-muted-foreground">Sacred Unity</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">◈</div>
+                  <div className="text-xs text-muted-foreground">Divine Truth</div>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Grove Statistics */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-4"
-      >
-        <Card className="text-center">
-          <CardContent className="pt-6">
-            <Users className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-            <div className="text-2xl font-bold">{groveStats.totalMembers.toLocaleString()}</div>
-            <div className="text-sm text-muted-foreground">Sacred Seekers</div>
-          </CardContent>
-        </Card>
-
-        <Card className="text-center">
-          <CardContent className="pt-6">
-            <Eye className="h-8 w-8 mx-auto mb-2 text-green-600" />
-            <div className="text-2xl font-bold">{groveStats.activeNow}</div>
-            <div className="text-sm text-muted-foreground">Active Now</div>
-          </CardContent>
-        </Card>
-
-        <Card className="text-center">
-          <CardContent className="pt-6">
-            <Sun className="h-8 w-8 mx-auto mb-2 text-yellow-600" />
-            <div className="text-2xl font-bold">{groveStats.ceremoniesThisWeek}</div>
-            <div className="text-sm text-muted-foreground">Ceremonies This Week</div>
-          </CardContent>
-        </Card>
-
-        <Card className="text-center">
-          <CardContent className="pt-6">
-            <Heart className="h-8 w-8 mx-auto mb-2 text-pink-600" />
-            <div className="text-2xl font-bold">{groveStats.transformationsShared}</div>
-            <div className="text-sm text-muted-foreground">Transformations Shared</div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Active Sessions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TreePine className="h-6 w-6 text-green-600" />
-              Active Grove Sessions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <AnimatePresence>
-                {activeSessions.map((session, index) => (
-                  <motion.div
-                    key={session.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card className={`${session.isActive ? 'border-green-400 bg-green-50/50' : 'border-gray-200'}`}>
-                      <CardContent className="pt-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              {getSessionIcon(session.type)}
-                              <h3 className="font-semibold">{session.title}</h3>
-                              <Badge 
-                                variant="outline" 
-                                className={getTypeColor(session.type)}
-                              >
-                                {session.type}
-                              </Badge>
-                              {session.isActive && (
-                                <Badge className="bg-green-600 text-white animate-pulse">
-                                  Live
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground mb-3">
-                              {session.description}
-                            </p>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4 text-sm">
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-4 w-4" />
-                                  <span>{session.participants}/{session.maxParticipants}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Compass className="h-4 w-4" />
-                                  <span>{new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                </div>
-                              </div>
-                              <Button 
-                                size="sm" 
-                                variant={session.isActive ? "default" : "outline"}
-                                className={session.isActive ? "bg-green-600 hover:bg-green-700" : ""}
-                              >
-                                {session.isActive ? 'Join Sacred Circle' : 'Set Reminder'}
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Grove Wisdom */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-      >
-        <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Leaf className="h-6 w-6 text-emerald-600" />
-              Grove Wisdom
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <blockquote className="text-lg italic text-center mb-4">
-              "In the sacred grove, individual consciousness merges with collective wisdom, 
-              creating a field of transformation where healing naturally occurs."
-            </blockquote>
-            <div className="text-center">
-              <cite className="text-sm text-muted-foreground">— Ancient Grove Teachings</cite>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Grove Elements */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        className="grid grid-cols-1 md:grid-cols-4 gap-4"
-      >
-        <Card className="text-center bg-gradient-to-b from-green-50 to-green-100 border-green-200">
-          <CardContent className="pt-6">
-            <TreePine className="h-12 w-12 mx-auto mb-3 text-green-600" />
-            <h3 className="font-semibold mb-2">Sacred Trees</h3>
-            <p className="text-sm text-muted-foreground">Ancient wisdom keepers</p>
-          </CardContent>
-        </Card>
-
-        <Card className="text-center bg-gradient-to-b from-blue-50 to-blue-100 border-blue-200">
-          <CardContent className="pt-6">
-            <Wind className="h-12 w-12 mx-auto mb-3 text-blue-600" />
-            <h3 className="font-semibold mb-2">Sacred Winds</h3>
-            <p className="text-sm text-muted-foreground">Carrying prayers and intentions</p>
-          </CardContent>
-        </Card>
-
-        <Card className="text-center bg-gradient-to-b from-yellow-50 to-yellow-100 border-yellow-200">
-          <CardContent className="pt-6">
-            <Sun className="h-12 w-12 mx-auto mb-3 text-yellow-600" />
-            <h3 className="font-semibold mb-2">Sacred Light</h3>
-            <p className="text-sm text-muted-foreground">Illuminating truth and clarity</p>
-          </CardContent>
-        </Card>
-
-        <Card className="text-center bg-gradient-to-b from-gray-50 to-gray-100 border-gray-200">
-          <CardContent className="pt-6">
-            <Mountain className="h-12 w-12 mx-auto mb-3 text-gray-600" />
-            <h3 className="font-semibold mb-2">Sacred Earth</h3>
-            <p className="text-sm text-muted-foreground">Grounding and stability</p>
-          </CardContent>
-        </Card>
-      </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
     </div>
   );
 };

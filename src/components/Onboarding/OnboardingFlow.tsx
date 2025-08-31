@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { WelcomeGateway } from './WelcomeGateway';
+import { PrivacyConsent } from './PrivacyConsent';
 import { PathSelection } from './PathSelection';
 import { ToolsIntroduction } from './ToolsIntroduction';
 import { GaiaAnchor } from './GaiaAnchor';
@@ -29,6 +30,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ isVisible, onCom
 
   const steps = [
     'welcome',
+    'privacy-consent',
     'path-selection', 
     'tools-introduction',
     'gaia-anchor',
@@ -93,6 +95,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ isVisible, onCom
     switch (steps[currentStep]) {
       case 'welcome':
         return <WelcomeGateway {...stepProps} />;
+      case 'privacy-consent':
+        return <PrivacyConsent {...stepProps} />;
       case 'path-selection':
         return <PathSelection onPathSelect={handlePathSelect} {...stepProps} />;
       case 'tools-introduction':
