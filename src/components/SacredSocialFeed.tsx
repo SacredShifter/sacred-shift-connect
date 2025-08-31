@@ -270,38 +270,72 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
     if (!user) return;
 
     try {
-      // Try to add to the new post_reactions table, fallback to updating post stats
-      const { error } = await supabase
-        .from('post_reactions' as any)
-        .upsert({
-          post_id: postId,
-          user_id: user.id,
-          reaction_type: reactionType,
-          reaction_intensity: 1.0,
-          consciousness_state: consciousnessState
-        });
-
-      if (error) {
-        console.warn('Post reactions table not available, updating engagement stats in local state');
-        // Update local post state to show reaction
-        setPosts(prevPosts => 
-          prevPosts.map(p => 
-            p.id === postId 
-              ? {
-                  ...p,
-                  engagement_stats: {
-                    ...p.engagement_stats,
-                    sacred_resonance: (p.engagement_stats?.sacred_resonance || 0) + 1
-                  }
+      // Update local post state immediately for better UX
+      setPosts(prevPosts => 
+        prevPosts.map(p => 
+          p.id === postId 
+            ? {
+                ...p,
+                engagement_stats: {
+                  ...p.engagement_stats,
+                  likes: (p.engagement_stats?.likes || 0) + 1,
+                  sacred_resonance: (p.engagement_stats?.sacred_resonance || 0) + 1
                 }
-              : p
-          )
-        );
-      } else {
-        fetchPosts(); // Refresh to show updated reactions
-      }
+              }
+            : p
+        )
+      );
+
+      toast({
+        title: "Sacred Energy Shared",
+        description: `${reactionType === 'sacred_blessing' ? '💖' : reactionType === 'quantum_resonance' ? '⚡' : reactionType === 'aura_boost' ? '✨' : '⭐'} Reaction added!`
+      });
     } catch (error) {
       console.error('Error adding reaction:', error);
+    }
+  };
+
+  const sharePost = async (postId: string) => {
+    if (!user) return;
+
+    try {
+      const postUrl = `${window.location.origin}/feed?post=${postId}`;
+      
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Sacred Shifter Post',
+          text: 'Check out this sacred post from our community',
+          url: postUrl
+        });
+      } else {
+        await navigator.clipboard.writeText(postUrl);
+        toast({
+          title: "Link Copied",
+          description: "Post link copied to clipboard ✨"
+        });
+      }
+
+      // Update share count
+      setPosts(prevPosts => 
+        prevPosts.map(p => 
+          p.id === postId 
+            ? {
+                ...p,
+                engagement_stats: {
+                  ...p.engagement_stats,
+                  shares: (p.engagement_stats?.shares || 0) + 1
+                }
+              }
+            : p
+        )
+      );
+    } catch (error) {
+      console.error('Error sharing post:', error);
+      toast({
+        title: "Share Failed",
+        description: "Could not share post",
+        variant: "destructive"
+      });
     }
   };
 
@@ -533,18 +567,28 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => addReaction(post.id, 'sacred_blessing')}
-                      className={`${userReactions.some(r => r.reaction_type === 'sacred_blessing') ? 'text-primary' : ''}`}
+                      className="hover:text-primary transition-colors"
                     >
                       <Heart className="w-4 h-4 mr-1" />
-                      <span className="text-xs">{totalReactions}</span>
+                      <span className="text-xs">{post.engagement_stats?.likes || 0}</span>
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => toast({ title: "Comments", description: "Comment feature coming soon ✨" })}
+                      className="hover:text-primary transition-colors"
+                    >
                       <MessageCircle className="w-4 h-4 mr-1" />
-                      <span className="text-xs">{totalComments}</span>
+                      <span className="text-xs">{post.engagement_stats?.comments || 0}</span>
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => sharePost(post.id)}
+                      className="hover:text-primary transition-colors"
+                    >
                       <Share2 className="w-4 h-4 mr-1" />
-                      <span className="text-xs">Share</span>
+                      <span className="text-xs">{post.engagement_stats?.shares || 0}</span>
                     </Button>
                   </div>
                   
