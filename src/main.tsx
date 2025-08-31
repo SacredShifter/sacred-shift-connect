@@ -47,6 +47,45 @@ const queryClient = new QueryClient({
 
 import { logger } from './lib/logger';
 
+// Service Worker Registration for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/'
+      });
+      
+      logger.info('Sacred Shifter PWA: Service Worker registered', { 
+        component: 'pwa', 
+        scope: registration.scope 
+      });
+      
+      // Listen for PWA install prompt
+      window.addEventListener('beforeinstallprompt', (e) => {
+        logger.info('Sacred Shifter PWA: Install prompt available', { component: 'pwa' });
+        // Store the event so it can be triggered later
+        (window as any).deferredPrompt = e;
+        
+        // Show install button or UI element
+        const installEvent = new CustomEvent('pwa-installable');
+        window.dispatchEvent(installEvent);
+      });
+      
+      // PWA installed
+      window.addEventListener('appinstalled', () => {
+        logger.info('Sacred Shifter PWA: Successfully installed', { component: 'pwa' });
+        (window as any).deferredPrompt = null;
+      });
+      
+    } catch (error) {
+      logger.error('Sacred Shifter PWA: Service Worker registration failed', { 
+        component: 'pwa', 
+        error: error.message 
+      });
+    }
+  });
+}
+
 // Initialize mobile-specific features
 if (Capacitor.isNativePlatform()) {
   logger.info('Sacred Shifter Community - Running on native mobile platform', { component: 'main' });

@@ -45,23 +45,44 @@ export const PrivacySettings: React.FC = () => {
 
   const handlePWAInstall = () => {
     // Check if PWA install prompt is available
-    if ('serviceWorker' in navigator) {
-      // PWA installation logic
-      const installPrompt = (window as any).deferredPrompt;
-      if (installPrompt) {
-        installPrompt.prompt();
-        installPrompt.userChoice.then((choiceResult: any) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User accepted the PWA install prompt');
-          }
-        });
-      } else {
-        // Show instructions for manual install
-        alert('To install Sacred Shifter as a PWA:\n\n' +
-              'Chrome/Edge: Click the install icon in the address bar\n' +
-              'Safari: Tap Share → Add to Home Screen\n' +
-              'Firefox: Use the menu → Install');
-      }
+    const deferredPrompt = (window as any).deferredPrompt;
+    
+    if (deferredPrompt) {
+      // Show the install prompt
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('Sacred Shifter PWA installation accepted');
+        } else {
+          console.log('Sacred Shifter PWA installation dismissed');
+        }
+        (window as any).deferredPrompt = null;
+      });
+    } else {
+      // Show manual installation instructions
+      const instructions = `To install Sacred Shifter as a PWA:
+
+📱 **Mobile (Chrome/Edge):**
+1. Tap the menu (⋮) in your browser
+2. Select "Add to Home Screen" or "Install App"
+3. Confirm installation
+
+💻 **Desktop (Chrome/Edge):**
+1. Look for the install icon (⊕) in the address bar
+2. Click it and confirm installation
+
+🦊 **Firefox:**
+1. Open the menu and select "Install"
+2. Or add to home screen on mobile
+
+🍎 **Safari (iOS):**
+1. Tap the Share button
+2. Select "Add to Home Screen"
+3. Confirm installation
+
+Once installed, Sacred Shifter will work offline and sync when connected!`;
+      
+      alert(instructions);
     }
   };
 
