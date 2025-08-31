@@ -2,12 +2,14 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react-swc'
 import path from "path"
 import { sentryVitePlugin } from "@sentry/vite-plugin";
+import { componentTagger } from "lovable-tagger";
 
 // Sacred Shifter development configuration
 export default defineConfig(({ mode }) => {
   const plugins = [
     react(),
-  ];
+    mode === 'development' && componentTagger(),
+  ].filter(Boolean);
 
   // Only add Sentry plugin in production with auth token
   if (process.env.SENTRY_AUTH_TOKEN) {
@@ -20,7 +22,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     server: {
-      host: '127.0.0.1',
+      host: "::",
       port: 8080,
     },
     plugins,
