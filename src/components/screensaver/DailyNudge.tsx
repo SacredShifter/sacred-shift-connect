@@ -40,11 +40,13 @@ export function DailyNudge({ isVisible, onNavigate }: DailyNudgeProps) {
   
   return (
     <motion.div
-      className="absolute bottom-16 left-1/2 -translate-x-1/2 text-center max-w-2xl px-8"
+      className="absolute bottom-16 left-1/2 -translate-x-1/2 text-center max-w-2xl px-8 pointer-events-auto"
       initial={{ opacity: 0, y: 30, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -30, scale: 0.9 }}
       transition={{ duration: 1.0, ease: "easeOut" }}
+      onMouseMove={(e) => e.stopPropagation()} // Prevent mouse movement from exiting screensaver
+      onClick={(e) => e.stopPropagation()} // Prevent background click from exiting
     >
       {/* Enhanced Progress indicators */}
       {state.streak > 0 && (
@@ -55,8 +57,10 @@ export function DailyNudge({ isVisible, onNavigate }: DailyNudgeProps) {
           transition={{ delay: 0.3, duration: 0.8 }}
         >
           <motion.div 
-            className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-full px-6 py-3 border border-white/30 cursor-pointer hover:scale-105 transition-transform"
+            data-daily-routine
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-full px-6 py-3 border border-white/30 cursor-pointer hover:scale-105 transition-transform pointer-events-auto"
             onClick={handleStreakClick}
+            onMouseMove={(e) => e.stopPropagation()}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
             style={{
@@ -83,11 +87,13 @@ export function DailyNudge({ isVisible, onNavigate }: DailyNudgeProps) {
       {/* Enhanced Today's practice status */}
       {!todaysStep.completedAt && (
         <motion.div
-          className="relative cursor-pointer"
+          data-daily-routine
+          className="relative cursor-pointer pointer-events-auto"
           initial={{ scale: 0.8, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
           onClick={handlePracticeClick}
+          onMouseMove={(e) => e.stopPropagation()}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
@@ -169,10 +175,12 @@ export function DailyNudge({ isVisible, onNavigate }: DailyNudgeProps) {
       {/* Enhanced Completed message */}
       {todaysStep.completedAt && timeOfDay === 'evening' && (
         <motion.div
-          className="relative"
+          data-daily-routine
+          className="relative pointer-events-auto"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
+          onMouseMove={(e) => e.stopPropagation()}
         >
           <div 
             className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-lg rounded-2xl p-6 border border-emerald-400/30"

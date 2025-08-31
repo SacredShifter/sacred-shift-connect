@@ -498,9 +498,21 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
   
   return (
     <motion.div 
-      className="fixed inset-0 cursor-pointer"
-      onClick={onExit}
-      onTouchStart={onExit}
+      className="fixed inset-0"
+      onClick={(e) => {
+        // Only exit if clicking outside of daily routine elements
+        const target = e.target as HTMLElement;
+        if (!target.closest('[data-daily-routine]')) {
+          onExit();
+        }
+      }}
+      onTouchStart={(e) => {
+        // Only exit if touching outside of daily routine elements  
+        const target = e.target as HTMLElement;
+        if (!target.closest('[data-daily-routine]')) {
+          onExit();
+        }
+      }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -668,16 +680,18 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
       </div>
       
       {/* Enhanced Daily Routine Nudge */}
-      <DailyNudge isVisible={true} onNavigate={onExit} />
+      <div data-daily-routine className="pointer-events-none">
+        <DailyNudge isVisible={true} onNavigate={onExit} />
+      </div>
       
-      {/* Refined hint */}
+      {/* Refined hint with safe zone */}
       <motion.div 
-        className="absolute bottom-4 left-1/2 -translate-x-1/2"
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 2.0, duration: 0.8 }}
       >
-        <p className="text-xs text-white/50 text-center">Touch or press ESC to return</p>
+        <p className="text-xs text-white/50 text-center">Click outside the cards or press ESC to return</p>
       </motion.div>
     </motion.div>
   );
