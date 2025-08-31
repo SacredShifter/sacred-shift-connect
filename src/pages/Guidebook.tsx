@@ -24,10 +24,12 @@ import {
   Video,
   BookOpen,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Waves
 } from 'lucide-react';
 import { TeachingLayer } from '@/components/TeachingLayer';
 import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
+import { GAAGuidebookSection } from '@/components/gaa/GAAGuidebookSection';
 
 const sections = [
   {
@@ -206,6 +208,24 @@ const sections = [
     ]
   },
   {
+    title: "GAA Engine (Geometrically Aligned Audio)",
+    icon: Waves,
+    topics: [
+      "Understanding GAA: Advanced consciousness harmonization technology using sacred geometry and precise frequencies",
+      "Deep5 Archetypes: Moon XVIII (shadow work), Tower XVI (breakthrough), Devil XV (liberation), Death XIII (transformation), Sun XIX (illumination)",
+      "Tarot Tradition Variants: Marseille (c.1650-1760), RWS (1909), Thoth (1969), Etteilla (1788) with unique frequencies and phases", 
+      "Polarity Protocol: Balancing light and dark channels with harmonic and chaotic resonance modes",
+      "Cosmic Visualization V2: Real-time 3D representation with firmament sphere and shadow dome integration",
+      "Embodied Biofeedback: HRV monitoring, breathing rate tracking, EEG alpha/theta integration, skin conductance",
+      "Orchestra Sync: Collective consciousness sessions with real-time phase synchronization and group coherence",
+      "Session Metrics: Live tracking of dark phase duration, polarity balance, limiter activations, and export capabilities",
+      "Demo Mode: Automated cycling through archetypes for presentations and exploration",
+      "Safety Protocols: Panic button, light bias activation, HPF for headphones, master limiter protection",
+      "Shadow Engine: Advanced dark phase processing with transparency controls and detailed status information",
+      "Audio Safety: Master limiters, volume controls, headphone protection, and real-time audio monitoring"
+    ]
+  },
+  {
     title: "Advanced Practices & Security",
     icon: Shield,
     topics: [
@@ -309,6 +329,18 @@ const Guidebook: React.FC = () => {
             />
           </motion.div>
         )}
+
+        {/* Featured GAA Engine Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mb-8"
+        >
+          <GAAGuidebookSection />
+        </motion.div>
+
+        <Separator className="opacity-30 my-8" />
 
         {/* Sacred Grove Special Section */}
         <motion.div

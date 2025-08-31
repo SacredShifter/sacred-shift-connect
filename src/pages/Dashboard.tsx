@@ -40,6 +40,7 @@ import { DailyResonanceWeather } from '@/components/dashboard/DailyResonanceWeat
 import { CommunityMirrorPulse } from '@/components/dashboard/CommunityMirrorPulse';
 import { GlowWrapper } from '@/components/dashboard/GlowWrapper';
 import { GAAControlPanel } from '@/components/dashboard/GAAControlPanel';
+import { GAAQuickAccess } from '@/components/dashboard/GAAQuickAccess';
 import { GAADashboard } from '@/components/gaa/GAADashboard';
 
 const Dashboard = () => {
@@ -263,10 +264,10 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* GAA Engine Section */}
+            {/* GAA Engine Section - Consolidated */}
             <div className="mb-8">
               <GlowWrapper elementId="gaa-engine">
-                <GAAControlPanel />
+                <GAAQuickAccess />
               </GlowWrapper>
             </div>
 

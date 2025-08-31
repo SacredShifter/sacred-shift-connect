@@ -33,7 +33,11 @@ import {
   ChevronRight,
   ChevronDown,
   BarChart3,
-  Wind
+  Wind,
+  Waves,
+  Play,
+  Moon,
+  Sun
 } from 'lucide-react';
 
 const Index = () => {
@@ -79,6 +83,16 @@ const Index = () => {
       keywords: ['mesh networking', 'sovereign communication', 'encrypted', 'decentralized'],
       isCrownJewel: true,
       status: meshStatus
+    },
+    {
+      title: 'GAA Engine',
+      description: 'Geometrically Aligned Audio - Advanced consciousness harmonization technology with Deep5 Archetypes, biofeedback integration, and cosmic visualization',
+      icon: Waves,
+      path: '/gaa',
+      gradient: 'from-indigo-500 via-purple-500 to-pink-500',
+      glow: 'shadow-indigo-500/30',
+      keywords: ['consciousness', 'sacred geometry', 'audio therapy', 'archetypes'],
+      isFeatured: true
     },
     {
       title: 'The Grove',
@@ -364,6 +378,74 @@ const Index = () => {
             <ChevronDown className="h-6 w-6" />
           </div>
         </div>
+
+        {/* Featured GAA Engine Section */}
+        {modules.find(m => m.isFeatured) && (
+          <div className="mb-8">
+            {(() => {
+              const gaaModule = modules.find(m => m.isFeatured);
+              return (
+                <Link to={gaaModule.path} className="group block">
+                  <Card className="portal-tile featured-module relative p-8 backdrop-blur-xl border-white/20 hover:border-primary/40 transition-all duration-500 group-hover:shadow-2xl overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10" />
+                    
+                    {/* Sacred geometry overlay */}
+                    <div className="sacred-geometry">
+                      <Waves className="w-full h-full text-primary/30" style={{ animation: 'merkaba-spin 12s linear infinite' }} />
+                    </div>
+                    
+                    <CardContent className="relative z-10 text-center">
+                      <div className="flex items-center justify-center gap-4 mb-6">
+                        <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-2xl">
+                          <Waves className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            {gaaModule.title}
+                          </h2>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Star className="w-4 h-4 text-amber-500" />
+                            <span className="text-sm text-muted-foreground">Advanced Consciousness Technology</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-6">
+                        {gaaModule.description}
+                      </p>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground mb-6">
+                        <div className="flex items-center gap-2">
+                          <Moon className="h-4 w-4 text-indigo-400" />
+                          <span>Deep5 Archetypes</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Sun className="h-4 w-4 text-purple-400" />
+                          <span>Polarity Control</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4 text-pink-400" />
+                          <span>Cosmic Visualization</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Brain className="h-4 w-4 text-cyan-400" />
+                          <span>Biofeedback Integration</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-center">
+                        <div className="px-6 py-3 rounded-full bg-gradient-to-r from-indigo-500/20 to-pink-500/20 border border-primary/30 flex items-center gap-2 text-primary font-medium">
+                          <Play className="w-4 h-4" />
+                          Enter GAA Dashboard →
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Portal Modules Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
