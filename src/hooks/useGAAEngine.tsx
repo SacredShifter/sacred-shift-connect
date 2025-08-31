@@ -2,6 +2,13 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { MultiScaleLayerManager, LayerHierarchy } from '@/utils/gaa/MultiScaleLayerManager';
 import { GeometricOscillator } from '@/utils/gaa/GeometricOscillator';
 import { NormalizedGeometry } from '@/utils/gaa/GeometricNormalizer';
+import { ShadowEngine } from '@/utils/gaa/ShadowEngine';
+import { 
+  PolarityProtocol, 
+  ShadowEngineState, 
+  BiofeedbackMetrics,
+  GAASessionExtended 
+} from '@/types/gaa-polarity';
 
 export interface GAAEngineState {
   isInitialized: boolean;
@@ -9,6 +16,13 @@ export interface GAAEngineState {
   currentGeometry: NormalizedGeometry[];
   activeOscillators: number;
   breathPhase: number;
+  // Shadow Engine integration
+  shadowEngine: ShadowEngineState | null;
+  polarityProtocol: PolarityProtocol | null;
+  biofeedbackMetrics: BiofeedbackMetrics | null;
+  // Session management
+  currentSession: GAASessionExtended | null;
+  sessionId: string | null;
 }
 
 /**
@@ -21,12 +35,18 @@ export const useGAAEngine = () => {
     isPlaying: false,
     currentGeometry: [],
     activeOscillators: 0,
-    breathPhase: 0
+    breathPhase: 0,
+    shadowEngine: null,
+    polarityProtocol: null,
+    biofeedbackMetrics: null,
+    currentSession: null,
+    sessionId: null
   });
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const layerManagerRef = useRef<MultiScaleLayerManager | null>(null);
   const geometricOscillatorRef = useRef<GeometricOscillator | null>(null);
+  const shadowEngineRef = useRef<ShadowEngine | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const lastUpdateTime = useRef<number>(performance.now());
 
@@ -52,7 +72,46 @@ export const useGAAEngine = () => {
         spatialPanning: true
       });
 
-      setState(prev => ({ ...prev, isInitialized: true }));
+      // Initialize Shadow Engine
+      shadowEngineRef.current = new ShadowEngine(audioContextRef.current);
+      
+      // Generate session ID
+      const sessionId = `gaa_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      setState(prev => ({ 
+        ...prev, 
+        isInitialized: true,
+        sessionId,
+        shadowEngine: shadowEngineRef.current.getState(),
+        polarityProtocol: {
+          lightChannel: {
+            enabled: true,
+            amplitude: 0.5,
+            phase: 0,
+            subharmonicDepth: 0.3,
+            texturalComplexity: 0.5,
+            resonanceMode: 'constructive'
+          },
+          darkChannel: {
+            enabled: true,
+            amplitude: 0.5,
+            phase: Math.PI,
+            subharmonicDepth: 0.3,
+            texturalComplexity: 0.5,
+            resonanceMode: 'destructive'
+          },
+          polarityBalance: 0,
+          manifestInDark: false,
+          crossPolarizationEnabled: true,
+          darkEnergyDrift: {
+            driftRate: 0.001,
+            expansionFactor: 1.0,
+            voidResonance: false,
+            quantumFluctuation: 0.1,
+            darkMatterDensity: 0.85
+          }
+        }
+      }));
       return true;
     } catch (error) {
       console.error('Failed to initialize GAA engine:', error);
@@ -69,7 +128,7 @@ export const useGAAEngine = () => {
       if (!initialized) return;
     }
 
-    if (!layerManagerRef.current || !geometricOscillatorRef.current || state.isPlaying) {
+    if (!layerManagerRef.current || !geometricOscillatorRef.current || !shadowEngineRef.current || state.isPlaying) {
       return;
     }
 
@@ -81,11 +140,18 @@ export const useGAAEngine = () => {
       geometricOscillatorRef.current!.createGeometricOscillator(geo, `gaa-osc-${index}`, 4);
     });
 
+    // Start Shadow Engine with current polarity protocol
+    if (state.polarityProtocol) {
+      shadowEngineRef.current.updatePolarityProtocol(state.polarityProtocol);
+      shadowEngineRef.current.start();
+    }
+
     setState(prev => ({ 
       ...prev, 
       isPlaying: true, 
       currentGeometry: geometry,
-      activeOscillators: geometry.length 
+      activeOscillators: geometry.length,
+      shadowEngine: shadowEngineRef.current!.getState()
     }));
 
     startAnimation();
@@ -99,6 +165,10 @@ export const useGAAEngine = () => {
       geometricOscillatorRef.current.stopAll();
     }
 
+    if (shadowEngineRef.current) {
+      shadowEngineRef.current.stop();
+    }
+
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
@@ -107,7 +177,8 @@ export const useGAAEngine = () => {
     setState(prev => ({ 
       ...prev, 
       isPlaying: false,
-      activeOscillators: 0 
+      activeOscillators: 0,
+      shadowEngine: shadowEngineRef.current?.getState() || null
     }));
   }, []);
 
@@ -123,6 +194,9 @@ export const useGAAEngine = () => {
       const deltaTime = (currentTime - lastUpdateTime.current) / 1000; // Convert to seconds
       lastUpdateTime.current = currentTime;
 
+      // Get current state first
+      const gaaState = layerManagerRef.current.getState();
+
       // Update breath phase and layer timing
       layerManagerRef.current.updateBreathPhase(deltaTime * 0.5); // Slower breath for deep states
       
@@ -135,11 +209,41 @@ export const useGAAEngine = () => {
       });
 
       // Update state
-      const gaaState = layerManagerRef.current.getState();
       setState(prev => ({ 
         ...prev, 
         currentGeometry: newGeometry,
-        breathPhase: gaaState.breathPhase
+        breathPhase: gaaState.breathPhase,
+        shadowEngine: shadowEngineRef.current?.getState() || null,
+        biofeedbackMetrics: shadowEngineRef.current ? {
+          heartRateVariability: {
+            rmssd: 40 + Math.sin(currentTime * 0.001) * 10,
+            pnn50: 30 + Math.cos(currentTime * 0.0007) * 15,
+            coherenceRatio: 0.7 + Math.sin(currentTime * 0.0003) * 0.2,
+            timestamp: currentTime
+          },
+          brainwaveActivity: {
+            alpha: 0.3 + Math.sin(gaaState.breathPhase) * 0.1,
+            beta: 0.2,
+            theta: 0.4 + Math.cos(gaaState.breathPhase * 0.7) * 0.15,
+            delta: 0.1,
+            gamma: 0.05,
+            coherence: shadowEngineRef.current.getState().neuralEntrainment,
+            timestamp: currentTime
+          },
+          breathingPattern: {
+            rate: 6 + Math.sin(gaaState.breathPhase) * 2,
+            depth: 0.8 + Math.cos(gaaState.breathPhase) * 0.2,
+            coherence: shadowEngineRef.current.getState().breathCoherence,
+            phase: Math.sin(gaaState.breathPhase) > 0 ? 'inhale' : 'exhale',
+            timestamp: currentTime
+          },
+          autonomicBalance: {
+            sympathetic: 0.4 + shadowEngineRef.current.getState().lightDominance * 0.3,
+            parasympathetic: 0.6 + shadowEngineRef.current.getState().darkDominance * 0.3,
+            balance: shadowEngineRef.current.getState().polarityBalance,
+            timestamp: currentTime
+          }
+        } : null
       }));
 
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -202,6 +306,48 @@ export const useGAAEngine = () => {
     };
   }, [stopGAA]);
 
+  // Polarity control functions
+  const updatePolarityProtocol = useCallback((protocol: PolarityProtocol) => {
+    if (shadowEngineRef.current) {
+      shadowEngineRef.current.updatePolarityProtocol(protocol);
+      setState(prev => ({ 
+        ...prev, 
+        polarityProtocol: protocol,
+        shadowEngine: shadowEngineRef.current!.getState()
+      }));
+    }
+  }, []);
+
+  const setPolarityBalance = useCallback((balance: number) => {
+    if (shadowEngineRef.current) {
+      shadowEngineRef.current.setPolarityBalance(balance);
+      setState(prev => ({ 
+        ...prev, 
+        shadowEngine: shadowEngineRef.current!.getState()
+      }));
+    }
+  }, []);
+
+  const enableManifestInDark = useCallback((enabled: boolean) => {
+    if (shadowEngineRef.current) {
+      shadowEngineRef.current.enableManifestInDark(enabled);
+      setState(prev => ({ 
+        ...prev, 
+        shadowEngine: shadowEngineRef.current!.getState()
+      }));
+    }
+  }, []);
+
+  const triggerShadowPhase = useCallback(() => {
+    if (shadowEngineRef.current) {
+      shadowEngineRef.current.triggerShadowPhase();
+      setState(prev => ({ 
+        ...prev, 
+        shadowEngine: shadowEngineRef.current!.getState()
+      }));
+    }
+  }, []);
+
   return {
     // State
     ...state,
@@ -213,11 +359,18 @@ export const useGAAEngine = () => {
     toggleLayer,
     setOscillatorCount,
     
+    // Polarity Actions
+    updatePolarityProtocol,
+    setPolarityBalance,
+    enableManifestInDark,
+    triggerShadowPhase,
+    
     // Data access
     getLayerStates,
     
     // Direct manager access for advanced users
     layerManager: layerManagerRef.current,
-    geometricOscillator: geometricOscillatorRef.current
+    geometricOscillator: geometricOscillatorRef.current,
+    shadowEngine: shadowEngineRef.current
   };
 };

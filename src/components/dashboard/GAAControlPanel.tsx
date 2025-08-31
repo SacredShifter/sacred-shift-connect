@@ -26,6 +26,9 @@ import { GAAGeometryVisualizer } from './GAAGeometryVisualizer';
 import { PresetManager } from '@/utils/gaa/PresetManager';
 import { SafetySystem } from '@/utils/gaa/SafetySystem';
 import { COSMIC_STRUCTURE_PRESETS } from '@/utils/gaa/CosmicStructurePresets';
+import { PolarityControls } from '@/components/gaa/PolarityControls';
+import { BiofeedbackDisplay } from '@/components/gaa/BiofeedbackDisplay';
+import { CosmicIntegration } from '@/components/gaa/CosmicIntegration';
 
 export const GAAControlPanel = () => {
   const {
@@ -34,12 +37,20 @@ export const GAAControlPanel = () => {
     currentGeometry,
     activeOscillators,
     breathPhase,
+    shadowEngine,
+    polarityProtocol,
+    biofeedbackMetrics,
+    sessionId,
     initializeGAA,
     startGAA,
     stopGAA,
     toggleLayer,
     setOscillatorCount,
-    getLayerStates
+    getLayerStates,
+    updatePolarityProtocol,
+    setPolarityBalance,
+    enableManifestInDark,
+    triggerShadowPhase
   } = useGAAEngine();
   
   const [volume, setVolume] = useState([50]);
@@ -335,6 +346,35 @@ export const GAAControlPanel = () => {
         </AnimatePresence>
         </CardContent>
       </Card>
+
+      {/* Polarity Controls */}
+      {polarityProtocol && shadowEngine && (
+        <PolarityControls
+          polarityProtocol={polarityProtocol}
+          shadowEngineState={shadowEngine}
+          onPolarityChange={updatePolarityProtocol}
+          onShadowToggle={(enabled) => enableManifestInDark(enabled)}
+          disabled={!isInitialized}
+        />
+      )}
+
+      {/* Biofeedback Display */}
+      {biofeedbackMetrics && shadowEngine && (
+        <BiofeedbackDisplay
+          metrics={biofeedbackMetrics}
+          isConnected={isInitialized && isPlaying}
+        />
+      )}
+
+      {/* Cosmic Integration */}
+      <CosmicIntegration 
+        cosmicData={null}
+        selectedStructure={null}
+        onStructureSelect={(structure) => console.log('Selected cosmic structure:', structure)}
+        onGeneratePreset={(structure) => console.log('Generate preset for:', structure)}
+        isStreaming={isPlaying}
+        onToggleStreaming={() => isPlaying ? stopGAA() : startGAA()}
+      />
     </div>
   );
 };
