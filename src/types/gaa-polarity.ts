@@ -1,146 +1,117 @@
-/**
- * Polarity-Integrated GAA Type System
- * Complete TypeScript interfaces for Shadow Engine and Cosmic Integration
- */
-
+// Core Polarity Protocol Configuration
 export interface PolarityProtocol {
   lightChannel: ChannelConfiguration;
   darkChannel: ChannelConfiguration;
-  polarityBalance: number; // -1 (full dark) to +1 (full light)
-  manifestInDark: boolean;
-  crossPolarizationEnabled: boolean;
+  polarityBalance: number; // -1 (full dark) to 1 (full light)
   darkEnergyDrift: DarkEnergyConfiguration;
 }
 
+// Channel configurations for light/dark polarity
 export interface ChannelConfiguration {
   enabled: boolean;
   amplitude: number;
   phase: number;
-  subharmonicDepth: number;
-  texturalComplexity: number;
-  resonanceMode: 'constructive' | 'destructive' | 'phase_cancel';
+  resonanceMode: 'harmonic' | 'chaotic' | 'adaptive';
 }
 
+// Dark energy dynamics configuration
 export interface DarkEnergyConfiguration {
-  driftRate: number; // Hz/sec
-  expansionFactor: number; // Cosmological expansion simulation
-  voidResonance: boolean;
-  quantumFluctuation: number;
-  darkMatterDensity: number;
+  driftRate: number;
+  expansionFactor: number;
 }
 
+// Shadow Engine operational state
 export interface ShadowEngineState {
   isActive: boolean;
-  currentPhase: 'light' | 'dark' | 'transition' | 'void';
+  currentPhase: 'activation' | 'integration' | 'manifestation' | 'dissolution';
   polarityBalance: number;
   shadowIntensity: number;
   lightDominance: number;
   darkDominance: number;
-  manifestationMode: 'light' | 'dark' | 'balanced';
   breathCoherence: number;
   heartVariability: number;
   neuralEntrainment: number;
 }
 
+// Comprehensive biofeedback metrics
 export interface BiofeedbackMetrics {
-  heartRateVariability: {
-    rmssd: number;
-    pnn50: number;
-    coherenceRatio: number;
-    timestamp: number;
-  };
+  heartRateVariability: number;
   brainwaveActivity: {
-    alpha: number;
-    beta: number;
-    theta: number;
-    delta: number;
-    gamma: number;
-    coherence: number;
-    timestamp: number;
+    alpha: number;  // 8-13 Hz
+    beta: number;   // 13-30 Hz
+    theta: number;  // 4-8 Hz
+    delta: number;  // 0.5-4 Hz
+    gamma: number;  // 30-100 Hz
   };
   breathingPattern: {
-    rate: number;
-    depth: number;
-    coherence: number;
-    phase: 'inhale' | 'exhale' | 'hold' | 'pause';
-    timestamp: number;
+    rate: number;      // breaths per minute
+    depth: number;     // 0-1 normalized
+    coherence: number; // HRV-breath sync
   };
   autonomicBalance: {
-    sympathetic: number;
-    parasympathetic: number;
-    balance: number;
-    timestamp: number;
+    sympathetic: number;   // 0-1 activation
+    parasympathetic: number; // 0-1 activation
   };
 }
 
+// Cosmic structure data from real astronomical sources
 export interface CosmicStructureData {
   id: string;
   name: string;
-  type: 'galaxy' | 'nebula' | 'pulsar' | 'blackhole' | 'gravitational_wave' | 'dark_matter' | 'jwst_discovery';
+  type: 'galaxy' | 'nebula' | 'star_cluster' | 'quasar' | 'black_hole' | 'pulsar';
   coordinates: {
-    ra: number; // Right ascension
-    dec: number; // Declination
-    distance: number; // Parsecs
-    redshift?: number;
+    rightAscension: number;
+    declination: number;
+    distance?: number; // light years
   };
   physicalProperties: {
     mass?: number;
-    luminosity?: number;
+    diameter?: number;
     temperature?: number;
-    magneticField?: number;
-    rotationPeriod?: number;
+    luminosity?: number;
+    redshift?: number;
   };
   geometricSignature: NormalizedGeometry;
   audioMapping: {
-    fundamentalFreq: number;
+    baseFrequency: number;
     harmonicSeries: number[];
-    polarityProfile: PolarityProtocol;
-    temporalEvolution: TemporalParameters;
+    amplitude: number;
+    duration: number; // seconds
   };
   discoveryMetadata: {
-    source: 'jwst' | 'hubble' | 'ligo' | 'ai_discovery' | 'manual';
-    discoveryDate: Date;
-    confidence: number;
-    dataQuality: number;
+    discoveryDate?: string;
+    observatory?: string;
+    catalogId?: string;
+    confidence: 'confirmed' | 'probable' | 'theoretical';
   };
 }
 
-export interface TemporalParameters {
-  cosmicAge: number; // Billion years
-  evolutionRate: number; // Change per cosmic year
-  timeDialationFactor: number;
-  quantumFluctuation: number;
-  causalityMode: 'forward' | 'backward' | 'quantum_superposition';
-}
-
+// Normalized geometric data from cosmic structures
 export interface NormalizedGeometry {
-  vertices: Float32Array;
-  faces: Uint32Array;
-  normals: Float32Array;
+  vertices: number[][]; // 3D coordinates normalized to [-1, 1]
+  faces?: number[][]; // vertex indices for faces
+  normals?: number[][]; // surface normals
   boundingBox: {
-    min: [number, number, number];
-    max: [number, number, number];
+    min: number[];
+    max: number[];
   };
-  centerOfMass: [number, number, number];
-  symmetryGroup: string;
-  fractalDimension: number;
   sacredRatios: {
-    phi: number;
-    pi: number;
-    euler: number;
-    fibonacci: number[];
+    phi: number; // golden ratio presence
+    pi: number;  // circular geometry
+    sqrt2: number; // square root of 2
   };
 }
 
+// Collective orchestration state
 export interface CollectiveOrchestration {
-  sessionId: string;
+  sessionId?: string;
   participants: ParticipantState[];
   phaseCoherence: number;
-  collectiveResonance: number;
-  synchronizationQuality: number;
+  collectiveResonance?: number;
+  synchronizationQuality?: number;
   leaderUserId?: string;
-  ceremonyType: 'healing' | 'manifestation' | 'shadow_work' | 'cosmic_attunement';
-  groupConsciousnessMetrics: {
+  ceremonyType: 'healing' | 'manifestation' | 'shadow_work' | 'cosmic_attunement' | 'harmonic_convergence';
+  groupConsciousnessMetrics?: {
     coherence: number;
     entrainment: number;
     fieldStrength: number;
@@ -152,115 +123,130 @@ export interface ParticipantState {
   userId: string;
   displayName: string;
   polarityBalance: number;
-  biofeedback: BiofeedbackMetrics;
-  shadowEngineState: ShadowEngineState;
+  biofeedback: BiofeedbackMetrics | null;
+  shadowEngineState: ShadowEngineState | null;
   lastActive: Date;
+  lastActivity: Date;
   role: 'participant' | 'facilitator' | 'witness';
   consentLevel: 'observer' | 'participant' | 'full_integration';
 }
 
+// Extended collective state type
+export interface CollectiveGAAState {
+  sessionId: string;
+  isLeader: boolean;
+  isConnected: boolean;
+  orchestration: CollectiveOrchestration;
+  participants: ParticipantState[];
+  currentSession: GAASessionExtended | null;
+  connectionStatus: 'connected' | 'connecting' | 'disconnected' | 'error';
+}
+
+// Safety configuration and monitoring
 export interface SafetyConfiguration {
-  infrasonicLimit: number; // Hz - below which is blocked
-  ultrasonicLimit: number; // Hz - above which is blocked  
-  maxAmplitude: number; // Prevents hearing damage
-  fatigueDetection: boolean;
-  shadowModeRequiresConsent: boolean;
-  emergencyStopEnabled: boolean;
-  biofeedbackLimits: {
-    maxHeartRate: number;
-    minHeartRateVariability: number;
-    maxStressIndicators: number;
+  maxFrequency: number; // Hz
+  maxAmplitude: number; // normalized 0-1
+  biofeedbackThresholds: {
+    heartRateMax: number;
+    heartRateMin: number;
+    stressThreshold: number;
   };
-  temporalSafetyLimits: {
-    maxSessionDuration: number; // Minutes
-    cooldownPeriod: number; // Minutes between shadow sessions
-    maxDarkDominance: number; // 0-1, prevents full shadow takeover
+  temporalLimits: {
+    maxSessionDuration: number; // minutes
+    cooldownPeriod: number; // minutes
   };
 }
 
+// Extended GAA preset with polarity integration
 export interface GAAPresetExtended {
   id: string;
   name: string;
   description: string;
-  geometryType: string;
-  parameters: any; // Original GAA parameters
-  
-  // Polarity Extensions
-  polarityProtocol: PolarityProtocol;
-  cosmicStructure?: CosmicStructureData;
-  biofeedbackIntegration: boolean;
-  shadowModeEnabled: boolean;
+  cosmicStructure: CosmicStructureData;
+  geometryParams: {
+    complexity: number;
+    symmetry: 'radial' | 'bilateral' | 'spiral' | 'fractal';
+    scale: number;
+  };
+  polarityExtensions: {
+    defaultBalance: number;
+    darkChannelWeight: number;
+    lightChannelWeight: number;
+    manifestInDark: boolean;
+  };
+  biofeedbackIntegration: {
+    hrv_sensitivity: number;
+    brainwave_mapping: Record<string, number>;
+    breath_coupling: number;
+  };
+  shadowMode: {
+    enabled: boolean;
+    activationThreshold: number;
+    integrationDepth: number;
+  };
   collectiveCompatible: boolean;
   safetyProfile: SafetyConfiguration;
-  
-  // Metadata
-  createdBy: string;
-  createdAt: Date;
-  tags: string[];
-  evidenceProvenance: string[];
-  scientificBasis: string;
+  audioConfig: {
+    baseFrequency: number;
+    harmonics: number[];
+    waveform: 'sine' | 'triangle' | 'sawtooth' | 'square';
+    spatialMapping: '2d' | '3d' | 'spherical';
+  };
 }
 
+// Extended session data with analytics
 export interface GAASessionExtended {
   id: string;
   presetId: string;
   facilitatorId: string;
   participantIds: string[];
-  
-  // Session State
-  status: 'preparing' | 'active' | 'paused' | 'completed' | 'emergency_stopped';
-  startTime: Date;
-  endTime?: Date;
-  
-  // Real-time State
+  status: 'active' | 'paused' | 'completed' | 'emergency_stopped';
   collectiveState: CollectiveOrchestration;
-  currentCosmicData?: CosmicStructureData;
-  emergencyProtocols: EmergencyProtocol[];
-  
-  // Analytics
-  sessionMetrics: {
+  sessionAnalytics: {
+    startTime: Date;
+    endTime?: Date;
+    totalParticipants: number;
+    averageCoherence: number;
     peakCoherence: number;
-    averagePolarityBalance: number;
-    shadowWorkIntensity: number;
-    healingEventCount: number;
-    manifestationMarkers: number;
+    emergencyStops?: number;
+    biofeedbackSummary?: BiofeedbackMetrics;
   };
 }
 
+// Emergency response protocols
 export interface EmergencyProtocol {
-  id: string;
-  type: 'biofeedback_alarm' | 'shadow_overflow' | 'temporal_displacement' | 'collective_disruption';
-  severity: 'warning' | 'critical' | 'emergency';
-  autoResponse: 'alert' | 'reduce_intensity' | 'emergency_stop';
-  description: string;
-  triggerConditions: any;
-  responseActions: string[];
+  triggerType: 'biofeedback_critical' | 'coherence_drop' | 'participant_distress' | 'system_error';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  responseActions: ('pause' | 'stop' | 'alert_facilitator' | 'medical_alert')[];
 }
 
-// Event Types for Real-time Updates
+// Real-time event structure
 export interface GAARealtimeEvent {
-  type: 'polarity_shift' | 'shadow_emergence' | 'cosmic_alignment' | 'collective_resonance' | 'emergency';
+  type: 'participant_update' | 'polarity_sync' | 'emergency' | 'session_state';
+  payload: any;
+  timestamp: Date;
   sessionId: string;
   userId?: string;
-  timestamp: Date;
-  data: any;
 }
 
-// API Response Types
+// API response types
 export interface CosmicDataResponse {
   structures: CosmicStructureData[];
-  lastUpdated: Date;
-  dataSource: string;
-  confidence: number;
+  metadata: {
+    totalCount: number;
+    lastUpdated: string;
+    source: string;
+  };
 }
 
 export interface BiofeedbackCalibration {
   userId: string;
-  baselineHRV: number;
-  baselineBrainwaves: any;
-  baselineBreathing: any;
-  polarityPreference: number; // Natural tendency toward light/dark
-  shadowWorkReadiness: number; // 0-1 scale
+  deviceType: string;
+  baselineMetrics: BiofeedbackMetrics;
   calibrationDate: Date;
-  deviceConfiguration: any;
+  personalThresholds: {
+    relaxation: number;
+    focus: number;
+    stress: number;
+  };
 }

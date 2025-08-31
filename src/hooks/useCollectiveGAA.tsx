@@ -1,40 +1,32 @@
-/**
- * Collective GAA Hook - Multi-user session management
- * Manages collective sessions, real-time coordination, and participant states
- */
-
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  CollectiveOrchestration, 
+  CollectiveGAAState, 
   ParticipantState, 
   GAASessionExtended,
+  CollectiveOrchestration,
   PolarityProtocol,
   BiofeedbackMetrics,
   ShadowEngineState
 } from '@/types/gaa-polarity';
 
-export interface CollectiveGAAState {
-  sessionId: string | null;
-  isLeader: boolean;
-  isConnected: boolean;
-  orchestration: CollectiveOrchestration | null;
-  participants: ParticipantState[];
-  currentSession: GAASessionExtended | null;
-  connectionStatus: 'disconnected' | 'connecting' | 'connected' | 'error';
-}
+// Initial state for the collective GAA system
+const initialState: CollectiveGAAState = {
+  sessionId: '',
+  isLeader: false,
+  isConnected: false,
+  orchestration: {
+    participants: [],
+    phaseCoherence: 0,
+    ceremonyType: 'harmonic_convergence'
+  },
+  participants: [],
+  currentSession: null,
+  connectionStatus: 'disconnected'
+};
 
 export const useCollectiveGAA = () => {
-  const [state, setState] = useState<CollectiveGAAState>({
-    sessionId: null,
-    isLeader: false,
-    isConnected: false,
-    orchestration: null,
-    participants: [],
-    currentSession: null,
-    connectionStatus: 'disconnected'
-  });
-
+  const [state, setState] = useState<CollectiveGAAState>(initialState);
   const channelRef = useRef<any>(null);
   const userIdRef = useRef<string | null>(null);
 
@@ -42,283 +34,251 @@ export const useCollectiveGAA = () => {
   useEffect(() => {
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      userIdRef.current = user?.id || null;
+      if (user) {
+        userIdRef.current = user.id;
+      }
     };
     getCurrentUser();
   }, []);
 
-  /**
-   * Create a new collective session
-   */
-  const createSession = useCallback(async (ceremonyType: string = 'cosmic_attunement') => {
+  // Create a new collective session (simulated)
+  const createSession = async (ceremonyType?: string): Promise<string | null> => {
     if (!userIdRef.current) {
-      console.warn('User not authenticated');
+      console.error('User not authenticated');
       return null;
     }
 
-    const sessionId = `collective_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    try {
-      setState(prev => ({ ...prev, connectionStatus: 'connecting' }));
-
-      // Create session in database
-      const sessionData: Partial<GAASessionExtended> = {
-        id: sessionId,
-        preset_id: null,
-        participant_ids: [userIdRef.current!],
-        status: 'active',
-        collective_state: {
-          participants: [],
-          phaseCoherence: 0,
-          ceremonyType,
-          lightDominance: 0.5,
-          darkDominance: 0.5,
-          collectivePolarityBalance: 0,
-          sessionStartTime: new Date().toISOString(),
-          averageBiofeedback: null,
-          emergencyProtocols: {
-            triggerType: 'coherence_drop',
-            threshold: 0.3,
-            responseActions: ['reduce_intensity', 'breathing_guide'],
-            severity: 'low',
-            activatedAt: null
-          }
-        }
-      };
-
-      const { error } = await supabase
-        .from('gaa_sessions_extended')
-        .insert(sessionData);
-
-      if (error) {
-        console.error('Failed to create session:', error);
-        setState(prev => ({ ...prev, connectionStatus: 'error' }));
-        return null;
-      }
-
-      setState(prev => ({ 
-        ...prev, 
-        sessionId,
-        isLeader: true,
-        connectionStatus: 'connected',
-        currentSession: sessionData as GAASessionExtended
-      }));
-
-      // Setup real-time channel
-      setupRealtimeChannel(sessionId);
-
-      return sessionId;
-    } catch (error) {
-      console.error('Error creating session:', error);
-      setState(prev => ({ ...prev, connectionStatus: 'error' }));
-      return null;
-    }
-  }, []);
-
-  /**
-   * Join an existing collective session
-   */
-  const joinSession = useCallback(async (sessionId: string) => {
-    if (!userIdRef.current) {
-      console.warn('User not authenticated');
-      return false;
-    }
-
-    try {
-      setState(prev => ({ ...prev, connectionStatus: 'connecting' }));
-
-      // Check if session exists
-      const { data: session, error } = await supabase
-        .from('gaa_sessions_extended')
-        .select('*')
-        .eq('id', sessionId)
-        .eq('status', 'active')
-        .single();
-
-      if (error || !session) {
-        console.error('Session not found:', error);
-        setState(prev => ({ ...prev, connectionStatus: 'error' }));
-        return false;
-      }
-
-      // Add user to participant list
-      const updatedParticipants = [...(session.participant_ids || []), userIdRef.current!];
-      
-      const { error: updateError } = await supabase
-        .from('gaa_sessions_extended')
-        .update({ participant_ids: updatedParticipants })
-        .eq('id', sessionId);
-
-      if (updateError) {
-        console.error('Failed to join session:', updateError);
-        setState(prev => ({ ...prev, connectionStatus: 'error' }));
-        return false;
-      }
-
-      setState(prev => ({ 
-        ...prev, 
-        sessionId,
-        isLeader: false,
-        connectionStatus: 'connected',
-        currentSession: { ...session, participant_ids: updatedParticipants }
-      }));
-
-      // Setup real-time channel
-      setupRealtimeChannel(sessionId);
-
-      return true;
-    } catch (error) {
-      console.error('Error joining session:', error);
-      setState(prev => ({ ...prev, connectionStatus: 'error' }));
-      return false;
-    }
-  }, []);
-
-  /**
-   * Leave the current session
-   */
-  const leaveSession = useCallback(async () => {
-    if (!state.sessionId || !userIdRef.current) return;
-
-    try {
-      // Remove user from participant list
-      const updatedParticipants = (state.currentSession?.participant_ids || [])
-        .filter(id => id !== userIdRef.current);
-
-      await supabase
-        .from('gaa_sessions_extended')
-        .update({ participant_ids: updatedParticipants })
-        .eq('id', state.sessionId);
-
-      // Cleanup real-time channel
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-
-      setState(prev => ({
-        ...prev,
-        sessionId: null,
-        isLeader: false,
-        isConnected: false,
-        orchestration: null,
+    const mockSession: GAASessionExtended = {
+      id: sessionId,
+      presetId: 'cosmic_harmony',
+      facilitatorId: userIdRef.current,
+      participantIds: [userIdRef.current],
+      status: 'active',
+      collectiveState: {
         participants: [],
-        currentSession: null,
-        connectionStatus: 'disconnected'
-      }));
+        phaseCoherence: 0,
+        ceremonyType: (ceremonyType as any) || 'harmonic_convergence'
+      },
+      sessionAnalytics: {
+        startTime: new Date(),
+        totalParticipants: 1,
+        averageCoherence: 0,
+        peakCoherence: 0
+      }
+    };
 
-    } catch (error) {
-      console.error('Error leaving session:', error);
+    // Set up realtime channel
+    setupRealtimeChannel(sessionId);
+    
+    setState(prev => ({
+      ...prev,
+      sessionId,
+      isLeader: true,
+      isConnected: true,
+      currentSession: mockSession,
+      connectionStatus: 'connected',
+      orchestration: {
+        participants: [],
+        phaseCoherence: 0,
+        ceremonyType: (ceremonyType as any) || 'harmonic_convergence'
+      }
+    }));
+
+    return sessionId;
+  };
+
+  // Join an existing session (simulated)
+  const joinSession = async (sessionId: string): Promise<boolean> => {
+    if (!userIdRef.current) {
+      console.error('User not authenticated');
+      return false;
     }
-  }, [state.sessionId, state.currentSession]);
 
-  /**
-   * Setup real-time channel for session coordination
-   */
-  const setupRealtimeChannel = useCallback((sessionId: string) => {
+    // Simulate joining session
+    const mockSession: GAASessionExtended = {
+      id: sessionId,
+      presetId: 'cosmic_harmony',
+      facilitatorId: 'other_user',
+      participantIds: ['other_user', userIdRef.current],
+      status: 'active',
+      collectiveState: {
+        phaseCoherence: 0.3,
+        participants: [],
+        ceremonyType: 'harmonic_convergence' as any
+      },
+      sessionAnalytics: {
+        startTime: new Date(),
+        totalParticipants: 2,
+        averageCoherence: 0.3,
+        peakCoherence: 0.5
+      }
+    };
+
+    // Set up realtime channel
+    setupRealtimeChannel(sessionId);
+
+    setState(prev => ({
+      ...prev,
+      sessionId,
+      isLeader: false,
+      connectionStatus: 'connected',
+      currentSession: mockSession,
+      isConnected: true,
+      orchestration: {
+        phaseCoherence: 0.3,
+        participants: [],
+        ceremonyType: 'harmonic_convergence' as any
+      }
+    }));
+
+    return true;
+  };
+
+  // Leave the current session
+  const leaveSession = async (): Promise<void> => {
+    // Clean up realtime channel
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
+    // Reset state
+    setState(initialState);
+  };
+
+  // Set up realtime channel for session coordination
+  const setupRealtimeChannel = (sessionId: string): void => {
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
     }
 
-    channelRef.current = supabase
+    const channel = supabase
       .channel(`collective-session-${sessionId}`)
       .on('presence', { event: 'sync' }, () => {
-        const presenceState = channelRef.current.presenceState();
-        const participants = Object.values(presenceState).flat() as ParticipantState[];
-        
-        setState(prev => ({ 
-          ...prev, 
-          participants,
-          orchestration: prev.orchestration ? {
+        const presences = channel.presenceState();
+        const participantList = Object.values(presences).map(presence => ({
+          userId: (presence[0] as any)?.user_id || (presence[0] as any)?.presence_ref || 'unknown',
+          displayName: (presence[0] as any)?.display_name || 'Anonymous',
+          polarityBalance: (presence[0] as any)?.polarity_balance || 0.5,
+          biofeedback: (presence[0] as any)?.biofeedback || null,
+          shadowEngineState: (presence[0] as any)?.shadow_engine_state || null,
+          lastActivity: new Date((presence[0] as any)?.last_activity || Date.now()),
+          lastActive: new Date((presence[0] as any)?.last_activity || Date.now()),
+          consentLevel: 'participant' as const,
+          role: (presence[0] as any)?.role || 'participant'
+        })) as ParticipantState[];
+
+        setState(prev => ({
+          ...prev,
+          participants: participantList,
+          orchestration: {
             ...prev.orchestration,
-            participants
-          } : null
+            participants: participantList
+          }
         }));
       })
       .on('presence', { event: 'join' }, ({ newPresences }) => {
-        console.log('New participant joined:', newPresences);
+        console.log('Participant joined:', newPresences);
       })
       .on('presence', { event: 'leave' }, ({ leftPresences }) => {
         console.log('Participant left:', leftPresences);
       })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'gaa_sessions_extended',
-        filter: `id=eq.${sessionId}`
-      }, (payload) => {
-        setState(prev => ({ 
-          ...prev, 
-          currentSession: payload.new as GAASessionExtended 
-        }));
-      })
       .subscribe();
 
-    // Track presence
-    if (userIdRef.current) {
-      const participantState: ParticipantState = {
-        userId: userIdRef.current,
-        role: state.isLeader ? 'leader' : 'participant',
-        biofeedback: null,
-        shadowEngineState: null,
-        isActive: true,
-        joinedAt: new Date().toISOString(),
-        lastSeen: new Date().toISOString()
-      };
+    channelRef.current = channel;
+  };
 
-      channelRef.current.track(participantState);
-    }
-  }, [state.isLeader]);
-
-  /**
-   * Update participant's biofeedback and shadow engine state
-   */
-  const updateParticipantState = useCallback((
-    biofeedback: BiofeedbackMetrics | null, 
+  // Update participant state with biofeedback and shadow engine data
+  const updateParticipantState = (
+    biofeedback: BiofeedbackMetrics | null,
     shadowEngine: ShadowEngineState | null
-  ) => {
+  ): void => {
     if (!channelRef.current || !userIdRef.current) return;
 
-    const participantState: ParticipantState = {
-      userId: userIdRef.current,
-      role: state.isLeader ? 'leader' : 'participant',
+    const presence = {
+      user_id: userIdRef.current,
+      display_name: `User ${userIdRef.current.slice(-4)}`,
+      polarity_balance: shadowEngine?.polarityBalance || 0.5,
       biofeedback,
-      shadowEngineState: shadowEngine,
-      isActive: true,
-      joinedAt: new Date().toISOString(),
-      lastSeen: new Date().toISOString()
+      shadow_engine_state: shadowEngine,
+      last_activity: new Date().toISOString(),
+      role: state.isLeader ? 'facilitator' : 'participant'
     };
 
-    channelRef.current.track(participantState);
-  }, [state.isLeader]);
+    channelRef.current.track(presence);
+  };
 
-  /**
-   * Synchronize polarity protocol across all participants
-   */
-  const syncPolarityProtocol = useCallback(async (protocol: PolarityProtocol) => {
-    if (!state.sessionId || !state.isLeader) return;
-
-    try {
-      // Update session with new polarity protocol
-      const { error } = await supabase
-        .from('gaa_sessions_extended')
-        .update({ 
-          collective_state: {
-            ...state.currentSession?.collective_state,
-            collectivePolarityBalance: protocol.polarityBalance,
-            lightDominance: protocol.lightChannel.amplitude,
-            darkDominance: protocol.darkChannel.amplitude
-          }
-        })
-        .eq('id', state.sessionId);
-
-      if (error) {
-        console.error('Failed to sync polarity protocol:', error);
-      }
-    } catch (error) {
-      console.error('Error syncing polarity protocol:', error);
+  // Sync polarity protocol across all participants
+  const syncPolarityProtocol = async (protocol: PolarityProtocol): Promise<void> => {
+    if (!state.isLeader) {
+      console.warn('Only the session leader can sync polarity protocol');
+      return;
     }
-  }, [state.sessionId, state.isLeader, state.currentSession]);
+
+    // Update local orchestration state
+    setState(prev => ({
+      ...prev,
+      orchestration: {
+        ...prev.orchestration,
+        ...protocol as any
+      }
+    }));
+
+    // Broadcast to all participants via realtime channel
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'polarity_sync',
+        payload: protocol
+      });
+    }
+  };
+
+  // Simulate participant presence for testing
+  const simulateParticipant = () => {
+    if (!channelRef.current) return;
+
+    const mockParticipant = {
+      user_id: `mock_${Date.now()}`,
+      display_name: `Participant ${Math.floor(Math.random() * 1000)}`,
+      polarity_balance: Math.random(),
+      biofeedback: {
+        heartRateVariability: Math.random() * 100,
+        brainwaveActivity: {
+          alpha: Math.random() * 50,
+          beta: Math.random() * 30,
+          theta: Math.random() * 40,
+          delta: Math.random() * 20,
+          gamma: Math.random() * 10
+        },
+        breathingPattern: {
+          rate: 12 + Math.random() * 8,
+          depth: Math.random(),
+          coherence: Math.random()
+        },
+        autonomicBalance: {
+          sympathetic: Math.random(),
+          parasympathetic: Math.random()
+        }
+      },
+      shadow_engine_state: {
+        isActive: true,
+        currentPhase: 'integration' as const,
+        polarityBalance: Math.random(),
+        shadowIntensity: Math.random(),
+        lightDominance: Math.random(),
+        darkDominance: Math.random(),
+        breathCoherence: Math.random(),
+        heartVariability: Math.random(),
+        neuralEntrainment: Math.random()
+      },
+      last_activity: new Date().toISOString(),
+      role: state.isLeader ? 'facilitator' : 'participant'
+    };
+
+    channelRef.current.track(mockParticipant);
+  };
 
   // Cleanup on unmount
   useEffect(() => {
@@ -330,14 +290,12 @@ export const useCollectiveGAA = () => {
   }, []);
 
   return {
-    // State
     ...state,
-    
-    // Actions
     createSession,
     joinSession,
     leaveSession,
     updateParticipantState,
-    syncPolarityProtocol
+    syncPolarityProtocol,
+    simulateParticipant
   };
 };
