@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
@@ -268,15 +268,11 @@ function JetStream({ isActive }: { isActive: boolean }) {
   if (!isActive) return null;
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleCount}
-          array={positions}
-          itemSize={3}
-        />
-      </bufferGeometry>
+    <points ref={pointsRef} geometry={useMemo(() => {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      return geo;
+    }, [positions])}>
       <pointsMaterial color="#ffffff" size={0.02} transparent opacity={0.5} />
     </points>
   );

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Sphere } from '@react-three/drei';
 import * as THREE from 'three';
@@ -200,21 +200,12 @@ export default function BreathOrb({
       </mesh>
 
       {/* Energy Particles */}
-      <points ref={particlesRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={particleCount}
-            array={particles.positions}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={particleCount}
-            array={particles.colors}
-            itemSize={3}
-          />
-        </bufferGeometry>
+      <points ref={particlesRef} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(particles.positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(particles.colors, 3));
+        return geo;
+      }, [particles.positions, particles.colors])}>
         <pointsMaterial
           size={0.02}
           transparent

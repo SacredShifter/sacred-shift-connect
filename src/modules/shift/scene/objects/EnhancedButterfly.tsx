@@ -95,21 +95,12 @@ export const EnhancedButterfly: React.FC = () => {
       </mesh>
       
       {/* Particle Trail */}
-      <points ref={particlesRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            array={particleData.positions}
-            count={particleData.positions.length / 3}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            array={particleData.colors}
-            count={particleData.colors.length / 3}
-            itemSize={3}
-          />
-        </bufferGeometry>
+      <points ref={particlesRef} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(particleData.positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(particleData.colors, 3));
+        return geo;
+      }, [particleData.positions, particleData.colors])}>
         <pointsMaterial
           size={0.05}
           vertexColors

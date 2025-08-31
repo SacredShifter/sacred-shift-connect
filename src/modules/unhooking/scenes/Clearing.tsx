@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import { useUnhookingState } from '../context/UnhookingContext';
@@ -45,17 +45,14 @@ export const Clearing: React.FC = () => {
       </mesh>
       
       {/* Remaining fog */}
-      <points>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={500}
-            array={new Float32Array(
-              Array.from({ length: 1500 }, () => (Math.random() - 0.5) * 20)
-            )}
-            itemSize={3}
-          />
-        </bufferGeometry>
+      <points geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        const positions = new Float32Array(
+          Array.from({ length: 1500 }, () => (Math.random() - 0.5) * 20)
+        );
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        return geo;
+      }, [])}>
         <pointsMaterial
           size={0.08}
           color="#696969"

@@ -73,17 +73,14 @@ export const FogOfBroadcasts: React.FC = () => {
       <pointLight position={[0, 10, 0]} intensity={0.3} color="#FF4500" />
       
       {/* Fog particles */}
-      <points ref={fogRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={1000}
-            array={new Float32Array(
-              Array.from({ length: 3000 }, () => (Math.random() - 0.5) * 50)
-            )}
-            itemSize={3}
-          />
-        </bufferGeometry>
+      <points ref={fogRef} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        const positions = new Float32Array(
+          Array.from({ length: 3000 }, () => (Math.random() - 0.5) * 50)
+        );
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        return geo;
+      }, [])}>
         <pointsMaterial
           size={0.1}
           color="#696969"
