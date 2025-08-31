@@ -163,25 +163,27 @@ export const SessionMetrics: React.FC<SessionMetricsProps> = ({
     ];
   };
 
-  // Generate session insights - memoized to prevent infinite loops
+  // Generate session insights - simplified to prevent infinite loops
   useEffect(() => {
-    if (!isActive || !biofeedbackState) {
-      setSessionInsights([]);
+    if (!isActive) {
+      if (sessionInsights.length > 0) {
+        setSessionInsights([]);
+      }
       return;
     }
 
+    // Only generate insights once per minute to prevent excessive updates
+    const shouldUpdate = sessionDuration % 60000 < 1000; // Update once per minute
+    if (!shouldUpdate) return;
+
     const insights: string[] = [];
     
-    // Extract stable values to avoid object reference changes
-    const alphaLevel = biofeedbackState.brainwaveAlpha || 0;
-    const hrvLevel = biofeedbackState.heartRateVariability || 0;
-    const alertCount = safetyAlerts.length;
-    
-    if (alphaLevel > 0.4) {
+    // Simplified insight generation with null safety
+    if (biofeedbackState?.brainwaveAlpha && biofeedbackState.brainwaveAlpha > 0.4) {
       insights.push('Strong alpha wave activity detected - excellent meditation state');
     }
     
-    if (hrvLevel > 50) {
+    if (biofeedbackState?.heartRateVariability && biofeedbackState.heartRateVariability > 50) {
       insights.push('High heart rate variability indicates good autonomic balance');
     }
     
@@ -189,25 +191,13 @@ export const SessionMetrics: React.FC<SessionMetricsProps> = ({
       insights.push('Extended session duration - deepening practice detected');
     }
     
-    if (alertCount === 0 && sessionDuration > 300000) {
+    if (safetyAlerts.length === 0 && sessionDuration > 300000) {
       insights.push('Stable physiological state maintained throughout session');
     }
 
-    // Only update if insights actually changed
-    setSessionInsights(prev => {
-      if (prev.length !== insights.length || 
-          !prev.every((insight, index) => insight === insights[index])) {
-        return insights;
-      }
-      return prev;
-    });
-  }, [
-    isActive, 
-    biofeedbackState?.brainwaveAlpha, 
-    biofeedbackState?.heartRateVariability,
-    sessionDuration, 
-    safetyAlerts.length
-  ]);
+    // Simple replacement - don't compare arrays
+    setSessionInsights(insights);
+  }, [isActive, Math.floor(sessionDuration / 60000)]); // Only depend on active state and minute intervals
 
   const safetyStatus = getSafetyStatus();
   const metricCards = getMetricCards();

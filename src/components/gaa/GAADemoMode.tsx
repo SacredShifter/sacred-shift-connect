@@ -62,13 +62,17 @@ export const GAADemoMode: React.FC<GAADemoModeProps> = ({
 
         if (newProgress >= 100) {
           // Move to next archetype
-          const nextIndex = (currentIndex + 1) % DEMO_SEQUENCE.length;
-          const nextTradition = (traditionIndex + 1) % TRADITIONS.length;
+          setCurrentIndex(prevIndex => {
+            const nextIndex = (prevIndex + 1) % DEMO_SEQUENCE.length;
+            onArchetypeChange(DEMO_SEQUENCE[nextIndex].id);
+            return nextIndex;
+          });
           
-          setCurrentIndex(nextIndex);
-          setTraditionIndex(nextTradition);
-          onArchetypeChange(DEMO_SEQUENCE[nextIndex].id);
-          onTraditionChange(TRADITIONS[nextTradition]);
+          setTraditionIndex(prevTradition => {
+            const nextTradition = (prevTradition + 1) % TRADITIONS.length;
+            onTraditionChange(TRADITIONS[nextTradition]);
+            return nextTradition;
+          });
           
           return 0;
         }
@@ -78,7 +82,7 @@ export const GAADemoMode: React.FC<GAADemoModeProps> = ({
     }, 100);
 
     return () => clearInterval(interval);
-  }, [isActive, currentIndex, traditionIndex, currentArchetype.duration, onArchetypeChange, onTraditionChange]);
+  }, [isActive, currentArchetype.duration, onArchetypeChange, onTraditionChange]);
 
   const handleSkip = () => {
     const nextIndex = (currentIndex + 1) % DEMO_SEQUENCE.length;
