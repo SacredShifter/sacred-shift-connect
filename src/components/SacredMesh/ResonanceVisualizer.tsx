@@ -403,7 +403,7 @@ export const ResonanceVisualizer: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4 text-amber-500" />
-                <span>Handshakes: {handshakes.filter(h => h.status === 'established').length}</span>
+                <span>Handshakes: {handshakes.filter(h => h.status === 'active').length}</span>
               </div>
             </div>
 
