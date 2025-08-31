@@ -11,6 +11,8 @@ import { GAADashboard } from "@/components/gaa/GAADashboard";
 import { CosmicVisualization } from "@/components/gaa/CosmicVisualization";
 import { SessionMetrics } from "@/components/gaa/SessionMetrics";
 import { AppProviders } from "@/providers/AppProviders";
+import { TermsOfService } from "@/pages/TermsOfService";
+import { PrivacyPolicy } from "@/pages/PrivacyPolicy";
 
 import { ErrorBoundary, UIErrorBoundary } from "@/components/ErrorBoundary";
 import { ProductionReadyErrorBoundary } from "@/components/production/ProductionReadyErrorBoundary";
