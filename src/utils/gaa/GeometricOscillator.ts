@@ -1,230 +1,248 @@
-import { Vector3 } from 'three';
-import { NormalizedGeometry } from './GeometricNormalizer';
+import * as Tone from 'tone';
 
-export interface OscillatorParams {
+export interface GeometricOscillatorConfig {
   baseFrequency: number;
   gainLevel: number;
-  waveform: 'sine' | 'triangle' | 'sawtooth' | 'square';
+  waveform: 'sine' | 'triangle' | 'square' | 'sawtooth';
   modulationDepth: number;
   spatialPanning: boolean;
 }
 
-export interface SpatialAudioState {
-  position: Vector3;
-  velocity: Vector3;
-  pannerNode?: PannerNode;
-  gainNode?: GainNode;
-  oscillatorNode?: OscillatorNode;
+export interface NormalizedGeometry {
+  vertices: number[][];
+  faces: number[][];
+  normals: number[][];
+  center: number[];
+  radius: number;
+  sacredRatios: {
+    phi: number;
+    pi: number;
+    sqrt2: number;
+  };
 }
 
-/**
- * Geometric oscillator for GAA 3D audio synthesis
- * Maps normalized geometry to deterministic audio parameters
- */
 export class GeometricOscillator {
   private audioContext: AudioContext;
-  private masterGain: GainNode;
-  private spatialNodes: Map<string, SpatialAudioState> = new Map();
-  private params: OscillatorParams;
+  private config: GeometricOscillatorConfig;
+  private oscillators: Map<string, {
+    osc: Tone.Oscillator;
+    filter: Tone.Filter;
+    gain: Tone.Gain;
+    panner: Tone.Panner3D;
+    envelope: Tone.AmplitudeEnvelope;
+  }> = new Map();
+  private masterGain: Tone.Gain;
+  private masterCompressor: Tone.Compressor;
 
-  constructor(audioContext: AudioContext, params: Partial<OscillatorParams> = {}) {
+  constructor(audioContext: AudioContext, config: GeometricOscillatorConfig) {
     this.audioContext = audioContext;
-    this.params = {
-      baseFrequency: 440,
-      gainLevel: 0.3,
-      waveform: 'sine',
-      modulationDepth: 0.1,
-      spatialPanning: true,
-      ...params
-    };
-
-    this.masterGain = audioContext.createGain();
-    this.masterGain.gain.setValueAtTime(this.params.gainLevel, audioContext.currentTime);
-    this.masterGain.connect(audioContext.destination);
+    this.config = config;
+    
+    // Setup master audio chain
+    this.masterGain = new Tone.Gain(config.gainLevel);
+    this.masterCompressor = new Tone.Compressor({
+      threshold: -24,
+      ratio: 3,
+      attack: 0.003,
+      release: 0.1
+    });
+    
+    this.masterGain.connect(this.masterCompressor);
+    this.masterCompressor.toDestination();
   }
 
   /**
-   * Create oscillator from normalized geometry
-   * Frequency mapping: f = f_base * 2^(scale * octaves + curvature_offset)
+   * Create a geometric oscillator based on normalized geometry
    */
   createGeometricOscillator(
-    geometry: NormalizedGeometry,
-    nodeId: string,
-    octaveRange: number = 3
-  ): SpatialAudioState {
-    // Deterministic frequency mapping
-    const frequency = this.params.baseFrequency * Math.pow(2, 
-      geometry.scale * octaveRange + 
-      geometry.curvature * 0.5 + 
-      geometry.torsion * 0.25 - octaveRange/2
-    );
-
-    // Create audio nodes
-    const oscillator = this.audioContext.createOscillator();
-    const gainNode = this.audioContext.createGain();
-    
-    // Configure oscillator
-    oscillator.type = this.params.waveform;
-    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
-
-    // Geometric gain modulation
-    const geometricGain = (geometry.curvature * 0.6 + geometry.torsion * 0.4) * this.params.gainLevel;
-    gainNode.gain.setValueAtTime(geometricGain, this.audioContext.currentTime);
-
-    let pannerNode: PannerNode | undefined;
-    
-    if (this.params.spatialPanning) {
-      pannerNode = this.audioContext.createPanner();
-      pannerNode.panningModel = 'HRTF';
-      pannerNode.distanceModel = 'inverse';
-      pannerNode.refDistance = 1;
-      pannerNode.maxDistance = 10000;
-      pannerNode.rolloffFactor = 1;
-
-      // Set 3D position from geometry
-      pannerNode.positionX.setValueAtTime(geometry.position.x, this.audioContext.currentTime);
-      pannerNode.positionY.setValueAtTime(geometry.position.y, this.audioContext.currentTime);
-      pannerNode.positionZ.setValueAtTime(geometry.position.z, this.audioContext.currentTime);
-
-      // Connect: oscillator → gain → panner → master
-      oscillator.connect(gainNode);
-      gainNode.connect(pannerNode);
-      pannerNode.connect(this.masterGain);
-    } else {
-      // Connect: oscillator → gain → master  
-      oscillator.connect(gainNode);
-      gainNode.connect(this.masterGain);
+    geometry: NormalizedGeometry, 
+    id: string, 
+    harmonics: number = 4
+  ): void {
+    if (this.oscillators.has(id)) {
+      this.stopOscillator(id);
     }
 
-    const spatialState: SpatialAudioState = {
-      position: geometry.position.clone(),
-      velocity: new Vector3(),
-      pannerNode,
-      gainNode,
-      oscillatorNode: oscillator
-    };
-
-    this.spatialNodes.set(nodeId, spatialState);
+    // Calculate frequency based on geometry
+    const frequency = this.calculateGeometricFrequency(geometry);
     
-    // Start oscillator
-    oscillator.start();
+    // Create oscillator with harmonic content
+    const osc = new Tone.Oscillator({
+      frequency: frequency,
+      type: this.config.waveform
+    });
 
-    return spatialState;
+    // Create filter based on geometric complexity
+    const cutoff = this.calculateFilterFrequency(geometry);
+    const filter = new Tone.Filter(cutoff, 'lowpass', -12);
+
+    // Create gain envelope based on geometry
+    const gain = new Tone.Gain(0);
+    const envelope = new Tone.AmplitudeEnvelope({
+      attack: 0.1,
+      decay: 0.2,
+      sustain: 0.8,
+      release: 0.5
+    });
+
+    // Create 3D panner for spatial positioning
+    const panner = new Tone.Panner3D({
+      positionX: geometry.center[0] * 10,
+      positionY: geometry.center[1] * 10,
+      positionZ: geometry.center[2] * 10
+    });
+
+    // Connect audio chain
+    osc.connect(filter);
+    filter.connect(envelope);
+    envelope.connect(gain);
+    
+    if (this.config.spatialPanning) {
+      gain.connect(panner);
+      panner.connect(this.masterGain);
+    } else {
+      gain.connect(this.masterGain);
+    }
+
+    // Store oscillator components
+    this.oscillators.set(id, { osc, filter, gain, panner, envelope });
+
+    // Start oscillator
+    osc.start();
+    envelope.triggerAttack();
   }
 
   /**
-   * Update oscillator parameters from geometry
+   * Update existing geometric oscillator
    */
   updateGeometricOscillator(
-    nodeId: string, 
-    geometry: NormalizedGeometry,
-    octaveRange: number = 3
+    id: string, 
+    geometry: NormalizedGeometry, 
+    harmonics: number = 4
   ): void {
-    const spatialState = this.spatialNodes.get(nodeId);
-    if (!spatialState || !spatialState.oscillatorNode || !spatialState.gainNode) return;
+    const components = this.oscillators.get(id);
+    if (!components) return;
 
-    const now = this.audioContext.currentTime;
+    const { osc, filter, panner } = components;
 
-    // Update frequency
-    const frequency = this.params.baseFrequency * Math.pow(2, 
-      geometry.scale * octaveRange + 
-      geometry.curvature * 0.5 + 
-      geometry.torsion * 0.25 - octaveRange/2
-    );
-    
-    spatialState.oscillatorNode.frequency.linearRampToValueAtTime(frequency, now + 0.1);
+    // Smoothly update frequency
+    const newFreq = this.calculateGeometricFrequency(geometry);
+    osc.frequency.rampTo(newFreq, 0.1);
 
-    // Update gain
-    const geometricGain = (geometry.curvature * 0.6 + geometry.torsion * 0.4) * this.params.gainLevel;
-    spatialState.gainNode.gain.linearRampToValueAtTime(geometricGain, now + 0.1);
+    // Update filter based on geometry changes
+    const newCutoff = this.calculateFilterFrequency(geometry);
+    filter.frequency.rampTo(newCutoff, 0.1);
 
-    // Update 3D position
-    if (spatialState.pannerNode && this.params.spatialPanning) {
-      spatialState.pannerNode.positionX.linearRampToValueAtTime(geometry.position.x, now + 0.1);
-      spatialState.pannerNode.positionY.linearRampToValueAtTime(geometry.position.y, now + 0.1);
-      spatialState.pannerNode.positionZ.linearRampToValueAtTime(geometry.position.z, now + 0.1);
+    // Update spatial position
+    if (this.config.spatialPanning) {
+      panner.positionX.rampTo(geometry.center[0] * 10, 0.2);
+      panner.positionY.rampTo(geometry.center[1] * 10, 0.2);
+      panner.positionZ.rampTo(geometry.center[2] * 10, 0.2);
     }
-
-    spatialState.position.copy(geometry.position);
   }
 
   /**
-   * Create musical scale mapping
-   * Maps normalized values to pentatonic/chromatic scales
+   * Calculate frequency based on geometric properties
    */
-  createMusicalMapping(
-    geometries: NormalizedGeometry[],
-    scale: 'pentatonic' | 'chromatic' | 'dorian' = 'pentatonic'
-  ): number[] {
-    const scaleIntervals = {
-      pentatonic: [0, 2, 4, 7, 9], // Major pentatonic intervals
-      chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-      dorian: [0, 2, 3, 5, 7, 9, 10]
-    };
-
-    const intervals = scaleIntervals[scale];
+  private calculateGeometricFrequency(geometry: NormalizedGeometry): number {
+    const { sacredRatios, radius, vertices } = geometry;
     
-    return geometries.map(geometry => {
-      // Map scale to musical intervals
-      const scaleIndex = Math.floor(geometry.scale * intervals.length);
-      const semitone = intervals[scaleIndex % intervals.length];
-      
-      // Add octave from curvature
-      const octave = Math.floor(geometry.curvature * 4) * 12;
-      
-      return this.params.baseFrequency * Math.pow(2, (semitone + octave) / 12);
-    });
+    // Base frequency from sacred ratios
+    let freq = this.config.baseFrequency;
+    
+    // Modulate by golden ratio
+    freq *= Math.pow(sacredRatios.phi, (radius - 0.5) * 2);
+    
+    // Modulate by vertex count (complexity)
+    const complexity = vertices.length / 100; // Normalize vertex count
+    freq *= 1 + complexity * 0.5;
+    
+    // Modulate by geometric center position
+    const centerMagnitude = Math.sqrt(
+      geometry.center[0] ** 2 + 
+      geometry.center[1] ** 2 + 
+      geometry.center[2] ** 2
+    );
+    freq *= 1 + centerMagnitude * 0.3;
+    
+    // Ensure frequency is in audible range
+    return Math.max(20, Math.min(2000, freq));
   }
 
   /**
-   * Stop and cleanup oscillator
+   * Calculate filter frequency based on geometric complexity
    */
-  stopOscillator(nodeId: string): void {
-    const spatialState = this.spatialNodes.get(nodeId);
-    if (!spatialState || !spatialState.oscillatorNode) return;
+  private calculateFilterFrequency(geometry: NormalizedGeometry): number {
+    const baseFilter = 800;
+    const complexity = geometry.vertices.length / 50;
+    const radiusEffect = geometry.radius * 2;
+    
+    return Math.max(200, Math.min(8000, baseFilter * (1 + complexity + radiusEffect)));
+  }
 
-    spatialState.oscillatorNode.stop();
-    spatialState.oscillatorNode.disconnect();
+  /**
+   * Stop specific oscillator
+   */
+  stopOscillator(id: string): void {
+    const components = this.oscillators.get(id);
+    if (!components) return;
+
+    const { osc, filter, gain, panner, envelope } = components;
     
-    if (spatialState.gainNode) spatialState.gainNode.disconnect();
-    if (spatialState.pannerNode) spatialState.pannerNode.disconnect();
+    // Graceful release
+    envelope.triggerRelease();
     
-    this.spatialNodes.delete(nodeId);
+    // Stop after release time
+    setTimeout(() => {
+      osc.stop();
+      osc.disconnect();
+      filter.disconnect();
+      gain.disconnect();
+      panner.disconnect();
+      envelope.disconnect();
+      
+      this.oscillators.delete(id);
+    }, 600); // Wait for release
   }
 
   /**
    * Stop all oscillators
    */
   stopAll(): void {
-    this.spatialNodes.forEach((_, nodeId) => {
-      this.stopOscillator(nodeId);
+    Array.from(this.oscillators.keys()).forEach(id => {
+      this.stopOscillator(id);
     });
   }
 
   /**
-   * Update master parameters
+   * Get active oscillator count
    */
-  updateParams(newParams: Partial<OscillatorParams>): void {
-    this.params = { ...this.params, ...newParams };
-    this.masterGain.gain.setValueAtTime(this.params.gainLevel, this.audioContext.currentTime);
+  getActiveCount(): number {
+    return this.oscillators.size;
   }
 
   /**
-   * Set listener position for 3D audio
+   * Update master gain
    */
-  setListenerPosition(position: Vector3, forward: Vector3, up: Vector3): void {
-    if (this.audioContext.listener.positionX) {
-      this.audioContext.listener.positionX.setValueAtTime(position.x, this.audioContext.currentTime);
-      this.audioContext.listener.positionY.setValueAtTime(position.y, this.audioContext.currentTime);
-      this.audioContext.listener.positionZ.setValueAtTime(position.z, this.audioContext.currentTime);
-      
-      this.audioContext.listener.forwardX.setValueAtTime(forward.x, this.audioContext.currentTime);
-      this.audioContext.listener.forwardY.setValueAtTime(forward.y, this.audioContext.currentTime);
-      this.audioContext.listener.forwardZ.setValueAtTime(forward.z, this.audioContext.currentTime);
-      
-      this.audioContext.listener.upX.setValueAtTime(up.x, this.audioContext.currentTime);
-      this.audioContext.listener.upY.setValueAtTime(up.y, this.audioContext.currentTime);
-      this.audioContext.listener.upZ.setValueAtTime(up.z, this.audioContext.currentTime);
-    }
+  setMasterGain(gain: number): void {
+    this.masterGain.gain.rampTo(Math.max(0, Math.min(1, gain)), 0.1);
+  }
+
+  /**
+   * Get oscillator info for debugging
+   */
+  getOscillatorInfo(id: string) {
+    const components = this.oscillators.get(id);
+    if (!components) return null;
+
+    return {
+      frequency: components.osc.frequency.value,
+      filterCutoff: components.filter.frequency.value,
+      position: {
+        x: components.panner.positionX.value,
+        y: components.panner.positionY.value,
+        z: components.panner.positionZ.value
+      }
+    };
   }
 }

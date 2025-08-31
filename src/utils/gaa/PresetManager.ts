@@ -1,6 +1,6 @@
 import { CosmicStructurePreset, COSMIC_STRUCTURE_PRESETS, getVerifiedPresets } from './CosmicStructurePresets';
 import { ToroidalHelixGeometry } from './ToroidalHelixGeometry';
-import { GeometricOscillator, OscillatorParams } from './GeometricOscillator';
+import { GeometricOscillator, GeometricOscillatorConfig } from './GeometricOscillator';
 
 export interface PresetLoadResult {
   success: boolean;

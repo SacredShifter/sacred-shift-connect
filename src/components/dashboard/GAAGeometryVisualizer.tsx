@@ -30,23 +30,19 @@ const GeometryPoints = ({
     const connections = new Float32Array((geometry.length - 1) * 6); // Lines between consecutive points
 
     geometry.forEach((geo, i) => {
-      // Position based on normalized geometry
-      const radius = 2 + geo.scale * 3;
-      const theta = geo.angles.theta * Math.PI * 2;
-      const phi = geo.angles.phi * Math.PI;
-
-      const x = radius * Math.sin(phi) * Math.cos(theta);
-      const y = radius * Math.sin(phi) * Math.sin(theta);
-      const z = radius * Math.cos(phi);
+      // Position based on center and radius
+      const x = geo.center[0] * 3;
+      const y = geo.center[1] * 3;
+      const z = geo.center[2] * 3;
 
       positions[i * 3] = x;
       positions[i * 3 + 1] = y;
       positions[i * 3 + 2] = z;
 
-      // Color based on curvature and torsion
-      const hue = (geo.curvature + geo.torsion) * 180;
+      // Color based on sacred ratios
+      const hue = (geo.sacredRatios.phi - 1) * 360;
       const saturation = 0.8;
-      const lightness = 0.4 + geo.scale * 0.4;
+      const lightness = 0.4 + geo.radius * 0.4;
       
       const color = new Color().setHSL(hue / 360, saturation, lightness);
       colors[i * 3] = color.r;
