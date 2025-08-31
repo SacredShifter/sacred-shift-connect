@@ -13,6 +13,7 @@ import { SessionMetrics } from "@/components/gaa/SessionMetrics";
 import { AppProviders } from "@/providers/AppProviders";
 import { TermsOfService } from "@/pages/TermsOfService";
 import { PrivacyPolicy } from "@/pages/PrivacyPolicy";
+import { PrivacySettings } from "@/pages/PrivacySettings";
 
 import { ErrorBoundary, UIErrorBoundary } from "@/components/ErrorBoundary";
 import { ProductionReadyErrorBoundary } from "@/components/production/ProductionReadyErrorBoundary";
@@ -181,7 +182,8 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/terms" element={<TermsOfService />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/privacy" element={<PrivacySettings />} />
                   <Route path="/support-the-shift" element={<Support />} />
                   
                   {/* Admin Routes */}

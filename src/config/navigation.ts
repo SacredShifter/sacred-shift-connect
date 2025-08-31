@@ -242,6 +242,13 @@ export const NAV_CONFIG: NavGroup[] = [
         tooltip: "Customize your Sacred Shifter experience"
       },
       { 
+        id: "privacy", 
+        label: "Privacy & Data", 
+        icon: Shield, 
+        path: "/privacy",
+        tooltip: "Manage privacy settings, sync options, Sacred Mesh, and data rights"
+      },
+      { 
         id: "support-shift", 
         label: "Support the Shift", 
         icon: Heart, 
