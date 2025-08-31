@@ -265,23 +265,90 @@ export const CircleVideoCallManager: React.FC<CircleVideoCallManagerProps> = ({
     });
   };
 
-  const toggleVideo = () => {
+  const toggleVideo = async () => {
     if (!localStream || !callChannel || !user) return;
 
-    const videoTrack = localStream.getVideoTracks()[0];
-    if (videoTrack) {
-      videoTrack.enabled = !videoTrack.enabled;
-      setIsVideoCall(videoTrack.enabled);
+    try {
+      const videoTrack = localStream.getVideoTracks()[0];
+      
+      if (videoTrack) {
+        // If video track exists, just toggle it
+        videoTrack.enabled = !videoTrack.enabled;
+        setIsVideoCall(videoTrack.enabled);
+        
+        // Notify other participants
+        callChannel.send({
+          type: 'broadcast',
+          event: 'call_update',
+          payload: {
+            type: 'toggle_video',
+            userId: user.id,
+            isVideo: videoTrack.enabled
+          }
+        });
+      } else {
+        // If no video track exists, request camera access and add video track
+        try {
+          const videoStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "user"
+            }
+          });
 
-      // Notify other participants
-      callChannel.send({
-        type: 'broadcast',
-        event: 'call_update',
-        payload: {
-          type: 'toggle_video',
-          userId: user.id,
-          isVideo: videoTrack.enabled
+          // Add video track to existing stream
+          const videoTrack = videoStream.getVideoTracks()[0];
+          if (videoTrack) {
+            localStream.addTrack(videoTrack);
+            setIsVideoCall(true);
+            
+            // Notify other participants
+            callChannel.send({
+              type: 'broadcast',
+              event: 'call_update',
+              payload: {
+                type: 'toggle_video',
+                userId: user.id,
+                isVideo: true
+              }
+            });
+
+            toast({
+              title: "Video Enabled",
+              description: "Camera is now active",
+            });
+          }
+        } catch (error: any) {
+          console.error('Error enabling video:', error);
+          
+          let errorMessage = "Could not access camera.";
+          
+          if (error instanceof DOMException || error.name) {
+            if (error.name === 'NotAllowedError') {
+              errorMessage = "Camera access denied. Please allow camera permission.";
+            } else if (error.name === 'NotFoundError') {
+              errorMessage = "No camera found. Please connect a camera.";
+            } else if (error.name === 'NotReadableError') {
+              errorMessage = "Camera is busy. Please close other apps using the camera.";
+            } else {
+              errorMessage = `Camera error: ${error.message || error.name}`;
+            }
+          }
+          
+          toast({
+            title: "Video Failed",
+            description: errorMessage,
+            variant: "destructive"
+          });
         }
+      }
+    } catch (error) {
+      console.error('Error toggling video:', error);
+      toast({
+        title: "Video Error",
+        description: "Failed to toggle video. Please try again.",
+        variant: "destructive"
       });
     }
   };
@@ -292,6 +359,11 @@ export const CircleVideoCallManager: React.FC<CircleVideoCallManagerProps> = ({
     const audioTrack = localStream.getAudioTracks()[0];
     if (audioTrack) {
       audioTrack.enabled = !audioTrack.enabled;
+      
+      toast({
+        title: audioTrack.enabled ? "Microphone On" : "Microphone Off",
+        description: audioTrack.enabled ? "You are now unmuted" : "You are now muted",
+      });
     }
   };
 
@@ -332,6 +404,16 @@ export const CircleVideoCallManager: React.FC<CircleVideoCallManagerProps> = ({
           <div className="text-xs text-muted-foreground">
             {participants.length + 1} in call
           </div>
+          {/* Video toggle button during call */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`h-9 w-9 p-0 ${isVideoCall ? 'text-blue-500' : 'text-muted-foreground'} hover:text-blue-600`}
+            onClick={toggleVideo}
+            title={isVideoCall ? "Turn off video" : "Turn on video"}
+          >
+            <Video className="h-4 w-4" />
+          </Button>
           <Button 
             variant="ghost" 
             size="sm" 
