@@ -532,7 +532,7 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
             {/* CLEAN LOGO - NO SPINNING */}
             <motion.div 
               className="mx-auto mb-12"
-              style={{ width: '300px', height: '300px' }}
+              style={{ width: '600px', height: '600px' }}
               animate={{ 
                 scale: [0.98, 1.02, 0.98]
               }}
@@ -555,7 +555,7 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
                   alt="Sacred Shifter Logo"
                   className="w-4/5 h-4/5 object-contain"
                   style={{ 
-                    filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.5))'
+                    filter: 'invert(1) drop-shadow(0 0 20px rgba(255, 255, 255, 0.5))'
                   }}
                 />
               </div>
