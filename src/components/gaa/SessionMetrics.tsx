@@ -33,6 +33,7 @@ interface SessionMetricsProps {
   isActive: boolean;
   onExportSession?: () => void;
   className?: string;
+  compact?: boolean;
 }
 
 interface MetricCard {
