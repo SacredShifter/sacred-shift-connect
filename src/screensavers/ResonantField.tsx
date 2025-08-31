@@ -299,35 +299,17 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
     return null;
   }
 
+  const geometry = useMemo(() => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(particleData.positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(particleData.colors, 3));
+    geo.setAttribute('phase', new THREE.BufferAttribute(particleData.phases, 1));
+    geo.setAttribute('size', new THREE.BufferAttribute(particleData.sizes, 1));
+    return geo;
+  }, [particleData]);
+
   return (
-    <points ref={meshRef} material={material}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleData.count}
-          array={particleData.positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          count={particleData.count}
-          array={particleData.colors}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-phase"
-          count={particleData.count}
-          array={particleData.phases}
-          itemSize={1}
-        />
-        <bufferAttribute
-          attach="attributes-size"
-          count={particleData.count}
-          array={particleData.sizes}
-          itemSize={1}
-        />
-      </bufferGeometry>
-    </points>
+    <points ref={meshRef} geometry={geometry} material={material} />
   );
 };
 
