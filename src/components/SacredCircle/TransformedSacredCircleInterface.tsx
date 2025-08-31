@@ -175,9 +175,9 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
   };
 
   return (
-    <div className={cn("h-screen flex flex-col bg-background", className)}>
+    <div className={cn("h-screen flex flex-col bg-background relative", className)} style={{ minHeight: '100vh', maxHeight: '100vh' }}>
       {/* Fixed Header */}
-      <div className="flex-shrink-0 flex items-center gap-3 p-4 border-b bg-card shadow-sm">
+      <div className="flex-shrink-0 flex items-center gap-3 p-4 border-b bg-card shadow-sm z-10" style={{ minHeight: '80px' }}>
         <Button variant="ghost" size="sm" onClick={onClose} className="p-2">
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -238,6 +238,11 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
       <div 
         className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
         ref={scrollAreaRef}
+        style={{ 
+          flex: '1 1 auto',
+          minHeight: '200px',
+          paddingBottom: '20px'
+        }}
       >
         {loading ? (
           <div className="text-center text-muted-foreground py-8">
@@ -256,7 +261,18 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
       </div>
 
       {/* Fixed Message Input at Bottom - ALWAYS VISIBLE */}
-      <div className="flex-shrink-0 border-t bg-card shadow-lg" style={{ minHeight: '80px' }}>
+      <div 
+        className="flex-shrink-0 border-t bg-card shadow-lg z-20" 
+        style={{ 
+          minHeight: '100px',
+          maxHeight: '200px',
+          position: 'sticky',
+          bottom: 0,
+          backgroundColor: 'hsl(var(--card))',
+          borderTop: '2px solid hsl(var(--border))',
+          boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1)'
+        }}
+      >
         {/* Attached Files Preview */}
         {attachedFiles.length > 0 && (
           <div className="p-3 bg-muted/30 border-b">
@@ -279,28 +295,62 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
         )}
         
         {/* Message Input Row - GUARANTEED VISIBLE */}
-        <div className="p-4 bg-background border-t border-border">
-          <div className="flex items-center gap-3 w-full min-h-[48px]">
+        <div 
+          className="p-4 bg-card border-t border-border" 
+          style={{ 
+            backgroundColor: 'hsl(var(--card))',
+            borderTop: '1px solid hsl(var(--border))',
+            minHeight: '80px'
+          }}
+        >
+          <div 
+            className="flex items-center gap-3 w-full min-h-[48px]"
+            style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              width: '100%',
+              minHeight: '48px'
+            }}
+          >
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-10 w-10 p-0 shrink-0 border-2"
+              className="h-12 w-12 p-0 shrink-0 border-2 bg-muted hover:bg-muted/80"
               onClick={handleFileAttach}
               title="Attach file"
+              style={{
+                backgroundColor: 'hsl(var(--muted))',
+                border: '2px solid hsl(var(--border))',
+                color: 'hsl(var(--foreground))'
+              }}
             >
-              <Paperclip className="h-4 w-4" />
+              <Paperclip className="h-5 w-5" />
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-10 w-10 p-0 shrink-0 border-2"
+              className="h-12 w-12 p-0 shrink-0 border-2 bg-muted hover:bg-muted/80"
               onClick={handleImageAttach}
               title="Attach image"
+              style={{
+                backgroundColor: 'hsl(var(--muted))',
+                border: '2px solid hsl(var(--border))',
+                color: 'hsl(var(--foreground))'
+              }}
             >
-              <Image className="h-4 w-4" />
+              <Image className="h-5 w-5" />
             </Button>
             
-            <div className="flex-1 flex items-center gap-2">
+            <div 
+              className="flex-1 flex items-center gap-3"
+              style={{ 
+                flex: '1 1 auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}
+            >
               <Input
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
@@ -311,21 +361,36 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
                   }
                 }}
                 placeholder="Type your message here..."
-                className="flex-1 h-12 bg-muted border-2 border-border focus:border-primary text-foreground text-base"
+                className="flex-1 h-12 bg-background border-2 border-border focus:border-primary text-foreground text-base rounded-lg"
                 disabled={loading}
                 autoComplete="off"
                 style={{ 
-                  backgroundColor: 'var(--muted)',
-                  color: 'var(--foreground)',
-                  border: '2px solid var(--border)'
+                  flex: '1 1 auto',
+                  height: '48px',
+                  backgroundColor: 'hsl(var(--background))',
+                  color: 'hsl(var(--foreground))',
+                  border: '2px solid hsl(var(--border))',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  padding: '12px 16px'
                 }}
               />
               <Button 
                 onClick={handleSendMessage}
                 disabled={(!messageText.trim() && attachedFiles.length === 0) || loading}
                 size="sm"
-                className="h-12 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium border-2 border-primary"
+                className="h-12 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium border-2 border-primary rounded-lg"
+                style={{
+                  height: '48px',
+                  backgroundColor: 'hsl(var(--primary))',
+                  color: 'hsl(var(--primary-foreground))',
+                  border: '2px solid hsl(var(--primary))',
+                  borderRadius: '8px',
+                  fontWeight: '500',
+                  minWidth: '80px'
+                }}
               >
+                <Send className="h-4 w-4 mr-2" />
                 Send
               </Button>
             </div>
