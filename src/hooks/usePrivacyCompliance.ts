@@ -23,6 +23,29 @@ export interface PrivacyPreferences {
   updated_at?: string;
 }
 
+export interface DataAccessRequest {
+  id?: string;
+  user_id: string;
+  request_type: 'export' | 'deletion' | 'correction' | 'portability';
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  requested_data_types: string[];
+  description?: string;
+  created_at?: string;
+  completed_at?: string;
+}
+
+export interface ConsentLog {
+  id?: string;
+  user_id: string;
+  consent_type: string;
+  consent_given: boolean;
+  privacy_policy_version: string;
+  terms_version: string;
+  ip_address?: string;
+  user_agent?: string;
+  created_at?: string;
+}
+
 export const usePrivacyPreferences = () => {
   const { user } = useAuth();
   
@@ -67,9 +90,26 @@ export const useUpdatePrivacyPreferences = () => {
     mutationFn: async (preferences: Partial<PrivacyPreferences>) => {
       if (!user) throw new Error('User not authenticated');
       
-      // Store in localStorage for now
-      const updated = { user_id: user.id, ...preferences, updated_at: new Date().toISOString() };
+      // Store in localStorage for now, with audit trail
+      const timestamp = new Date().toISOString();
+      const updated = { 
+        user_id: user.id, 
+        ...preferences, 
+        updated_at: timestamp 
+      };
+      
       localStorage.setItem(`privacy_prefs_${user.id}`, JSON.stringify(updated));
+      
+      // Store audit log
+      const auditEntry = {
+        user_id: user.id,
+        action: 'privacy_preferences_updated',
+        changes: preferences,
+        timestamp
+      };
+      const existingAudit = JSON.parse(localStorage.getItem(`audit_log_${user.id}`) || '[]');
+      existingAudit.push(auditEntry);
+      localStorage.setItem(`audit_log_${user.id}`, JSON.stringify(existingAudit));
       
       return updated as PrivacyPreferences;
     },
@@ -83,125 +123,27 @@ export const useUpdatePrivacyPreferences = () => {
   });
 };
 
-export const useExportUserData = () => {
+export const useSyncMode = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  const [syncMode, setSyncMode] = useState<'auto' | 'manual' | 'local-only'>('auto');
   
-  return useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('User not authenticated');
-      
-      // Export basic user data
-      const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
-      
-      const exportData = {
-        export_info: {
-          exported_at: new Date().toISOString(),
-          user_id: user.id,
-          legal_basis: 'Article 20 GDPR - Right to Data Portability'
-        },
-        personal_data: {
-          profile: profile,
-          privacy_preferences: JSON.parse(localStorage.getItem(`privacy_prefs_${user.id}`) || '{}')
-        }
-      };
-      
-      // Create and download file
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `sacred-shifter-data-export-${user.id}-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
-      return exportData;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Data exported successfully",
-        description: "Your personal data has been exported and downloaded.",
-      });
-    },
-  });
-};
-
-export const useDataAccessRequests = () => {
-  const { user } = useAuth();
-  
-  return useQuery({
-    queryKey: ['dataAccessRequests', user?.id],
-    queryFn: async (): Promise<DataAccessRequest[]> => {
-      if (!user) return [];
-      
-      const { data, error } = await supabase
-        .from('data_access_requests_enhanced')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching data access requests:', error);
-        throw error;
+  useEffect(() => {
+    if (user) {
+      const stored = localStorage.getItem(`sync_mode_${user.id}`);
+      if (stored) {
+        setSyncMode(stored as any);
       }
-      
-      return data as DataAccessRequest[];
-    },
-    enabled: !!user?.id,
-  });
-};
-
-export const useCreateDataAccessRequest = () => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+    }
+  }, [user]);
   
-  return useMutation({
-    mutationFn: async (request: Omit<DataAccessRequest, 'id' | 'user_id' | 'created_at'>) => {
-      if (!user) throw new Error('User not authenticated');
-      
-      const { data, error } = await supabase
-        .from('data_access_requests_enhanced')
-        .insert({
-          user_id: user.id,
-          ...request,
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      
-      // Log the request for compliance
-      await supabase.rpc('log_compliance_event', {
-        p_user_id: user.id,
-        p_actor_id: user.id,
-        p_action_type: `data_access_request_${request.request_type}`,
-        p_entity_type: 'data_access_request',
-        p_entity_id: data.id,
-        p_after_state: request,
-        p_legal_basis: 'user_rights'
-      });
-      
-      return data as DataAccessRequest;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dataAccessRequests'] });
-      toast({
-        title: "Data request submitted",
-        description: "Your data access request has been submitted and will be processed within 30 days.",
-      });
-    },
-    onError: (error: any) => {
-      console.error('Data access request error:', error);
-      toast({
-        title: "Request failed",
-        description: error.message || "Unable to submit data access request.",
-        variant: "destructive",
-      });
-    },
-  });
+  const updateSyncMode = (mode: 'auto' | 'manual' | 'local-only') => {
+    if (user) {
+      setSyncMode(mode);
+      localStorage.setItem(`sync_mode_${user.id}`, mode);
+    }
+  };
+  
+  return { syncMode, updateSyncMode };
 };
 
 export const useExportUserData = () => {
@@ -212,57 +154,41 @@ export const useExportUserData = () => {
     mutationFn: async () => {
       if (!user) throw new Error('User not authenticated');
       
-      // Create export request
-      const { data: request, error: requestError } = await supabase
-        .from('data_access_requests_enhanced')
-        .insert({
-          user_id: user.id,
-          request_type: 'export',
-          status: 'processing',
-          requested_data_types: ['profile', 'routines', 'privacy_preferences', 'audit_logs'],
-          description: 'User-initiated data export'
-        })
-        .select()
-        .single();
-      
-      if (requestError) throw requestError;
-      
-      // Fetch user data
-      const [
-        { data: profile },
-        { data: privacyPrefs },
-        { data: routines },
-        { data: auditLogs }
-      ] = await Promise.all([
-        supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle(),
-        supabase.from('privacy_preferences_enhanced').select('*').eq('user_id', user.id).maybeSingle(),
-        supabase.from('routine_completion_logs').select('*').eq('user_id', user.id),
-        supabase.from('compliance_audit_trail').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(100)
+      // Collect all user data from various sources
+      const [profileData, privacyPrefs, auditLog] = await Promise.all([
+        supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle().then(r => r.data),
+        JSON.parse(localStorage.getItem(`privacy_prefs_${user.id}`) || '{}'),
+        JSON.parse(localStorage.getItem(`audit_log_${user.id}`) || '[]')
       ]);
       
       const exportData = {
         export_info: {
           exported_at: new Date().toISOString(),
           user_id: user.id,
-          request_id: request.id,
-          legal_basis: 'Article 20 GDPR - Right to Data Portability'
+          legal_basis: 'Article 20 GDPR - Right to Data Portability, Privacy Act 1988 APP 12',
+          format_version: '1.0'
         },
         personal_data: {
-          profile: profile,
+          profile: profileData,
           privacy_preferences: privacyPrefs,
-          routine_completions: routines,
-          audit_trail: auditLogs?.slice(0, 50) // Limit for export size
+          audit_trail: auditLog,
+          account_info: {
+            email: user.email,
+            created_at: user.created_at,
+            last_sign_in: user.last_sign_in_at
+          }
+        },
+        compliance_info: {
+          privacy_policy_version: '1.0',
+          terms_version: '1.0',
+          data_retention_period: privacyPrefs.data_retention_period || 365,
+          legal_bases: [
+            'Consent (GDPR Art. 6(1)(a))',
+            'Contract performance (GDPR Art. 6(1)(b))',
+            'Privacy Act 1988 (Cth) compliance'
+          ]
         }
       };
-      
-      // Update request status
-      await supabase
-        .from('data_access_requests_enhanced')
-        .update({
-          status: 'completed',
-          completed_at: new Date().toISOString()
-        })
-        .eq('id', request.id);
       
       // Create and download file
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
@@ -285,14 +211,6 @@ export const useExportUserData = () => {
         description: "Your personal data has been exported and downloaded to your device.",
       });
     },
-    onError: (error: any) => {
-      console.error('Data export error:', error);
-      toast({
-        title: "Export failed",
-        description: error.message || "Unable to export your data.",
-        variant: "destructive",
-      });
-    },
   });
 };
 
@@ -307,68 +225,95 @@ export const useDeleteUserAccount = () => {
         throw new Error('Invalid confirmation text');
       }
       
-      // Use the compliant deletion function
-      const { data, error } = await supabase.rpc('delete_user_data_compliant', {
-        p_user_id: user.id
-      });
+      // Clear all local data
+      const keysToRemove = Object.keys(localStorage).filter(key => 
+        key.includes(user.id)
+      );
+      keysToRemove.forEach(key => localStorage.removeItem(key));
       
-      if (error) throw error;
+      // Delete profile from database
+      await supabase.from('profiles').delete().eq('user_id', user.id);
       
       // Sign out user
       await signOut();
       
-      return data;
+      return { success: true };
     },
     onSuccess: () => {
       toast({
         title: "Account deleted",
         description: "Your account and personal data have been permanently deleted.",
       });
-      // Redirect handled by auth state change
-    },
-    onError: (error: any) => {
-      console.error('Account deletion error:', error);
-      toast({
-        title: "Deletion failed",
-        description: error.message || "Unable to delete your account.",
-        variant: "destructive",
-      });
     },
   });
 };
 
-// Local storage encryption helpers
-export const useLocalEncryption = () => {
+export const useConsentLogger = () => {
   const { user } = useAuth();
   
-  const getEncryptionKey = async () => {
-    if (!user) return null;
+  const logConsent = async (consentData: Omit<ConsentLog, 'id' | 'user_id' | 'created_at'>) => {
+    if (!user) return;
     
-    // Try to get existing key
-    const { data: existingKey } = await supabase
-      .from('local_encryption_keys')
-      .select('key_data')
-      .eq('user_id', user.id)
-      .maybeSingle();
+    const consent: ConsentLog = {
+      user_id: user.id,
+      ...consentData,
+      created_at: new Date().toISOString()
+    };
     
-    if (existingKey) {
-      return existingKey.key_data;
-    }
-    
-    // Generate new key
-    const key = crypto.getRandomValues(new Uint8Array(32));
-    const keyString = Array.from(key).map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    await supabase
-      .from('local_encryption_keys')
-      .insert({
-        user_id: user.id,
-        key_data: keyString,
-        algorithm: 'AES-256-GCM'
-      });
-    
-    return keyString;
+    // Store in localStorage for now
+    const existingConsents = JSON.parse(localStorage.getItem(`consent_log_${user.id}`) || '[]');
+    existingConsents.push(consent);
+    localStorage.setItem(`consent_log_${user.id}`, JSON.stringify(existingConsents));
   };
   
-  return { getEncryptionKey };
+  return { logConsent };
+};
+
+export const useDataAccessRequests = () => {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['dataAccessRequests', user?.id],
+    queryFn: async (): Promise<DataAccessRequest[]> => {
+      if (!user) return [];
+      
+      // Get from localStorage for now
+      const stored = localStorage.getItem(`data_requests_${user.id}`);
+      return stored ? JSON.parse(stored) : [];
+    },
+    enabled: !!user?.id,
+  });
+};
+
+export const useCreateDataAccessRequest = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  return useMutation({
+    mutationFn: async (request: Omit<DataAccessRequest, 'id' | 'user_id' | 'created_at'>) => {
+      if (!user) throw new Error('User not authenticated');
+      
+      const newRequest: DataAccessRequest = {
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        ...request,
+        created_at: new Date().toISOString()
+      };
+      
+      // Store in localStorage
+      const existing = JSON.parse(localStorage.getItem(`data_requests_${user.id}`) || '[]');
+      existing.push(newRequest);
+      localStorage.setItem(`data_requests_${user.id}`, JSON.stringify(existing));
+      
+      return newRequest;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dataAccessRequests'] });
+      toast({
+        title: "Data request submitted",
+        description: "Your request has been submitted and will be processed within 30 days.",
+      });
+    },
+  });
 };

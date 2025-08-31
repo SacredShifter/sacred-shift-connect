@@ -1,0 +1,63 @@
+{
+  "name": "Sacred Shifter",
+  "short_name": "SacredShift",
+  "description": "Transform your consciousness through sacred technology",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#8B4EB8",
+  "background_color": "#000000",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["health", "lifestyle", "entertainment"],
+  "icons": [
+    {
+      "src": "https://mikltjgbvxrxndtszorb.supabase.co/storage/v1/object/public/sacred-assets/uploads/SSfavicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://mikltjgbvxrxndtszorb.supabase.co/storage/v1/object/public/sacred-assets/uploads/SSfavicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Daily Practice",
+      "short_name": "Practice",
+      "description": "Start your daily sacred practice",
+      "url": "/practice/daily",
+      "icons": [
+        {
+          "src": "https://mikltjgbvxrxndtszorb.supabase.co/storage/v1/object/public/sacred-assets/uploads/SSfavicon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Journal",
+      "short_name": "Journal",
+      "description": "Open your sacred journal",
+      "url": "/journal",
+      "icons": [
+        {
+          "src": "https://mikltjgbvxrxndtszorb.supabase.co/storage/v1/object/public/sacred-assets/uploads/SSfavicon.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=app.lovable.sacredshiftconnect",
+      "id": "app.lovable.sacredshiftconnect"
+    }
+  ],
+  "prefer_related_applications": false,
+  "dir": "ltr",
+  "iarc_rating_id": "0+"
+}
