@@ -9,38 +9,32 @@ import config from './config.json';
 const SacredShifterLogo = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
   <svg className={className} style={style} viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <radialGradient id="logoGradient" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#8B5CF6" stopOpacity="1" />
-        <stop offset="50%" stopColor="#A78BFA" stopOpacity="0.8" />
-        <stop offset="100%" stopColor="#C4B5FD" stopOpacity="0.6" />
+      <radialGradient id="ssLogoGradient" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="#BD93F9" stopOpacity="1" />
+        <stop offset="50%" stopColor="#FF79C6" stopOpacity="0.9" />
+        <stop offset="100%" stopColor="#50FA7B" stopOpacity="0.8" />
       </radialGradient>
-      <filter id="logoGlow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-        <feMerge> 
-          <feMergeNode in="coloredBlur"/>
-          <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-      </filter>
     </defs>
     
-    {/* Sacred Infinity Symbol */}
+    {/* Sacred Infinity Symbol - MUCH MORE VISIBLE */}
     <path
       d="M24 48C24 35.85 32.95 26 44 26C55.05 26 64 35.85 64 48C64 60.15 55.05 70 44 70C32.95 70 24 60.15 24 48Z"
-      fill="url(#logoGradient)"
-      filter="url(#logoGlow)"
-      opacity="0.9"
+      fill="url(#ssLogoGradient)"
+      stroke="#FFFFFF"
+      strokeWidth="2"
     />
     <path
       d="M32 48C32 60.15 40.95 70 52 70C63.05 70 72 60.15 72 48C72 35.85 63.05 26 52 26C40.95 26 32 35.85 32 48Z"
-      fill="url(#logoGradient)"
-      filter="url(#logoGlow)"
-      opacity="0.7"
+      fill="url(#ssLogoGradient)"
+      stroke="#FFFFFF"
+      strokeWidth="2"
+      opacity="0.8"
     />
     
-    {/* Central Mandala */}
-    <circle cx="48" cy="48" r="8" fill="#FFD700" opacity="0.8" filter="url(#logoGlow)" />
-    <circle cx="48" cy="48" r="12" fill="none" stroke="#8B5CF6" strokeWidth="1" opacity="0.6" />
-    <circle cx="48" cy="48" r="16" fill="none" stroke="#A78BFA" strokeWidth="0.5" opacity="0.4" />
+    {/* Central Mandala - BRIGHT GOLD */}
+    <circle cx="48" cy="48" r="8" fill="#FFD700" stroke="#FFFFFF" strokeWidth="2" />
+    <circle cx="48" cy="48" r="12" fill="none" stroke="#FFFFFF" strokeWidth="2" opacity="0.8" />
+    <circle cx="48" cy="48" r="16" fill="none" stroke="#BD93F9" strokeWidth="1" opacity="0.6" />
   </svg>
 );
 
@@ -543,69 +537,91 @@ export const ResonantField: React.FC<ResonantFieldProps> = ({
         <Scene safeRadius={safeRadius} particleCount={particleCount} />
       </Canvas>
       
-      {/* Sacred Shifter Logo Overlay - MAXIMUM PROMINENCE */}
-      <div className="pointer-events-none absolute inset-0 grid place-items-center z-[99999] p-8">
-        <motion.div 
-          className="text-center px-6 relative bg-black/20 backdrop-blur-sm rounded-3xl p-12 border border-white/10"
-          initial={{ scale: 0.8, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 1.0, ease: "easeOut" }}
-        >
-          {/* MASSIVE Logo with extreme contrast */}
+      {/* SACRED SHIFTER LOGO - BULLETPROOF VISIBILITY */}
+      <div 
+        className="pointer-events-none fixed inset-0 z-[999999]" 
+        style={{ 
+          background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.7) 70%, rgba(0,0,0,0.9) 100%)',
+          backdropFilter: 'blur(1px)'
+        }}
+      >
+        <div className="absolute inset-0 flex items-center justify-center">
           <motion.div 
-            className="mx-auto w-48 h-48 mb-8 relative"
-            animate={{ 
-              rotate: 360,
-              scale: [1, 1.05, 1]
-            }}
-            transition={{ 
-              rotate: { duration: 60, repeat: Infinity, ease: "linear" },
-              scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
-            }}
+            className="text-center"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 1.0 }}
           >
-            <SacredShifterLogo 
-              className="w-full h-full"
-              style={{ 
-                filter: 'brightness(2.5) contrast(2) saturate(1.5) drop-shadow(0 0 30px rgba(139,92,246,1)) drop-shadow(0 0 60px rgba(255,255,255,0.8))'
+            {/* GIANT LOGO */}
+            <motion.div 
+              className="mx-auto mb-12"
+              style={{ width: '300px', height: '300px' }}
+              animate={{ 
+                rotate: [0, 360],
+                scale: [0.95, 1.05, 0.95]
               }}
-            />
-          </motion.div>
+              transition={{ 
+                rotate: { duration: 40, repeat: Infinity, ease: "linear" },
+                scale: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+              }}
+            >
+              <div 
+                className="w-full h-full bg-white rounded-full shadow-2xl flex items-center justify-center"
+                style={{
+                  boxShadow: `
+                    0 0 0 8px rgba(189, 147, 249, 0.5),
+                    0 0 0 16px rgba(255, 121, 198, 0.3),
+                    0 0 0 24px rgba(80, 250, 123, 0.2),
+                    0 0 60px rgba(255, 255, 255, 0.8),
+                    inset 0 0 60px rgba(189, 147, 249, 0.3)
+                  `
+                }}
+              >
+                <SacredShifterLogo 
+                  className="w-5/6 h-5/6"
+                  style={{ 
+                    filter: 'drop-shadow(0 0 20px rgba(189, 147, 249, 0.8))'
+                  }}
+                />
+              </div>
+            </motion.div>
             
-          {/* Tagline with massive shadow and glow */}
-          <motion.h1 
-            className="relative text-4xl md:text-6xl lg:text-7xl font-bold text-white max-w-[54ch] mx-auto leading-tight font-sacred" 
-            style={{ 
-              textShadow: `
-                0 0 30px rgba(0,0,0,1),
-                0 0 60px rgba(0,0,0,0.8),
-                0 0 90px rgba(0,0,0,0.6),
-                0 8px 16px rgba(0,0,0,1),
-                0 0 20px rgba(189,147,249,1),
-                0 0 40px rgba(255,121,198,0.8),
-                0 0 60px rgba(80,250,123,0.6)
-              `,
-              filter: 'brightness(2) contrast(1.8) saturate(1.3)'
-            }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 1.2 }}
-          >
-            {tagline}
-          </motion.h1>
-
-          {/* Sacred subtitle */}
-          <motion.p 
-            className="text-xl md:text-2xl text-white/80 mt-6 font-codex italic"
-            style={{
-              textShadow: '0 0 20px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,1)'
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 1.0 }}
-          >
-            Consciousness evolution platform
-          </motion.p>
-        </motion.div>
+            {/* GIANT TEXT */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 1.0 }}
+            >
+              <h1 
+                className="text-7xl md:text-8xl lg:text-9xl font-bold text-white mb-6 font-sacred"
+                style={{ 
+                  textShadow: `
+                    0 0 40px rgba(0, 0, 0, 1),
+                    0 0 80px rgba(0, 0, 0, 0.8),
+                    0 8px 32px rgba(0, 0, 0, 1),
+                    0 0 40px rgba(189, 147, 249, 1),
+                    0 0 80px rgba(255, 121, 198, 0.8)
+                  `
+                }}
+              >
+                SACRED SHIFTER
+              </h1>
+              
+              <p 
+                className="text-3xl md:text-4xl text-white/90 font-codex italic"
+                style={{
+                  textShadow: `
+                    0 0 20px rgba(0, 0, 0, 1),
+                    0 4px 16px rgba(0, 0, 0, 1),
+                    0 0 20px rgba(80, 250, 123, 0.6)
+                  `
+                }}
+              >
+                {tagline}
+              </p>
+            </motion.div>
+          </motion.div>
+        </div>
       </div>
       
       {/* Subtle hint */}
