@@ -122,7 +122,10 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
     
     let validParticles = 0;
     
-    for (let i = 0; i < particleCount && validParticles < particleCount; i++) {
+    // Always generate at least a few particles for safety
+    const minParticles = Math.min(10, particleCount);
+    
+    for (let i = 0; i < particleCount; i++) {
       // Generate position and check if it's outside safe area
       let x, y, z, distance;
       let attempts = 0;
@@ -135,10 +138,10 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
         // Check distance from center in screen space
         distance = Math.sqrt(x * x + y * y) / 8; // Normalize to screen space
         attempts++;
-      } while (distance < safeRadius && attempts < 50);
+      } while (distance < safeRadius && attempts < 50 && validParticles >= minParticles);
       
-      // Only add particle if it's outside safe area
-      if (distance >= safeRadius) {
+      // Add particle if it's outside safe area OR we need minimum particles
+      if (distance >= safeRadius || validParticles < minParticles) {
         const i3 = validParticles * 3;
         
         positions[i3] = x;
@@ -149,24 +152,39 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
         const colorIndex = Math.floor(Math.random() * brandColors.length);
         const baseColor = brandColors[colorIndex];
         
-        colors[i3] = baseColor[0] + (Math.random() - 0.5) * 0.2;
-        colors[i3 + 1] = baseColor[1] + (Math.random() - 0.5) * 0.2;
-        colors[i3 + 2] = baseColor[2] + (Math.random() - 0.5) * 0.2;
+        colors[i3] = Math.max(0, Math.min(1, baseColor[0] + (Math.random() - 0.5) * 0.2));
+        colors[i3 + 1] = Math.max(0, Math.min(1, baseColor[1] + (Math.random() - 0.5) * 0.2));
+        colors[i3 + 2] = Math.max(0, Math.min(1, baseColor[2] + (Math.random() - 0.5) * 0.2));
         
         phases[validParticles] = Math.random() * Math.PI * 2;
-        sizes[validParticles] = 12 + Math.random() * 8; // Smaller particles
+        sizes[validParticles] = 12 + Math.random() * 8;
         
         validParticles++;
+        
+        if (validParticles >= particleCount) break;
       }
+    }
+    
+    // Ensure we have at least minimum particles
+    if (validParticles === 0) {
+      validParticles = 1;
+      positions[0] = 0;
+      positions[1] = 0;
+      positions[2] = 5;
+      colors[0] = 0.6;
+      colors[1] = 0.2;
+      colors[2] = 1.0;
+      phases[0] = 0;
+      sizes[0] = 15;
     }
     
     console.log(`Generated ${validParticles} particles outside safe radius ${safeRadius}`);
     
     return { 
-      positions: positions.slice(0, validParticles * 3), 
-      colors: colors.slice(0, validParticles * 3), 
-      phases: phases.slice(0, validParticles), 
-      sizes: sizes.slice(0, validParticles),
+      positions: new Float32Array(positions.buffer.slice(0, validParticles * 3 * 4)), 
+      colors: new Float32Array(colors.buffer.slice(0, validParticles * 3 * 4)), 
+      phases: new Float32Array(phases.buffer.slice(0, validParticles * 4)), 
+      sizes: new Float32Array(sizes.buffer.slice(0, validParticles * 4)),
       count: validParticles
     };
   }, [particleCount, safeRadius]);
@@ -277,6 +295,10 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
     }
   });
   
+  if (!particleData || particleData.count === 0) {
+    return null;
+  }
+
   return (
     <points ref={meshRef} material={material}>
       <bufferGeometry>
