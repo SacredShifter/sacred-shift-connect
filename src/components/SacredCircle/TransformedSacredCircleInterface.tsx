@@ -155,12 +155,35 @@ export const TransformedSacredCircleInterface: React.FC<TransformedSacredCircleI
           )}
           
           <div className={cn(
-            "rounded-2xl px-4 py-2 text-sm break-words",
+            "rounded-2xl overflow-hidden",
             isOwn 
               ? "bg-primary text-primary-foreground" 
               : "bg-muted"
           )}>
-            {message.content}
+            {/* Text Content */}
+            {message.content && (
+              <div className="px-4 py-2 text-sm break-words">
+                {message.content}
+              </div>
+            )}
+            
+            {/* Image Content */}
+            {message.has_image && message.image_url && (
+              <div className={cn(
+                "relative",
+                message.content ? "border-t border-border/20" : ""
+              )}>
+                <img 
+                  src={message.image_url} 
+                  alt="Shared vision"
+                  className="w-full h-auto max-h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => window.open(message.image_url, '_blank')}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
           </div>
           
           <span className={cn(
