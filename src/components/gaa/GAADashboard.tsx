@@ -18,7 +18,10 @@ import {
   Sun,
   Moon as MoonIcon,
   Info,
-  BookOpen
+  BookOpen,
+  Star,
+  RotateCcw,
+  HelpCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useGAAEngine } from '@/hooks/useGAAEngine';
@@ -27,6 +30,8 @@ import { useCollectiveGAA } from '@/hooks/useCollectiveGAA';
 import { SessionMetrics } from './SessionMetrics';
 import { CosmicVisualization } from './CosmicVisualization';
 import { GAAInfoPanel } from './GAAInfoPanel';
+import { GAADemoMode } from './GAADemoMode';
+import { CosmicVisualizationLegend } from './CosmicVisualizationLegend';
 import { PolarityProtocol, TarotTradition } from '@/types/gaa-polarity';
 import { FLAGS } from '@/config/flags';
 
@@ -60,6 +65,10 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
   });
   const [sessionStartTime] = useState(Date.now());
   const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [firmamentVisible, setFirmamentVisible] = useState(true);
+  const [shadowDomeVisible, setShadowDomeVisible] = useState(true);
+  const [sessionBadges, setSessionBadges] = useState<string[]>([]);
 
   // Core hooks
   const gaaEngine = useGAAEngine();
@@ -92,6 +101,29 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
       ...prev,
       polarityBalance: prev.polarityBalance > 0.5 ? 0.3 : 0.8
     }));
+  };
+
+  // Mock orchestra metrics
+  const mockOrchestraMetrics = orchestra.sessionId ? {
+    phaseError: Math.floor(Math.random() * 100) + 20, // 20-120ms
+    participantCount: orchestra.participants.length,
+    syncQuality: (orchestra.participants.length > 2 ? 'excellent' : 'good') as 'excellent' | 'good' | 'poor'
+  } : undefined;
+
+  // Handle demo mode changes
+  const handleDemoArchetypeChange = (archetypeId: string) => {
+    setSelectedArchetype(archetypeId);
+  };
+
+  const handleDemoTraditionChange = (newTradition: TarotTradition) => {
+    setTradition(newTradition);
+  };
+
+  // Handle completion badge (demo feature)
+  const handleCompletionBadge = (badge: string) => {
+    if (!sessionBadges.includes(badge)) {
+      setSessionBadges(prev => [...prev, badge]);
+    }
   };
 
   const sessionDuration = Date.now() - sessionStartTime;
@@ -293,16 +325,26 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
               <CardHeader>
                 <CardTitle>Deep5 Archetypes</CardTitle>
                 <div className="flex gap-2">
-                  {(['marseille', 'rws', 'thoth', 'etteilla'] as TarotTradition[]).map((t) => (
-                    <Button
-                      key={t}
-                      variant={tradition === t ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setTradition(t)}
-                    >
-                      {t.toUpperCase()}
-                    </Button>
-                  ))}
+                  {(['marseille', 'rws', 'thoth', 'etteilla'] as TarotTradition[]).map((t) => {
+                    const provenanceText = {
+                      marseille: 'c.1650-1760 • Original Tarot de Marseille tradition',
+                      rws: '1909 • Rider-Waite-Smith deck by Pamela Colman Smith',
+                      thoth: '1969 • Aleister Crowley & Lady Frieda Harris collaboration', 
+                      etteilla: '1788 • First printed Tarot for divination by Etteilla'
+                    }[t];
+                    
+                    return (
+                      <Button
+                        key={t}
+                        variant={tradition === t ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setTradition(t)}
+                        title={provenanceText}
+                      >
+                        {t.toUpperCase()}
+                      </Button>
+                    );
+                  })}
                 </div>
               </CardHeader>
               <CardContent>
@@ -322,6 +364,14 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
               </CardContent>
             </Card>
           )}
+
+          {/* Demo Mode Panel */}
+          <GAADemoMode
+            isActive={isDemoMode}
+            onToggle={() => setIsDemoMode(!isDemoMode)}
+            onArchetypeChange={handleDemoArchetypeChange}
+            onTraditionChange={handleDemoTraditionChange}
+          />
 
           {/* Biofeedback Status */}
           {FLAGS.embodiedBiofeedback && (
@@ -382,6 +432,15 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
                     isActive={gaaEngine.isPlaying}
                   />
                 </div>
+                
+                {/* Cosmic Visualization Legend */}
+                <CosmicVisualizationLegend
+                  firmamentVisible={firmamentVisible}
+                  shadowDomeVisible={shadowDomeVisible}
+                  onFirmamentToggle={() => setFirmamentVisible(!firmamentVisible)}
+                  onShadowDomeToggle={() => setShadowDomeVisible(!shadowDomeVisible)}
+                  className="mt-4"
+                />
               </CardContent>
             </Card>
           )}
@@ -406,6 +465,9 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
               sessionDuration={sessionDuration}
               safetyAlerts={safetyAlerts}
               isActive={gaaEngine.isPlaying}
+              orchestraMetrics={mockOrchestraMetrics}
+              sessionBadges={sessionBadges}
+              onCompletionBadge={handleCompletionBadge}
               onExportSession={() => {
                 const sessionData = {
                   duration: sessionDuration,

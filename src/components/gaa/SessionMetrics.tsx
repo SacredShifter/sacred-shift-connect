@@ -20,7 +20,15 @@ import {
   BarChart3,
   Download,
   Eye,
-  Zap
+  Zap,
+  Play,
+  RotateCcw,
+  Trophy,
+  HelpCircle,
+  ChevronDown,
+  ToggleLeft,
+  ToggleRight,
+  Users
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BiofeedbackMetrics, GAAEngineState } from '@/types/gaa-polarity';
@@ -34,6 +42,13 @@ interface SessionMetricsProps {
   onExportSession?: () => void;
   className?: string;
   compact?: boolean;
+  orchestraMetrics?: {
+    phaseError: number;
+    participantCount: number;
+    syncQuality: 'excellent' | 'good' | 'poor';
+  };
+  sessionBadges?: string[];
+  onCompletionBadge?: (badge: string) => void;
 }
 
 interface MetricCard {
@@ -52,10 +67,44 @@ export const SessionMetrics: React.FC<SessionMetricsProps> = ({
   safetyAlerts,
   isActive,
   onExportSession,
-  className = ''
+  className = '',
+  compact = false,
+  orchestraMetrics,
+  sessionBadges = [],
+  onCompletionBadge
 }) => {
   const [showDetailed, setShowDetailed] = useState(false);
   const [sessionInsights, setSessionInsights] = useState<string[]>([]);
+  const [expandedAlerts, setExpandedAlerts] = useState<string[]>([]);
+
+  // Semantic coloring for safety alerts
+  const getAlertVariant = (alert: string) => {
+    if (alert.includes('error') || alert.includes('critical') || alert.includes('fail')) {
+      return 'destructive';
+    }
+    if (alert.includes('low') || alert.includes('monitoring') || alert.includes('active')) {
+      return 'default'; // amber/warning color
+    }
+    return 'secondary';
+  };
+
+  const getAlertIcon = (alert: string) => {
+    if (alert.includes('error') || alert.includes('critical')) {
+      return <AlertCircle className="w-3 h-3" />;
+    }
+    if (alert.includes('active') && alert.includes('Shadow')) {
+      return <Eye className="w-3 h-3" />;
+    }
+    return <Shield className="w-3 h-3" />;
+  };
+
+  const toggleAlertDetail = (alert: string) => {
+    setExpandedAlerts(prev => 
+      prev.includes(alert) 
+        ? prev.filter(a => a !== alert)
+        : [...prev, alert]
+    );
+  };
 
   // Format duration
   const formatDuration = (ms: number) => {
@@ -177,7 +226,7 @@ export const SessionMetrics: React.FC<SessionMetricsProps> = ({
                   onClick={onExportSession}
                 >
                   <Download className="w-4 h-4 mr-1" />
-                  Export
+                  Export JSON
                 </Button>
               )}
             </div>
@@ -259,14 +308,98 @@ export const SessionMetrics: React.FC<SessionMetricsProps> = ({
                     key={index}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="bg-yellow-500/10 border border-yellow-500/20 rounded p-2"
+                    className="cursor-pointer"
+                    onClick={() => toggleAlertDetail(alert)}
                   >
-                    <p className="text-xs text-yellow-300">{alert}</p>
+                    <Badge 
+                      variant={getAlertVariant(alert)} 
+                      className="w-full justify-start gap-2 p-2 hover:bg-opacity-80"
+                    >
+                      {getAlertIcon(alert)}
+                      <span className="flex-1">{alert}</span>
+                      {alert.includes('Shadow engine active') && (
+                        <HelpCircle className="w-3 h-3" />
+                      )}
+                    </Badge>
+                    
+                    {/* Shadow Engine Detail Dropdown */}
+                    {expandedAlerts.includes(alert) && alert.includes('Shadow engine active') && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="mt-2 p-3 bg-muted/20 rounded border text-xs space-y-1"
+                      >
+                        <div><strong>Shadow Engine Status:</strong></div>
+                        <div>• Dark phase processing active</div>
+                        <div>• Polarity sum: {((gaaEngineState.oscillatorCount || 0) * 10).toFixed(0)}% dark weight</div>
+                        <div>• Audio limiter: {gaaEngineState.oscillatorCount > 5 ? 'Engaged' : 'Standby'}</div>
+                        <div>• Integration mode: Harmonic shadow work</div>
+                      </motion.div>
+                    )}
                   </motion.div>
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Orchestra Sync Meter */}
+          {orchestraMetrics && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-purple-500" />
+                  <span className="text-sm font-medium">Orchestra Sync</span>
+                  <Badge variant={
+                    orchestraMetrics.syncQuality === 'excellent' ? 'default' :
+                    orchestraMetrics.syncQuality === 'good' ? 'secondary' : 'destructive'
+                  }>
+                    {orchestraMetrics.syncQuality}
+                  </Badge>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span className="text-muted-foreground">Phase Error:</span>
+                    <div className="font-mono text-lg">{orchestraMetrics.phaseError}ms</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Participants:</span>
+                    <div className="font-mono text-lg">{orchestraMetrics.participantCount}</div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Session Badges */}
+          {sessionBadges.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-amber-500" />
+                  <span className="text-sm font-medium">Session Badges</span>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {sessionBadges.map((badge, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">
+                        <Trophy className="w-3 h-3 mr-1" />
+                        {badge}
+                      </Badge>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Session Insights */}
           {showDetailed && sessionInsights.length > 0 && (
