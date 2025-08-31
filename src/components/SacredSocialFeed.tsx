@@ -14,6 +14,7 @@ import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { VideoRecorder } from '@/components/VideoRecorder';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { useSacredCircles } from '@/hooks/useSacredCircles';
 
 interface SacredPost {
   id: string;
@@ -67,12 +68,13 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { circles } = useSacredCircles();
   const [posts, setPosts] = useState<SacredPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [newPost, setNewPost] = useState('');
   const [postType, setPostType] = useState<'text' | 'image' | 'video' | 'audio' | 'sacred_sigil'>('text');
-  const [consciousnessState, setConsciousnessState] = useState('balanced');
-  const [chakraTag, setChakraTag] = useState('');
+  const [consciousnessState, setConsciousnessState] = useState('elevated');
+  const [selectedCircle, setSelectedCircle] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
   const [recordedVideo, setRecordedVideo] = useState<Blob | null>(null);
@@ -81,22 +83,14 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
 
   const consciousnessStates = [
     { value: 'elevated', label: '✨ Elevated', color: 'hsl(var(--primary))' },
-    { value: 'balanced', label: '🌟 Balanced', color: 'hsl(120, 100%, 70%)' },
     { value: 'meditative', label: '🧘 Meditative', color: 'hsl(240, 100%, 80%)' },
     { value: 'creative', label: '🎨 Creative', color: 'hsl(300, 100%, 70%)' },
     { value: 'healing', label: '💚 Healing', color: 'hsl(140, 100%, 60%)' },
     { value: 'expanding', label: '🌌 Expanding', color: 'hsl(270, 100%, 75%)' }
   ];
 
-  const chakraOptions = [
-    { value: 'root', label: 'Root 🔴', color: 'hsl(0, 84%, 60%)' },
-    { value: 'sacral', label: 'Sacral 🟠', color: 'hsl(24, 100%, 50%)' },
-    { value: 'solar-plexus', label: 'Solar 🟡', color: 'hsl(60, 100%, 50%)' },
-    { value: 'heart', label: 'Heart 💚', color: 'hsl(120, 100%, 50%)' },
-    { value: 'throat', label: 'Throat 🔵', color: 'hsl(200, 100%, 50%)' },
-    { value: 'third-eye', label: 'Third Eye 🟣', color: 'hsl(240, 100%, 70%)' },
-    { value: 'crown', label: 'Crown 🟢', color: 'hsl(300, 100%, 80%)' }
-  ];
+  // Get user's circles for selection
+  const userCircles = circles?.filter(circle => circle.is_member) || [];
 
   const fetchPosts = async () => {
     if (!user) return;
@@ -229,10 +223,10 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
         .insert({
           user_id: user.id,
           content: newPost,
-          chakra_tag: chakraTag || null,
           tone: consciousnessState,
           frequency: 528 + Math.random() * 100, // Base healing frequency + variation
-          visibility: 'circle'
+          visibility: 'circle',
+          group_id: selectedCircle || null
         })
         .select()
         .single();
@@ -240,7 +234,7 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
       if (error) throw error;
 
       setNewPost('');
-      setChakraTag('');
+      setSelectedCircle('');
       setSelectedImage(null);
       setRecordedAudio(null);
       setRecordedVideo(null);
@@ -351,14 +345,14 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
             </select>
 
             <select
-              value={chakraTag}
-              onChange={(e) => setChakraTag(e.target.value)}
+              value={selectedCircle}
+              onChange={(e) => setSelectedCircle(e.target.value)}
               className="px-3 py-1 rounded-full border border-primary/20 bg-background text-sm"
             >
-              <option value="">Select Chakra (Optional)</option>
-              {chakraOptions.map(chakra => (
-                <option key={chakra.value} value={chakra.value}>
-                  {chakra.label}
+              <option value="">Select Circle (Optional)</option>
+              {userCircles.map(circle => (
+                <option key={circle.id} value={circle.id}>
+                  {circle.name}
                 </option>
               ))}
             </select>
@@ -497,19 +491,6 @@ export const SacredSocialFeed: React.FC<SacredSocialFeedProps> = ({
                       </div>
                     </div>
                   </div>
-                  
-                  {post.chakra_tag && (
-                    <Badge 
-                      variant="outline" 
-                      className="text-xs"
-                      style={{ 
-                        borderColor: chakraOptions.find(c => c.value === post.chakra_tag)?.color,
-                        color: chakraOptions.find(c => c.value === post.chakra_tag)?.color
-                      }}
-                    >
-                      {chakraOptions.find(c => c.value === post.chakra_tag)?.label}
-                    </Badge>
-                  )}
                 </div>
               </CardHeader>
 
