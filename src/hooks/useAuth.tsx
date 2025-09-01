@@ -34,8 +34,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [userRole, setUserRole] = useState<string | undefined>(undefined);
   const [roleLoading, setRoleLoading] = useState(false);
   
-  // Initialize error handler inside the component
-  const { handleAuthError } = useErrorHandler();
+  // Temporarily remove useErrorHandler to fix React dispatcher issue
+  // const { handleAuthError } = useErrorHandler();
   
   logger.debug('AuthProvider state change', { 
     component: 'AuthProvider',
@@ -72,11 +72,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 .eq('user_id', session.user.id);
               
               if (error) {
-                handleAuthError(error, {
-                  component: 'AuthProvider',
-                  function: 'fetchUserRoles',
-                  userId: session.user.id
-                });
+                console.error('AuthProvider role fetch error:', error);
                 setUserRole('user'); // Default to user role on error
               } else {
                 // Check if user is admin
@@ -102,11 +98,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 });
               }
             } catch (error) {
-              handleAuthError(error, {
-                component: 'AuthProvider',
-                function: 'fetchUserRoles',
-                userId: session.user.id
-              });
+              console.error('AuthProvider role fetch exception:', error);
               setUserRole('user'); // Default to user role on error
             } finally {
               setRoleLoading(false);
@@ -161,11 +153,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               .eq('user_id', session.user.id);
             
             if (error) {
-              handleAuthError(error, {
-                component: 'AuthProvider',
-                function: 'fetchInitialUserRoles',
-                userId: session.user.id
-              });
+              console.error('AuthProvider initial role fetch error:', error);
               setUserRole('user'); // Default to user role on error
             } else {
               const isAdmin = roles?.some(r => r.role === 'admin');
@@ -184,11 +172,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               });
             }
           } catch (error) {
-            handleAuthError(error, {
-              component: 'AuthProvider',
-              function: 'fetchInitialUserRoles',
-              userId: session?.user?.id
-            });
+            console.error('AuthProvider initial role fetch exception:', error);
             setUserRole('user'); // Default to user role on error
           } finally {
             setRoleLoading(false);
@@ -201,7 +185,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
 
     return () => subscription.unsubscribe();
-  }, [handleAuthError]);
+  }, []);
 
   const signUp = async (email: string, password: string) => {
     logger.info('Starting user sign up', { component: 'useAuth', function: 'signUp', metadata: { email } });
