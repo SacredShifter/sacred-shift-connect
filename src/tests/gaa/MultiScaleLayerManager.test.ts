@@ -89,4 +89,34 @@ describe('MultiScaleLayerManager', () => {
     // Only the 'organism' layer should produce geometry
     expect(geometries.length).toBe(1);
   });
+
+  it('should produce a consistent geometric output for snapshot testing', () => {
+    const manager = new MultiScaleLayerManager();
+    // Mock performance.now() to ensure deterministic output for the snapshot
+    vi.spyOn(performance, 'now').mockReturnValue(1000);
+
+    const geometries = manager.generateCompositeGeometry(12);
+    expect(geometries).toMatchSnapshot();
+  });
+
+  describe('Individual Layer Geometry Snapshots', () => {
+    const layerIds: (keyof LayerHierarchy)[] = ['atomic', 'molecular', 'cellular', 'tissue', 'organ', 'organism'];
+
+    layerIds.forEach(layerId => {
+      it(`should generate a consistent snapshot for the ${layerId} layer`, () => {
+        const manager = new MultiScaleLayerManager();
+        vi.spyOn(performance, 'now').mockReturnValue(1000);
+
+        // Deactivate all layers except the one being tested
+        layerIds.forEach(id => {
+          if (id !== layerId) {
+            manager.toggleLayer(id);
+          }
+        });
+
+        const geometry = manager.generateCompositeGeometry(20);
+        expect(geometry).toMatchSnapshot();
+      });
+    });
+  });
 });

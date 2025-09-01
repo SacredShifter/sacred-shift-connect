@@ -1,3 +1,4 @@
+import Delaunator from 'delaunator';
 import { NormalizedGeometry } from './GeometricOscillator';
 import { GeometricNormalizer } from './GeometricNormalizer';
 
@@ -26,69 +27,59 @@ export interface MultiScaleState {
   currentLayer: keyof LayerHierarchy;
 }
 
+const DEFAULT_BREATH_RATE_HZ = 0.1;
+
+// Constants for layer generation, separated for clarity and maintainability
+const LAYER_PARAMS = {
+  // Biologically-inspired layer properties
+  HIERARCHY_DEFAULTS: {
+    atomic:    { active: true, weight: 0.10, frequency: 0.001, phase: 0,           resonance: 0.95 },
+    molecular: { active: true, weight: 0.15, frequency: 0.01,  phase: Math.PI / 6, resonance: 0.80 },
+    cellular:  { active: true, weight: 0.20, frequency: 0.1,   phase: Math.PI / 4, resonance: 0.70 },
+    tissue:    { active: true, weight: 0.25, frequency: 1.0,   phase: Math.PI / 3, resonance: 0.60 },
+    organ:     { active: true, weight: 0.20, frequency: 10.0,  phase: Math.PI / 2, resonance: 0.50 },
+    organism:  { active: true, weight: 0.10, frequency: 100.0, phase: Math.PI,     resonance: 0.30 },
+  },
+  // Parameters for breath influence calculation
+  BREATH_COUPLING: {
+    BASE: 0.1,
+    SCALE_FACTOR: 0.4,
+    INFLUENCE_FACTOR: 0.3,
+    MIN_WEIGHT: 0.01,
+    MAX_WEIGHT: 1.0,
+  },
+  // Parameters for geometric pattern generation
+  GEOMETRY: {
+    atomic:    { amp: 0.3, freq1: 3, freq2: 2, z_factor: 0.5 },
+    molecular: { amp: 0.2, freq: 4, z_factor: 0.3 },
+    cellular:  { amp: 0.15, freq: 6, z_factor: 0.2 },
+    tissue:    { amp: 0.1, freq: 8, y_factor: 0.8, z_factor: 0.4 },
+    organ:     { amp: 0.25, freq: 1, z_factor: 0.6 },
+    organism:  { amp: 0.4, freq: 0.5, sub_amp: 0.1, sub_freq: 5, z_factor: 0.8 },
+  }
+};
+
 export class MultiScaleLayerManager {
   private layers: LayerHierarchy;
   private state: MultiScaleState;
   private geometricNormalizer: GeometricNormalizer;
-  private breathRate: number = 0.1; // Hz, very slow for deep states
+  private breathRate: number = DEFAULT_BREATH_RATE_HZ;
   private startTime: number = performance.now();
 
   constructor() {
     this.geometricNormalizer = new GeometricNormalizer();
     
     // Initialize layer hierarchy with biologically-inspired parameters
-    this.layers = {
-      atomic: {
-        active: true,
-        weight: 0.1,
-        frequency: 0.001, // Very fast, quantum-like
-        phase: 0,
-        resonance: 0.95
-      },
-      molecular: {
-        active: true,
-        weight: 0.15,
-        frequency: 0.01,
-        phase: Math.PI / 6,
-        resonance: 0.8
-      },
-      cellular: {
-        active: true,
-        weight: 0.2,
-        frequency: 0.1,
-        phase: Math.PI / 4,
-        resonance: 0.7
-      },
-      tissue: {
-        active: true,
-        weight: 0.25,
-        frequency: 1.0,
-        phase: Math.PI / 3,
-        resonance: 0.6
-      },
-      organ: {
-        active: true,
-        weight: 0.2,
-        frequency: 10.0,
-        phase: Math.PI / 2,
-        resonance: 0.5
-      },
-      organism: {
-        active: true,
-        weight: 0.1,
-        frequency: 100.0, // Slowest, most integrated
-        phase: Math.PI,
-        resonance: 0.3
-      }
-    };
+    this.layers = JSON.parse(JSON.stringify(LAYER_PARAMS.HIERARCHY_DEFAULTS));
 
     // Initialize state
+    const initialWeights = Object.values(this.layers).map(l => l.weight);
     this.state = {
       breathPhase: 0,
       globalCoherence: 0.5,
-      energyDistribution: [0.1, 0.15, 0.2, 0.25, 0.2, 0.1],
+      energyDistribution: initialWeights,
       layerSyncRatio: 0.8,
-      currentLayer: 'cellular' // Start at cellular level
+      currentLayer: 'cellular'
     };
   }
 
@@ -102,6 +93,7 @@ export class MultiScaleLayerManager {
 
     // Calculate breath influence (sine wave for inhale/exhale)
     const breathInfluence = Math.sin(this.state.breathPhase);
+    const C = LAYER_PARAMS.BREATH_COUPLING;
     
     // Update each layer phase based on breath and its natural frequency
     Object.keys(this.layers).forEach((layerId, index) => {
@@ -113,11 +105,11 @@ export class MultiScaleLayerManager {
         layer.phase %= (2 * Math.PI);
         
         // Breath coupling - higher layers more coupled to breath
-        const breathCoupling = 0.1 + (index / 6) * 0.4;
-        layer.weight = layer.weight * (1 + breathInfluence * breathCoupling * 0.3);
+        const breathCoupling = C.BASE + (index / 6) * C.SCALE_FACTOR;
+        layer.weight = layer.weight * (1 + breathInfluence * breathCoupling * C.INFLUENCE_FACTOR);
         
         // Ensure weight stays in bounds
-        layer.weight = Math.max(0.01, Math.min(1.0, layer.weight));
+        layer.weight = Math.max(C.MIN_WEIGHT, Math.min(C.MAX_WEIGHT, layer.weight));
       }
     });
 
@@ -208,10 +200,13 @@ export class MultiScaleLayerManager {
       vertices.push(vertex);
     }
 
-    // Generate faces (simple triangulation for now)
+    // Generate faces using Delaunay triangulation for correctness
     const faces: number[][] = [];
-    for (let i = 0; i < vertices.length - 2; i++) {
-      faces.push([0, i + 1, i + 2]);
+    if (vertices.length >= 3) {
+      const delaunay = Delaunator.from(vertices.map(v => [v[0], v[1]]));
+      for (let i = 0; i < delaunay.triangles.length; i += 3) {
+        faces.push([delaunay.triangles[i], delaunay.triangles[i+1], delaunay.triangles[i+2]]);
+      }
     }
 
     // Calculate normals
@@ -232,78 +227,114 @@ export class MultiScaleLayerManager {
   }
 
   /**
-   * Atomic orbital patterns (s, p, d orbitals)
+   * Generates a point cloud resembling quantum-like electron orbital patterns.
+   * Uses Lissajous-like figures in 3D space to create complex, nested shapes.
+   * @param t - The normalized position along the curve (0 to 2π).
+   * @param phase - The current phase offset for this layer.
+   * @param scale - The overall scale of the geometry.
+   * @returns A 3D vertex coordinate.
    */
   private generateOrbitalPattern(t: number, phase: number, scale: number): number[] {
-    const r = scale * (1 + 0.3 * Math.sin(3 * t + phase));
+    const C = LAYER_PARAMS.GEOMETRY.atomic;
+    const r = scale * (1 + C.amp * Math.sin(C.freq1 * t + phase));
     return [
-      r * Math.cos(t) * Math.sin(2 * t + phase),
-      r * Math.sin(t) * Math.sin(2 * t + phase),
-      r * Math.cos(2 * t + phase) * 0.5
+      r * Math.cos(t) * Math.sin(C.freq2 * t + phase),
+      r * Math.sin(t) * Math.sin(C.freq2 * t + phase),
+      r * Math.cos(C.freq2 * t + phase) * C.z_factor
     ];
   }
 
   /**
-   * Molecular bond patterns
+   * Generates a point cloud resembling molecular bond patterns.
+   * Creates a twisted, helix-like structure.
+   * @param t - The normalized position along the curve (0 to 2π).
+   * @param phase - The current phase offset for this layer.
+   * @param scale - The overall scale of the geometry.
+   * @returns A 3D vertex coordinate.
    */
   private generateMolecularPattern(t: number, phase: number, scale: number): number[] {
-    const r = scale * (1 + 0.2 * Math.cos(4 * t + phase));
+    const C = LAYER_PARAMS.GEOMETRY.molecular;
+    const r = scale * (1 + C.amp * Math.cos(C.freq * t + phase));
     return [
       r * Math.cos(t + phase),
       r * Math.sin(t + phase) * Math.cos(phase),
-      r * Math.sin(2 * t + phase) * 0.3
+      r * Math.sin(2 * t + phase) * C.z_factor
     ];
   }
 
   /**
-   * Cellular membrane oscillations
+   * Generates a point cloud resembling the oscillation of a cellular membrane.
+   * Creates a wobbling, spherical shape.
+   * @param t - The normalized position along the curve (0 to 2π).
+   * @param phase - The current phase offset for this layer.
+   * @param scale - The overall scale of the geometry.
+   * @returns A 3D vertex coordinate.
    */
   private generateCellularPattern(t: number, phase: number, scale: number): number[] {
-    const membrane = 1 + 0.15 * Math.sin(6 * t + phase);
+    const C = LAYER_PARAMS.GEOMETRY.cellular;
+    const membrane = 1 + C.amp * Math.sin(C.freq * t + phase);
     const r = scale * membrane;
     return [
       r * Math.cos(t),
       r * Math.sin(t),
-      scale * 0.2 * Math.sin(3 * t + phase)
+      scale * C.z_factor * Math.sin(3 * t + phase)
     ];
   }
 
   /**
-   * Tissue fiber patterns
+   * Generates a point cloud resembling aligned tissue fibers.
+   * Creates an elongated, slightly twisted shape.
+   * @param t - The normalized position along the curve (0 to 2π).
+   * @param phase - The current phase offset for this layer.
+   * @param scale - The overall scale of the geometry.
+   * @returns A 3D vertex coordinate.
    */
   private generateTissuePattern(t: number, phase: number, scale: number): number[] {
-    const fiber = 1 + 0.1 * Math.sin(8 * t + phase);
+    const C = LAYER_PARAMS.GEOMETRY.tissue;
+    const fiber = 1 + C.amp * Math.sin(C.freq * t + phase);
     const r = scale * fiber;
     return [
       r * Math.cos(t + phase * 0.5),
-      r * Math.sin(t + phase * 0.5) * 0.8,
-      scale * 0.4 * Math.cos(2 * t + phase)
+      r * Math.sin(t + phase * 0.5) * C.y_factor,
+      scale * C.z_factor * Math.cos(2 * t + phase)
     ];
   }
 
   /**
-   * Organ rhythm patterns
+   * Generates a point cloud resembling the rhythmic pulse of an organ.
+   * Creates a complex, cardioid-like pulsating shape.
+   * @param t - The normalized position along the curve (0 to 2π).
+   * @param phase - The current phase offset for this layer.
+   * @param scale - The overall scale of the geometry.
+   * @returns A 3D vertex coordinate.
    */
   private generateOrganPattern(t: number, phase: number, scale: number): number[] {
-    const rhythm = 1 + 0.25 * Math.sin(t + phase);
+    const C = LAYER_PARAMS.GEOMETRY.organ;
+    const rhythm = 1 + C.amp * Math.sin(C.freq * t + phase);
     const r = scale * rhythm;
     return [
       r * Math.cos(t),
       r * Math.sin(t),
-      scale * 0.6 * Math.sin(t + phase) * Math.cos(2 * t)
+      scale * C.z_factor * Math.sin(t + phase) * Math.cos(2 * t)
     ];
   }
 
   /**
-   * Organism integration patterns
+   * Generates a point cloud resembling an integrated, whole organism.
+   * Creates a large, slowly modulating toroidal field.
+   * @param t - The normalized position along the curve (0 to 2π).
+   * @param phase - The current phase offset for this layer.
+   * @param scale - The overall scale of the geometry.
+   * @returns A 3D vertex coordinate.
    */
   private generateOrganismPattern(t: number, phase: number, scale: number): number[] {
-    const integration = 1 + 0.4 * Math.sin(0.5 * t + phase);
+    const C = LAYER_PARAMS.GEOMETRY.organism;
+    const integration = 1 + C.amp * Math.sin(C.freq * t + phase);
     const r = scale * integration;
     return [
-      r * Math.cos(t) * (1 + 0.1 * Math.sin(5 * t + phase)),
-      r * Math.sin(t) * (1 + 0.1 * Math.cos(5 * t + phase)),
-      scale * 0.8 * Math.sin(t + phase)
+      r * Math.cos(t) * (1 + C.sub_amp * Math.sin(C.sub_freq * t + phase)),
+      r * Math.sin(t) * (1 + C.sub_amp * Math.cos(C.sub_freq * t + phase)),
+      scale * C.z_factor * Math.sin(t + phase)
     ];
   }
 

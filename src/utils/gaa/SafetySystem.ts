@@ -95,19 +95,19 @@ export class SafetySystem {
    * Update audio metrics from Web Audio API
    */
   updateAudioMetrics(analyser: AnalyserNode, frequency: number): void {
-    const bufferLength = analyser.frequencyBinCount;
+    const bufferLength = analyser.fftSize;
     const dataArray = new Uint8Array(bufferLength);
     
-    // Get frequency data
-    analyser.getByteFrequencyData(dataArray);
+    // Get time domain data for accurate peak/RMS calculation
+    analyser.getByteTimeDomainData(dataArray);
     
-    // Calculate peak and RMS
     let peak = 0;
     let sum = 0;
     
     for (let i = 0; i < bufferLength; i++) {
-      const value = dataArray[i] / 255; // Normalize to 0-1
-      peak = Math.max(peak, value);
+      // The signal is from 0-255, with 128 as the zero-crossing.
+      const value = (dataArray[i] - 128) / 128.0; // Normalize to -1 to 1
+      peak = Math.max(peak, Math.abs(value));
       sum += value * value;
     }
     

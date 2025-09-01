@@ -46,107 +46,62 @@ This report outlines an action plan to address these findings, prioritized into 
 ### 3.2. High Risks (Medium-Term Action Required)
 
 - **Risk:** Lack of Automated Testing Prevents Safe Refactoring.
-  - **Evidence:** No test files existed for any of the core GAA modules (`GeometricOscillator`, `ShadowEngine`, `MultiScaleLayerManager`, `SafetySystem`).
-  - **Status:** **MITIGATED**. Test scaffolds have been created in `src/tests/gaa/`. These now require implementation.
+  - **Evidence:** No test files existed for any of the core GAA modules.
+  - **Status:** ✅ **FIXED**. Test scaffolds have been created and implemented with baseline logic, snapshot tests, and boundary checks.
 
 - **Risk:** Safety System is Non-Functional.
-  - **Evidence:** `SafetySystem.ts` is never instantiated or called by the core GAA engine. Its `updateAudioMetrics` function is never called. Furthermore, it incorrectly uses `getByteFrequencyData` instead of `getByteTimeDomainData` to measure audio peaks.
-  - **Status:** **NOT FIXED**. Requires significant integration work.
+  - **Evidence:** `SafetySystem.ts` was not integrated, and its audio calculation was incorrect.
+  - **Status:** ✅ **FIXED**. The `SafetySystem` is now fully integrated into the `useGAAEngine` loop. The audio calculation has been corrected to use `getByteTimeDomainData`.
 
 - **Risk:** Collective Sync (Multi-User) is Not Scalable or Functional.
-  - **Evidence:** `useCollectiveGAA.tsx` uses Supabase Presence for high-frequency state updates, which is not scalable. It also lacks any logic for phase coherence or handling broadcasted state updates.
-  - **Status:** **NOT FIXED**. Requires a complete architectural redesign.
+  - **Evidence:** `useCollectiveGAA.tsx` was using Supabase Presence incorrectly and lacked a handler for sync messages.
+  - **Status:** ⚠️ **PARTIALLY FIXED**. The `polarity_sync` feature is now functional. The misuse of Presence has been stopped. A Phase 1.5 clock synchronization feature has been added. A full scalable redesign is still required.
 
 - **Risk:** Incorrect 3D Geometry Generation.
-  - **Evidence:** `MultiScaleLayerManager.ts` uses a simple fan triangulation (`[0, i + 1, i + 2]`) for all generated geometry, which is mathematically incorrect for the complex shapes being generated and will result in visual artifacts.
-  - **Status:** **NOT FIXED**.
+  - **Evidence:** `MultiScaleLayerManager.ts` used a naive and incorrect triangulation algorithm.
+  - **Status:** ✅ **FIXED**. The `delaunator` library has been added and integrated to provide correct 2D triangulation.
 
 ### 3.3. Medium Risks (Long-Term Action Required)
 
 - **Risk:** Code Complexity and Magic Numbers Hinder Maintenance.
-  - **Evidence:** `ShadowEngine.ts` and `MultiScaleLayerManager.ts` contain dense mathematical formulas with unnamed constants, making the code difficult to understand and maintain.
-  - **Status:** **NOT FIXED**.
+  - **Evidence:** `ShadowEngine.ts` and `MultiScaleLayerManager.ts` contained many unnamed constants.
+  - **Status:** ✅ **FIXED**. Both modules have been refactored to extract magic numbers into named constants, and complex functions have been documented.
 
 ---
 
-## 4. Fix Plan
+## 4. Fix Plan and Implementation Status
 
-### 4.1. Immediate Fixes (Completed)
+This section details the action plan based on the audit and the current status of each item after the hardening pass.
 
-- **[COMPLETED]** **Implement Oscillator Guardrail:** Add a hard limit to `GeometricOscillator.ts` to prevent audio engine crashes.
-  - **Diff:**
-    ```diff
-    --- a/src/utils/gaa/GeometricOscillator.ts
-    +++ b/src/utils/gaa/GeometricOscillator.ts
-    @@ -20,6 +20,8 @@
-         sqrt2: number;
-       };
-     }
-+
-+    const MAX_OSCILLATORS = 32; // Safety limit for Web Audio API performance
+### 4.1. Core Architecture & Integration
 
-     export class GeometricOscillator {
-       private config: GeometricOscillatorConfig;
-    @@ -60,13 +62,19 @@
-         geometry: NormalizedGeometry,
-         id: string,
-         harmonics: number = 4
--      ): void {
-+      ): boolean {
-         console.log(`🎼 Creating geometric oscillator: ${id}`);
+- **✅ Centralize GAA Engine:** Create a single, overarching `useGAAEngine` hook that instantiates and connects all core modules.
+- **✅ Integrate the Safety System:**
+  - ✅ Pass an `AnalyserNode` to `SafetySystem.updateAudioMetrics`.
+  - ✅ Fix the audio metric calculation to use `getByteTimeDomainData`.
+  - ✅ Use `applySafetyCorrections` to pause the engine on critical alerts.
+- **✅ Integrate Biofeedback:** Connect the `GaaBiofeedbackSimulator` output to the `ShadowEngine` to modulate sound.
+- **✅ Fix Geometry Generation:** Correct the triangulation logic in `MultiScaleLayerManager.ts` using `delaunator`.
+- **✅ Refactor for Clarity:** Refactor `ShadowEngine.ts` and `MultiScaleLayerManager.ts` to remove magic numbers and add documentation.
 
-         if (this.oscillators.has(id)) {
--          console.log(`🔄 Stopping existing oscillator: ${id}`);
-+          console.warn(`🔄 Oscillator with ID ${id} already exists. Stopping and replacing.`);
-           this.stopOscillator(id);
-         }
-+
-+        // --- PERFORMANCE GUARDRAIL ---
-+        if (this.oscillators.size >= MAX_OSCILLATORS) {
-+          console.error(`❌ Oscillator limit reached (${MAX_OSCILLATORS}). Cannot create new oscillator.`);
-+          return false;
-+        }
+### 4.2. Testing & Reliability
 
-         try {
-           // Calculate frequency based on geometry
-    @@ -118,9 +126,15 @@
-           osc.start();
-           envelope.triggerAttack();
+- **✅ Flesh out Test Suites:** Implement comprehensive tests for all core modules, including logic, snapshot, and boundary testing.
+- **❌ Add CI/CD Coverage Gates:** This requires repository configuration changes and cannot be completed via code changes alone.
 
--          console.log(`✅ Oscillator ${id} started successfully`);
-+          console.log(`✅ Oscillator ${id} started successfully. Total: ${this.oscillators.size}`);
-+          return true;
-         } catch (error) {
-           console.error(`❌ Failed to create oscillator ${id}:`, error);
-+          // Clean up any partially created resources if an error occurred
-+          if (this.oscillators.has(id)) {
-+            this.stopOscillator(id);
-+          }
-+          return false;
-         }
-       }
-    ```
+### 4.3. Collective Sync (Phase 1 & 1.5)
 
-### 4.2. Medium-Term Fixes (Next Steps)
+- **✅ Fix Polarity Sync:** Implement the missing broadcast handler in `useCollectiveGAA.tsx`.
+- **✅ Stop Presence Misuse:** Remove high-frequency state updates from `channel.track()`.
+- **✅ Implement Clock Synchronization:** Add a Supabase function to get server time and implement a client-side clock offset calculation.
 
-- **Flesh out Test Suites:** Implement comprehensive tests using the newly created scaffolds in `src/tests/gaa/`. Focus on validating the mathematical outputs of `ShadowEngine` and `MultiScaleLayerManager`.
-- **Integrate the Safety System:**
-  1.  Create a single, overarching `GAAEngine` class that instantiates and connects `GeometricOscillator`, `ShadowEngine`, `MultiScaleLayerManager`, and `SafetySystem`.
-  2.  Pass an `AnalyserNode` from the audio chain to `SafetySystem.updateAudioMetrics`.
-  3.  Fix the audio metric calculation in `SafetySystem` to use `getByteTimeDomainData`.
-  4.  Use the output of `SafetySystem.applySafetyCorrections` to actually reduce volume in `GeometricOscillator`.
-- **Integrate Biofeedback:** Connect the output of `useEmbodiedBiofeedback.generateGAAParameters` to the GAA engine to allow simulated biofeedback to modulate the sound.
-- **Refactor for Clarity:** Refactor `ShadowEngine.ts` and `MultiScaleLayerManager.ts` to extract magic numbers into named constants and add comments explaining the mathematical models.
-- **Fix Geometry Generation:** Correct the triangulation logic in `MultiScaleLayerManager.ts` to generate valid 3D meshes (e.g., using a library like `delaunator` or by implementing a more robust algorithm).
+### 4.4. Phase 2+ Roadmap (Future Work)
 
-### 4.3. Long-Term Fixes (Future Architecture)
-
-- **Redesign Collective Sync:**
-  - **Short-term:** Replace the use of Supabase Presence for high-frequency updates with dedicated broadcast messages. Implement a handler for these messages on the client.
-  - **Long-term:** For true scalability, architect a dedicated real-time server that manages session state. Investigate using WebRTC data channels for lower latency peer-to-peer state sharing.
-  - **Phase Coherence:** Begin research and development into clock synchronization, latency compensation, and drift correction algorithms. This is a significant undertaking.
-- **Implement Real P2P Audio:** To support collective audio experiences, modify the `WebRTCManager` to capture the Web Audio API output (via `MediaStreamAudioDestinationNode`) and transmit that instead of the microphone input.
-- **Implement Real Biofeedback:** Replace the simulation in `useEmbodiedBiofeedback` with actual hardware integration using Web Bluetooth or Web Serial API.
+- **Collective Sync (Phase 2 - Scalability):**
+  - **Jitter & Latency Compensation:** The next crucial step is to handle network instability. All state updates should be sent with the synchronized network timestamp. Clients should implement a "jitter buffer" to delay incoming messages slightly, re-ordering them by timestamp to ensure smooth playback at the cost of a small, fixed latency.
+  - **Scalable Architecture:** For scaling beyond a few users, the pure broadcast model must be replaced. The recommended path is to introduce a dedicated real-time server (e.g., a Node.js or Elixir application) that manages session state, processes updates, and sends targeted messages to clients. This reduces client-side load and enables more complex interactions. WebRTC data channels are a viable alternative for smaller, peer-to-peer groups.
+- **Implement Real P2P Audio:** Modify the `WebRTCManager` to capture audio from the Web Audio API context (via `MediaStreamAudioDestinationNode`) instead of the microphone. This is essential for broadcasting the generated soundscape in a collective session.
+- **Implement Real Biofeedback:** Replace the `GaaBiofeedbackSimulator` with a real hardware integration layer using the Web Bluetooth or Web Serial APIs to connect to and parse data from actual biofeedback devices.
 
 ---
 

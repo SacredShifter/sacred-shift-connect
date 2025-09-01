@@ -2,15 +2,18 @@ import { describe, it, expect, vi } from 'vitest';
 import { SafetySystem, SafetyAlert } from '@/utils/gaa/SafetySystem';
 
 // Mock AnalyserNode for testing updateAudioMetrics
-const createMockAnalyserNode = (peakValue: number): AnalyserNode => {
-  const dataArray = new Uint8Array(1);
-  dataArray[0] = peakValue * 255; // Convert normalized peak to byte value
+const createMockAnalyserNode = (peakNormalized: number): AnalyserNode => {
+  const buffer = new Uint8Array(128);
+  // zero is 128, max is 255.
+  const peakByte = 128 + peakNormalized * 127;
+  buffer.fill(128); // Fill with silence
+  buffer[0] = peakByte; // Add one peak value
 
   return {
-    getByteFrequencyData: vi.fn((array: Uint8Array) => {
-      array[0] = dataArray[0];
+    getByteTimeDomainData: vi.fn((array: Uint8Array) => {
+      array.set(buffer);
     }),
-    frequencyBinCount: 1,
+    fftSize: buffer.length,
   } as unknown as AnalyserNode;
 };
 
@@ -109,5 +112,35 @@ describe('SafetySystem', () => {
     safetySystem.updateVisualMetrics(5, 0.5, 0.5);
 
     expect(alertCallback).toHaveBeenCalledTimes(1);
+  });
+
+  describe('Threshold Boundary Conditions', () => {
+    it('should not trigger a visual alert just below the flash rate threshold', () => {
+      const safetySystem = new SafetySystem();
+      safetySystem.updateVisualMetrics(2.9, 0.5, 0.5); // Threshold is 3Hz
+      const status = safetySystem.getSafetyStatus();
+      expect(status.level).toBe('safe');
+    });
+
+    it('should trigger a visual alert exactly at the flash rate threshold', () => {
+      const safetySystem = new SafetySystem();
+      // The check is `> THRESHOLD`, so exactly at threshold should be safe.
+      safetySystem.updateVisualMetrics(3.0, 0.5, 0.5);
+      const statusAt = safetySystem.getSafetyStatus();
+      expect(statusAt.level).toBe('safe');
+
+      // But just above should trigger it.
+      safetySystem.updateVisualMetrics(3.1, 0.5, 0.5);
+      const statusAbove = safetySystem.getSafetyStatus();
+      expect(statusAbove.level).toBe('critical');
+    });
+
+    it('should not trigger an audio alert just below the peak threshold', () => {
+        const safetySystem = new SafetySystem();
+        const mockAnalyser = createMockAnalyserNode(0.89); // Threshold is 0.9
+        safetySystem.updateAudioMetrics(mockAnalyser, 1000);
+        const status = safetySystem.getSafetyStatus();
+        expect(status.level).toBe('safe');
+    });
   });
 });

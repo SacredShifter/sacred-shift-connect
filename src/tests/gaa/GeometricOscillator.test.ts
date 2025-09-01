@@ -98,6 +98,29 @@ describe('GeometricOscillator', () => {
     expect(freq).toBeLessThanOrEqual(2000);
   });
 
+  it('should calculate a specific, predictable frequency', () => {
+    const audioContext = new MockAudioContext() as unknown as AudioContext;
+    const geoOsc = new GeometricOscillator(audioContext, { ...defaultConfig, baseFrequency: 100 });
+
+    const specificGeometry: NormalizedGeometry = {
+      vertices: Array(100).fill([0,0,0]), // 100 vertices
+      faces: [], normals: [],
+      center: [0, 0, 0], // No center magnitude
+      radius: 0.5, // (radius - 0.5) * 2 = 0, so phi term is 1
+      sacredRatios: { phi: 1.618, pi: 3.141, sqrt2: 1.414 },
+    };
+
+    // Manual calculation:
+    // freq = baseFrequency * Math.pow(phi, (0.5 - 0.5) * 2) -> 100 * 1 = 100
+    // complexity = 100 / 100 = 1
+    // freq *= 1 + 1 * 0.5 -> 100 * 1.5 = 150
+    // centerMagnitude = 0, so that term is 1
+    // Final freq should be 150
+    // @ts-expect-error - accessing private method for testing
+    const freq = geoOsc.calculateGeometricFrequency(specificGeometry);
+    expect(freq).toBeCloseTo(150);
+  });
+
   it('should stop an oscillator when stopOscillator is called', () => {
     const audioContext = new MockAudioContext() as unknown as AudioContext;
     const oscillator = new GeometricOscillator(audioContext, defaultConfig);
