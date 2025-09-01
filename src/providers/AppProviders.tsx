@@ -1,8 +1,9 @@
 /**
  * App Providers - Nested provider structure for GAA system
- * Order matters: BiofeedbackProvider -> CosmicDataProvider -> PresetProvider -> RealtimeOrchestraProvider -> SafetyProvider
+ * Order matters: AuthProvider -> BiofeedbackProvider -> CosmicDataProvider -> PresetProvider -> RealtimeOrchestraProvider -> SafetyProvider
  */
 import React from 'react';
+import { AuthProvider } from '@/hooks/useAuth';
 import { BiofeedbackProvider } from './BiofeedbackProvider';
 import { CosmicDataProvider } from './CosmicDataProvider';
 import { PresetProvider } from './PresetProvider';
@@ -16,18 +17,20 @@ interface AppProvidersProps {
 
 export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
-    <BiofeedbackProvider>
-      <CosmicDataProvider>
-        <PresetProvider>
-          <RealtimeOrchestraProvider>
-            <SafetyProvider>
-              <DailyRoutineProvider>
-                {children}
-              </DailyRoutineProvider>
-            </SafetyProvider>
-          </RealtimeOrchestraProvider>
-        </PresetProvider>
-      </CosmicDataProvider>
-    </BiofeedbackProvider>
+    <AuthProvider>
+      <BiofeedbackProvider>
+        <CosmicDataProvider>
+          <PresetProvider>
+            <RealtimeOrchestraProvider>
+              <SafetyProvider>
+                <DailyRoutineProvider>
+                  {children}
+                </DailyRoutineProvider>
+              </SafetyProvider>
+            </RealtimeOrchestraProvider>
+          </PresetProvider>
+        </CosmicDataProvider>
+      </BiofeedbackProvider>
+    </AuthProvider>
   );
 };

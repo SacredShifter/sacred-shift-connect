@@ -109,12 +109,10 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
-          <JusticePlatformProvider>
-            <App />
-            <Toaster />
-          </JusticePlatformProvider>
-        </AuthProvider>
+        <JusticePlatformProvider>
+          <App />
+          <Toaster />
+        </JusticePlatformProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,
