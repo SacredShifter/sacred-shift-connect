@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useGAAEngine } from '@/hooks/useGAAEngine';
-import { useEmbodiedBiofeedback } from '@/hooks/useEmbodiedBiofeedback';
 import { useCollectiveGAA } from '@/hooks/useCollectiveGAA';
 import { SessionMetrics } from './SessionMetrics';
 import { CosmicVisualization } from './CosmicVisualization';
@@ -72,21 +71,28 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
 
   // Core hooks
   const gaaEngine = useGAAEngine();
-  const biofeedback = useEmbodiedBiofeedback();
+  // const biofeedback = useEmbodiedBiofeedback(); // DEPRECATED: Integrated into useGAAEngine
   const orchestra = useCollectiveGAA();
+
+  // MOCK BIOFEEDBACK for UI until full integration
+  const biofeedback = {
+    isConnected: false,
+    biofeedbackState: {
+      heartRateVariability: 72,
+      breathingRate: 15,
+      brainwaveAlpha: 0.4,
+      skinConductance: 0.6,
+    }
+  };
 
   // Transport controls
   const handlePlay = async () => {
     console.log('🎮 Play button pressed - START OF FUNCTION');
     
     try {
-      console.log('🔍 Current GAA Engine state:', {
-        isInitialized: gaaEngine.isInitialized,
-        isPlaying: gaaEngine.isPlaying,
-        activeOscillators: gaaEngine.activeOscillators
-      });
+      console.log('🔍 Current GAA Engine state:', gaaEngine.state);
       
-      if (!gaaEngine.isInitialized) {
+      if (!gaaEngine.state.isInitialized) {
         console.log('🔧 Engine not initialized, initializing...');
         const result = await gaaEngine.initializeGAA();
         console.log('🔧 Initialize result:', result);
@@ -156,7 +162,7 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
   const safetyAlerts = [
     ...(biofeedback.biofeedbackState?.heartRateVariability && 
         biofeedback.biofeedbackState.heartRateVariability < 20 ? ['HRV low - monitoring'] : []),
-    ...(gaaEngine.shadowEngine ? ['Shadow engine active'] : []),
+    ...(gaaEngine.state.shadowState ? ['Shadow engine active'] : []),
     ...(orchestra.connectionStatus === 'error' ? ['Orchestra connection error'] : [])
   ];
 
@@ -202,8 +208,8 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant={gaaEngine.isPlaying ? 'default' : 'secondary'}>
-            {gaaEngine.isPlaying ? 'Active' : 'Idle'}
+          <Badge variant={gaaEngine.state.isPlaying ? 'default' : 'secondary'}>
+            {gaaEngine.state.isPlaying ? 'Active' : 'Idle'}
           </Badge>
           {FLAGS.orchestra && orchestra.sessionId && (
             <Badge variant="outline">
@@ -220,10 +226,10 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button
-                variant={gaaEngine.isPlaying ? 'secondary' : 'default'}
+              variant={gaaEngine.state.isPlaying ? 'secondary' : 'default'}
                 size="sm"
                 onClick={handlePlay}
-                disabled={gaaEngine.isPlaying}
+              disabled={gaaEngine.state.isPlaying}
               >
                 <Play className="w-4 h-4 mr-1" />
                 Start
@@ -232,7 +238,7 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
                 variant="outline"
                 size="sm"
                 onClick={handleStop}
-                disabled={!gaaEngine.isPlaying}
+              disabled={!gaaEngine.state.isPlaying}
               >
                 <Square className="w-4 h-4 mr-1" />
                 Stop
@@ -454,8 +460,8 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
                 <div className="h-64">
                   <CosmicVisualization 
                     cosmicData={mockCosmicData}
-                    shadowEngineState={gaaEngine.shadowEngine}
-                    isActive={gaaEngine.isPlaying}
+                    shadowEngineState={gaaEngine.state.shadowState}
+                    isActive={gaaEngine.state.isPlaying}
                   />
                 </div>
                 
@@ -476,10 +482,10 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
             <SessionMetrics
               biofeedbackState={biofeedback.biofeedbackState}
               gaaEngineState={{
-                isInitialized: gaaEngine.isInitialized,
-                isPlaying: gaaEngine.isPlaying,
+                isInitialized: gaaEngine.state.isInitialized,
+                isPlaying: gaaEngine.state.isPlaying,
                 currentPhase: 'idle' as const,
-                oscillatorCount: gaaEngine.activeOscillators,
+                oscillatorCount: gaaEngine.state.activeOscillators,
                 currentGeometry: {
                   complexity: 0.5,
                   vertices: 8,
@@ -490,14 +496,14 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
               }}
               sessionDuration={sessionDuration}
               safetyAlerts={safetyAlerts}
-              isActive={gaaEngine.isPlaying}
+              isActive={gaaEngine.state.isPlaying}
               orchestraMetrics={mockOrchestraMetrics}
               sessionBadges={sessionBadges}
               onCompletionBadge={handleCompletionBadge}
               onExportSession={() => {
                 const sessionData = {
                   duration: sessionDuration,
-                  darkPhaseSeconds: gaaEngine.shadowEngine ? 30 : 0,
+                  darkPhaseSeconds: gaaEngine.state.shadowState ? 30 : 0,
                   avgPolarityBalance: polarity.polarityBalance,
                   archetype: selectedArchetype,
                   tradition,

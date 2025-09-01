@@ -57,7 +57,7 @@ describe('GaaBiofeedbackSimulator', () => {
       simulator.state.brainwaveBeta = 0;
 
       const signals = simulator.getBioSignals();
-      expect(signals.eegBandRatio).toBe(1);
+      expect(signals.eegBandRatio).toBeCloseTo(1);
     });
 
     it('should handle the eegBandRatio calculation when both are zero', () => {

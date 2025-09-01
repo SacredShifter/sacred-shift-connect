@@ -20,6 +20,8 @@ export interface SafetyMetrics {
     coherence: number; // 0-1
   };
   sessionDuration: number; // minutes
+  cpuLoad: number; // 0-1, placeholder
+  memoryUsage: number; // MB, placeholder
 }
 
 export interface SafetyAlert {
@@ -69,7 +71,9 @@ export class SafetySystem {
       audioLevels: { peak: 0, rms: 0, frequency: 440 },
       visualStimulation: { flashRate: 0, brightness: 0.5, contrast: 0.5 },
       breathingGuidance: { currentRate: 6, targetRate: 6, coherence: 0.5 },
-      sessionDuration: 0
+      sessionDuration: 0,
+      cpuLoad: 0,
+      memoryUsage: 0,
     };
   }
 
