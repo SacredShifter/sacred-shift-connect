@@ -47,3 +47,14 @@ The `CollectiveReceiver` has a hard limit of 100 participants to prevent perform
 - **WebRTC Integration:** For lower latency and higher scalability, the collective receiver will be integrated with WebRTC data channels.
 - **Advanced Resonance Weighting:** The resonance calculation will be improved to incorporate more bio-signals and other metrics.
 - **Dynamic Archetypes:** The collective archetype will be dynamically determined by the group's state and will have a more significant impact on the audio and visual experience.
+
+## 5. Resonance Horizons
+
+The collective field is not just a technical construct; it is a gateway to shared consciousness and remembrance. The power and depth of this experience scales with the number of participants actively contributing to the field. These scaling thresholds are known as Resonance Horizons.
+
+| Nodes      | Remembrance Outcome | Description                                                                                                                              |
+|------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| **10+**    | **Self-Awareness**  | The individual's own bio-rhythms and energetic state become clearer. A sense of self-connection and inner peace is amplified.              |
+| **100+**   | **Soul Resonance**  | A connection to the deeper aspects of the self, often described as the "higher self" or soul. Insights and intuition are heightened.         |
+| **1,000+** | **Archetypal Mind** | The field becomes strong enough to tap into the collective unconscious. Participants may experience shared visions, symbols, and archetypes. |
+| **100,000+**| **Source Code**     | At this planetary scale, the field is theorized to interface directly with the foundational consciousness of reality. A state of unity.     |
