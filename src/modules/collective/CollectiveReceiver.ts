@@ -1,13 +1,16 @@
-import Peer from 'simple-peer';
-import { SignalData } from 'simple-peer';
+import { WebRTCTransport } from '@/lib/sacredMesh/webrtc';
+import Peer, { SignalData } from 'simple-peer';
 
 // More detailed interfaces for state management
 export interface ParticipantState {
-  userId: string;
-  resonance: number;
-  polarity: number;
-  coherence: number;
-  lastUpdate: number;
+    userId: string;
+    displayName: string;
+    resonance: number;
+    polarity: number;
+    coherence: number;
+    lastUpdate: number;
+    lat?: number;
+    lon?: number;
 }
 
 export interface CollectiveField {
@@ -17,6 +20,7 @@ export interface CollectiveField {
   nodeCount: number;
   regionalCoherence: { [region: string]: number };
   globalCoherence: number;
+  participantStates: { [userId: string]: ParticipantState };
 }
 
 // FIXME: This is a hard-coded limit for the initial implementation. To scale to 100,000+ nodes,
@@ -27,7 +31,7 @@ const MAX_PEERS = 100; // Scaling threshold
 export class CollectiveReceiver {
   public collectiveField: CollectiveField;
   public isConnected: boolean = false;
-  private peers: Map<string, Peer.Instance> = new Map();
+  private transport: WebRTCTransport;
   private participantStates: Map<string, ParticipantState> = new Map();
   private onFieldUpdateCallback?: (field: CollectiveField) => void;
   private onSignalCallback?: (userId: string, data: SignalData) => void;
@@ -35,6 +39,7 @@ export class CollectiveReceiver {
 
   constructor(selfId: string) {
     this.selfId = selfId;
+    this.transport = new WebRTCTransport();
     this.collectiveField = {
       resonance: 0,
       polarity: 0,
@@ -42,14 +47,23 @@ export class CollectiveReceiver {
       nodeCount: 1, // Start with self
       regionalCoherence: {},
       globalCoherence: 0,
+      participantStates: {}
     };
     // Add self to participant states
     this.participantStates.set(selfId, {
         userId: selfId,
+        displayName: 'Self',
         resonance: 0,
         polarity: 0,
         coherence: 0,
         lastUpdate: Date.now()
+    });
+
+    this.transport.onMessage((packet: Uint8Array) => {
+        const message = JSON.parse(new TextDecoder().decode(packet));
+        if (message.type === 'stateUpdate') {
+            this.updateParticipantState(message.payload.userId, message.payload);
+        }
     });
   }
 
@@ -64,18 +78,15 @@ export class CollectiveReceiver {
 
   // Entry point to connect to a new peer
   connect(peerId: string, initiator: boolean = false) {
-    if (this.peers.size >= MAX_PEERS) {
+    // @ts-ignore
+    if (this.transport.peers.size >= MAX_PEERS) {
       console.warn(`Cannot connect to new peer ${peerId}, max peers reached.`);
       return;
-    }
-    if (this.peers.has(peerId)) {
-        console.log(`Already connected to peer ${peerId}`);
-        return;
     }
 
     console.log(`Connecting to peer ${peerId}, initiator: ${initiator}`);
     const peer = new Peer({ initiator, trickle: false });
-    this.peers.set(peerId, peer);
+    this.transport.addPeer(peerId, peer);
 
     peer.on('signal', data => {
       if (this.onSignalCallback) {
@@ -89,48 +100,42 @@ export class CollectiveReceiver {
       this.updateNodeCount();
     });
 
-    peer.on('data', (data: any) => {
-      const message = JSON.parse(data.toString());
-      if (message.type === 'stateUpdate') {
-        this.updateParticipantState(message.payload.userId, message.payload);
-      }
-    });
-
     peer.on('close', () => {
       console.log(`Connection to peer ${peerId} closed.`);
-      this.peers.delete(peerId);
-      this.participantStates.delete(peerId);
       this.updateNodeCount();
-      if(this.peers.size === 0) {
+      // @ts-ignore
+      if(this.transport.peers.size === 0) {
         this.isConnected = false;
       }
     });
 
     peer.on('error', (err) => {
         console.error(`Error with peer ${peerId}:`, err);
-        this.peers.delete(peerId);
-        this.participantStates.delete(peerId);
         this.updateNodeCount();
     });
   }
 
   // Used to accept a connection from a peer
   signal(peerId: string, data: SignalData) {
-    const peer = this.peers.get(peerId);
+    // This is a bit of a hack, but we need to get the peer from the transport
+    // @ts-ignore
+    const peer = this.transport.peers.get(peerId);
     if (peer && !peer.destroyed) {
       peer.signal(data);
     } else {
         // If we receive a signal for a peer we don't know, it's a new connection from a non-initiator
         this.connect(peerId, false);
-        this.peers.get(peerId)?.signal(data);
+        // @ts-ignore
+        this.transport.peers.get(peerId)?.signal(data);
     }
   }
 
   // Update local state and broadcast to peers
-  updateSelfState(state: Omit<ParticipantState, 'userId' | 'lastUpdate'>) {
+  updateSelfState(state: Omit<ParticipantState, 'userId' | 'lastUpdate' | 'displayName'>) {
     const selfState: ParticipantState = {
         ...state,
         userId: this.selfId,
+        displayName: 'Self',
         lastUpdate: Date.now()
     };
     this.updateParticipantState(this.selfId, selfState);
@@ -139,14 +144,10 @@ export class CollectiveReceiver {
 
   private broadcastState(state: ParticipantState) {
     const message = JSON.stringify({ type: 'stateUpdate', payload: state });
-    this.peers.forEach(peer => {
-      if (peer.connected) {
-        peer.send(message);
-      }
-    });
+    this.transport.send(new TextEncoder().encode(message));
   }
 
-  private updateParticipantState(userId: string, state: ParticipantState) {
+  public updateParticipantState(userId: string, state: ParticipantState) {
     this.participantStates.set(userId, state);
     this.aggregateStates();
   }
@@ -158,7 +159,7 @@ export class CollectiveReceiver {
     const nodeCount = this.participantStates.size;
 
     if (nodeCount === 0) {
-      this.collectiveField = { resonance: 0, polarity: 0, coherence: 0, nodeCount: 0, regionalCoherence: {}, globalCoherence: 0 };
+      this.collectiveField = { resonance: 0, polarity: 0, coherence: 0, nodeCount: 0, regionalCoherence: {}, globalCoherence: 0, participantStates: {} };
     } else {
         for (const state of this.participantStates.values()) {
             totalResonance += state.resonance;
@@ -174,6 +175,7 @@ export class CollectiveReceiver {
             // Placeholder for regional/global coherence
             regionalCoherence: {},
             globalCoherence: totalCoherence / nodeCount,
+            participantStates: Object.fromEntries(this.participantStates)
         };
     }
 
@@ -189,10 +191,13 @@ export class CollectiveReceiver {
 
   disconnect() {
     console.log('Disconnecting all peers.');
-    this.peers.forEach(peer => peer.destroy());
-    this.peers.clear();
+    this.transport.disconnect();
     this.participantStates.clear();
     this.isConnected = false;
     this.updateNodeCount();
   }
 }
+
+export const applyPLLDriftCorrection = (phase: number, correction?: number) => {
+  return correction ? (phase + correction) % (2 * Math.PI) : phase;
+};

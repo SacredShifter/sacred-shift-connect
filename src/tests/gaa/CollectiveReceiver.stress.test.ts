@@ -44,7 +44,7 @@ describe('CollectiveReceiver Stress Test', () => {
     // The MAX_PEERS constant in CollectiveReceiver is 100, so we expect 100 peers.
     // The test is to ensure it doesn't crash when trying to add more.
     // @ts-ignore
-    expect(receiver.peers.size).toBe(100);
+    expect(receiver.transport.peers.size).toBe(100);
 
     // Simulate receiving state updates from all connected peers
     for (let i = 0; i < 100; i++) {
@@ -67,6 +67,6 @@ describe('CollectiveReceiver Stress Test', () => {
 
     receiver.disconnect();
     // @ts-ignore
-    expect(receiver.peers.size).toBe(0);
+    expect(receiver.transport.peers.size).toBe(0);
   });
 });

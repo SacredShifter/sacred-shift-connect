@@ -11,7 +11,7 @@ const PI = Math.PI;
 export class StoneResonanceFilter {
   private readonly input: Tone.Gain;
   readonly output: Tone.Gain;
-  private filter: Tone.Filter | Tone.EQ4;
+  private filter: Tone.Filter | Tone.EQ3;
   private infrasoundOscillator: Tone.Oscillator;
 
   constructor(stoneType: StoneType) {
@@ -30,7 +30,7 @@ export class StoneResonanceFilter {
     }).connect(this.output).start();
   }
 
-  private createFilterForStone(stoneType: StoneType): Tone.Filter | Tone.EQ4 {
+  private createFilterForStone(stoneType: StoneType): Tone.Filter | Tone.EQ3 {
     switch (stoneType) {
       case 'granite':
         // Granite is dense and crystalline, good for low frequencies.
@@ -39,12 +39,10 @@ export class StoneResonanceFilter {
       case 'limestone':
         // Limestone is softer and more porous, absorbing high frequencies.
         // We'll use an EQ to cut highs and slightly boost mids.
-        return new Tone.EQ4({
+        return new Tone.EQ3({
             low: 0,
             mid: 3,
             high: -6,
-            lowFrequency: 250,
-            highFrequency: 2500
         });
       case 'quartz':
         // Quartz is highly resonant, often associated with high frequencies.

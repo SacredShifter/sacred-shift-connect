@@ -96,8 +96,15 @@ export const usePhonePulseSensor = () => {
 
         // Attempt to turn on the flash
         const track = stream.getVideoTracks()[0];
-        if (track.getCapabilities().torch) {
-            await track.applyConstraints({ advanced: [{ torch: true }] });
+        const capabilities = track.getCapabilities();
+        // @ts-ignore
+        if (capabilities.torch) {
+            try {
+                // @ts-ignore
+                await track.applyConstraints({ advanced: [{ torch: true }] });
+            } catch (err) {
+                console.warn("Could not enable torch:", err);
+            }
         } else {
             console.warn("Flash/torch not available on this device.");
         }
@@ -123,8 +130,15 @@ export const usePhonePulseSensor = () => {
     if (streamRef.current) {
         // Turn off flash
         const track = streamRef.current.getVideoTracks()[0];
-        if (track.getCapabilities().torch) {
-            track.applyConstraints({ advanced: [{ torch: false }] });
+        const capabilities = track.getCapabilities();
+        // @ts-ignore
+        if (capabilities.torch) {
+            try {
+                // @ts-ignore
+                track.applyConstraints({ advanced: [{ torch: false }] });
+            } catch (err) {
+                console.warn("Could not disable torch:", err);
+            }
         }
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;

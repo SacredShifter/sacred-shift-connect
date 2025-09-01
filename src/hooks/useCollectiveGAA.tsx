@@ -2,14 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   CollectiveGAAState, 
-  ParticipantState, 
   GAASessionExtended,
   CollectiveOrchestration,
   PolarityProtocol,
   BiofeedbackMetrics,
   ShadowEngineState
 } from '@/types/gaa-polarity';
-import { CollectiveField, CollectiveReceiver, applyPLLDriftCorrection } from '@/modules/collective/CollectiveReceiver';
+import { CollectiveField, CollectiveReceiver, applyPLLDriftCorrection, ParticipantState } from '@/modules/collective/CollectiveReceiver';
 
 // Initial state for the collective GAA system
 const initialState: CollectiveGAAState = {
@@ -111,10 +110,12 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     // Set up realtime channel
     setupRealtimeChannel(sessionId);
     
-    collectiveReceiverRef.current = new CollectiveReceiver();
-    collectiveReceiverRef.current.onFieldUpdate((field) => {
-      setState(prev => ({ ...prev, collectiveField: field }));
-    });
+    if(userIdRef.current) {
+        collectiveReceiverRef.current = new CollectiveReceiver(userIdRef.current);
+        collectiveReceiverRef.current.onFieldUpdate((field) => {
+          setState(prev => ({ ...prev, collectiveField: field }));
+        });
+    }
 
     setState(prev => ({
       ...prev,
@@ -164,10 +165,12 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     // Set up realtime channel
     setupRealtimeChannel(sessionId);
 
-    collectiveReceiverRef.current = new CollectiveReceiver();
-    collectiveReceiverRef.current.onFieldUpdate((field) => {
-      setState(prev => ({ ...prev, collectiveField: field }));
-    });
+    if(userIdRef.current) {
+        collectiveReceiverRef.current = new CollectiveReceiver(userIdRef.current);
+        collectiveReceiverRef.current.onFieldUpdate((field) => {
+          setState(prev => ({ ...prev, collectiveField: field }));
+        });
+    }
 
     setState(prev => ({
       ...prev,
@@ -224,9 +227,9 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
       }
     });
 
-    channel.on('broadcast', { event: 'state_update' }, ({ payload }: { payload: ParticipantState }) => {
+    channel.on('broadcast', { event: 'state_update' }, ({ payload }: { payload: any }) => {
       if (payload.userId !== userIdRef.current) {
-        collectiveReceiverRef.current?.updateParticipantState(payload.userId, payload);
+        collectiveReceiverRef.current?.updateParticipantState(payload.userId, payload as ParticipantState);
         setState(prev => ({
           ...prev,
           participants: prev.participants.map(p => p.userId === payload.userId ? payload : p)
@@ -283,7 +286,7 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
   ): void => {
     if (!channelRef.current || !userIdRef.current) return;
 
-    const participantState: ParticipantState = {
+    const participantState: any = {
       userId: userIdRef.current,
       displayName: 'Anonymous', // This should be fetched from the profile
       polarityBalance: shadowEngine?.polarityBalance || 0.5,
