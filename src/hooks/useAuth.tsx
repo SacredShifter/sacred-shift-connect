@@ -27,12 +27,14 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | undefined>(undefined);
   const [roleLoading, setRoleLoading] = useState(false);
+  
+  // Initialize error handler inside the component
   const { handleAuthError } = useErrorHandler();
   
   logger.debug('AuthProvider state change', { 
@@ -199,7 +201,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [handleAuthError]);
 
   const signUp = async (email: string, password: string) => {
     logger.info('Starting user sign up', { component: 'useAuth', function: 'signUp', metadata: { email } });
