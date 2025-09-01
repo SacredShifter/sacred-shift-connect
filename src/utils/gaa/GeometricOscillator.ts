@@ -21,6 +21,8 @@ export interface NormalizedGeometry {
   };
 }
 
+const MAX_OSCILLATORS = 32; // Safety limit for Web Audio API performance
+
 export class GeometricOscillator {
   private config: GeometricOscillatorConfig;
   private oscillators: Map<string, {
@@ -60,12 +62,18 @@ export class GeometricOscillator {
     geometry: NormalizedGeometry, 
     id: string, 
     harmonics: number = 4
-  ): void {
+  ): boolean {
     console.log(`🎼 Creating geometric oscillator: ${id}`);
     
     if (this.oscillators.has(id)) {
-      console.log(`🔄 Stopping existing oscillator: ${id}`);
+      console.warn(`🔄 Oscillator with ID ${id} already exists. Stopping and replacing.`);
       this.stopOscillator(id);
+    }
+
+    // --- PERFORMANCE GUARDRAIL ---
+    if (this.oscillators.size >= MAX_OSCILLATORS) {
+      console.error(`❌ Oscillator limit reached (${MAX_OSCILLATORS}). Cannot create new oscillator.`);
+      return false;
     }
 
     try {
@@ -118,9 +126,15 @@ export class GeometricOscillator {
       osc.start();
       envelope.triggerAttack();
       
-      console.log(`✅ Oscillator ${id} started successfully`);
+      console.log(`✅ Oscillator ${id} started successfully. Total: ${this.oscillators.size}`);
+      return true;
     } catch (error) {
       console.error(`❌ Failed to create oscillator ${id}:`, error);
+      // Clean up any partially created resources if an error occurred
+      if (this.oscillators.has(id)) {
+        this.stopOscillator(id);
+      }
+      return false;
     }
   }
 
