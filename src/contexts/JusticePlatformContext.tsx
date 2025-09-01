@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import type { ReactNode, FC } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'react-router-dom';
@@ -49,7 +50,7 @@ const defaultPlatformState: PlatformState = {
 
 const JusticePlatformContext = createContext<JusticePlatformContextType | undefined>(undefined);
 
-export const JusticePlatformProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const JusticePlatformProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const location = useLocation();
   const [platformState, setPlatformState] = useState<PlatformState>(defaultPlatformState);
