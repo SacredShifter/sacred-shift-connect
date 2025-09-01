@@ -43,6 +43,10 @@ export interface SacredShifterDB extends DBSchema {
     value: any;
     indexes: { 'by-user': string; 'by-timestamp': number };
   };
+  presets: {
+    key: string;
+    value: any;
+  };
 }
 
 class SacredShifterStorage {
@@ -98,6 +102,11 @@ class SacredShifterStorage {
           const consentStore = db.createObjectStore('consent_logs', { keyPath: 'id' });
           consentStore.createIndex('by-user', 'user_id');
           consentStore.createIndex('by-timestamp', 'created_at');
+        }
+
+        // Presets store for offline archetypes
+        if (!db.objectStoreNames.contains('presets')) {
+            db.createObjectStore('presets', { keyPath: 'id' });
         }
 
         console.log('[Storage] Sacred Shifter IndexedDB initialized');

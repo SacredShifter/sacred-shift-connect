@@ -30,6 +30,15 @@ export interface MultiScaleState {
 const DEFAULT_BREATH_RATE_HZ = 0.1;
 
 // Constants for layer generation, separated for clarity and maintainability
+const defaultGeometry: NormalizedGeometry = {
+  vertices: [[-0.5, -0.5, 0], [0.5, -0.5, 0], [0, 0.5, 0]],
+  faces: [[0, 1, 2]],
+  normals: [[0, 0, 1], [0, 0, 1], [0, 0, 1]],
+  center: [0, 0, 0],
+  radius: 1,
+  sacredRatios: { phi: 1.618, pi: 3.141, sqrt2: 1.414 },
+};
+
 const LAYER_PARAMS = {
   // Biologically-inspired layer properties
   HIERARCHY_DEFAULTS: {
@@ -154,6 +163,12 @@ export class MultiScaleLayerManager {
     pointCount: number,
     layerIndex: number
   ): NormalizedGeometry {
+    // --- Input Validation ---
+    if (!Number.isFinite(layer.weight) || layer.weight <= 0) {
+        console.warn(`[GAA] Invalid layer weight for ${layerId}: ${layer.weight}. Falling back to default.`);
+        layer.weight = 0.1;
+    }
+
     const vertices: number[][] = [];
     const time = (performance.now() - this.startTime) / 1000;
     
@@ -212,7 +227,7 @@ export class MultiScaleLayerManager {
     // Calculate normals
     const normals: number[][] = vertices.map(() => [0, 0, 1]);
 
-    return this.geometricNormalizer.normalize({
+    const geometry = {
       vertices,
       faces,
       normals,
@@ -223,7 +238,14 @@ export class MultiScaleLayerManager {
         pi: Math.PI,
         sqrt2: Math.sqrt(2)
       }
-    });
+    };
+
+    if (!geometry.faces || geometry.faces.length === 0) {
+        console.warn(`[GAA] Invalid geometry generated for layer ${layerId} (no faces). Falling back to default geometry.`);
+        return defaultGeometry;
+    }
+
+    return this.geometricNormalizer.normalize(geometry);
   }
 
   /**
@@ -383,6 +405,11 @@ export class MultiScaleLayerManager {
       id => this.layers[id as keyof LayerHierarchy].active
     );
     
+    if (activeLayerIds.length === 0) {
+        console.warn("Cannot rebalance energy; no active layers.");
+        return;
+    }
+
     const baseWeight = 1.0 / activeLayerIds.length;
     
     activeLayerIds.forEach((layerId, index) => {

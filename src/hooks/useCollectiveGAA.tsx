@@ -2,14 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   CollectiveGAAState, 
-  ParticipantState, 
   GAASessionExtended,
   CollectiveOrchestration,
   PolarityProtocol,
   BiofeedbackMetrics,
   ShadowEngineState
 } from '@/types/gaa-polarity';
-import { CollectiveField, CollectiveReceiver, applyPLLDriftCorrection } from '@/modules/collective/CollectiveReceiver';
+import { CollectiveField, CollectiveReceiver, applyPLLDriftCorrection, ParticipantState } from '@/modules/collective/CollectiveReceiver';
 
 // Initial state for the collective GAA system
 const initialState: CollectiveGAAState = {
@@ -38,6 +37,8 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
   const clockOffsetRef = useRef<number>(0);
   const clockSyncIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const collectiveReceiverRef = useRef<CollectiveReceiver | null>(null);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [remoteStreams, setRemoteStreams] = useState<{ [key: string]: MediaStream }>({});
 
   // --- Clock Synchronization Logic ---
   const syncClock = async () => {
@@ -56,6 +57,18 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
       console.log(`🕰️ Clock synchronized. Offset: ${estimatedOffset.toFixed(2)}ms, RTT: ${roundTripTime}ms`);
     } catch (error) {
       console.error('Error syncing clock:', error);
+    }
+  };
+
+  const startAudioStreaming = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setLocalStream(stream);
+      if (collectiveReceiverRef.current) {
+        collectiveReceiverRef.current.setLocalStream(stream);
+      }
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
     }
   };
 
@@ -111,10 +124,15 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     // Set up realtime channel
     setupRealtimeChannel(sessionId);
     
-    collectiveReceiverRef.current = new CollectiveReceiver();
-    collectiveReceiverRef.current.onFieldUpdate((field) => {
-      setState(prev => ({ ...prev, collectiveField: field }));
-    });
+    if(userIdRef.current) {
+        collectiveReceiverRef.current = new CollectiveReceiver(userIdRef.current);
+        collectiveReceiverRef.current.onFieldUpdate((field) => {
+          setState(prev => ({ ...prev, collectiveField: field }));
+        });
+        collectiveReceiverRef.current.onStream((userId, stream) => {
+            setRemoteStreams(prev => ({...prev, [userId]: stream}));
+        });
+    }
 
     setState(prev => ({
       ...prev,
@@ -164,10 +182,15 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     // Set up realtime channel
     setupRealtimeChannel(sessionId);
 
-    collectiveReceiverRef.current = new CollectiveReceiver();
-    collectiveReceiverRef.current.onFieldUpdate((field) => {
-      setState(prev => ({ ...prev, collectiveField: field }));
-    });
+    if(userIdRef.current) {
+        collectiveReceiverRef.current = new CollectiveReceiver(userIdRef.current);
+        collectiveReceiverRef.current.onFieldUpdate((field) => {
+          setState(prev => ({ ...prev, collectiveField: field }));
+        });
+        collectiveReceiverRef.current.onStream((userId, stream) => {
+            setRemoteStreams(prev => ({...prev, [userId]: stream}));
+        });
+    }
 
     setState(prev => ({
       ...prev,
@@ -199,6 +222,11 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
 
     // Reset state
     setState({ ...initialState, collectiveField: null });
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        setLocalStream(null);
+    }
+    setRemoteStreams({});
   };
 
   // Set up realtime channel for session coordination
@@ -213,7 +241,17 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     channel.on('broadcast', { event: 'polarity_sync' }, ({ payload }: { payload: PolarityProtocol }) => {
       console.log('Received polarity sync:', payload);
       if (!state.isLeader) {
-        applyPLLDriftCorrection(payload.timestamp, 0.1);
+        // Use the hook's own drift correction method
+        const networkTime = Date.now() + clockOffsetRef.current;
+        const timeError = networkTime - payload.timestamp;
+        const P = 0.0001;
+        const I = 0.00001;
+        const currentBpm = transport.bpm.value;
+        const adjustment = timeError * P + (timeError * I);
+        const newBpm = currentBpm + adjustment;
+        const clampedBpm = Math.max(30, Math.min(300, newBpm));
+        transport.bpm.rampTo(clampedBpm, 0.5);
+
         setState(prev => ({
           ...prev,
           orchestration: {
@@ -224,9 +262,9 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
       }
     });
 
-    channel.on('broadcast', { event: 'state_update' }, ({ payload }: { payload: ParticipantState }) => {
+    channel.on('broadcast', { event: 'state_update' }, ({ payload }: { payload: any }) => {
       if (payload.userId !== userIdRef.current) {
-        collectiveReceiverRef.current?.updateParticipantState(payload.userId, payload);
+        collectiveReceiverRef.current?.updateParticipantState(payload.userId, payload as ParticipantState);
         setState(prev => ({
           ...prev,
           participants: prev.participants.map(p => p.userId === payload.userId ? payload : p)
@@ -283,7 +321,7 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
   ): void => {
     if (!channelRef.current || !userIdRef.current) return;
 
-    const participantState: ParticipantState = {
+    const participantState: any = {
       userId: userIdRef.current,
       displayName: 'Anonymous', // This should be fetched from the profile
       polarityBalance: shadowEngine?.polarityBalance || 0.5,
@@ -395,6 +433,8 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     updateParticipantState,
     syncPolarityProtocol,
     simulateParticipant,
+    startAudioStreaming,
+    remoteStreams,
     updateConsentLevel: (level: 'observer' | 'participant' | 'full_integration') => {
       // This would be a broadcast message to the leader/server
       console.log(`Setting consent level to: ${level}`);
@@ -403,22 +443,22 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     getNetworkTime: () => Date.now() + clockOffsetRef.current,
     getParticipantLatency: (userId: string) => 0, // TODO: Implement latency detection
     applyPLLDriftCorrection: (leaderTimestamp: number) => {
-      const networkTime = Date.now() + clockOffsetRef.current;
-      const timeError = networkTime - leaderTimestamp; // in ms
+        const networkTime = Date.now() + clockOffsetRef.current;
+        const timeError = networkTime - leaderTimestamp; // in ms
 
-      // PI controller for drift correction
-      const P = 0.0001; // Proportional gain
-      const I = 0.00001; // Integral gain
+        // PI controller for drift correction
+        const P = 0.0001; // Proportional gain
+        const I = 0.00001; // Integral gain
 
-      // Adjust transport BPM to correct for drift
-      const currentBpm = transport.bpm.value;
-      const adjustment = timeError * P + (timeError * I);
-      const newBpm = currentBpm + adjustment;
+        // Adjust transport BPM to correct for drift
+        const currentBpm = transport.bpm.value;
+        const adjustment = timeError * P + (timeError * I);
+        const newBpm = currentBpm + adjustment;
 
-      // Clamp BPM to reasonable values
-      const clampedBpm = Math.max(30, Math.min(300, newBpm));
-      transport.bpm.rampTo(clampedBpm, 0.5);
-    }
+        // Clamp BPM to reasonable values
+        const clampedBpm = Math.max(30, Math.min(300, newBpm));
+        transport.bpm.rampTo(clampedBpm, 0.5);
+      }
   };
 };
 

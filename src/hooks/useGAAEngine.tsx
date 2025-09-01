@@ -8,6 +8,7 @@ import { MultiScaleLayerManager } from '@/utils/gaa/MultiScaleLayerManager';
 import { ShadowEngine } from '@/dsp/ShadowEngine';
 import { GaaBiofeedbackSimulator } from '@/utils/biofeedback/GaaBiofeedbackSimulator';
 import { usePhonePulseSensor } from './usePhonePulseSensor';
+import { useAccelerometer } from './useAccelerometer';
 
 export interface GAAEngineState {
   isInitialized: boolean;
@@ -16,6 +17,7 @@ export interface GAAEngineState {
   safetyAlerts: SafetyAlert[];
   shadowState: ShadowEngineState | null;
   isRecovering: boolean;
+  bioSignals: BioSignals | null;
 }
 
 // Default preset
@@ -54,6 +56,7 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
     safetyAlerts: [],
     shadowState: null,
     isRecovering: false,
+    bioSignals: null,
   });
 
   // Refs to hold instances of our engine components
@@ -65,6 +68,7 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
   const animationFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
   const phonePulseSensor = usePhonePulseSensor();
+  const accelerometer = useAccelerometer();
 
   // Centralized initialization
   const initializeGAA = useCallback(async () => {
@@ -119,26 +123,36 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
 
     if (!geoOsc || !shadowEngine || !layerManager || !safetySystem || !biofeedback) return;
 
-    // 1. Update layer manager to get new geometries
-    layerManager.updateBreathPhase(deltaTime);
-    const geometries = layerManager.generateCompositeGeometry(8); // Manage complexity
-
-    // 2. Get latest bio-signals from the primary simulator or the phone PPG fallback
+    // 1a. Get latest bio-signals from the primary simulator or the phone PPG fallback
     let currentBioSignals: BioSignals;
     if (biofeedback.isRunning) {
       currentBioSignals = biofeedback.getBioSignals();
-    } else if (phonePulseSensor.isSensing) {
-      // Use phone sensor data as a fallback, mapping BPM to an HRV-like value
-      const normalizedBpm = (phonePulseSensor.bpm - 60) / 40; // Normalize 60-100bpm to 0-1
+    } else if (phonePulseSensor.isSensing && phonePulseSensor.bpm > 0) {
+      const normalizedBpm = (phonePulseSensor.bpm - 60) / 40;
       currentBioSignals = {
-        hrv: Math.max(0, Math.min(1, 1 - normalizedBpm)) * 100, // Inverse relationship
-        eegBandRatio: 0.5, // Default EEG
-        breath: 0,
+        hrv: Math.max(0, Math.min(1, 1 - normalizedBpm)) * 100,
+        eegBandRatio: 0.5,
+        breath: phonePulseSensor.bpm / 60, // Convert BPM to Hz for breath rate
       };
+    } else if (accelerometer.isSensing && accelerometer.bpm > 0) {
+        const normalizedBpm = (accelerometer.bpm - 60) / 40;
+        currentBioSignals = {
+            hrv: Math.max(0, Math.min(1, 1 - normalizedBpm)) * 100,
+            eegBandRatio: 0.5,
+            breath: accelerometer.bpm / 60,
+        };
     } else {
-      // Default placeholder if no biofeedback is active
       currentBioSignals = { hrv: 0.5, eegBandRatio: 0.5, breath: 0 };
     }
+
+    // 1b. Update layer manager with real breath rate
+    if (currentBioSignals.breath > 0) {
+        layerManager.setBreathRate(currentBioSignals.breath);
+    }
+
+    // 2. Update layer manager phase and get new geometries
+    layerManager.updateBreathPhase(deltaTime);
+    const geometries = layerManager.generateCompositeGeometry(8); // Manage complexity
 
     // 3. Iterate through geometries and update oscillators
     geometries.forEach((geom, index) => {
@@ -194,6 +208,7 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
       activeOscillators: geoOsc.getActiveCount(),
       shadowState: shadowEngine.snapshot(),
       safetyAlerts: safetySystem.getSafetyStatus().activeAlerts,
+      bioSignals: currentBioSignals,
     }));
 
     // Check for audio context crash
@@ -233,6 +248,8 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
     }
     
     biofeedbackSimulatorRef.current?.startSession();
+    phonePulseSensor.startSensing();
+    accelerometer.startSensing();
     setState(prev => ({ ...prev, isPlaying: true }));
     lastTimeRef.current = 0;
     animationFrameRef.current = requestAnimationFrame(updateLoop);
@@ -245,6 +262,8 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
 
     geometricOscillatorRef.current?.stopAll();
     biofeedbackSimulatorRef.current?.stopSession();
+    phonePulseSensor.stopSensing();
+    accelerometer.stopSensing();
     cancelAnimationFrame(animationFrameRef.current);
 
     setState(prev => ({ ...prev, isPlaying: false, activeOscillators: 0 }));
@@ -278,5 +297,6 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
     stopGAA,
     updatePreset: setPreset,
     phonePulseSensor, // Expose the whole hook for UI integration
+    accelerometer,
   };
 };
