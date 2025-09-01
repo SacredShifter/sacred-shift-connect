@@ -1,7 +1,11 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 
-export default function ShiftCanvas() {
+interface ShiftCanvasProps {
+  isPlaying: boolean;
+}
+
+export default function ShiftCanvas({ isPlaying }: ShiftCanvasProps) {
   return (
     <div className="w-full h-full flex items-center justify-center">
       <Card className="max-w-md">
