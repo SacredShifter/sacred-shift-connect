@@ -9,11 +9,22 @@ import { AudioEngine } from './audio/AudioEngine';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 interface ReconnectionWithLivingEarthProps {
-  onExit: () => void;
+  onExit?: () => void;
 }
 
 export default function ReconnectionWithLivingEarth({ onExit }: ReconnectionWithLivingEarthProps) {
   const [state, send] = useMachine(earthMachine);
+
+  // Default exit handler if none provided
+  const handleExit = onExit || (() => {
+    // Try to go back in browser history
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      // Fallback to home or learning modules
+      window.location.href = '/learning-3d';
+    }
+  });
 
   useEffect(() => {
     send({ type: 'START' });
@@ -21,7 +32,7 @@ export default function ReconnectionWithLivingEarth({ onExit }: ReconnectionWith
 
   return (
     <ErrorBoundary name="ReconnectionWithLivingEarth">
-      <EarthProvider value={{ state, send, onExit }}>
+      <EarthProvider value={{ state, send, onExit: handleExit }}>
         <div className="fixed inset-0 bg-gradient-to-b from-green-900 to-brown-900 z-[100]">
           <Canvas
             dpr={[1, 2]}
