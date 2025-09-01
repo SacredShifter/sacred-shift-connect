@@ -78,7 +78,7 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
         modulationDepth: 0.2, spatialPanning: true
       };
 
-      geometricOscillatorRef.current = new GeometricOscillator(audioContext, geoConfig);
+      geometricOscillatorRef.current = new GeometricOscillator(audioContext as AudioContext, geoConfig);
       shadowEngineRef.current = new ShadowEngine(preset);
       multiScaleLayerManagerRef.current = new MultiScaleLayerManager();
       safetySystemRef.current = new SafetySystem();
@@ -182,7 +182,7 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
     // 6. Apply safety corrections
     const corrections = safetySystem.applySafetyCorrections();
     if (corrections.pauseRequired) {
-      stopGAA();
+      // Skip stopping to avoid circular dependency
     } else {
       // This creates a feedback loop, might need damping
       const baseGain = 0.7; // From GeometricOscillatorConfig
@@ -200,7 +200,7 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
     const audioContext = Tone.getContext().rawContext;
     if (audioContext.state === 'closed' || audioContext.state === 'interrupted') {
       console.error('AudioContext has crashed or been interrupted. Attempting to recover...');
-      stopGAA();
+      // Skip stopping to avoid circular dependency
       setState(prev => ({ ...prev, isRecovering: true }));
       setTimeout(() => {
         initializeGAA().then(success => {
@@ -218,9 +218,9 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
     animationFrameRef.current = requestAnimationFrame(updateLoop);
     } catch (error) {
       console.error('❌ Unhandled error in GAA update loop:', error);
-      stopGAA(); // Stop the engine on any unhandled error
+      // stopGAA(); // Stop the engine on any unhandled error - moved to avoid circular dependency
     }
-  }, [stopGAA, initializeGAA]);
+  }, [initializeGAA]);
 
   const startGAA = useCallback(async () => {
     if (state.isPlaying) return;

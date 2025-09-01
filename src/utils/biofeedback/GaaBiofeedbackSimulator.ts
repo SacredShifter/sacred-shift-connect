@@ -72,6 +72,7 @@ export class GaaBiofeedbackSimulator {
   public getBioSignals(): BioSignals {
     // Translate the detailed state into the simplified BioSignals type
     return {
+      breath: Math.sin(Date.now() / 4000) * 0.8, // Breathing oscillation -0.8 to 0.8
       hrv: this.state.heartRateVariability,
       // A simple mapping of alpha (calm) vs beta (active) brainwaves
       eegBandRatio: this.state.brainwaveAlpha / (this.state.brainwaveAlpha + this.state.brainwaveBeta + 1e-6),
