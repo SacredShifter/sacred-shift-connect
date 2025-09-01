@@ -1,4 +1,4 @@
-import { Home, Users, User, Rss, Settings, BookOpen, Video, Database, Archive, Scroll, Heart, MessageCircle, Brain, TreePine, Stars, Box, Sparkles, Zap, BarChart3, Navigation, LucideIcon } from "lucide-react";
+import { Home, Users, User, Rss, Settings, BookOpen, Video, Database, Archive, Scroll, Heart, MessageCircle, Brain, TreePine, Stars, Box, Sparkles, Zap, BarChart3, Navigation, LucideIcon, LayoutGrid } from "lucide-react";
 
 // Sacred Sigils for major modules - using Unicode symbols
 export const SacredSigils = {
@@ -21,7 +21,8 @@ export const SacredSigils = {
   settings: "⚙",
   aiAdmin: "🧠",
   liberation: "◦",
-  shift: "⟢"
+  shift: "⟢",
+  tarot: "🎴" // Using an emoji that represents cards
 } as const;
 
 // Tri-Law Quality Scores (Truth, Resonance, Sovereignty)
@@ -233,6 +234,29 @@ export const SACRED_ROUTES_REGISTRY: SacredRouteMetadata[] = [
     journeyStage: "integration",
     resonanceChains: ["feed", "messages", "registry"],
     synchronicityTriggers: ["community_call", "collective_awakening", "shared_purpose"]
+  },
+  {
+    path: "/tarot",
+    component: "Tarot",
+    title: "Sacred Tarot",
+    icon: LayoutGrid,
+    sigil: SacredSigils.tarot,
+    description: "A resonance learning system for the Sacred Shifter tarot deck.",
+    category: "tools",
+    authRequired: true,
+    adminOnly: false,
+    rlsPolicies: ["tarot_journal_logs_access"],
+    supabaseTables: ["tarot_journal_logs"],
+    edgeFunctions: ["log_tarot_pull"],
+    triLawScores: { truth: 0.9, resonance: 0.95, sovereignty: 0.8 },
+    chakraAlignment: "Third Eye",
+    consciousnessLevel: 5,
+    dependencies: ["tarot_deck_data", "journaling_system"],
+    errorPatterns: ["card_load_error", "journal_save_failed"],
+    performanceWeight: "medium",
+    journeyStage: "exploration",
+    resonanceChains: ["journal", "codex", "grove"],
+    synchronicityTriggers: ["self_reflection", "guidance_needed", "pattern_seeking"]
   },
   {
     path: "/messages",
