@@ -12,12 +12,13 @@ The collective sync feature allows multiple users to join a shared session. The 
 - **Presence:** A basic list of participants in a session is available via Supabase Presence.
 - **Control Message Sync:** The session leader can broadcast control messages (specifically, `polarity_sync`) to all participants, and participants will correctly update their state.
 - **Clock Synchronization:** A foundational clock synchronization mechanism is in place. Clients periodically sync with a server timestamp to establish a shared "network time," which is a prerequisite for more advanced synchronization.
+- **State Synchronization:** The system now synchronizes the high-frequency state of the GAA engine (e.g., oscillator parameters, geometry changes) between clients using Supabase broadcast channels.
+- **Drift Correction:** A Phase-Locked Loop (PLL) has been implemented to correct for clock drift between clients over time.
 
 ### 1.2. Known Limitations & Risks:
-- **No State Synchronization:** The system does **not** synchronize the high-frequency state of the GAA engine (e.g., oscillator parameters, geometry changes) between clients. The initial implementation attempting this via Supabase Presence has been disabled as it is not a scalable or reliable approach.
-- **No Phase Coherence:** There is **no mechanism** to ensure the audio oscillators of different participants are in phase. The audio will sound different for each user and will not be a truly "collective" experience.
 - **Scalability:** The current architecture relies on Supabase's broadcast features, which will not scale effectively beyond a small number of users (likely < 10).
-- **No Jitter/Latency Compensation:** The system does not handle real-world network conditions like variable latency (jitter) or packet loss.
+- **No Jitter Compensation:** The system does not handle real-world network conditions like variable latency (jitter) or packet loss. A jitter buffer is needed for a smooth experience.
+- **WebRTC Not Fully Integrated:** WebRTC data channels have been stubbed but are not yet used for state synchronization.
 
 ## 2. Development Roadmap
 
@@ -26,9 +27,10 @@ Significant work is required to make this feature production-ready. The roadmap 
 ### 2.1. Phase 2: Latency & Jitter Compensation (The "Smooth" Experience)
 *This phase focuses on making the experience feel synchronized and smooth for a small group of users.*
 
-- **Implement Jitter Buffer:** All incoming state update messages must be timestamped with the synchronized network time. Clients will buffer these messages for a short, fixed period (e.g., 100-200ms) and then process them in timestamp order. This trades a small amount of latency for a large increase in smoothness.
-- **Implement Phase-Locked Loop (PLL):** To correct for clock drift between clients over time, a PLL system should be implemented. This involves comparing the timestamp of incoming messages from the session leader to the client's current network time and using a PI controller to make micro-adjustments to the local playback rate (e.g., `Tone.Transport.bpm`), gently pulling the client back into phase.
-- **WebRTC Data Channels for State:** Begin experimenting with WebRTC data channels for sending high-frequency state updates directly between peers. This can significantly reduce latency compared to a server broadcast model.
+- ✅ **Implement Phase-Locked Loop (PLL):** A PLL has been implemented to correct for clock drift.
+- ✅ **Use Broadcast for State Sync:** High-frequency state updates are now sent via broadcast channels instead of Presence.
+- ✅ **Stub WebRTC Data Channels:** `WebRTCManager` has been updated with stubs for data channel support.
+- ❌ **Implement Jitter Buffer:** All incoming state update messages must be timestamped with the synchronized network time. Clients will buffer these messages for a short, fixed period (e.g., 100-200ms) and then process them in timestamp order. This trades a small amount of latency for a large increase in smoothness.
 
 ### 2.2. Phase 3: Scalability & Robustness (The "Production" Experience)
 *This phase focuses on making the feature work for larger groups and in unreliable network conditions.*

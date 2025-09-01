@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useEarthState } from '../context/EarthContext';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 const frequencies = {
   forest: 528,
@@ -21,9 +22,13 @@ export const AudioEngine: React.FC = () => {
 
   useEffect(() => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextClass();
+      if (AudioContextClass) {
+        audioContextRef.current = new AudioContextClass();
+      }
     }
     const audioContext = audioContextRef.current;
+    if (!audioContext) return;
 
     if (!oscillatorRef.current) {
       // Tone generator

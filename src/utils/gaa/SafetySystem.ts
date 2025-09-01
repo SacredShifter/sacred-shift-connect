@@ -139,6 +139,12 @@ export class SafetySystem {
     this.checkBreathingSafety();
   }
 
+  updatePerformanceMetrics(cpuLoad: number, memoryUsage: number): void {
+    this.metrics.cpuLoad = cpuLoad;
+    this.metrics.memoryUsage = memoryUsage;
+    // In a real implementation, we would check these against thresholds
+  }
+
   /**
    * Check audio safety thresholds
    */

@@ -164,24 +164,28 @@ export class GeometricOscillator {
     geometry: NormalizedGeometry, 
     harmonics: number = 4
   ): void {
-    const components = this.oscillators.get(id);
-    if (!components) return;
+    try {
+      const components = this.oscillators.get(id);
+      if (!components) return;
 
-    const { osc, filter, panner } = components;
+      const { osc, filter, panner } = components;
 
-    // Smoothly update frequency
-    const newFreq = this.calculateGeometricFrequency(geometry);
-    osc.frequency.rampTo(newFreq, 0.1);
+      // Smoothly update frequency
+      const newFreq = this.calculateGeometricFrequency(geometry);
+      osc.frequency.rampTo(newFreq, 0.1);
 
-    // Update filter based on geometry changes
-    const newCutoff = this.calculateFilterFrequency(geometry);
-    filter.frequency.rampTo(newCutoff, 0.1);
+      // Update filter based on geometry changes
+      const newCutoff = this.calculateFilterFrequency(geometry);
+      filter.frequency.rampTo(newCutoff, 0.1);
 
-    // Update spatial position
-    if (this.config.spatialPanning) {
-      panner.positionX.rampTo(geometry.center[0] * 10, 0.2);
-      panner.positionY.rampTo(geometry.center[1] * 10, 0.2);
-      panner.positionZ.rampTo(geometry.center[2] * 10, 0.2);
+      // Update spatial position
+      if (this.config.spatialPanning) {
+        panner.positionX.rampTo(geometry.center[0] * 10, 0.2);
+        panner.positionY.rampTo(geometry.center[1] * 10, 0.2);
+        panner.positionZ.rampTo(geometry.center[2] * 10, 0.2);
+      }
+    } catch (error) {
+      console.error(`❌ Failed to update oscillator ${id}:`, error);
     }
   }
 
@@ -190,20 +194,24 @@ export class GeometricOscillator {
    * This is more direct than recalculating from geometry.
    */
   setParameters(id: string, params: { fHz?: number, amp?: number, fcHz?: number }): void {
-    const components = this.oscillators.get(id);
-    if (!components) return;
+    try {
+      const components = this.oscillators.get(id);
+      if (!components) return;
 
-    const { osc, envelope, filter } = components;
+      const { osc, envelope, filter } = components;
 
-    if (params.fHz) {
-      osc.frequency.rampTo(params.fHz, 0.05);
-    }
-    if (params.amp) {
-      // Direct gain control on the envelope is tricky. For now, we assume amp is handled by envelope.
-      // A more advanced implementation might use a separate VCA.
-    }
-    if (params.fcHz) {
-      filter.frequency.rampTo(params.fcHz, 0.05);
+      if (params.fHz) {
+        osc.frequency.rampTo(params.fHz, 0.05);
+      }
+      if (params.amp) {
+        // Direct gain control on the envelope is tricky. For now, we assume amp is handled by envelope.
+        // A more advanced implementation might use a separate VCA.
+      }
+      if (params.fcHz) {
+        filter.frequency.rampTo(params.fcHz, 0.05);
+      }
+    } catch (error) {
+      console.error(`❌ Failed to set parameters for oscillator ${id}:`, error);
     }
   }
 

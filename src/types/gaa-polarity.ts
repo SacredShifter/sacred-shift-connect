@@ -4,6 +4,7 @@ export interface PolarityProtocol {
   darkChannel: ChannelConfiguration;
   polarityBalance: number; // -1 (full dark) to 1 (full light)
   darkEnergyDrift: DarkEnergyConfiguration;
+  timestamp: number;
 }
 
 // Channel configurations for light/dark polarity

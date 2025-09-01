@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface BreathingPreset {
   id: string;
@@ -68,7 +69,10 @@ export function useBreathingTool() {
 
   const initializeAudio = () => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextClass();
+      if (AudioContextClass) {
+        audioContextRef.current = new AudioContextClass();
+      }
     }
     return audioContextRef.current;
   };

@@ -103,18 +103,20 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ profile, onE
               </div>
               
               <div>
-                <CardTitle className="text-2xl">{profile.full_name}</CardTitle>
+                <CardTitle className="text-2xl">{profile.full_name || 'Anonymous Shifter'}</CardTitle>
                 {profile.soul_identity && (
                   <p className="text-lg text-primary font-medium">{profile.soul_identity}</p>
                 )}
                 <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    {calculateAge(profile.date_of_birth)} years old
-                  </span>
+                  {profile.date_of_birth && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {calculateAge(profile.date_of_birth)} years old
+                    </span>
+                  )}
                   <span className="flex items-center gap-1">
                     <Globe className="w-4 h-4" />
-                    {profile.timezone}
+                    {profile.timezone || 'Unknown'}
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />

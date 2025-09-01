@@ -24,6 +24,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import * as Tone from 'tone';
 import { useGAAEngine } from '@/hooks/useGAAEngine';
 import { useCollectiveGAA } from '@/hooks/useCollectiveGAA';
 import { SessionMetrics } from './SessionMetrics';
@@ -70,9 +71,9 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
   const [sessionBadges, setSessionBadges] = useState<string[]>([]);
 
   // Core hooks
-  const gaaEngine = useGAAEngine();
+  const orchestra = useCollectiveGAA(Tone.Transport);
+  const gaaEngine = useGAAEngine(orchestra.collectiveField);
   // const biofeedback = useEmbodiedBiofeedback(); // DEPRECATED: Integrated into useGAAEngine
-  const orchestra = useCollectiveGAA();
 
   // MOCK BIOFEEDBACK for UI until full integration
   const biofeedback = {

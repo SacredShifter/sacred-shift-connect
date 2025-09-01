@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, Compass, Heart, Crown, Home } from 'lucide-react';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface SacredGroveEntryProps {
   onPathSelect: (path: 'discovery' | 'purpose' | 'connection') => void;
@@ -16,8 +17,10 @@ export const SacredGroveEntry: React.FC<SacredGroveEntryProps> = ({ onPathSelect
 
   useEffect(() => {
     if (isVisible) {
+      const AudioContextClass = getAudioContextClass();
+      if (!AudioContextClass) return;
       // Create ambient binaural tones (40Hz base frequency)
-      const audioContext = new AudioContext();
+      const audioContext = new AudioContextClass();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       

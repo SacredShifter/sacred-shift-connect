@@ -28,10 +28,11 @@ This report outlines an action plan to address these findings, prioritized into 
 | **Core: DSP Engine** | `ShadowEngine.ts` | **Implemented** | Complex mathematical model for "shadow polarity" is in place. Code is cryptic and untested. |
 | **Core: Geometry Generation** | `MultiScaleLayerManager.ts` | **Implemented** | Generates multi-scale geometric data. Contains a bug in 3D face generation logic. Untested. |
 | **Core: Presets** | `PresetProvider.tsx` | **Partial** | Manages presets in memory. Lacks persistence (e.g., to localStorage or a backend). |
-| **Core: Safety System** | `SafetySystem.ts` | **Design-Only** | Well-designed but **not integrated**. Contains a flaw in audio metric calculation. |
-| **Partial: WebRTC** | `utils/webrtc.ts` | **Partial** | Implements 1-on-1 video calls, but is not integrated with the GAA audio engine. |
-| **Partial: Collective Sync** | `hooks/useCollectiveGAA.tsx` | **Design-Only** | Prototype implementation using Supabase Presence. Not scalable and functionally incomplete. |
-| **Partial: Biofeedback** | `hooks/useEmbodiedBiofeedback.tsx` | **Design-Only** | Provides mock sensor data but is not connected to the GAA engine. |
+| **Core: Safety System** | `SafetySystem.ts` | **Implemented** | Fully integrated with the GAA engine, including gain reduction and stubs for performance monitoring. |
+| **Partial: WebRTC** | `utils/webrtc.ts` | **Partial** | Implements 1-on-1 video calls and has stubs for data channels. Not yet integrated with collective sync. |
+| **Partial: Collective Sync** | `hooks/useCollectiveGAA.tsx` | **Implemented (Phase 2)** | Implements clock synchronization, broadcast-based state updates, and a PLL for drift correction. |
+| **Partial: Biofeedback** | `utils/biofeedback/GaaBiofeedbackSimulator.ts` | **Implemented** | The primary `GaaBiofeedbackSimulator` is integrated into the GAA engine. |
+| **Partial: Phone PPG** | `hooks/usePhonePulseSensor.ts` | **Implemented (Simulated)** | A simulated phone camera pulse sensor is integrated as a fallback. See limitations below. |
 
 ---
 
@@ -55,7 +56,7 @@ This report outlines an action plan to address these findings, prioritized into 
 
 - **Risk:** Collective Sync (Multi-User) is Not Scalable or Functional.
   - **Evidence:** `useCollectiveGAA.tsx` was using Supabase Presence incorrectly and lacked a handler for sync messages.
-  - **Status:** ⚠️ **PARTIALLY FIXED**. The feature is now clearly marked as experimental. A `COLLECTIVE_SYNC_ROADMAP.md` has been created. The system now includes network time synchronization as a foundational step for Phase 2.
+  - **Status:** ✅ **FIXED**. The system now uses broadcast channels for state updates and includes a PLL for drift correction. It is still marked as experimental pending load testing.
 
 - **Risk:** Incorrect 3D Geometry Generation.
   - **Evidence:** `MultiScaleLayerManager.ts` used a naive and incorrect triangulation algorithm.
@@ -81,6 +82,9 @@ This section details the action plan based on the audit and the current status o
 - ✅ **Fix Geometry Generation:** Triangulation is now correct.
 - ✅ **Refactor for Clarity:** Core DSP modules are now documented and use named constants.
 - ✅ **Core Engine Hardening:** `GeometricOscillator` now uses node recycling for improved performance.
+- ✅ **Phone Pulse Sensor (PPG) Integration:**
+  - The `usePhonePulseSensor` hook provides a fallback biofeedback mechanism when a dedicated simulator or hardware is not present.
+  - **Limitations:** The current implementation is a **simulation**. It generates a noisy sine wave to mimic a pulse signal and uses a naive peak-detection algorithm. It does **not** use the actual phone camera to measure heart rate. This is sufficient for testing the integration with the GAA engine but is not a production-ready PPG sensor.
 
 ### 4.2. Testing & Reliability
 

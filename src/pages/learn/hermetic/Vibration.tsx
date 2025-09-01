@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, BookOpen, Sparkles } from 'lucide-react'
 import { TeachingLayer } from '@/components/TeachingLayer'
 import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings'
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 const vertexShader = `
   uniform float u_time;
@@ -74,7 +75,9 @@ export default function Vibration(){
 
   useEffect(() => {
     if (!audio.current) {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const AudioContextClass = getAudioContextClass();
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
       osc.connect(gain).connect(ctx.destination)

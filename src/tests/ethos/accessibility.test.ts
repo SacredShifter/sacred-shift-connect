@@ -144,6 +144,17 @@ describe('Ethos: Accessibility & Inclusivity Verification', () => {
       expectNoViolations(results);
     });
 
+    it('should fail for components with accessibility violations', async () => {
+      const { container } = mockRender('MockViolatingComponent');
+      // Temporarily modify the mock to return a violation
+      const originalViolations = mockAxeResults.violations;
+      mockAxeResults.violations = [{ id: 'image-alt', description: 'Images must have alternate text', nodes: [] }] as any;
+      const results = await mockAxe(container);
+      expect(results.violations.length).toBe(1);
+      // Restore the mock
+      mockAxeResults.violations = originalViolations;
+    });
+
     it('Animated components provide reduced motion alternatives', async () => {
       // Test with normal motion
       const { container: normalContainer } = mockRender('MockAnimatedComponent');

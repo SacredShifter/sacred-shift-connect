@@ -1,3 +1,5 @@
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
+
 class AudioCueSystem {
   private audioContext: AudioContext | null = null;
   private gainNode: GainNode | null = null;
@@ -7,7 +9,11 @@ class AudioCueSystem {
     if (this.isInitialized) return;
     
     try {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextClass();
+      if (!AudioContextClass) {
+        throw new Error("AudioContext not supported");
+      }
+      this.audioContext = new AudioContextClass();
       this.gainNode = this.audioContext.createGain();
       this.gainNode.connect(this.audioContext.destination);
       this.isInitialized = true;

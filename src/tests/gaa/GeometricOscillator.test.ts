@@ -130,6 +130,30 @@ describe('GeometricOscillator', () => {
     expect(freq).toBeCloseTo(150);
   });
 
+  it('should produce a lower frequency with a smaller radius', () => {
+    const audioContext = new MockAudioContext() as unknown as AudioContext;
+    const geoOsc = new GeometricOscillator(audioContext, defaultConfig);
+    const geometry1 = { ...mockGeometry, radius: 0.2 };
+    const geometry2 = { ...mockGeometry, radius: 0.8 };
+    // @ts-expect-error - accessing private method for testing
+    const freq1 = geoOsc.calculateGeometricFrequency(geometry1);
+    // @ts-expect-error - accessing private method for testing
+    const freq2 = geoOsc.calculateGeometricFrequency(geometry2);
+    expect(freq1).toBeLessThan(freq2);
+  });
+
+  it('should produce a higher filter cutoff with more vertices', () => {
+    const audioContext = new MockAudioContext() as unknown as AudioContext;
+    const geoOsc = new GeometricOscillator(audioContext, defaultConfig);
+    const geometry1 = { ...mockGeometry, vertices: Array(10).fill([0,0,0]) };
+    const geometry2 = { ...mockGeometry, vertices: Array(100).fill([0,0,0]) };
+    // @ts-expect-error - accessing private method for testing
+    const fc1 = geoOsc.calculateFilterFrequency(geometry1);
+    // @ts-expect-error - accessing private method for testing
+    const fc2 = geoOsc.calculateFilterFrequency(geometry2);
+    expect(fc2).toBeGreaterThan(fc1);
+  });
+
   it('should recycle nodes back into the pool when an oscillator is stopped', () => {
     vi.useFakeTimers();
     const audioContext = new MockAudioContext() as unknown as AudioContext;

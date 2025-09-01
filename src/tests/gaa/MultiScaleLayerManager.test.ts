@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { MultiScaleLayerManager } from '@/utils/gaa/MultiScaleLayerManager';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { MultiScaleLayerManager, LayerHierarchy } from '@/utils/gaa/MultiScaleLayerManager';
 import { GeometricNormalizer } from '@/utils/gaa/GeometricNormalizer';
 
 // Mock GeometricNormalizer since its implementation is not part of this test
@@ -14,6 +14,10 @@ vi.mock('@/utils/gaa/GeometricNormalizer', () => {
 });
 
 describe('MultiScaleLayerManager', () => {
+  beforeEach(() => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+  });
+
   it('should be instantiated without errors', () => {
     expect(() => new MultiScaleLayerManager()).not.toThrow();
   });

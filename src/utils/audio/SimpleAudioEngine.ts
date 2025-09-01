@@ -3,6 +3,14 @@
  * Fallback for when Tone.js has issues
  */
 
+export const getAudioContextClass = (): typeof AudioContext | null => {
+  // Check for window to avoid SSR errors
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  return window.AudioContext || (window as any).webkitAudioContext || null;
+};
+
 export class SimpleAudioEngine {
   private audioContext: AudioContext | null = null;
   private oscillators: Map<string, {
@@ -17,7 +25,12 @@ export class SimpleAudioEngine {
       console.log('🎵 SimpleAudioEngine: Initializing...');
       
       // Create audio context
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextClass();
+      if (!AudioContextClass) {
+        console.error('❌ SimpleAudioEngine: AudioContext not supported');
+        return false;
+      }
+      this.audioContext = new AudioContextClass();
       
       if (this.audioContext.state === 'suspended') {
         console.log('🎵 SimpleAudioEngine: Resuming suspended context...');

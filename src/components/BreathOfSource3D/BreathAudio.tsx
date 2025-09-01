@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface BreathAudioProps {
   isActive: boolean;
@@ -22,7 +23,12 @@ export default function BreathAudio({
   useEffect(() => {
     const initAudio = async () => {
       try {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AudioContextClass = getAudioContextClass();
+        if (!AudioContextClass) {
+          console.warn('AudioContext is not supported in this browser.');
+          return;
+        }
+        audioContextRef.current = new AudioContextClass();
         
         // Resume context if suspended (required for Chrome)
         if (audioContextRef.current.state === 'suspended') {
