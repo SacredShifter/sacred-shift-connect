@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useBreathingTool } from '@/hooks/useBreathingTool';
 import { useToast } from '@/hooks/use-toast';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 export type UnifiedBreathPhase = 'inhale' | 'hold1' | 'exhale' | 'hold2';
 export type BreathPreset = 'basic' | 'liberation' | 'sovereignty';
@@ -107,7 +108,10 @@ export function useUnifiedBreathing(): UnifiedBreathingState {
   // Audio functions
   const initializeAudio = useCallback(() => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextClass();
+      if (AudioContextClass) {
+        audioContextRef.current = new AudioContextClass();
+      }
     }
     return audioContextRef.current;
   }, []);

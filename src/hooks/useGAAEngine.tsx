@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as Tone from 'tone';
 import { GaaPreset, ShadowEngineState, BioSignals, GaaCoreFrame } from '@/types/gaa';
+import { CollectiveField } from '@/modules/collective/CollectiveReceiver';
 import { GeometricOscillator, GeometricOscillatorConfig, NormalizedGeometry } from '@/utils/gaa/GeometricOscillator';
 import { SafetySystem, SafetyAlert } from '@/utils/gaa/SafetySystem';
 import { MultiScaleLayerManager } from '@/utils/gaa/MultiScaleLayerManager';
@@ -44,7 +45,7 @@ const defaultPreset: GaaPreset = {
  * GAA (Geometrically Aligned Audio) Engine Hook
  * Refactored to a centralized architecture with a main update loop.
  */
-export const useGAAEngine = () => {
+export const useGAAEngine = (collectiveField: CollectiveField | null) => {
   const [preset, setPreset] = useState<GaaPreset>(defaultPreset);
   const [state, setState] = useState<GAAEngineState>({
     isInitialized: false,
@@ -136,7 +137,7 @@ export const useGAAEngine = () => {
       };
     } else {
       // Default placeholder if no biofeedback is active
-      currentBioSignals = { hrv: 50, eegBandRatio: 0.5, breath: 0 };
+      currentBioSignals = { hrv: 0.5, eegBandRatio: 0.5, breath: 0 };
     }
 
     // 3. Iterate through geometries and update oscillators
@@ -150,7 +151,16 @@ export const useGAAEngine = () => {
       };
 
       // 4. Get audio params from ShadowEngine using real bio-signals
-      const audioParams = shadowEngine.step(deltaTime, mockCore, currentBioSignals);
+      let audioParams = shadowEngine.step(deltaTime, mockCore, currentBioSignals);
+
+      // 4a. Apply collective field influence
+      if (collectiveField) {
+        const { resonance, polarity, coherence } = collectiveField;
+        // Simple blending - more sophisticated mapping can be done in ShadowEngine
+        audioParams.fHz *= (1 + (resonance - 0.5) * 0.1);
+        audioParams.amp *= (1 + (coherence - 0.5) * 0.2);
+        // Polarity will be handled inside ShadowEngine in a future iteration
+      }
 
       // 5. Create or update oscillator
       if (!geoOsc.getOscillatorInfo(id)) {
@@ -167,6 +177,7 @@ export const useGAAEngine = () => {
     if (rawAnalyserNode) {
       safetySystem.updateAudioMetrics(rawAnalyserNode, 440); // freq is placeholder
     }
+    safetySystem.updatePerformanceMetrics(0.5, 100); // Mock values
 
     // 6. Apply safety corrections
     const corrections = safetySystem.applySafetyCorrections();
@@ -174,7 +185,8 @@ export const useGAAEngine = () => {
       stopGAA();
     } else {
       // This creates a feedback loop, might need damping
-      // geoOsc.setMasterGain(baseGain * corrections.audioReduction);
+      const baseGain = 0.7; // From GeometricOscillatorConfig
+      geoOsc.setMasterGain(baseGain * corrections.audioReduction);
     }
 
     setState(prev => ({
@@ -240,11 +252,24 @@ export const useGAAEngine = () => {
 
   // Cleanup on unmount
   useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopGAA();
+      } else {
+        if (state.isPlaying) {
+          startGAA();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       stopGAA();
       safetySystemRef.current?.stopMonitoring();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [stopGAA]);
+  }, [stopGAA, startGAA, state.isPlaying]);
 
   return {
     state,

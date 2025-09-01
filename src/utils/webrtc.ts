@@ -14,6 +14,7 @@ export class WebRTCManager {
   private peerConnection: RTCPeerConnection | null = null;
   private localStream: MediaStream | null = null;
   private remoteStream: MediaStream | null = null;
+  private dataChannel: RTCDataChannel | null = null;
   private callChannel: any = null;
   private callId: string | null = null;
   private isInitiator: boolean = false;
@@ -37,6 +38,13 @@ export class WebRTCManager {
         { urls: 'stun:stun1.l.google.com:19302' }
       ]
     });
+
+    this.peerConnection.ondatachannel = (event) => {
+      this.dataChannel = event.channel;
+      this.dataChannel.onmessage = (event) => {
+        console.log('Data channel message:', event.data);
+      };
+    };
 
     // Handle remote stream
     this.peerConnection.ontrack = (event) => {
@@ -94,6 +102,8 @@ export class WebRTCManager {
 
       // Setup signaling channel
       this.setupSignalingChannel(remoteUserId);
+
+      this.dataChannel = this.peerConnection!.createDataChannel('gaa-sync');
 
       // Create offer
       const offer = await this.peerConnection!.createOffer();
@@ -330,5 +340,11 @@ export class WebRTCManager {
 
   getRemoteStream(): MediaStream | null {
     return this.remoteStream;
+  }
+
+  sendData(data: any): void {
+    if (this.dataChannel && this.dataChannel.readyState === 'open') {
+      this.dataChannel.send(JSON.stringify(data));
+    }
   }
 }

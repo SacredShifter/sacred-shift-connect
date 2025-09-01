@@ -9,6 +9,7 @@ import {
   BiofeedbackMetrics,
   ShadowEngineState
 } from '@/types/gaa-polarity';
+import { CollectiveReceiver } from '@/modules/collective/CollectiveReceiver';
 
 // Initial state for the collective GAA system
 const initialState: CollectiveGAAState = {
@@ -25,12 +26,18 @@ const initialState: CollectiveGAAState = {
   connectionStatus: 'disconnected'
 };
 
-export const useCollectiveGAA = () => {
-  const [state, setState] = useState<CollectiveGAAState>(initialState);
+import * as Tone from 'tone';
+
+export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
+  const [state, setState] = useState<CollectiveGAAState & { collectiveField: CollectiveField | null }>({
+    ...initialState,
+    collectiveField: null,
+  });
   const channelRef = useRef<any>(null);
   const userIdRef = useRef<string | null>(null);
   const clockOffsetRef = useRef<number>(0);
   const clockSyncIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const collectiveReceiverRef = useRef<CollectiveReceiver | null>(null);
 
   // --- Clock Synchronization Logic ---
   const syncClock = async () => {
@@ -74,6 +81,7 @@ export const useCollectiveGAA = () => {
 
   // Create a new collective session (simulated)
   const createSession = async (ceremonyType?: string): Promise<string | null> => {
+    console.log('ethos.event: CollectiveSessionCreated');
     if (!userIdRef.current) {
       console.error('User not authenticated');
       return null;
@@ -103,6 +111,11 @@ export const useCollectiveGAA = () => {
     // Set up realtime channel
     setupRealtimeChannel(sessionId);
     
+    collectiveReceiverRef.current = new CollectiveReceiver();
+    collectiveReceiverRef.current.onFieldUpdate((field) => {
+      setState(prev => ({ ...prev, collectiveField: field }));
+    });
+
     setState(prev => ({
       ...prev,
       sessionId,
@@ -122,6 +135,7 @@ export const useCollectiveGAA = () => {
 
   // Join an existing session (simulated)
   const joinSession = async (sessionId: string): Promise<boolean> => {
+    console.log('ethos.event: CollectiveSessionJoined');
     if (!userIdRef.current) {
       console.error('User not authenticated');
       return false;
@@ -150,6 +164,11 @@ export const useCollectiveGAA = () => {
     // Set up realtime channel
     setupRealtimeChannel(sessionId);
 
+    collectiveReceiverRef.current = new CollectiveReceiver();
+    collectiveReceiverRef.current.onFieldUpdate((field) => {
+      setState(prev => ({ ...prev, collectiveField: field }));
+    });
+
     setState(prev => ({
       ...prev,
       sessionId,
@@ -169,11 +188,14 @@ export const useCollectiveGAA = () => {
 
   // Leave the current session
   const leaveSession = async (): Promise<void> => {
+    console.log('ethos.event: CollectiveSessionLeft');
     // Clean up realtime channel
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
+
+    collectiveReceiverRef.current = null;
 
     // Reset state
     setState(initialState);
@@ -188,15 +210,26 @@ export const useCollectiveGAA = () => {
     const channel = supabase.channel(`collective-session-${sessionId}`);
 
     // *** Add broadcast handler for polarity_sync ***
-    channel.on('broadcast', { event: 'polarity_sync' }, ({ payload }) => {
+    channel.on('broadcast', { event: 'polarity_sync' }, ({ payload }: { payload: PolarityProtocol }) => {
       console.log('Received polarity sync:', payload);
       if (!state.isLeader) {
+        applyPLLDriftCorrection(payload.timestamp);
         setState(prev => ({
           ...prev,
           orchestration: {
             ...prev.orchestration,
             ...payload as any
           }
+        }));
+      }
+    });
+
+    channel.on('broadcast', { event: 'state_update' }, ({ payload }: { payload: ParticipantState }) => {
+      if (payload.userId !== userIdRef.current) {
+        collectiveReceiverRef.current?.updateParticipantState(payload.userId, payload);
+        setState(prev => ({
+          ...prev,
+          participants: prev.participants.map(p => p.userId === payload.userId ? payload : p)
         }));
       }
     });
@@ -226,9 +259,11 @@ export const useCollectiveGAA = () => {
     })
     .on('presence', { event: 'join' }, ({ newPresences }) => {
       console.log('Participant joined:', newPresences);
+      newPresences.forEach(p => collectiveReceiverRef.current?.registerParticipant(p as any));
     })
     .on('presence', { event: 'leave' }, ({ leftPresences }) => {
       console.log('Participant left:', leftPresences);
+      leftPresences.forEach(p => collectiveReceiverRef.current?.unregisterParticipant((p as any).user_id));
     })
     .subscribe();
 
@@ -246,31 +281,54 @@ export const useCollectiveGAA = () => {
     biofeedback: BiofeedbackMetrics | null,
     shadowEngine: ShadowEngineState | null
   ): void => {
-    // No-op: Do not use presence for high-frequency updates.
-    return;
+    if (!channelRef.current || !userIdRef.current) return;
+
+    const participantState: ParticipantState = {
+      userId: userIdRef.current,
+      displayName: 'Anonymous', // This should be fetched from the profile
+      polarityBalance: shadowEngine?.polarityBalance || 0.5,
+      biofeedback,
+      shadowEngineState: shadowEngine,
+      lastActive: new Date(),
+      lastActivity: new Date(),
+      role: state.isLeader ? 'facilitator' : 'participant',
+      consentLevel: 'participant',
+    };
+
+    channelRef.current.send({
+      type: 'broadcast',
+      event: 'state_update',
+      payload: participantState,
+    });
   };
 
   // Sync polarity protocol across all participants
-  const syncPolarityProtocol = async (protocol: PolarityProtocol): Promise<void> => {
+  const syncPolarityProtocol = async (protocol: Omit<PolarityProtocol, 'timestamp'>): Promise<void> => {
     if (!state.isLeader) {
       console.warn('Only the session leader can sync polarity protocol');
       return;
     }
+
+    const fullProtocol: PolarityProtocol = {
+      ...protocol,
+      timestamp: Date.now() + clockOffsetRef.current,
+    };
 
     // Update local orchestration state
     setState(prev => ({
       ...prev,
       orchestration: {
         ...prev.orchestration,
-        ...protocol as any
+        ...fullProtocol as any
       }
     }));
 
     // Broadcast to all participants via realtime channel
     if (channelRef.current) {
       channelRef.current.send({
-        type: 'polarity_sync',
-        payload: protocol
+        type: 'broadcast',
+        event: 'polarity_sync',
+        payload: fullProtocol
       });
     }
   };
@@ -337,10 +395,30 @@ export const useCollectiveGAA = () => {
     updateParticipantState,
     syncPolarityProtocol,
     simulateParticipant,
+    updateConsentLevel: (level: 'observer' | 'participant' | 'full_integration') => {
+      // This would be a broadcast message to the leader/server
+      console.log(`Setting consent level to: ${level}`);
+    },
     // --- Placeholder for future advanced sync logic ---
     getNetworkTime: () => Date.now() + clockOffsetRef.current,
     getParticipantLatency: (userId: string) => 0, // TODO: Implement latency detection
-    applyPLLDriftCorrection: (leaderTimestamp: number) => { /* NO-OP */ }
+    applyPLLDriftCorrection: (leaderTimestamp: number) => {
+      const networkTime = Date.now() + clockOffsetRef.current;
+      const timeError = networkTime - leaderTimestamp; // in ms
+
+      // PI controller for drift correction
+      const P = 0.0001; // Proportional gain
+      const I = 0.00001; // Integral gain
+
+      // Adjust transport BPM to correct for drift
+      const currentBpm = transport.bpm.value;
+      const adjustment = timeError * P + (timeError * I);
+      const newBpm = currentBpm + adjustment;
+
+      // Clamp BPM to reasonable values
+      const clampedBpm = Math.max(30, Math.min(300, newBpm));
+      transport.bpm.rampTo(clampedBpm, 0.5);
+    }
   };
 };
 

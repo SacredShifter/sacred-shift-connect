@@ -9,6 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { motion } from 'framer-motion';
 import { Volume2, Eye, Shield, Star, Book } from 'lucide-react';
 import * as THREE from 'three';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface AngelicName {
   id: string;
@@ -300,7 +301,12 @@ export default function SigillumDeiAemeth3D({ className }: { className?: string 
 
   const playFrequency = (frequency: number, volume: number) => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextClass();
+      if (!AudioContextClass) {
+        console.error("AudioContext is not supported in this browser.");
+        return;
+      }
+      const audioContext = new AudioContextClass();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       

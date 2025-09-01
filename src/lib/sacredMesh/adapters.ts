@@ -1,3 +1,5 @@
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
+
 export type LivingTransportType = 
   | 'light_pulse'
   | 'frequency_wave' 
@@ -6,7 +8,9 @@ export type LivingTransportType =
   | 'forest_echo'
   | 'ocean_rhythm'
   | 'wind_song'
-  | 'earth_pulse';
+  | 'earth_pulse'
+  | 'web_bluetooth'
+  | 'web_serial';
 
 export interface LivingTransport {
   type: LivingTransportType;
@@ -73,12 +77,15 @@ export class FrequencyWaveAdapter implements LivingTransport {
   private messageCallback?: (packet: Uint8Array) => void;
 
   async available(): Promise<boolean> {
-    return !!(window.AudioContext || (window as any).webkitAudioContext);
+    return !!getAudioContextClass();
   }
 
   async send(packet: Uint8Array): Promise<void> {
     if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextClass();
+      if (AudioContextClass) {
+        this.audioContext = new AudioContextClass();
+      }
     }
     
     // Encode packet as frequency modulation
@@ -200,6 +207,78 @@ export class QuantumFlutterAdapter implements LivingTransport {
   }
 }
 
+// Web Bluetooth adapter for hardware like Polar, Muse
+export class WebBluetoothAdapter implements LivingTransport {
+  type: any = 'web_bluetooth'; // Custom type
+  private messageCallback?: (packet: Uint8Array) => void;
+
+  async available(): Promise<boolean> {
+    return !!(navigator.bluetooth);
+  }
+
+  async send(packet: Uint8Array): Promise<void> {
+    console.log('Sending via Web Bluetooth:', packet);
+    // Implementation for sending data to a connected device
+  }
+
+  onMessage(callback: (packet: Uint8Array) => void): void {
+    this.messageCallback = callback;
+    // Implementation for receiving data from a connected device
+  }
+
+  async disconnect(): Promise<void> {
+    // Implementation for disconnecting from the device
+  }
+
+  async attune(frequency: number): Promise<void> {
+    console.log(`Attuning Web Bluetooth device to ${frequency}Hz`);
+  }
+
+  async harmonize(element: 'earth' | 'water' | 'fire' | 'air'): Promise<void> {
+    console.log(`Harmonizing Web Bluetooth device with ${element}`);
+  }
+
+  async resonate(pattern: string): Promise<void> {
+    console.log(`Resonating Web Bluetooth device with pattern: ${pattern}`);
+  }
+}
+
+// Web Serial adapter for USB HRV sensors
+export class WebSerialAdapter implements LivingTransport {
+  type: any = 'web_serial'; // Custom type
+  private messageCallback?: (packet: Uint8Array) => void;
+
+  async available(): Promise<boolean> {
+    return !!(navigator.serial);
+  }
+
+  async send(packet: Uint8Array): Promise<void> {
+    console.log('Sending via Web Serial:', packet);
+    // Implementation for sending data to a connected device
+  }
+
+  onMessage(callback: (packet: Uint8Array) => void): void {
+    this.messageCallback = callback;
+    // Implementation for receiving data from a connected device
+  }
+
+  async disconnect(): Promise<void> {
+    // Implementation for disconnecting from the device
+  }
+
+  async attune(frequency: number): Promise<void> {
+    console.log(`Attuning Web Serial device to ${frequency}Hz`);
+  }
+
+  async harmonize(element: 'earth' | 'water' | 'fire' | 'air'): Promise<void> {
+    console.log(`Harmonizing Web Serial device with ${element}`);
+  }
+
+  async resonate(pattern: string): Promise<void> {
+    console.log(`Resonating Web Serial device with pattern: ${pattern}`);
+  }
+}
+
 // Adapter factory
 export class LivingAdapterFactory {
   private static adapters = new Map<LivingTransportType, () => LivingTransport>([
@@ -207,6 +286,8 @@ export class LivingAdapterFactory {
     ['frequency_wave', () => new FrequencyWaveAdapter()],
     ['nature_whisper', () => new NatureWhisperAdapter()],
     ['quantum_flutter', () => new QuantumFlutterAdapter()],
+    ['web_bluetooth', () => new WebBluetoothAdapter()],
+    ['web_serial', () => new WebSerialAdapter()],
   ]);
 
   static createAdapter(type: LivingTransportType): LivingTransport {

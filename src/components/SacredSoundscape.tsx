@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Volume2, VolumeX, Waves } from 'lucide-react';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface SacredFrequency {
   hz: number;
@@ -43,10 +44,16 @@ export const SacredSoundscape = ({ autoOpen = false }: { autoOpen?: boolean }) =
   const createSacredTone = async (frequency: number, volume: number = 0.015) => {
     try {
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AudioContextClass = getAudioContextClass();
+        if (AudioContextClass) {
+          audioContextRef.current = new AudioContextClass();
+        }
       }
 
       const audioContext = audioContextRef.current;
+      if (!audioContext) {
+        throw new Error("AudioContext not supported");
+      }
       
       if (audioContext.state === 'suspended') {
         await audioContext.resume();

@@ -40,6 +40,7 @@ describe('ShadowEngine', () => {
   };
 
   const mockBioSignals: BioSignals = {
+    breath: 0,
     hrv: 0.6,
     eegBandRatio: 0.4,
   };
@@ -79,7 +80,7 @@ describe('ShadowEngine', () => {
     const engine = new ShadowEngine(mockPreset);
     const outputs1 = engine.step(0.016, mockCoreFrame, mockBioSignals);
 
-    const bioSignalsWithMoreStress = { hrv: 0.3, eegBandRatio: 0.7 };
+    const bioSignalsWithMoreStress = { breath: 0, hrv: 0.3, eegBandRatio: 0.7 };
     const outputs2 = engine.step(0.016, mockCoreFrame, bioSignalsWithMoreStress);
 
     // Based on the formula, a higher shadowBias (from higher HRV and lower EEG ratio) increases dark weight.
@@ -95,7 +96,7 @@ describe('ShadowEngine', () => {
     const engine = new ShadowEngine(preset);
 
     // With neutral bio-signals, shadowBias should be 0.5
-    const neutralBio: BioSignals = { hrv: 0.5, eegBandRatio: 0.5 };
+    const neutralBio: BioSignals = { breath: 0, hrv: 0.5, eegBandRatio: 0.5 };
 
     // Manual calculation:
     // hrvBias = 0.5, eegBias = 0.5

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLiberationState } from '../context/LiberationContext';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface AudioLayer {
   id: string;
@@ -46,7 +47,11 @@ export const AudioEngine: React.FC = () => {
   const initializeAudio = async () => {
     if (!audioContextRef.current) {
       try {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AudioContextClass = getAudioContextClass();
+        if (!AudioContextClass) {
+          throw new Error("AudioContext not supported");
+        }
+        audioContextRef.current = new AudioContextClass();
         gainNodeRef.current = audioContextRef.current.createGain();
         gainNodeRef.current.connect(audioContextRef.current.destination);
         gainNodeRef.current.gain.value = state.context.comfortSettings.volumeLevel;

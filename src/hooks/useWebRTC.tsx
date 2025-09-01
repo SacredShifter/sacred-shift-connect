@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface WebRTCConnection {
   userId: string;
@@ -111,7 +112,9 @@ export const useWebRTC = ({
       setLocalStream(stream);
       
       // Apply audio processing for consciousness-aware audio
-      const audioContext = new AudioContext();
+      const AudioContextClass = getAudioContextClass();
+      if (!AudioContextClass) return stream;
+      const audioContext = new AudioContextClass();
       const source = audioContext.createMediaStreamSource(stream);
       const filter = audioContext.createBiquadFilter();
       filter.type = 'highpass';
@@ -289,7 +292,9 @@ export const useWebRTC = ({
     
     // This would implement real-time audio processing based on consciousness state
     // For now, we'll adjust the gain and apply basic filters
-    const audioContext = new AudioContext();
+    const AudioContextClass = getAudioContextClass();
+    if (!AudioContextClass || !localStreamRef.current) return;
+    const audioContext = new AudioContextClass();
     const source = audioContext.createMediaStreamSource(localStreamRef.current);
     const gainNode = audioContext.createGain();
     const filter = audioContext.createBiquadFilter();

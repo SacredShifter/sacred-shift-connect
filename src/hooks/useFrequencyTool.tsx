@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface SacredFrequency {
   hz: number;
@@ -27,7 +28,14 @@ export function useFrequencyTool() {
 
   const initializeAudioContext = async () => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextClass();
+      if (AudioContextClass) {
+        audioContextRef.current = new AudioContextClass();
+      }
+    }
+
+    if (!audioContextRef.current) {
+      throw new Error("AudioContext not supported");
     }
     
     if (audioContextRef.current.state === 'suspended') {

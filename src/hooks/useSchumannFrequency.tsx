@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface SchumannFrequency {
   frequency: number;
@@ -58,10 +59,16 @@ export function useSchumannFrequency() {
   const createSchumannTone = useCallback(async (frequency: number, volume: number = 0.01) => {
     try {
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AudioContextClass = getAudioContextClass();
+        if (AudioContextClass) {
+          audioContextRef.current = new AudioContextClass();
+        }
       }
 
       const audioContext = audioContextRef.current;
+      if (!audioContext) {
+        throw new Error("AudioContext not supported");
+      }
       
       if (audioContext.state === 'suspended') {
         await audioContext.resume();
