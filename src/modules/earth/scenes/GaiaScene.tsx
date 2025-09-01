@@ -27,12 +27,11 @@ function Earth({ isBreathing, breathRate, breathingMode, onBreath, sunRef }: {
   const atmosphereRef = useRef<THREE.Mesh>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
 
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://mikltjgbvxrxndtszorb.supabase.co';
-  
+  // Use reliable NASA Earth textures that actually exist
   const [dayTexture, nightTexture, cloudsTexture] = useTexture([
-    `${supabaseUrl}/storage/v1/object/public/sacred-assets/uploads/2k_earth_daymap.jpg`,
-    `${supabaseUrl}/storage/v1/object/public/sacred-assets/uploads/2k_earth_nightmap.jpg`,
-    `${supabaseUrl}/storage/v1/object/public/sacred-assets/uploads/2k_earth_clouds.jpg`,
+    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
+    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_lights_2048.png',
+    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png',
   ]);
 
   useFrame((state) => {
