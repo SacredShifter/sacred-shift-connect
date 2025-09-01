@@ -1,11 +1,34 @@
 import * as Tone from 'tone';
 
+export type AudioProfile = 'high-quality' | 'balanced' | 'low-latency';
+
+const AUDIO_PROFILES = {
+  'high-quality': {
+    waveform: 'sawtooth' as const,
+    filterRolloff: -24 as const,
+    envelope: { attack: 0.2, decay: 0.3, sustain: 0.7, release: 0.8 },
+    spatialPanning: true,
+  },
+  'balanced': {
+    waveform: 'triangle' as const,
+    filterRolloff: -12 as const,
+    envelope: { attack: 0.1, decay: 0.2, sustain: 0.6, release: 0.5 },
+    spatialPanning: true,
+  },
+  'low-latency': {
+    waveform: 'sine' as const,
+    filterRolloff: -12 as const,
+    envelope: { attack: 0.05, decay: 0.1, sustain: 0.8, release: 0.2 },
+    spatialPanning: false,
+  },
+};
+
+
 export interface GeometricOscillatorConfig {
   baseFrequency: number;
   gainLevel: number;
-  waveform: 'sine' | 'triangle' | 'square' | 'sawtooth';
+  profile?: AudioProfile;
   modulationDepth: number;
-  spatialPanning: boolean;
 }
 
 export interface NormalizedGeometry {
@@ -21,10 +44,15 @@ export interface NormalizedGeometry {
   };
 }
 
-const MAX_OSCILLATORS = 32; // Safety limit for Web Audio API performance
+const MAX_OSCILLATORS = 32; // Default max oscillators
 
 export class GeometricOscillator {
   private config: GeometricOscillatorConfig;
+  private _dynamicMaxOscillators: number = MAX_OSCILLATORS;
+  private _lastFrameTime: number = 0;
+  private _frameTimeHistory: number[] = [];
+  private _monitoringHandle: number | null = null;
+
   private oscillators: Map<string, {
     osc: Tone.Oscillator;
     filter: Tone.Filter;
@@ -45,6 +73,9 @@ export class GeometricOscillator {
 
   constructor(audioContext: AudioContext, config: GeometricOscillatorConfig) {
     this.config = config;
+    if (!this.config.profile) {
+      this.config.profile = 'balanced';
+    }
     
     console.log('🎛️ Setting up GAA master audio chain...');
     
@@ -66,6 +97,58 @@ export class GeometricOscillator {
 
     // Pre-warm the node pools to avoid initial audio lag
     this.prewarmPools(5);
+    this._startMonitoring();
+  }
+
+  public destroy(): void {
+    this.stopAll();
+    this.stopMonitoring();
+  }
+
+  private _startMonitoring(): void {
+    if (typeof window === 'undefined' || this._monitoringHandle) return;
+    console.log('📈 Starting performance monitoring...');
+    this._lastFrameTime = performance.now();
+    const monitorLoop = (time: number) => {
+      this._updatePerformanceMetrics(time);
+      this._monitoringHandle = requestAnimationFrame(monitorLoop);
+    };
+    this._monitoringHandle = requestAnimationFrame(monitorLoop);
+  }
+
+  public stopMonitoring(): void {
+    if (this._monitoringHandle) {
+      cancelAnimationFrame(this._monitoringHandle);
+      this._monitoringHandle = null;
+      console.log('📉 Stopped performance monitoring.');
+    }
+  }
+
+  private _updatePerformanceMetrics(time: number): void {
+    const delta = time - this._lastFrameTime;
+    this._lastFrameTime = time;
+
+    // Maintain a history of the last 20 frame times
+    this._frameTimeHistory.push(delta);
+    if (this._frameTimeHistory.length > 20) {
+      this._frameTimeHistory.shift();
+    }
+
+    // Calculate average frame time
+    const avgFrameTime = this._frameTimeHistory.reduce((a, b) => a + b, 0) / this._frameTimeHistory.length;
+
+    // Dynamically adjust oscillator count based on performance
+    if (avgFrameTime > 40) { // Critical load ( < 25 FPS)
+      this._dynamicMaxOscillators = Math.max(8, this._dynamicMaxOscillators - 1);
+      if (this.config.profile !== 'low-latency') {
+        console.warn(`🐢 Performance critically low. Forcing "low-latency" audio profile.`);
+        this.setProfile('low-latency');
+      }
+    } else if (avgFrameTime > 25) { // Strained ( < 40 FPS)
+      this._dynamicMaxOscillators = Math.max(16, this._dynamicMaxOscillators - 1);
+    } else { // Healthy
+      this._dynamicMaxOscillators = Math.min(MAX_OSCILLATORS, this._dynamicMaxOscillators + 1);
+    }
   }
 
   private prewarmPools(size: number): void {
@@ -82,55 +165,52 @@ export class GeometricOscillator {
   /**
    * Create a geometric oscillator based on normalized geometry
    */
-  createGeometricOscillator(
-    geometry: NormalizedGeometry, 
-    id: string, 
-    harmonics: number = 4
-  ): boolean {
-    console.log(`🎼 Creating geometric oscillator: ${id}`);
+  createGeometricOscillator(geometry: NormalizedGeometry, id: string): boolean {
+    console.log(`🎼 Creating geometric oscillator: ${id} with profile: ${this.config.profile}`);
     
     if (this.oscillators.has(id)) {
       console.warn(`🔄 Oscillator with ID ${id} already exists. Stopping and replacing.`);
       this.stopOscillator(id);
     }
 
-    // --- PERFORMANCE GUARDRAIL ---
-    if (this.oscillators.size >= MAX_OSCILLATORS) {
-      console.error(`❌ Oscillator limit reached (${MAX_OSCILLATORS}). Cannot create new oscillator.`);
+    // --- DYNAMIC PERFORMANCE GUARDRAIL ---
+    if (this.oscillators.size >= this._dynamicMaxOscillators) {
+      console.warn(`Dynamic oscillator limit reached (${this._dynamicMaxOscillators}). Cannot create new oscillator.`);
       return false;
     }
 
     try {
-      // Calculate frequency based on geometry
+      const profile = AUDIO_PROFILES[this.config.profile];
       const frequency = this.calculateGeometricFrequency(geometry);
       console.log(`🎵 Calculated frequency for ${id}: ${frequency.toFixed(2)}Hz`);
       
-      // Get nodes from pool or create new ones if pool is empty
       const osc = this.oscPool.pop() || new Tone.Oscillator();
-      osc.set({ frequency, type: this.config.waveform });
+      osc.set({ frequency, type: profile.waveform });
 
       const cutoff = this.calculateFilterFrequency(geometry);
       const filter = this.filterPool.pop() || new Tone.Filter();
-      filter.set({ frequency: cutoff, type: 'lowpass', rolloff: -12 });
+      filter.set({ frequency: cutoff, type: 'lowpass', rolloff: profile.filterRolloff });
 
       const gain = this.gainPool.pop() || new Tone.Gain(0.5);
 
       const envelope = this.envelopePool.pop() || new Tone.AmplitudeEnvelope();
-      envelope.set({ attack: 0.2, decay: 0.3, sustain: 0.7, release: 0.8 });
+      envelope.set(profile.envelope);
 
       const panner = this.pannerPool.pop() || new Tone.Panner3D();
-      panner.set({
-        positionX: geometry.center[0] * 5,
-        positionY: geometry.center[1] * 5,
-        positionZ: geometry.center[2] * 5
-      });
+      if (profile.spatialPanning) {
+        panner.set({
+          positionX: geometry.center[0] * 5,
+          positionY: geometry.center[1] * 5,
+          positionZ: geometry.center[2] * 5
+        });
+      }
 
       // Connect audio chain
       osc.connect(filter);
       filter.connect(envelope);
       envelope.connect(gain);
       
-      if (this.config.spatialPanning) {
+      if (profile.spatialPanning) {
         gain.connect(panner);
         panner.connect(this.masterGain);
       } else {
@@ -159,16 +239,13 @@ export class GeometricOscillator {
   /**
    * Update existing geometric oscillator
    */
-  updateGeometricOscillator(
-    id: string, 
-    geometry: NormalizedGeometry, 
-    harmonics: number = 4
-  ): void {
+  updateGeometricOscillator(id: string, geometry: NormalizedGeometry): void {
     try {
       const components = this.oscillators.get(id);
       if (!components) return;
 
       const { osc, filter, panner } = components;
+      const profile = AUDIO_PROFILES[this.config.profile];
 
       // Smoothly update frequency
       const newFreq = this.calculateGeometricFrequency(geometry);
@@ -179,7 +256,7 @@ export class GeometricOscillator {
       filter.frequency.rampTo(newCutoff, 0.1);
 
       // Update spatial position
-      if (this.config.spatialPanning) {
+      if (profile.spatialPanning) {
         panner.positionX.rampTo(geometry.center[0] * 10, 0.2);
         panner.positionY.rampTo(geometry.center[1] * 10, 0.2);
         panner.positionZ.rampTo(geometry.center[2] * 10, 0.2);
@@ -314,6 +391,22 @@ export class GeometricOscillator {
    */
   getActiveCount(): number {
     return this.oscillators.size;
+  }
+
+  /**
+   * Switches the audio profile on the fly.
+   * This stops all current oscillators and they will be recreated with the new profile settings on the next update.
+   */
+  setProfile(profile: AudioProfile): void {
+    if (this.config.profile === profile) return;
+
+    console.log(`🔄 Switching audio profile to: ${profile}`);
+    this.config.profile = profile;
+
+    // To ensure a clean switch, we stop all current oscillators.
+    // They will be recreated with the new profile settings on the next
+    // update or create call. This prevents mixed-profile states.
+    this.stopAll();
   }
 
   /**
