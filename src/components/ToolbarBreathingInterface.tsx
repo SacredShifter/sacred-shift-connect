@@ -45,7 +45,7 @@ export const ToolbarBreathingInterface = () => {
               opacity: currentPhase === 'inhale' || currentPhase === 'hold1' ? 0.9 : 0.6
             } : { scale: 1, opacity: 0.8 }}
             transition={{ 
-              duration: isActive ? currentPreset[currentPhase] : 2, 
+              duration: isActive ? currentPreset[currentPhase] / 1000 : 2, 
               ease: "easeInOut",
               repeat: isActive ? 0 : Infinity,
               repeatType: "reverse"
@@ -129,7 +129,7 @@ export const ToolbarBreathingInterface = () => {
                         {/* Session Stats */}
                         {isActive && (
                           <div className="text-center text-xs text-muted-foreground space-y-1">
-                            <div>Pattern: {currentPreset.inhale}s in • {currentPreset.hold1}s hold • {currentPreset.exhale}s out • {currentPreset.hold2}s hold</div>
+                            <div>Pattern: {currentPreset.inhale/1000}s in • {currentPreset.hold1/1000}s hold • {currentPreset.exhale/1000}s out • {currentPreset.hold2/1000}s hold</div>
                             <div className="text-emerald-300/80 italic">The Rhythm - not to be feared, but embraced</div>
                           </div>
                         )}
