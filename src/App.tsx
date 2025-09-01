@@ -112,7 +112,6 @@ function App() {
   };
 
   return (
-    <AppProviders>
       <ProductionReadyErrorBoundary>
       <PerformanceMonitor />
       <ErrorBoundary name="Root">
@@ -212,7 +211,6 @@ function App() {
         </TooltipProvider>
       </ErrorBoundary>
     </ProductionReadyErrorBoundary>
-    </AppProviders>
   );
 }
 
