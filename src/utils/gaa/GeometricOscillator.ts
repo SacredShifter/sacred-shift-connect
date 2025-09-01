@@ -36,6 +36,13 @@ export class GeometricOscillator {
   private masterCompressor: Tone.Compressor;
   private masterAnalyser: Tone.Analyser;
 
+  // Node pools for recycling
+  private oscPool: Tone.Oscillator[] = [];
+  private filterPool: Tone.Filter[] = [];
+  private gainPool: Tone.Gain[] = [];
+  private pannerPool: Tone.Panner3D[] = [];
+  private envelopePool: Tone.AmplitudeEnvelope[] = [];
+
   constructor(audioContext: AudioContext, config: GeometricOscillatorConfig) {
     this.config = config;
     
@@ -56,6 +63,20 @@ export class GeometricOscillator {
     this.masterAnalyser.toDestination();
     
     console.log('✅ GAA master audio chain ready');
+
+    // Pre-warm the node pools to avoid initial audio lag
+    this.prewarmPools(5);
+  }
+
+  private prewarmPools(size: number): void {
+    console.log(`🔥 Pre-warming ${size} audio nodes...`);
+    for (let i = 0; i < size; i++) {
+      this.oscPool.push(new Tone.Oscillator());
+      this.filterPool.push(new Tone.Filter());
+      this.gainPool.push(new Tone.Gain());
+      this.pannerPool.push(new Tone.Panner3D());
+      this.envelopePool.push(new Tone.AmplitudeEnvelope());
+    }
   }
 
   /**
@@ -84,27 +105,21 @@ export class GeometricOscillator {
       const frequency = this.calculateGeometricFrequency(geometry);
       console.log(`🎵 Calculated frequency for ${id}: ${frequency.toFixed(2)}Hz`);
       
-      // Create oscillator with harmonic content
-      const osc = new Tone.Oscillator({
-        frequency: frequency,
-        type: this.config.waveform
-      });
+      // Get nodes from pool or create new ones if pool is empty
+      const osc = this.oscPool.pop() || new Tone.Oscillator();
+      osc.set({ frequency, type: this.config.waveform });
 
-      // Create filter based on geometric complexity
       const cutoff = this.calculateFilterFrequency(geometry);
-      const filter = new Tone.Filter(cutoff, 'lowpass', -12);
+      const filter = this.filterPool.pop() || new Tone.Filter();
+      filter.set({ frequency: cutoff, type: 'lowpass', rolloff: -12 });
 
-      // Create gain envelope based on geometry
-      const gain = new Tone.Gain(0.5);
-      const envelope = new Tone.AmplitudeEnvelope({
-        attack: 0.2,
-        decay: 0.3,
-        sustain: 0.7,
-        release: 0.8
-      });
+      const gain = this.gainPool.pop() || new Tone.Gain(0.5);
 
-      // Create 3D panner for spatial positioning
-      const panner = new Tone.Panner3D({
+      const envelope = this.envelopePool.pop() || new Tone.AmplitudeEnvelope();
+      envelope.set({ attack: 0.2, decay: 0.3, sustain: 0.7, release: 0.8 });
+
+      const panner = this.pannerPool.pop() || new Tone.Panner3D();
+      panner.set({
         positionX: geometry.center[0] * 5,
         positionY: geometry.center[1] * 5,
         positionZ: geometry.center[2] * 5
@@ -245,23 +260,29 @@ export class GeometricOscillator {
       // Graceful release
       envelope.triggerRelease();
       
-      // Stop after release time
+      // After release, disconnect and return nodes to the pool
       setTimeout(() => {
         try {
-          osc.stop();
           osc.disconnect();
           filter.disconnect();
           gain.disconnect();
           panner.disconnect();
           envelope.disconnect();
+
+          this.oscPool.push(osc);
+          this.filterPool.push(filter);
+          this.gainPool.push(gain);
+          this.pannerPool.push(panner);
+          this.envelopePool.push(envelope);
           
           this.oscillators.delete(id);
-          console.log(`✅ Oscillator ${id} stopped and cleaned up`);
+          console.log(`✅ Oscillator ${id} stopped and recycled`);
         } catch (error) {
-          console.error(`❌ Error cleaning up oscillator ${id}:`, error);
+          console.error(`❌ Error recycling oscillator ${id}:`, error);
+          // Still remove from active map even if cleanup fails
           this.oscillators.delete(id);
         }
-      }, 900); // Wait for release
+      }, 900); // Wait for envelope release
     } catch (error) {
       console.error(`❌ Error stopping oscillator ${id}:`, error);
       this.oscillators.delete(id);

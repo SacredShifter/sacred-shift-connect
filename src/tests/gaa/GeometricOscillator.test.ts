@@ -8,6 +8,7 @@ vi.mock('tone', () => {
     connect: vi.fn(),
     toDestination: vi.fn(),
     gain: { rampTo: vi.fn() },
+    disconnect: vi.fn(),
   }));
   const Compressor = vi.fn(() => ({
     connect: vi.fn(),
@@ -19,6 +20,7 @@ vi.mock('tone', () => {
     positionY: { rampTo: vi.fn() },
     positionZ: { rampTo: vi.fn() },
     disconnect: vi.fn(),
+    set: vi.fn(),
   }));
   const Oscillator = vi.fn(() => ({
     connect: vi.fn(),
@@ -26,17 +28,20 @@ vi.mock('tone', () => {
     stop: vi.fn(),
     disconnect: vi.fn(),
     frequency: { rampTo: vi.fn() },
+    set: vi.fn(),
   }));
   const Filter = vi.fn(() => ({
     connect: vi.fn(),
     disconnect: vi.fn(),
     frequency: { rampTo: vi.fn() },
+    set: vi.fn(),
   }));
   const AmplitudeEnvelope = vi.fn(() => ({
     connect: vi.fn(),
     triggerAttack: vi.fn(),
     triggerRelease: vi.fn(),
     disconnect: vi.fn(),
+    set: vi.fn(),
   }));
 
   return {
@@ -46,6 +51,10 @@ vi.mock('tone', () => {
     Oscillator,
     Filter,
     AmplitudeEnvelope,
+    Analyser: vi.fn(() => ({
+      toDestination: vi.fn(),
+      connect: vi.fn(),
+    })),
     context: { createAnalyser: vi.fn() },
     Destination: { connect: vi.fn() },
     start: vi.fn().mockResolvedValue(undefined),
@@ -119,6 +128,26 @@ describe('GeometricOscillator', () => {
     // @ts-expect-error - accessing private method for testing
     const freq = geoOsc.calculateGeometricFrequency(specificGeometry);
     expect(freq).toBeCloseTo(150);
+  });
+
+  it('should recycle nodes back into the pool when an oscillator is stopped', () => {
+    vi.useFakeTimers();
+    const audioContext = new MockAudioContext() as unknown as AudioContext;
+    const oscillator = new GeometricOscillator(audioContext, defaultConfig);
+
+    // @ts-expect-error - accessing private property for testing
+    const initialPoolSize = oscillator.oscPool.length;
+
+    oscillator.createGeometricOscillator(mockGeometry, 'test-id-1');
+    // @ts-expect-error - accessing private property for testing
+    expect(oscillator.oscPool.length).toBe(initialPoolSize - 1);
+
+    oscillator.stopOscillator('test-id-1');
+    vi.runAllTimers();
+
+    // @ts-expect-error - accessing private property for testing
+    expect(oscillator.oscPool.length).toBe(initialPoolSize);
+    vi.useRealTimers();
   });
 
   it('should stop an oscillator when stopOscillator is called', () => {

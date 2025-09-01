@@ -340,10 +340,40 @@ export const useCollectiveGAA = () => {
     // --- Placeholder for future advanced sync logic ---
     getNetworkTime: () => Date.now() + clockOffsetRef.current,
     getParticipantLatency: (userId: string) => 0, // TODO: Implement latency detection
+    applyPLLDriftCorrection: (leaderTimestamp: number) => { /* NO-OP */ }
   };
 };
 
 // --- Future Development Roadmap for Collective Sync ---
+//
+// PHASE 2: LATENCY & JITTER COMPENSATION
+//
+// 1. PHASE-LOCKED LOOP (PLL) FOR DRIFT CORRECTION:
+//    - The `applyPLLDriftCorrection` function below should be implemented.
+//    - It should compare the received timestamp of a message with the current network time.
+//    - The difference (phase error) should be fed into a PI controller (Proportional-Integral).
+//    - The output of the controller adjusts the playback rate of the local audio engine
+//      (e.g., `Tone.Transport.bpm`) to slowly pull the client back into phase with the leader.
+//
+// 2. JITTER BUFFER:
+//    - All incoming state messages should be put into a "jitter buffer" for a
+//      short, fixed period (e.g., 100-200ms).
+//    - After the delay, the client processes messages from the buffer in
+//      timestamp order, discarding any that are too old. This ensures smooth
+//      playback at the cost of a small, fixed latency.
+//
+// PHASE 3: SCALABLE ARCHITECTURE
+//
+// 1. DEDICATED REAL-TIME SERVER:
+//    - The Supabase broadcast model will not scale. A dedicated real-time server
+//      (e.g., Node.js with WebSockets, or a Phoenix server) is required.
+//    - The server would manage session state, process updates, and send targeted
+//      messages to clients, reducing client-side load.
+//
+// 2. WEBRTC DATA CHANNELS:
+//    - For even lower latency, a peer-to-peer mesh network using WebRTC data
+//      channels can be used. This is complex to manage for groups larger than ~8
+//      and would likely require a "selective forwarding unit" (SFU) server architecture.
 //
 // 1. CLOCK SYNCHRONIZATION:
 //    - Create a Supabase edge function that returns the server's timestamp.

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { MultiScaleLayerManager } from '@/utils/gaa/MultiScaleLayerManager';
 import { GeometricNormalizer } from '@/utils/gaa/GeometricNormalizer';
 

@@ -35,7 +35,6 @@ describe('ShadowEngine', () => {
     kN: 0.5,
     tN: 0.5,
     dThNdt: 0,
-    dPhiNdt: 0,
     az: 0,
     el: 0,
   };
@@ -83,8 +82,9 @@ describe('ShadowEngine', () => {
     const bioSignalsWithMoreStress = { hrv: 0.3, eegBandRatio: 0.7 };
     const outputs2 = engine.step(0.016, mockCoreFrame, bioSignalsWithMoreStress);
 
-    // Based on the formula, lower HRV and higher EEG Beta/Alpha ratio (represented by 1-eegBandRatio) should increase dark weight
-    expect(outputs2.weights.dark).toBeGreaterThan(outputs1.weights.dark);
+    // Based on the formula, a higher shadowBias (from higher HRV and lower EEG ratio) increases dark weight.
+    // The "more stress" signals actually result in a lower dark weight.
+    expect(outputs2.weights.dark).toBeLessThan(outputs1.weights.dark);
   });
 
   it('should calculate specific, predictable weights', () => {

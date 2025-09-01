@@ -6,6 +6,7 @@ import { SafetySystem, SafetyAlert } from '@/utils/gaa/SafetySystem';
 import { MultiScaleLayerManager } from '@/utils/gaa/MultiScaleLayerManager';
 import { ShadowEngine } from '@/dsp/ShadowEngine';
 import { GaaBiofeedbackSimulator } from '@/utils/biofeedback/GaaBiofeedbackSimulator';
+import { usePhonePulseSensor } from './usePhonePulseSensor';
 
 export interface GAAEngineState {
   isInitialized: boolean;
@@ -13,6 +14,7 @@ export interface GAAEngineState {
   activeOscillators: number;
   safetyAlerts: SafetyAlert[];
   shadowState: ShadowEngineState | null;
+  isRecovering: boolean;
 }
 
 // Default preset
@@ -50,6 +52,7 @@ export const useGAAEngine = () => {
     activeOscillators: 0,
     safetyAlerts: [],
     shadowState: null,
+    isRecovering: false,
   });
 
   // Refs to hold instances of our engine components
@@ -60,6 +63,7 @@ export const useGAAEngine = () => {
   const biofeedbackSimulatorRef = useRef<GaaBiofeedbackSimulator | null>(null);
   const animationFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
+  const phonePulseSensor = usePhonePulseSensor();
 
   // Centralized initialization
   const initializeGAA = useCallback(async () => {
@@ -96,16 +100,17 @@ export const useGAAEngine = () => {
 
   // Main update loop
   const updateLoop = useCallback((time: number) => {
-    if (lastTimeRef.current === 0) {
+    try {
+      if (lastTimeRef.current === 0) {
+        lastTimeRef.current = time;
+        animationFrameRef.current = requestAnimationFrame(updateLoop);
+        return;
+      }
+
+      const deltaTime = (time - lastTimeRef.current) / 1000;
       lastTimeRef.current = time;
-      animationFrameRef.current = requestAnimationFrame(updateLoop);
-      return;
-    }
 
-    const deltaTime = (time - lastTimeRef.current) / 1000;
-    lastTimeRef.current = time;
-
-    const geoOsc = geometricOscillatorRef.current;
+      const geoOsc = geometricOscillatorRef.current;
     const shadowEngine = shadowEngineRef.current;
     const layerManager = multiScaleLayerManagerRef.current;
     const safetySystem = safetySystemRef.current;
@@ -117,8 +122,22 @@ export const useGAAEngine = () => {
     layerManager.updateBreathPhase(deltaTime);
     const geometries = layerManager.generateCompositeGeometry(8); // Manage complexity
 
-    // 2. Get latest bio-signals from the simulator
-    const currentBioSignals = biofeedback.getBioSignals();
+    // 2. Get latest bio-signals from the primary simulator or the phone PPG fallback
+    let currentBioSignals: BioSignals;
+    if (biofeedback.isRunning) {
+      currentBioSignals = biofeedback.getBioSignals();
+    } else if (phonePulseSensor.isSensing) {
+      // Use phone sensor data as a fallback, mapping BPM to an HRV-like value
+      const normalizedBpm = (phonePulseSensor.bpm - 60) / 40; // Normalize 60-100bpm to 0-1
+      currentBioSignals = {
+        hrv: Math.max(0, Math.min(1, 1 - normalizedBpm)) * 100, // Inverse relationship
+        eegBandRatio: 0.5, // Default EEG
+        breath: 0,
+      };
+    } else {
+      // Default placeholder if no biofeedback is active
+      currentBioSignals = { hrv: 50, eegBandRatio: 0.5, breath: 0 };
+    }
 
     // 3. Iterate through geometries and update oscillators
     geometries.forEach((geom, index) => {
@@ -126,7 +145,7 @@ export const useGAAEngine = () => {
 
       const mockCore: GaaCoreFrame = {
         f0: 220, A0: 0.8, fc0: 1200, ThN: 0.5, PhiN: 0.5,
-        kN: geom.radius, tN: 0.5, dThNdt: 0, dPhiNdt: 0,
+        kN: geom.radius, tN: 0.5, dThNdt: 0,
         az: geom.center[0], el: geom.center[1]
       };
 
@@ -157,7 +176,7 @@ export const useGAAEngine = () => {
       // This creates a feedback loop, might need damping
       // geoOsc.setMasterGain(baseGain * corrections.audioReduction);
     }
-    
+
     setState(prev => ({
       ...prev,
       activeOscillators: geoOsc.getActiveCount(),
@@ -165,12 +184,36 @@ export const useGAAEngine = () => {
       safetyAlerts: safetySystem.getSafetyStatus().activeAlerts,
     }));
 
+    // Check for audio context crash
+    const audioContext = Tone.getContext().rawContext;
+    if (audioContext.state === 'closed' || audioContext.state === 'interrupted') {
+      console.error('AudioContext has crashed or been interrupted. Attempting to recover...');
+      stopGAA();
+      setState(prev => ({ ...prev, isRecovering: true }));
+      setTimeout(() => {
+        initializeGAA().then(success => {
+          if (success) {
+            console.log('✅ AudioContext recovered successfully.');
+            setState(prev => ({ ...prev, isRecovering: false }));
+          } else {
+            console.error('❌ Failed to recover AudioContext.');
+          }
+        });
+      }, 3000);
+      return; // Stop the loop
+    }
+
     animationFrameRef.current = requestAnimationFrame(updateLoop);
-  }, [stopGAA]);
+    } catch (error) {
+      console.error('❌ Unhandled error in GAA update loop:', error);
+      stopGAA(); // Stop the engine on any unhandled error
+    }
+  }, [stopGAA, initializeGAA]);
 
   const startGAA = useCallback(async () => {
     if (state.isPlaying) return;
     console.log('🚀 Starting GAA Engine...');
+    console.log('ethos.event: GAASessionStarted'); // Ethos Telemetry
 
     if (!state.isInitialized) {
       const initialized = await initializeGAA();
@@ -186,6 +229,7 @@ export const useGAAEngine = () => {
   const stopGAA = useCallback(() => {
     if (!state.isPlaying) return;
     console.log('⏹️ Stopping GAA Engine');
+    console.log('ethos.event: GAASessionStopped'); // Ethos Telemetry
 
     geometricOscillatorRef.current?.stopAll();
     biofeedbackSimulatorRef.current?.stopSession();
@@ -208,5 +252,6 @@ export const useGAAEngine = () => {
     startGAA,
     stopGAA,
     updatePreset: setPreset,
+    phonePulseSensor, // Expose the whole hook for UI integration
   };
 };
