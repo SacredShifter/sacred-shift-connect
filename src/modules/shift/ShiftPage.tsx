@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Play, Pause } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ShiftCanvas from './scene/ShiftCanvas';
 
 export default function ShiftPage() {
   const navigate = useNavigate();
+  const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <div className="h-full overflow-y-auto bg-gradient-to-br from-background via-background/95 to-primary/5 p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center justify-between gap-4 mb-8">
           <Button
             variant="ghost"
             size="sm"
@@ -20,6 +22,10 @@ export default function ShiftPage() {
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
+          </Button>
+          <Button onClick={() => setIsPlaying(!isPlaying)} size="sm">
+            {isPlaying ? <Pause className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
+            {isPlaying ? 'Pause' : 'Play'}
           </Button>
         </div>
 
@@ -31,19 +37,9 @@ export default function ShiftPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <p className="text-lg text-muted-foreground">
-              Interactive consciousness transformation platform
-            </p>
-            
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-primary-glow animate-pulse"></div>
-              </div>
-              <p className="text-muted-foreground">
-                Shift module is being restored. This provides the core Sacred Shifter 
-                transformation experience with media integration and analytics.
-              </p>
-            </div>
+             <div className="aspect-video bg-background-inset rounded-lg overflow-hidden">
+               <ShiftCanvas isPlaying={isPlaying} />
+             </div>
           </CardContent>
         </Card>
       </div>
