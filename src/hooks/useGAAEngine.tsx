@@ -8,6 +8,7 @@ import { MultiScaleLayerManager } from '@/utils/gaa/MultiScaleLayerManager';
 import { ShadowEngine } from '@/dsp/ShadowEngine';
 import { GaaBiofeedbackSimulator } from '@/utils/biofeedback/GaaBiofeedbackSimulator';
 import { usePhonePulseSensor } from './usePhonePulseSensor';
+import { useAccelerometer } from './useAccelerometer';
 
 export interface GAAEngineState {
   isInitialized: boolean;
@@ -65,6 +66,7 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
   const animationFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
   const phonePulseSensor = usePhonePulseSensor();
+  const accelerometer = useAccelerometer();
 
   // Centralized initialization
   const initializeGAA = useCallback(async () => {
@@ -135,6 +137,14 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
         eegBandRatio: 0.5, // Default EEG
         breath: 0,
       };
+    } else if (accelerometer.isSensing) {
+        // Use accelerometer data as a second fallback
+        const normalizedBpm = (accelerometer.bpm - 60) / 40;
+        currentBioSignals = {
+            hrv: Math.max(0, Math.min(1, 1 - normalizedBpm)) * 100,
+            eegBandRatio: 0.5,
+            breath: 0,
+        };
     } else {
       // Default placeholder if no biofeedback is active
       currentBioSignals = { hrv: 0.5, eegBandRatio: 0.5, breath: 0 };
@@ -233,6 +243,8 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
     }
     
     biofeedbackSimulatorRef.current?.startSession();
+    phonePulseSensor.startSensing();
+    accelerometer.startSensing();
     setState(prev => ({ ...prev, isPlaying: true }));
     lastTimeRef.current = 0;
     animationFrameRef.current = requestAnimationFrame(updateLoop);
@@ -245,6 +257,8 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
 
     geometricOscillatorRef.current?.stopAll();
     biofeedbackSimulatorRef.current?.stopSession();
+    phonePulseSensor.stopSensing();
+    accelerometer.stopSensing();
     cancelAnimationFrame(animationFrameRef.current);
 
     setState(prev => ({ ...prev, isPlaying: false, activeOscillators: 0 }));
@@ -278,5 +292,6 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
     stopGAA,
     updatePreset: setPreset,
     phonePulseSensor, // Expose the whole hook for UI integration
+    accelerometer,
   };
 };

@@ -1,6 +1,7 @@
 import { CosmicStructurePreset, COSMIC_STRUCTURE_PRESETS, getVerifiedPresets } from './CosmicStructurePresets';
 import { ToroidalHelixGeometry } from './ToroidalHelixGeometry';
 import { GeometricOscillator, GeometricOscillatorConfig } from './GeometricOscillator';
+import { sacredStorage } from '@/lib/offline-storage';
 
 export interface PresetLoadResult {
   success: boolean;
@@ -28,36 +29,60 @@ export interface AccessibilityOptions {
 }
 
 export class PresetManager {
+  private _allPresets: CosmicStructurePreset[] = [];
   private activePreset: CosmicStructurePreset | null = null;
   private activeGeometry: ToroidalHelixGeometry | null = null;
   private safetyConstraints: SafetyConstraints;
   private accessibilityOptions: AccessibilityOptions;
+  private isInitialized = false;
 
   constructor() {
-    // Default safety constraints based on medical guidelines
-    this.safetyConstraints = {
-      maxFrequency: 20000, // 20kHz
-      minFrequency: 20,    // 20Hz
-      maxVolume: 0.8,      // 80% max volume
-      maxFlashRate: 3,     // 3Hz max to prevent seizures
-      maxBreathRate: 30,   // 30 BPM max
-      minBreathRate: 4     // 4 BPM min
-    };
+    this.safetyConstraints = { maxFrequency: 20000, minFrequency: 20, maxVolume: 0.8, maxFlashRate: 3, maxBreathRate: 30, minBreathRate: 4 };
+    this.accessibilityOptions = { hearingImpaired: false, visualImpaired: false, cognitiveSimplification: false, motorAccessibility: false, seizureProtection: true };
+  }
 
-    this.accessibilityOptions = {
-      hearingImpaired: false,
-      visualImpaired: false,
-      cognitiveSimplification: false,
-      motorAccessibility: false,
-      seizureProtection: true // Always on by default
-    };
+  async initialize(userId: string): Promise<void> {
+    if (this.isInitialized) return;
+
+    await sacredStorage.initialize(userId);
+
+    // 1. Try to load from cache first
+    const cachedPresets = await sacredStorage.getAll('presets');
+    if (cachedPresets && cachedPresets.length > 0) {
+      this._allPresets = cachedPresets;
+      console.log('[PresetManager] Loaded presets from cache.');
+    } else {
+      // 2. If cache is empty, fetch and populate
+      console.log('[PresetManager] Cache empty, fetching presets...');
+      await this._fetchAndCachePresets();
+    }
+
+    this.isInitialized = true;
+  }
+
+  private async _fetchAndCachePresets(): Promise<void> {
+    // In the future, this would be a network request.
+    // For now, we use the hardcoded presets.
+    const presets = COSMIC_STRUCTURE_PRESETS;
+
+    for (const preset of presets) {
+      // Using 'true' to skip encryption for public, non-sensitive preset data.
+      await sacredStorage.store('presets', preset, true);
+    }
+
+    this._allPresets = presets;
+    console.log(`[PresetManager] Fetched and cached ${presets.length} presets.`);
   }
 
   /**
    * Load a cosmic structure preset with safety verification
    */
   async loadPreset(presetId: string): Promise<PresetLoadResult> {
-    const preset = COSMIC_STRUCTURE_PRESETS.find(p => p.id === presetId);
+    if (!this.isInitialized) {
+        return { success: false, message: 'PresetManager not initialized.' };
+    }
+
+    const preset = this._allPresets.find(p => p.id === presetId);
     
     if (!preset) {
       return {
@@ -222,7 +247,16 @@ export class PresetManager {
    * Get all verified presets suitable for current accessibility settings
    */
   getAccessiblePresets(): CosmicStructurePreset[] {
-    const verified = getVerifiedPresets();
+    if (!this.isInitialized) {
+        console.warn("PresetManager not initialized, returning empty array.");
+        return [];
+    }
+
+    const verified = this._allPresets.filter(p =>
+        p.triLaw.scientificValidity &&
+        p.triLaw.safetyCompliance &&
+        p.triLaw.accessibilityScore >= 75
+    );
     
     // Filter based on accessibility requirements
     return verified.filter(preset => {
