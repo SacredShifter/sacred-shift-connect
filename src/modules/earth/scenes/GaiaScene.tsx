@@ -27,12 +27,15 @@ function Earth({ isBreathing, breathRate, breathingMode, onBreath, sunRef }: {
   const atmosphereRef = useRef<THREE.Mesh>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
 
-  // Use reliable NASA Earth textures that actually exist
-  const [dayTexture, nightTexture, cloudsTexture] = useTexture([
+  // Fixed Earth textures - force reload
+  const earthTextures = [
     'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
-    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_lights_2048.png',
+    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_lights_2048.png', 
     'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png',
-  ]);
+  ];
+  
+  console.log('Loading Earth textures:', earthTextures);
+  const [dayTexture, nightTexture, cloudsTexture] = useTexture(earthTextures);
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
