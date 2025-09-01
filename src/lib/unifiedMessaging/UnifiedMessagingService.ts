@@ -299,7 +299,9 @@ export class UnifiedMessagingService {
         chakra_tag: message.metadata?.chakraTag,
         tone: message.metadata?.tone,
         frequency: message.metadata?.frequency,
-        is_anonymous: message.metadata?.isAnonymous || false
+        is_anonymous: message.metadata?.isAnonymous || false,
+        image_url: message.metadata?.imageUrl,
+        has_image: message.metadata?.hasImage || false
       });
     if (error) throw error;
     return true;

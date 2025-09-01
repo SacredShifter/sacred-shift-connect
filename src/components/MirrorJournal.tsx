@@ -18,7 +18,8 @@ import {
   Clock,
   BookOpen,
   X,
-  Brain
+  Brain,
+  Eye
 } from 'lucide-react';
 import { format } from 'date-fns/format';
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
@@ -27,6 +28,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUnifiedMessaging } from '@/hooks/useUnifiedMessaging';
 import { DreamAnalyzer } from '@/components/DreamAnalyzer';
 import { Slogan } from './ui/Slogan';
+import { SynchronicityMirror } from '@/components/synchronicity/SynchronicityMirror';
 
 const poeticPrompts = [
   "What did your soul whisper today?",
@@ -78,6 +80,7 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
   });
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [showDreamAnalyzer, setShowDreamAnalyzer] = useState(false);
+  const [showSynchronicityMirror, setShowSynchronicityMirror] = useState(false);
 
   const currentPrompt = poeticPrompts[Math.floor(Math.random() * poeticPrompts.length)];
 
@@ -209,7 +212,6 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
 
   return (
     <div className={`min-h-screen bg-transparent ${className}`}>
-      <Slogan variant="watermark" />
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         {/* Header */}
         <motion.div
@@ -217,12 +219,31 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center space-y-2"
         >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Mirror Journal
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Reflect, record, and remember your sacred journey
-          </p>
+          <div className="flex items-center justify-between">
+            <div className="flex-1" />
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Mirror Journal
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Reflect, record, and remember your sacred journey
+              </p>
+            </div>
+            <div className="flex-1 flex justify-end">
+              <Button
+                onClick={() => setShowSynchronicityMirror(prev => !prev)}
+                size="sm"
+                variant="outline"
+                className="border-primary/30 text-primary hover:bg-primary/10"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Mirror
+                {showSynchronicityMirror && (
+                  <Sparkles className="w-4 h-4 ml-2" />
+                )}
+              </Button>
+            </div>
+          </div>
         </motion.div>
 
         {/* Empty State with Onboarding */}
@@ -379,32 +400,44 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
         {entries.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <BookOpen className="w-4 h-4" />
-                {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <BookOpen className="w-4 h-4" />
+              {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+            </div>
+            
+            {/* Action buttons including Mirror */}
+            {!isCreating && !editingId && (
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowSynchronicityMirror(prev => !prev)}
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-3 rounded-full border-primary/30 text-primary hover:bg-primary/10"
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  <span className="text-xs">Mirror</span>
+                  {showSynchronicityMirror && (
+                    <Sparkles className="w-3 h-3 ml-1" />
+                  )}
+                </Button>
+                <Button
+                  onClick={() => setShowDreamAnalyzer(true)}
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-3 rounded-full border-purple-200 text-purple-600 hover:bg-purple-50"
+                >
+                  <Brain className="w-4 h-4 mr-1" />
+                  <span className="text-xs">Dream</span>
+                </Button>
+                <Button
+                  onClick={handleCreateNew}
+                  size="sm"
+                  className="h-8 w-8 rounded-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
-              
-              {/* Add Entry Button - positioned above entries */}
-              {!isCreating && !editingId && (
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => setShowDreamAnalyzer(true)}
-                    size="sm"
-                    variant="outline"
-                    className="h-8 px-3 rounded-full border-purple-200 text-purple-600 hover:bg-purple-50"
-                  >
-                    <Brain className="w-4 h-4 mr-1" />
-                    <span className="text-xs">Dream</span>
-                  </Button>
-                  <Button
-                    onClick={handleCreateNew}
-                    size="sm"
-                    className="h-8 w-8 rounded-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
+            )}
             </div>
             
                    <ScrollArea className="h-[400px] md:h-[600px]">
@@ -506,6 +539,14 @@ export const MirrorJournal: React.FC<MirrorJournalProps> = ({ className }) => {
             onClose={() => setShowDreamAnalyzer(false)}
           />
         )}
+
+        {/* Synchronicity Mirror Component */}
+        <SynchronicityMirror
+          isVisible={showSynchronicityMirror}
+          onToggle={() => setShowSynchronicityMirror(prev => !prev)}
+          journalContent={currentEntry.content || ''}
+          intention={currentEntry.title || ''}
+        />
       </div>
     </div>
   );

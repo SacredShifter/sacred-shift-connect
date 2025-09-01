@@ -7,6 +7,8 @@ export interface SacredMeshMessage {
   ttl: number; // seconds
   hopLimit: number;
   ciphertext?: Uint8Array;
+  resonancePattern?: string;
+  intentionVector?: string;
 }
 
 export interface SacredMeshPacket {
@@ -41,7 +43,12 @@ export enum TransportType {
   MULTIPEER = 'multipeer', // iOS
   WIFI_AWARE = 'wifi_aware', // Android
   BLUETOOTH_LE = 'bluetooth_le',
-  MESHTASTIC = 'meshtastic'
+  MESHTASTIC = 'meshtastic',
+  LIGHT = 'light',
+  FREQUENCY = 'frequency', 
+  NATURE = 'nature',
+  QUANTUM = 'quantum',
+  FILE = 'file'
 }
 
 export interface Transport {
@@ -71,4 +78,30 @@ export interface MeshConfig {
   defaultTtl: number; // seconds
   maxQueueSize: number;
   retryInterval: number; // milliseconds
+  enableLightAdapter?: boolean;
+  enableFrequencyAdapter?: boolean;
+  enableNatureAdapter?: boolean;
+  enableQuantumAdapter?: boolean;
+  meshId?: string;
+}
+
+export interface MeshStatus {
+  initialized: boolean;
+  transports: Record<TransportType, boolean>;
+  activeConnections: number;
+  queue: {
+    size: number;
+    pending: number;
+    oldestAge: number;
+  };
+  lastActivity: Date;
+}
+
+export interface TransportAdapter {
+  type: TransportType;
+  initialize(): Promise<void>;
+  send(message: SacredMeshMessage): Promise<void>;
+  receive(): Promise<SacredMeshMessage | null>;
+  isActive(): boolean;
+  destroy(): void;
 }

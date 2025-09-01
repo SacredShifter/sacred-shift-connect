@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, Sparkles, Star, Zap, CreditCard } from 'lucide-react';
-import { WaitlistModal } from '@/components/WaitlistModal';
+import { Heart, Sparkles, CreditCard } from 'lucide-react';
+
 import { ContactModal } from '@/components/ContactModal';
 import { DonationModal } from '@/components/DonationModal';
 import { useToast } from '@/hooks/use-toast';
 
 const Support: React.FC = () => {
-  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  
   const [contactOpen, setContactOpen] = useState(false);
   const [donationOpen, setDonationOpen] = useState(false);
   const [searchParams] = useSearchParams();
@@ -126,44 +126,6 @@ const Support: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Premium Modules Coming Soon Section */}
-        <Card className="sacred-card border-silence/20 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-silence/5 via-transparent to-pulse/5 pointer-events-none" />
-          <CardHeader>
-            <CardTitle className="text-lg text-foreground flex items-center gap-2">
-              <Star className="h-5 w-5 text-pulse animate-pulse" />
-              🚀 Premium Modules Coming Soon
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 relative z-10">
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Modules like <span className="text-foreground font-medium">Sonic Shifter</span>, 
-                <span className="text-foreground font-medium"> Dreamscape Deep Dive</span>, and 
-                <span className="text-foreground font-medium"> Mirror Journal+</span> are launching soon.
-              </p>
-              
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                They will be part of a modular subscription package for users who want to go deeper into their 
-                transformation journey.
-              </p>
-              
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                <span className="text-foreground font-medium">The free version will always remain free.</span>
-              </p>
-            </div>
-            
-            <div className="pt-2">
-              <Button 
-                onClick={() => setWaitlistOpen(true)}
-                className="w-full md:w-auto h-12 text-base sacred-button bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
-              >
-                <Zap className="mr-2 h-4 w-4" />
-                🌌 Join the Waitlist
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Resonance Footer */}
         <div className="text-center py-8">
@@ -174,7 +136,6 @@ const Support: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
       <ContactModal open={contactOpen} onOpenChange={setContactOpen} />
     </div>
   );

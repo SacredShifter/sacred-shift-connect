@@ -3,7 +3,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, BookOpen } from 'lucide-react'
+import { ChevronDown, BookOpen, Sparkles } from 'lucide-react'
+import { TeachingLayer } from '@/components/TeachingLayer'
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings'
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 const vertexShader = `
   uniform float u_time;
@@ -67,11 +70,14 @@ export default function Vibration(){
   const [freq, setFreq] = useState(440)
   const [amp, setAmp] = useState(0.3)
   const [showInfo, setShowInfo] = useState(false)
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false)
   const audio = useRef<{ ctx: AudioContext, osc: OscillatorNode, gain: GainNode } | null>(null);
 
   useEffect(() => {
     if (!audio.current) {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const AudioContextClass = getAudioContextClass();
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
       osc.connect(gain).connect(ctx.destination)
@@ -94,7 +100,7 @@ export default function Vibration(){
   return (
     <div className="w-screen h-screen relative">
       <Canvas camera={{ position:[0,0,5] }}>
-        <color attach="background" args={["#0b0c10"]} />
+        <color args={["#0b0c10"]} />
         <ambientLight intensity={0.6} />
         <Particles amp={amp} freq={freq} />
       </Canvas>
@@ -124,6 +130,34 @@ export default function Vibration(){
             </motion.div>
         )}
         </AnimatePresence>
+      </div>
+
+      {/* Deeper Knowledge Section - Positioned prominently */}
+      <div className="absolute bottom-4 right-4 w-80">
+        <div className="bg-gradient-to-r from-cyan-500/20 via-teal-500/20 to-emerald-500/20 backdrop-blur-sm border border-cyan-400/30 rounded-xl p-4">
+          <Button
+            onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+            className="w-full bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-700 hover:to-emerald-700 text-white font-semibold py-3 text-lg gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
+            size="lg"
+          >
+            <Sparkles className="w-5 h-5" />
+            {showDeeperKnowledge ? 'Hide' : 'Unlock'} Sacred Wisdom
+            <BookOpen className="w-5 h-5" />
+          </Button>
+          
+          {showDeeperKnowledge && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 max-h-96 overflow-y-auto"
+            >
+              <TeachingLayer
+                content={ALL_MODULE_TEACHINGS.vibration}
+                moduleId="vibration"
+              />
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { useMachine } from '@xstate/react';
 import { collectiveMachine } from './machine';
@@ -7,13 +7,41 @@ import { SceneRouter } from './scenes/SceneRouter';
 import { HUD } from './ui/HUD';
 import { AudioEngine } from './audio/AudioEngine';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useCollectiveGAA } from '@/hooks/useCollectiveGAA';
+import { RemoteAudioPlayer } from '@/components/RemoteAudioPlayer';
+import * as Tone from 'tone';
 
 interface CollectiveCoherenceCircleProps {
   onExit: () => void;
 }
 
+const CollectiveGAAWrapper = ({ onStartAudio }: { onStartAudio: () => void }) => {
+  const { remoteStreams, joinSession, createSession } = useCollectiveGAA(Tone.Transport);
+
+  useEffect(() => {
+    // For demonstration, let's automatically join a session
+    // In a real app, this would be driven by UI events
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session');
+    if (sessionId) {
+      joinSession(sessionId);
+    } else {
+      createSession();
+    }
+  }, [joinSession, createSession]);
+
+  return (
+    <>
+      <SceneRouter />
+      <RemoteAudioPlayer streams={remoteStreams} />
+    </>
+  );
+};
+
+
 export default function CollectiveCoherenceCircle({ onExit }: CollectiveCoherenceCircleProps) {
   const [state, send] = useMachine(collectiveMachine);
+  const { startAudioStreaming } = useCollectiveGAA(Tone.Transport);
 
   return (
     <ErrorBoundary name="CollectiveCoherenceCircle">
@@ -34,10 +62,10 @@ export default function CollectiveCoherenceCircle({ onExit }: CollectiveCoherenc
               powerPreference: 'high-performance'
             }}
           >
-            <SceneRouter />
+            <CollectiveGAAWrapper onStartAudio={startAudioStreaming} />
           </Canvas>
           
-          <HUD />
+          <HUD onStartAudio={startAudioStreaming} />
           <AudioEngine />
         </div>
       </CollectiveProvider>

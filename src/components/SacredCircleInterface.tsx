@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Users, Settings, UserPlus, Hash, ArrowLeft, Crown, Shield, BookOpen, Maximize2, Minimize2, Minus, Heart, Brain, MessageSquare, Activity, Filter, Sparkles, Vote } from 'lucide-react';
+import { Send, Users, Settings, UserPlus, Hash, ArrowLeft, Crown, Shield, BookOpen, Maximize2, Minimize2, Minus, Heart, Brain, MessageSquare, Activity, Filter, Sparkles, Vote, Image, Smile, Paperclip, Camera, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -66,6 +66,10 @@ export const SacredCircleInterface = ({
   const [filteredMessages, setFilteredMessages] = useState<any[]>([]);
   const [internalMaximized, setInternalMaximized] = useState(false);
   const [internalMinimized, setInternalMinimized] = useState(false);
+  const [showMediaOptions, setShowMediaOptions] = useState(false);
+  const [showSigilSelector, setShowSigilSelector] = useState(false);
+  const [selectedSigils, setSelectedSigils] = useState<string[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -195,10 +199,10 @@ export const SacredCircleInterface = ({
   const handleSendMessage = async () => {
     const trimmed = newMessage.trim();
 
-    if (!trimmed) {
+    if (!trimmed && attachedFiles.length === 0) {
       toast({
         title: "Nothing to send",
-        description: "Please enter a message.",
+        description: "Please enter a message or attach an image.",
         variant: "destructive",
       });
       return;
@@ -227,11 +231,15 @@ export const SacredCircleInterface = ({
         chakraTag: messageMode === 'sacred' ? 'heart' : messageMode === 'quantum' ? 'third_eye' : 'heart',
         tone: messageMode === 'sacred' ? 'sacred' : messageMode === 'quantum' ? 'quantum' : 'harmonious',
         circleId,
+        attachedFiles,
+        selectedSigils,
         messageMode // Add mode to metadata for special handling
       };
 
-      await sendMessage(trimmed, 'circle', messageOptions);
+      await sendMessage(trimmed || '', 'circle', messageOptions);
       setNewMessage('');
+      setAttachedFiles([]);
+      setSelectedSigils([]);
       inputRef.current?.focus();
 
       const modeText = messageMode === 'sacred' ? 'sacred' : messageMode === 'quantum' ? 'quantum' : '';
@@ -275,6 +283,32 @@ export const SacredCircleInterface = ({
       crown: 'from-purple-400 to-purple-600',
     };
     return colors[chakraTag as keyof typeof colors] || 'from-primary to-primary/80';
+  };
+
+  // Sacred sigils and symbols
+  const sacredSigils = [
+    '☽', '☾', '☯', '🔯', '✡', '⚡', '🌟', '✨', '🔮', '💫', 
+    '🧿', '☀', '🌙', '⭐', '🌠', '🔥', '💎', '🗿', '🌺', '🍀',
+    '🦋', '🕊', '🌈', '🌀', '💜', '💙', '💚', '❤', '🤍', '🖤'
+  ];
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      setAttachedFiles(Array.from(files));
+      toast({
+        title: "Images attached",
+        description: `${files.length} file(s) ready to share`,
+      });
+    }
+  };
+
+  const handleSigilSelect = (sigil: string) => {
+    if (selectedSigils.includes(sigil)) {
+      setSelectedSigils(selectedSigils.filter(s => s !== sigil));
+    } else if (selectedSigils.length < 3) {
+      setSelectedSigils([...selectedSigils, sigil]);
+    }
   };
 
   // Mock members data (would come from API in real app)
@@ -520,39 +554,55 @@ export const SacredCircleInterface = ({
                                 </div>
                               )}
                               
-                              <div
-                                className={cn(
-                                  "px-3 py-2 rounded-2xl relative",
-                                  isOwnMessage
-                                    ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md"
-                                    : "bg-muted rounded-bl-md",
-                                  "animate-fade-in"
-                                )}
-                              >
-                                <p className="text-sm whitespace-pre-wrap break-words">
-                                  {message.content}
-                                </p>
-                                
-                                <div className={cn(
-                                  "flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity",
-                                  isOwnMessage ? "justify-end" : "justify-start"
-                                )}>
-                                  <span className={cn(
-                                    "text-xs",
-                                    isOwnMessage ? "text-primary-foreground/70" : "text-muted-foreground"
-                                  )}>
-                                    {formatTime(message.created_at)}
-                                  </span>
-                                  {message.tone && (
-                                    <span className={cn(
-                                      "text-xs opacity-75",
-                                      isOwnMessage ? "text-primary-foreground/70" : "text-muted-foreground"
-                                    )}>
-                                      • {message.tone}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
+                               <div
+                                 className={cn(
+                                   "px-3 py-2 rounded-2xl relative",
+                                   isOwnMessage
+                                     ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md"
+                                     : "bg-muted rounded-bl-md",
+                                   "animate-fade-in"
+                                 )}
+                               >
+                                 {/* Image Display */}
+                                 {message.has_image && message.image_url && (
+                                   <div className="mb-2">
+                                     <img 
+                                       src={message.image_url} 
+                                       alt="Shared image"
+                                       className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                       onClick={() => window.open(message.image_url, '_blank')}
+                                       style={{ maxHeight: '300px' }}
+                                     />
+                                   </div>
+                                 )}
+                                 
+                                 {/* Text Content */}
+                                 {message.content && (
+                                   <p className="text-sm whitespace-pre-wrap break-words">
+                                     {message.content}
+                                   </p>
+                                 )}
+                                 
+                                 <div className={cn(
+                                   "flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity",
+                                   isOwnMessage ? "justify-end" : "justify-start"
+                                 )}>
+                                   <span className={cn(
+                                     "text-xs",
+                                     isOwnMessage ? "text-primary-foreground/70" : "text-muted-foreground"
+                                   )}>
+                                     {formatTime(message.created_at)}
+                                   </span>
+                                   {message.tone && (
+                                     <span className={cn(
+                                       "text-xs opacity-75",
+                                       isOwnMessage ? "text-primary-foreground/70" : "text-muted-foreground"
+                                     )}>
+                                       • {message.tone}
+                                     </span>
+                                   )}
+                                 </div>
+                               </div>
                             </div>
 
                             {isOwnMessage && <div className="w-8 flex-shrink-0"></div>}
@@ -575,41 +625,170 @@ export const SacredCircleInterface = ({
                 )}
               </ScrollArea>
 
-              {/* Input */}
+              {/* Enhanced Social Media Style Input */}
               <div className="p-4 border-t bg-gradient-to-r from-muted/30 to-accent/10">
-                  <div className="flex items-end gap-2">
-                    <div className="flex-1 relative">
-                      <Input
-                        ref={inputRef}
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={handleKeyPress}
-                        placeholder={
-                          messageMode === 'sacred' ? "Share your sacred message..." :
-                          messageMode === 'quantum' ? "Express your quantum awareness..." :
-                          "Shift what you share, make it Sacred."
-                        }
-                        className="pr-10 resize-none bg-background/80 border-muted"
-                        disabled={!user}
-                      />
+                {/* Attached Files Preview */}
+                {attachedFiles.length > 0 && (
+                  <div className="mb-3 p-3 bg-background/50 rounded-lg border">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Attached Files ({attachedFiles.length})</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setAttachedFiles([])}
+                        className="h-6 px-2 text-xs"
+                      >
+                        Clear All
+                      </Button>
                     </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {attachedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-xs">
+                          <Image className="h-3 w-3" />
+                          <span className="truncate">{file.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                    <Button 
-                      onClick={handleSendMessage}
-                      disabled={!newMessage.trim() || !user || !circleId}
-                      size="sm" 
-                      className={cn(
-                        "h-9 w-9 p-0",
-                        messageMode === 'sacred' ? "bg-gradient-to-br from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600" :
-                        messageMode === 'quantum' ? "bg-gradient-to-br from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600" :
-                        "bg-gradient-to-br from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
-                      )}
+                {/* Selected Sigils Preview */}
+                {selectedSigils.length > 0 && (
+                  <div className="mb-3 p-3 bg-background/50 rounded-lg border">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Sacred Symbols</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setSelectedSigils([])}
+                        className="h-6 px-2 text-xs"
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      {selectedSigils.map((sigil, index) => (
+                        <span key={index} className="text-xl">{sigil}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sigil Selector */}
+                {showSigilSelector && (
+                  <div className="mb-3 p-3 bg-background/50 rounded-lg border max-h-32 overflow-y-auto">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Choose Sacred Symbols (max 3)</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setShowSigilSelector(false)}
+                        className="h-6 px-2 text-xs"
+                      >
+                        Done
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-10 gap-1">
+                      {sacredSigils.map((sigil, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSigilSelect(sigil)}
+                          className={cn(
+                            "text-lg p-1 rounded hover:bg-accent transition-colors",
+                            selectedSigils.includes(sigil) && "bg-primary text-primary-foreground"
+                          )}
+                        >
+                          {sigil}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Main Input Area */}
+                <div className="flex items-end gap-2">
+                  {/* Media Options */}
+                  <div className="flex flex-col gap-1">
+                    <input
+                      type="file"
+                      id="image-upload"
+                      accept="image/*,video/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => document.getElementById('image-upload')?.click()}
+                      className="h-8 w-8 p-0"
+                      title="Attach images or videos"
                     >
-                      {messageMode === 'sacred' ? <Heart className="h-4 w-4" /> :
-                       messageMode === 'quantum' ? <Brain className="h-4 w-4" /> :
-                       <Send className="h-4 w-4" />}
+                      <Image className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowSigilSelector(!showSigilSelector)}
+                      className="h-8 w-8 p-0"
+                      title="Add sacred symbols"
+                    >
+                      <Sparkles className="h-4 w-4" />
                     </Button>
                   </div>
+
+                  {/* Text Input */}
+                  <div className="flex-1 relative">
+                    <Input
+                      ref={inputRef}
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={handleKeyPress}
+                      placeholder={
+                        messageMode === 'sacred' ? "Share your sacred message with images & symbols..." :
+                        messageMode === 'quantum' ? "Express your quantum awareness through media..." :
+                        "Create a sacred post with text, images, and symbols..."
+                      }
+                      className="pr-10 resize-none bg-background/80 border-muted min-h-[40px]"
+                      disabled={!user}
+                    />
+                  </div>
+
+                   {/* Send Button */}
+                   <Button 
+                     onClick={handleSendMessage}
+                     disabled={(!newMessage.trim() && attachedFiles.length === 0) || !user || !circleId}
+                     size="sm" 
+                     className={cn(
+                       "h-9 w-9 p-0",
+                       messageMode === 'sacred' ? "bg-gradient-to-br from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600" :
+                       messageMode === 'quantum' ? "bg-gradient-to-br from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600" :
+                       "bg-gradient-to-br from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+                     )}
+                   >
+                     {messageMode === 'sacred' ? <Heart className="h-4 w-4" /> :
+                      messageMode === 'quantum' ? <Brain className="h-4 w-4" /> :
+                      <Send className="h-4 w-4" />}
+                   </Button>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>Shift+Enter for new line</span>
+                    {selectedSigils.length > 0 && (
+                      <span>• {selectedSigils.length}/3 symbols</span>
+                    )}
+                    {attachedFiles.length > 0 && (
+                      <span>• {attachedFiles.length} files</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Badge variant="outline" className="text-xs">
+                      {messageMode} mode
+                    </Badge>
+                  </div>
+                </div>
               </div>
             </TabsContent>
 

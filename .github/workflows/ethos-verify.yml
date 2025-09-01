@@ -1,0 +1,73 @@
+name: Ethos Verification
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  ethos-verify:
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g ajv-cli
+          
+      - name: Validate ethos_review.json exists
+        run: |
+          if [ ! -f "ethos_review.json" ]; then
+            echo "❌ ethos_review.json required for ethos verification"
+            echo "Create this file using the template in .github/pull_request_template.md"
+            exit 1
+          fi
+          
+      - name: Validate ethos review schema
+        run: |
+          ajv validate -s ethos.schema.json -d ethos_review.json
+          
+      - name: Run Truth Anchor linter
+        run: npm run ethos:hedge
+        
+      - name: Run Pattern Specification tests
+        run: npm run test:patterns
+        
+      - name: Run Data Minimization checks
+        run: npm run test:data-privacy
+        
+      - name: Validate accessibility compliance
+        run: npm run test:a11y
+        
+      - name: Check performance budgets
+        run: npm run build && npm run test:performance
+        
+      - name: Compute ethos score and validate gates
+        run: node scripts/ethos-score.js
+        
+      - name: Generate ethos verification report
+        run: node scripts/ethos-report.js >> $GITHUB_STEP_SUMMARY
+        
+      - name: Comment ethos status on PR
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const ethosReview = JSON.parse(fs.readFileSync('ethos_review.json', 'utf8'));
+            const report = fs.readFileSync('ethos-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🔱 Ethos Verification Report\n\n${report}`
+            });

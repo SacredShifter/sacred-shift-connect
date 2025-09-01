@@ -108,21 +108,12 @@ export const Expansion = forwardRef<ExpansionHandles, {}>((props, ref) => {
       <ambientLight intensity={0.3} color="#87CEEB" />
       <directionalLight position={[10, 10, 5]} intensity={0.4} color="#FFF8DC" />
       
-      <points ref={starsRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            array={starfield.positions}
-            count={2000}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            array={starfield.colors}
-            count={2000}
-            itemSize={3}
-          />
-        </bufferGeometry>
+      <points ref={starsRef} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(starfield.positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(starfield.colors, 3));
+        return geo;
+      }, [starfield.positions, starfield.colors])}>
         <pointsMaterial
           size={0.8}
           transparent

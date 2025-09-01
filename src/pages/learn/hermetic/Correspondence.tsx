@@ -4,7 +4,9 @@ import { OrbitControls, Html, Line, PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, BookOpen } from 'lucide-react'
+import { ChevronDown, BookOpen, Sparkles } from 'lucide-react'
+import { TeachingLayer } from '@/components/TeachingLayer'
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings'
 
 const PhiSpiral = () => {
   const points = useMemo(() => {
@@ -84,11 +86,12 @@ export default function Correspondence() {
   const [showPhi, setShowPhi] = useState(false)
   const [showBranching, setShowBranching] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false)
 
   return (
     <div className="w-screen h-screen relative">
       <Canvas>
-        <color attach="background" args={["#0b0c10"]} />
+        <color args={["#0b0c10"]} />
         <ambientLight intensity={0.6} />
         <Scene progress={progress} showPhi={showPhi} showBranching={showBranching} />
       </Canvas>
@@ -124,6 +127,34 @@ export default function Correspondence() {
             </motion.div>
         )}
         </AnimatePresence>
+      </div>
+
+      {/* Deeper Knowledge Section - Positioned prominently */}
+      <div className="absolute bottom-4 right-4 w-96">
+        <div className="bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 backdrop-blur-sm border border-emerald-400/30 rounded-xl p-4">
+          <Button
+            onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-3 text-lg gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
+            size="lg"
+          >
+            <Sparkles className="w-5 h-5" />
+            {showDeeperKnowledge ? 'Hide' : 'Unlock'} Sacred Wisdom
+            <BookOpen className="w-5 h-5" />
+          </Button>
+          
+          {showDeeperKnowledge && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 max-h-96 overflow-y-auto"
+            >
+              <TeachingLayer
+                content={ALL_MODULE_TEACHINGS.correspondence}
+                moduleId="correspondence"
+              />
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   )

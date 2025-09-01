@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ReactMarkdown from 'react-markdown';
+import { useToast } from '@/hooks/use-toast';
 
 // Sacred Collective Archetypal Categories
 const COLLECTIVE_ARCHETYPAL_CATEGORIES = {
@@ -44,6 +47,8 @@ export function CollectiveAkashicEntryModal({ isOpen, onClose, onSubmit, initial
   
   const [tagInput, setTagInput] = useState('');
   const [resonanceDescription, setResonanceDescription] = useState('');
+  const [isRestructuring, setIsRestructuring] = useState(false);
+  const { toast } = useToast();
 
   // Update resonance description based on rating
   const updateResonanceDescription = (rating: number) => {
@@ -122,6 +127,43 @@ export function CollectiveAkashicEntryModal({ isOpen, onClose, onSubmit, initial
   const handleResonanceChange = (value: number[]) => {
     setFormData(prev => ({ ...prev, resonance_rating: value }));
     updateResonanceDescription(value[0]);
+  };
+
+  const restructureText = async () => {
+    if (!formData.content.trim()) return;
+    
+    setIsRestructuring(true);
+    try {
+      const response = await fetch('/api/restructure-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: formData.content })
+      });
+      
+      if (response.ok) {
+        const { restructuredText } = await response.json();
+        setFormData(prev => ({ ...prev, content: restructuredText }));
+        toast({
+          title: "Text Restructured",
+          description: "Your content has been enhanced with Sacred Shifter formatting",
+        });
+      } else {
+        toast({
+          title: "Restructuring Failed", 
+          description: "Could not enhance the text at this time",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error restructuring text:', error);
+      toast({
+        title: "Restructuring Error",
+        description: "An error occurred while enhancing the text",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRestructuring(false);
+    }
   };
 
   const selectedCategory = COLLECTIVE_ARCHETYPAL_CATEGORIES[formData.entry_type] || COLLECTIVE_ARCHETYPAL_CATEGORIES['Consciousness Threads'];
@@ -221,21 +263,58 @@ export function CollectiveAkashicEntryModal({ isOpen, onClose, onSubmit, initial
             </div>
           </div>
 
-          {/* Sacred Content */}
+          {/* Sacred Content with Tabs */}
           <div className="space-y-2">
             <Label htmlFor="content" className="text-sm font-medium flex items-center gap-2">
               <Sun className="h-4 w-4" />
               Sacred Wisdom Content
             </Label>
-            <Textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="Share the wisdom that wishes to flow through you to the collective..."
-              rows={8}
-              className="bg-background/50 resize-none"
-              required
-            />
+            
+            <Tabs defaultValue="edit" className="w-full">
+              <div className="flex justify-between items-center mb-3">
+                <TabsList>
+                  <TabsTrigger value="edit">Edit</TabsTrigger>
+                  <TabsTrigger value="preview">Preview</TabsTrigger>
+                </TabsList>
+                <Button
+                  type="button"
+                  onClick={restructureText}
+                  disabled={isRestructuring || !formData.content.trim()}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {isRestructuring ? 'Restructuring...' : 'Restructure Text'}
+                </Button>
+              </div>
+              
+              <TabsContent value="edit" className="space-y-0">
+                <Textarea
+                  id="content"
+                  value={formData.content}
+                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                  placeholder="Share the wisdom that wishes to flow through you to the collective..."
+                  rows={8}
+                  className="bg-background/50 resize-none"
+                  required
+                />
+              </TabsContent>
+              
+              <TabsContent value="preview" className="space-y-0">
+                <div className="border rounded-md p-4 bg-background/50 min-h-[200px] max-h-[300px] overflow-y-auto">
+                  {formData.content.trim() ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown>
+                        {formData.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground italic">Preview will appear here as you type...</p>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
 
           {/* Truth Resonance Rating */}

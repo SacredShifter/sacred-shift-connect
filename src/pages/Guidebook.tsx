@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import { 
   Scroll, 
   Star, 
@@ -19,8 +20,16 @@ import {
   Brain,
   Sparkles,
   Wifi,
-  Shield
+  Shield,
+  Video,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  Waves
 } from 'lucide-react';
+import { TeachingLayer } from '@/components/TeachingLayer';
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
+import { GAAGuidebookSection } from '@/components/gaa/GAAGuidebookSection';
 
 const sections = [
   {
@@ -32,6 +41,19 @@ const sections = [
       "Bridging ancient wisdom with quantum consciousness",
       "Setting intentions for your transformation journey",
       "Creating your sacred digital space"
+    ]
+  },
+  {
+    title: "Core Platform Features",
+    icon: Zap,
+    topics: [
+      "Home Dashboard: Central hub with frequency tiles and quick access to all features",
+      "Sacred Social Feed: Share posts, images, videos, and consciousness insights with the community",
+      "Video & Voice Calling: WebRTC-powered calls with binaural beats integration",
+      "Messages: Private conversations with Sacred Mesh encrypted communication",
+      "Profile Management: Customize your spiritual identity and track consciousness evolution",
+      "Settings: Configure notifications, themes, privacy, and spiritual preferences",
+      "Real-time Synchronization: All data synced across devices with Supabase backend"
     ]
   },
   {
@@ -49,62 +71,89 @@ const sections = [
     ]
   },
   {
-    title: "Sacred Geometry & Symbols",
+    title: "3D Learning & Sacred Geometry",
     icon: Circle,
     topics: [
-      "Using the Flower of Life for meditation and manifestation",
-      "Metatron's Cube as a tool for consciousness expansion", 
-      "Understanding the Golden Ratio in nature and consciousness",
-      "Aligning with chakra frequencies through geometry",
-      "Activating sacred portals through geometric visualization"
+      "Interactive 3D Sacred Geometry library with Flower of Life, Metatron's Cube, and more",
+      "Immersive Tree of Life exploration with Sephiroth navigation and Kabbalistic wisdom",
+      "Hermetic Principles visualization with cause-and-effect consciousness mapping",
+      "Chakra Learning modules with 3D energy visualization and frequency alignment",
+      "Breath of Source meditation spaces with synchronized binaural beats and healing frequencies",
+      "Platonic Solids exploration for understanding universal geometric principles",
+      "WebGL-powered experiences optimized for mobile and desktop consciousness work",
+      "Audio integration with Tone.js for spatial sound design and frequency healing"
     ]
   },
   {
-    title: "Journal & Dream Work",
+    title: "Sacred Journal & Consciousness Tracking",
     icon: Eye,
     topics: [
-      "How to use Mirror Journal for shadow work and integration",
-      "Working with Aura AI for dream analysis and interpretation",
-      "Free association techniques for accessing the unconscious",
-      "Recognizing archetypal patterns in your dreams and experiences",
-      "Mapping consciousness shifts through journaling"
+      "Mirror Journal: Digital journaling with AI-powered insights and pattern recognition",
+      "Dream analysis and interpretation with Aura AI consciousness mapping",
+      "Mood tracking with sacred geometry visualizations and frequency alignment",
+      "Free association writing techniques for accessing deeper consciousness layers",
+      "Recognizing archetypal patterns in dreams, synchronicities, and daily experiences",
+      "Timeline view of your spiritual evolution and consciousness shifts over time",
+      "Integration with meditation tracking and biometric data for holistic awareness",
+      "Export and backup capabilities for long-term spiritual development records"
+    ]
+  },
+  {
+    title: "Meditation & Consciousness Practices",
+    icon: Sparkles,
+    topics: [
+      "Individual meditation sessions with guided practices and timer functionality",
+      "Collective consciousness expansion through synchronized group meditation sessions",
+      "Integration with Sacred Grove paths for deepening meditation experiences",
+      "Binaural beats and healing frequency integration for enhanced consciousness states",
+      "Sacred geometry meditation with visual focus points and geometric breathing patterns",
+      "Breath work practices synchronized with sacred mathematics and golden ratio timing",
+      "Progress tracking for meditation consistency and consciousness evolution metrics",
+      "Community meditation scheduling and group consciousness experiments",
+      "Integration with 3D learning modules for immersive meditative experiences"
     ]
   },
   {
     title: "Sacred Circles",
     icon: Infinity,
     topics: [
-      "Creating and maintaining energetic boundaries in digital space",
-      "Understanding circle protocols for respectful engagement",
-      "Recognizing and working with energy resonance patterns",
-      "Participating in group consciousness experiments",
-      "Best practices for digital ceremonial and ritual work"
+      "Creating and joining circles for deep community engagement and consciousness evolution",
+      "Circle creation with custom themes, descriptions, and member management",
+      "Real-time messaging within circles with encryption and privacy protection",
+      "Circle analytics to track engagement, resonance, and collective growth patterns",
+      "Understanding circle protocols for respectful and transformational engagement",
+      "Video calls and voice communication within circle spaces",
+      "Sacred ritual planning and ceremony coordination tools",
+      "Energy resonance tracking between circle members and collective consciousness work"
     ]
   },
   {
-    title: "Personal Codex",
+    title: "Personal Codex (Akashic Constellation)",
     icon: Heart,
     topics: [
-      "How to track and measure frequency shifts in your consciousness",
-      "Recognizing synchronicities and their deeper meanings", 
-      "Calibrating your truth resonance through practice",
-      "Understanding harmonic alignment with others",
-      "Working with quantum field interactions in daily life"
+      "Personal consciousness tracking with frequency shift visualization and sacred metrics",
+      "Synchronicity logging and pattern recognition for meaningful coincidence mapping",
+      "Truth resonance calibration through interactive decision-making exercises",
+      "Harmonic alignment assessment with other consciousness signatures and circle members",
+      "Quantum field interaction tracking for daily spiritual practice integration",
+      "Archetypal activation mapping with Jungian psychology and consciousness evolution",
+      "Personal sacred symbol creation and energetic signature development",
+      "Integration with journal entries for holistic spiritual development tracking"
     ]
   },
   {
-    title: "Collective Codex",
+    title: "Collective Codex (Registry of Resonance)",
     icon: Star,
     topics: [
-      "Accessing the living repository of ancient wisdom and sacred texts",
-      "Understanding the intersection of quantum physics and consciousness",
-      "Exploring metaphysical principles across cultures and traditions",
-      "Scientific research on consciousness, meditation, and spiritual phenomena",
-      "Sacred geometry patterns found in nature and cosmos",
-      "Archetypal wisdom from world mythology and depth psychology",
-      "Current discoveries in neuroscience and consciousness research",
-      "Contributing verified insights and knowledge to the collective",
-      "Navigating the community-verified wisdom database"
+      "Community-powered wisdom database with verified insights and sacred knowledge",
+      "Ancient wisdom integration from world traditions, sacred texts, and mystery schools",
+      "Quantum physics and consciousness research with scientific validation and spiritual integration",
+      "Metaphysical principles exploration across cultures, traditions, and time periods",
+      "Interactive 3D visualization of consciousness research, meditation studies, and spiritual phenomena",
+      "Sacred geometry pattern library found in nature, cosmos, and consciousness structures",
+      "Archetypal wisdom from world mythology, depth psychology, and collective unconscious mapping",
+      "Community contribution system for sharing verified insights and consciousness discoveries",
+      "Advanced search and filtering for finding relevant wisdom based on your spiritual journey"
     ]
   },
   {
@@ -135,19 +184,64 @@ const sections = [
     ]
   },
   {
-    title: "Advanced Practices",
-    icon: Zap,
+    title: "YouTube Library & Media",
+    icon: Video,
     topics: [
-      "Techniques for bridging different states of consciousness",
-      "Developing multidimensional awareness and perception",
-      "Integrating sacred technology with spiritual practice",
-      "Participating in collective field harmonization experiments",
-      "Understanding the evolution of human consciousness"
+      "Curated YouTube library with consciousness, spirituality, and sacred geometry content",
+      "Personal video library management with favorites, playlists, and consciousness categories",
+      "Integration with meditation practices and 3D learning modules for comprehensive education",
+      "Community-recommended videos for collective learning and wisdom sharing",
+      "Video recording and sharing within the Sacred Shifter platform for personal documentation",
+      "Live streaming capabilities for circle gatherings and community consciousness events"
+    ]
+  },
+  {
+    title: "AI-Powered Features",
+    icon: Brain,
+    topics: [
+      "Aura AI: Personal consciousness guide for dream analysis, journal insights, and spiritual evolution",
+      "AI-powered meditation recommendations based on consciousness state and spiritual needs",
+      "Intelligent content curation for personalized learning paths and wisdom discovery",
+      "Natural language processing for consciousness pattern recognition in journaling",
+      "Predictive wisdom algorithms for optimal spiritual practice timing and synchronicity awareness",
+      "AI-assisted circle matching based on resonance patterns and consciousness compatibility"
+    ]
+  },
+  {
+    title: "GAA Engine (Geometrically Aligned Audio)",
+    icon: Waves,
+    topics: [
+      "Understanding GAA: Advanced consciousness harmonization technology using sacred geometry and precise frequencies",
+      "Deep5 Archetypes: Moon XVIII (shadow work), Tower XVI (breakthrough), Devil XV (liberation), Death XIII (transformation), Sun XIX (illumination)",
+      "Tarot Tradition Variants: Marseille (c.1650-1760), RWS (1909), Thoth (1969), Etteilla (1788) with unique frequencies and phases", 
+      "Polarity Protocol: Balancing light and dark channels with harmonic and chaotic resonance modes",
+      "Cosmic Visualization V2: Real-time 3D representation with firmament sphere and shadow dome integration",
+      "Embodied Biofeedback: HRV monitoring, breathing rate tracking, EEG alpha/theta integration, skin conductance",
+      "Orchestra Sync: Collective consciousness sessions with real-time phase synchronization and group coherence",
+      "Session Metrics: Live tracking of dark phase duration, polarity balance, limiter activations, and export capabilities",
+      "Demo Mode: Automated cycling through archetypes for presentations and exploration",
+      "Safety Protocols: Panic button, light bias activation, HPF for headphones, master limiter protection",
+      "Shadow Engine: Advanced dark phase processing with transparency controls and detailed status information",
+      "Audio Safety: Master limiters, volume controls, headphone protection, and real-time audio monitoring"
+    ]
+  },
+  {
+    title: "Advanced Practices & Security",
+    icon: Shield,
+    topics: [
+      "End-to-end encryption for all sacred communications and private spiritual content",
+      "Quantum-inspired security protocols for consciousness data protection and sovereignty",
+      "Offline-first architecture with Sacred Mesh for communication independence from towers",
+      "Biometric integration for consciousness tracking with wearable devices and health monitors",
+      "Cross-platform synchronization with mobile apps, web interface, and future AR/VR experiences",
+      "Open-source spiritual technology for community-driven consciousness evolution tools"
     ]
   }
 ];
 
 const Guidebook: React.FC = () => {
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
+  
   return (
     <div className="h-full p-6">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -203,6 +297,50 @@ const Guidebook: React.FC = () => {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Prominent Sacred Wisdom Button */}
+        <div className="text-center my-8">
+          <div className="bg-gradient-to-r from-primary/20 via-purple/20 to-indigo/20 backdrop-blur-sm border border-primary/30 rounded-xl p-6 max-w-2xl mx-auto">
+            <Button
+              onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+              className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple/90 text-white font-bold py-4 px-8 text-xl gap-4 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+              size="lg"
+            >
+              <Sparkles className="w-6 h-6" />
+              {showDeeperKnowledge ? 'Hide' : 'Unlock'} Sacred Wisdom
+              <BookOpen className="w-6 h-6" />
+            </Button>
+            <p className="text-sm text-muted-foreground mt-3">
+              Discover the deeper spiritual and scientific understanding behind this sacred technology
+            </p>
+          </div>
+        </div>
+
+        {/* Teaching Layer */}
+        {showDeeperKnowledge && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <TeachingLayer
+              content={ALL_MODULE_TEACHINGS.guidebook}
+              moduleId="guidebook"
+            />
+          </motion.div>
+        )}
+
+        {/* Featured GAA Engine Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mb-8"
+        >
+          <GAAGuidebookSection />
+        </motion.div>
+
+        <Separator className="opacity-30 my-8" />
 
         {/* Sacred Grove Special Section */}
         <motion.div

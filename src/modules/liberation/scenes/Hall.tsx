@@ -112,21 +112,18 @@ export const Hall: React.FC = () => {
       ))}
       
       {/* Particle system for atmospheric depth */}
-      <points>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            array={new Float32Array(
-              Array.from({ length: 200 }, () => [
-                (Math.random() - 0.5) * 20,
-                (Math.random() - 0.5) * 20,
-                (Math.random() - 0.5) * 20,
-              ]).flat()
-            )}
-            count={200}
-            itemSize={3}
-          />
-        </bufferGeometry>
+      <points geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        const positions = new Float32Array(
+          Array.from({ length: 200 }, () => [
+            (Math.random() - 0.5) * 20,
+            (Math.random() - 0.5) * 20,
+            (Math.random() - 0.5) * 20,
+          ]).flat()
+        );
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        return geo;
+      }, [])}>
         <pointsMaterial
           color="#4B0082"
           size={0.1}

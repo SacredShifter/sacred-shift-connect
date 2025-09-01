@@ -64,7 +64,6 @@ export const useSharedMaterials = () => {
       },
       vertexShader: `
         attribute float size;
-        attribute vec3 color;
         
         varying vec3 vColor;
         
@@ -119,15 +118,11 @@ export const ParticleSystem: React.FC<{
   }, [count, spread]);
 
   return (
-    <points>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          array={positions}
-          count={count}
-          itemSize={3}
-        />
-      </bufferGeometry>
+    <points geometry={useMemo(() => {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      return geo;
+    }, [positions])}>
       <pointsMaterial
         color={color}
         size={0.1}

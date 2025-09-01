@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text, Torus } from '@react-three/drei';
 import { useLiberationState } from '../context/LiberationContext';
@@ -113,21 +113,18 @@ export const Integration: React.FC = () => {
       </Text>
       
       {/* Subtle particle flow representing breath */}
-      <points>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            array={new Float32Array(
-              Array.from({ length: 100 }, (_, i) => [
-                Math.sin(i * 0.1) * 3,
-                (i - 50) * 0.2,
-                Math.cos(i * 0.1) * 3,
-              ]).flat()
-            )}
-            count={100}
-            itemSize={3}
-          />
-        </bufferGeometry>
+      <points geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        const positions = new Float32Array(
+          Array.from({ length: 100 }, (_, i) => [
+            Math.sin(i * 0.1) * 3,
+            (i - 50) * 0.2,
+            Math.cos(i * 0.1) * 3,
+          ]).flat()
+        );
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        return geo;
+      }, [])}>
         <pointsMaterial
           color="#20B2AA"
           size={0.1}

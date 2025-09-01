@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AlertTriangle, Shield, Eye, Pause, Power } from 'lucide-react';
-import { FieldIntegrityLevel, FieldIntegrityMetrics } from '@/aura/schema';
-import { calculateFIL, getFILDescription, getFILColor } from '@/aura/fieldIntegrity';
+import { FieldIntegrityLevel, FieldIntegrityMetrics } from '@/justice/schema';
+import { calculateFIL, getFILDescription, getFILColor } from '@/justice/fieldIntegrity';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 

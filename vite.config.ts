@@ -2,31 +2,35 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react-swc'
 import path from "path"
 import { sentryVitePlugin } from "@sentry/vite-plugin";
-import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: '127.0.0.1',
-    port: 8080,
-  },
-  plugins: [
+// Sacred Shifter development configuration
+export default defineConfig(({ mode }) => {
+  const plugins = [
     react(),
-    mode === 'development' &&
-    componentTagger(),
-    // Sentry plugin must be last
-    process.env.SENTRY_AUTH_TOKEN && sentryVitePlugin({
+  ];
+
+  // Only add Sentry plugin in production with auth token
+  if (process.env.SENTRY_AUTH_TOKEN) {
+    plugins.push(sentryVitePlugin({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
       authToken: process.env.SENTRY_AUTH_TOKEN,
-    }),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    }
-  },
-  build: {
-    sourcemap: true,
+    }));
   }
-}))
+
+  return {
+    server: {
+      host: "::",
+      port: 8080,
+    },
+    plugins,
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      }
+    },
+    build: {
+      sourcemap: true,
+    }
+  };
+});

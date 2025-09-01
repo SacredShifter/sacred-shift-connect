@@ -47,10 +47,17 @@ All colors MUST be HSL.
 
     --radius: 1rem; /* More rounded for sacred feel */
 
-    /* Sacred glow effects */
-    --sacred-glow: 0 0 12px;
-    --sacred-glow-hover: 0 0 20px;
-    --sacred-blur: 8px;
+  /* Sacred glow effects */
+  --sacred-glow: 0 0 12px;
+  --sacred-glow-hover: 0 0 20px;
+  --sacred-blur: 8px;
+
+  /* Sacred Routine Colors */
+  --phoenix: 15 86% 59%; /* Phoenix spiral - healing transformation */
+  --merkaba: 269 69% 58%; /* Merkaba - awakening ascension */
+  --seed: 143 65% 56%; /* Seed of Life - new beginnings */
+  --flower: 324 78% 54%; /* Flower of Life - collective wisdom */
+  --metatron: 45 93% 47%; /* Metatron's Cube - master geometry */
 
     --sidebar-background: 257 65% 11%;
     --sidebar-foreground: 143 25% 86%;

@@ -15,37 +15,9 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Show sign out option if already authenticated
+  // Redirect authenticated users to dashboard
   if (user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-3 md:p-4">
-        <Card className="w-full max-w-sm sm:max-w-md mx-auto bg-background/80 backdrop-blur-sm">
-          <CardHeader className="space-y-1 text-center p-4 md:p-6">
-            <CardTitle className="text-xl">Already Signed In</CardTitle>
-            <CardDescription>
-              You're currently signed in. Sign out to test the registration.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 md:p-6">
-            <div className="space-y-4">
-              <Button 
-                onClick={() => signOut()}
-                variant="outline"
-                className="w-full"
-              >
-                Sign Out
-              </Button>
-              <Button 
-                onClick={() => window.location.href = '/'}
-                className="w-full"
-              >
-                Go to Dashboard
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -149,7 +121,7 @@ const Auth = () => {
         <CardHeader className="space-y-1 text-center p-4 md:p-6">
           <div className="flex justify-center mb-3 md:mb-4">
             <img 
-              src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/sacred-assets/uploads/Logo-MainSacredShifter-removebg-preview%20(1).png`}
+              src="https://mikltjgbvxrxndtszorb.supabase.co/storage/v1/object/public/sacred-assets/uploads/Logo-MainSacredShifter-removebg-preview%20(1).png"
               alt="Sacred Shifter" 
               className="h-24 sm:h-32 md:h-36 w-auto invert"
             />

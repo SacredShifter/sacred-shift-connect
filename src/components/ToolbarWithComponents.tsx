@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Brain, Wind, Waves, X } from 'lucide-react';
+import { Brain, Wind, Waves, X, Monitor } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToolbarAIInterface } from '@/components/ToolbarAIInterface';
 import { ToolbarBreathingInterface } from '@/components/ToolbarBreathingInterface';
@@ -28,15 +28,38 @@ export const ToolbarWithComponents = () => {
       name: 'Sacred Frequencies',
       icon: Waves,
       color: 'from-purple-500 to-pink-600'
+    },
+    {
+      id: 'screensaver',
+      name: 'Force Screensaver',
+      icon: Monitor,
+      color: 'from-slate-500 to-gray-600'
     }
   ];
 
   const toggleComponent = (toolId: string) => {
+    if (toolId === 'screensaver') {
+      // Force screensaver activation via custom event
+      window.dispatchEvent(new CustomEvent('forceScreensaver'));
+      return;
+    }
     setActiveComponent(activeComponent === toolId ? null : toolId);
   };
 
   return (
-    <div className="fixed top-16 right-4 z-50">
+    <motion.div 
+      className="fixed top-16 right-4 z-50 cursor-grab active:cursor-grabbing"
+      drag
+      dragMomentum={false}
+      dragElastic={0.1}
+      dragConstraints={{
+        top: 0,
+        left: -window.innerWidth + 200,
+        right: window.innerWidth - 200,
+        bottom: window.innerHeight - 200
+      }}
+      whileDrag={{ scale: 1.05 }}
+    >
       {/* Main Toolbar */}
       <div className="bg-background/20 backdrop-blur-xl border border-white/20 rounded-2xl p-2 shadow-2xl flex items-center gap-2">
         {tools.map((tool, index) => {
@@ -116,6 +139,6 @@ export const ToolbarWithComponents = () => {
           </Button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };

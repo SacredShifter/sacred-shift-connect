@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { MessageCircle, Send, Trash2, Reply } from 'lucide-react';
 import { useRegistryOfResonance } from '@/hooks/useRegistryOfResonance';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
 
@@ -18,6 +19,10 @@ interface Comment {
   is_anonymous: boolean;
   parent_comment_id: string | null;
   user_id: string;
+  user_profile?: {
+    display_name?: string;
+    avatar_url?: string;
+  };
 }
 
 interface RegistryCommentsProps {
@@ -35,9 +40,34 @@ export function RegistryComments({ entryId, onCommentAdded }: RegistryCommentsPr
   const [replyContent, setReplyContent] = useState('');
   const [showComments, setShowComments] = useState(false);
 
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('display_name, avatar_url')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      return { display_name: null, avatar_url: null };
+    }
+  };
+
   const fetchCommentsData = async () => {
     const commentsData = await getComments(entryId);
-    setComments(commentsData);
+    
+    // Fetch user profiles for all comments
+    const commentsWithProfiles = await Promise.all(
+      commentsData.map(async (comment) => {
+        const profile = await fetchUserProfile(comment.user_id);
+        return { ...comment, user_profile: profile };
+      })
+    );
+    
+    setComments(commentsWithProfiles);
   };
 
   useEffect(() => {
@@ -171,7 +201,7 @@ export function RegistryComments({ entryId, onCommentAdded }: RegistryCommentsPr
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="text-sm font-medium">
-                                    Anonymous User
+                                    {comment.user_profile?.display_name || 'Anonymous User'}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
                                     {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
@@ -260,14 +290,14 @@ export function RegistryComments({ entryId, onCommentAdded }: RegistryCommentsPr
                                     
                                     <div className="flex-1">
                                       <div className="flex items-center justify-between">
-                                        <div>
-                                          <p className="text-xs font-medium">
-                                            Anonymous User
-                                          </p>
-                                          <p className="text-xs text-muted-foreground">
-                                            {formatDistanceToNow(new Date(reply.created_at), { addSuffix: true })}
-                                          </p>
-                                        </div>
+                                         <div>
+                                           <p className="text-xs font-medium">
+                                             {reply.user_profile?.display_name || 'Anonymous User'}
+                                           </p>
+                                           <p className="text-xs text-muted-foreground">
+                                             {formatDistanceToNow(new Date(reply.created_at), { addSuffix: true })}
+                                           </p>
+                                         </div>
                                         
                                         {user?.id === reply.user_id && (
                                           <Button

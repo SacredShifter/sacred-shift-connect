@@ -9,7 +9,8 @@ import {
   MessageSquare, 
   Settings, 
   LogOut,
-  Rss
+  Rss,
+  BarChart3
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -22,6 +23,7 @@ export const Navigation = ({ className }: NavigationProps) => {
   
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
+    { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
     { path: '/feed', label: 'Feed', icon: Rss },
     { path: '/circles', label: 'Circles', icon: Users },
     { path: '/profile', label: 'Profile', icon: User },

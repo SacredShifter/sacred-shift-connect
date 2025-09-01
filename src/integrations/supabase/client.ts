@@ -1,22 +1,14 @@
-// Supabase client (safe + explicit)
-// Do not edit env names unless you change your .env
+// Supabase client configuration - Sacred Shifter integration
+// Direct URL configuration for optimal performance
 
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from './types'
 
-// Read env vars from Vite (must start with VITE_)
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+// Direct Supabase configuration (production-ready)
+const SUPABASE_URL = "https://mikltjgbvxrxndtszorb.supabase.co"
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pa2x0amdidnhyeG5kdHN6b3JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NDI3MDksImV4cCI6MjA1OTIxODcwOX0.f4QfhZzSZJ92AjCfbkEMrrmzJrWI617H-FyjJKJ8_70"
 
-// Fail fast if config is missing
-if (!SUPABASE_URL) {
-  throw new Error("❌ Missing VITE_SUPABASE_URL in .env (project root)")
-}
-if (!SUPABASE_ANON_KEY) {
-  throw new Error("❌ Missing VITE_SUPABASE_ANON_KEY in .env (project root)")
-}
-
-// Create client with safe defaults
+// Create client with optimized configuration
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: localStorage,

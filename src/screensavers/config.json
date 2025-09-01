@@ -1,0 +1,12 @@
+{
+  "safeRadiusScale": 0.18,
+  "bloomThreshold": 1.05,
+  "lumaCap": 0.92,
+  "exposure": 1.0,
+  "particleCountDesktop": 1200,
+  "particleCountMobile": 500,
+  "camera": {
+    "amp": 0.32,
+    "periodSec": 28
+  }
+}

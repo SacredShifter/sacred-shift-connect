@@ -53,7 +53,6 @@ export default function HermeticPrinciplesModule() {
 
   return (
     <div className="p-6 space-y-6 h-full overflow-y-auto bg-black">
-      <Slogan variant="watermark" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

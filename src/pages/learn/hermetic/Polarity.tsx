@@ -4,8 +4,10 @@ import { Box } from '@react-three/drei'
 import * as THREE from 'three'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, BookOpen } from 'lucide-react'
+import { ChevronDown, BookOpen, Sparkles } from 'lucide-react'
 import { Slogan } from '@/components/ui/Slogan'
+import { TeachingLayer } from '@/components/TeachingLayer'
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings'
 
 const PolarityScene = ({ value }: { value: number }) => {
   const hotRef = useRef<THREE.Mesh>(null!);
@@ -70,6 +72,7 @@ const SceneContent = ({ value }: { value: number }) => (
 export default function Polarity() {
   const [value, setValue] = useState(0)
   const [showInfo, setShowInfo] = useState(false)
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false)
 
   const stateLabel = useMemo(() => {
     if (value < 0.33) return "Cold / Contraction"
@@ -79,9 +82,8 @@ export default function Polarity() {
 
   return (
     <div className="w-screen h-screen relative">
-      <Slogan variant="watermark" />
       <Canvas camera={{ position: [0, 0, 5] }}>
-        <color attach="background" args={["#0b0c10"]} />
+        <color args={["#0b0c10"]} />
         <SceneContent value={value} />
       </Canvas>
       <div className="absolute top-4 left-4 space-y-2 bg-black/50 p-4 rounded-lg w-96 border border-white/10">
@@ -109,6 +111,34 @@ export default function Polarity() {
             </motion.div>
         )}
         </AnimatePresence>
+      </div>
+
+      {/* Deeper Knowledge Section - Positioned prominently */}
+      <div className="absolute bottom-4 right-4 w-96">
+        <div className="bg-gradient-to-r from-red-500/20 via-orange-500/20 to-blue-500/20 backdrop-blur-sm border border-red-400/30 rounded-xl p-4">
+          <Button
+            onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+            className="w-full bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-semibold py-3 text-lg gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
+            size="lg"
+          >
+            <Sparkles className="w-5 h-5" />
+            {showDeeperKnowledge ? 'Hide' : 'Unlock'} Sacred Wisdom
+            <BookOpen className="w-5 h-5" />
+          </Button>
+          
+          {showDeeperKnowledge && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 max-h-96 overflow-y-auto"
+            >
+              <TeachingLayer
+                content={ALL_MODULE_TEACHINGS.polarity}
+                moduleId="polarity"
+              />
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   )

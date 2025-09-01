@@ -1,354 +1,223 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SacredGroveEntry } from './SacredGroveEntry';
-import { PathExperience } from './PathExperiences';
-import { ResonanceCheck } from './ResonanceCheck';
-import { ResonanceSpheres } from './ResonanceSpheres';
-import { EvolutionSpirals } from './EvolutionSpirals';
-import { MysteryGates } from './MysteryGates';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Compass, Sparkles, Heart, Brain, TreePine, Star, Zap, Eye, Home } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { usePersonalSignature } from '@/hooks/usePersonalSignature';
-import { useCommunityResonance } from '@/hooks/useCommunityResonance';
-import { useWisdomEcosystem } from '@/hooks/useWisdomEcosystem';
-import { useAuraPlatformAwareness } from '@/hooks/useAuraPlatformAwareness';
-import { supabase } from '@/integrations/supabase/client';
+import { 
+  TreePine, 
+  Sparkles, 
+  Heart, 
+  Users, 
+  BookOpen,
+  Brain,
+  Globe
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-type PathType = 'discovery' | 'purpose' | 'connection';
-
-interface GroveState {
-  hasEntered: boolean;
-  selectedPath: PathType | null;
-  pathData: any;
-  showResonanceCheck: boolean;
-  ecosystemView: 'overview' | 'spheres' | 'spirals' | 'gates';
+interface Pathway {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+  route: string;
+  features: string[];
 }
 
-interface SacredGroveProps {
-  isVisible: boolean;
-  onClose: () => void;
-}
+const SacredGrove: React.FC = () => {
+  const navigate = useNavigate();
+  const [selectedPathway, setSelectedPathway] = useState<string | null>(null);
 
-export const SacredGrove: React.FC<SacredGroveProps> = ({ isVisible, onClose }) => {
-  const { user } = useAuth();
-  const { signature, isAnalyzing } = usePersonalSignature();
-  const { resonanceState } = useCommunityResonance();
-  const { getEcosystemInsights } = useWisdomEcosystem();
-  const { recordGroveActivity, notifyAuraOfEvent } = useAuraPlatformAwareness();
-  
-  const [groveState, setGroveState] = useState<GroveState>({
-    hasEntered: false,
-    selectedPath: null,
-    pathData: null,
-    showResonanceCheck: false,
-    ecosystemView: 'overview'
-  });
-
-  const handlePathSelect = async (path: PathType) => {
-    setGroveState(prev => ({
-      ...prev,
-      hasEntered: true,
-      selectedPath: path
-    }));
-
-    // Notify Aura of Grove entry via platform awareness
-    await recordGroveActivity('entry', `${path}_path`, { selected_path: path });
-    await notifyAuraOfEvent('grove_path_selected', { path, user_id: user?.id });
-  };
-
-  const handlePathComplete = async (pathData: any) => {
-    setGroveState(prev => ({
-      ...prev,
-      pathData
-    }));
-
-    // Store path data in Supabase
-    if (user) {
-      try {
-        await supabase
-          .from('akashic_records')
-          .insert({
-            type: 'sacred_grove_path',
-            data: pathData,
-            metadata: {
-              path: pathData.path,
-              userId: user.id,
-              timestamp: pathData.timestamp
-            }
-          });
-      } catch (error) {
-        console.error('Error storing path data:', error);
-      }
+  const pathways: Pathway[] = [
+    {
+      id: 'inner-wisdom',
+      title: 'Inner Wisdom',
+      description: 'Journey deep within to discover your authentic truth and inner guidance.',
+      icon: <Heart className="h-8 w-8" />,
+      color: 'from-rose-500 to-pink-600',
+      route: '/journal',
+      features: [
+        'Sacred Self-Reflection',
+        'Intuitive Guidance',
+        'Heart-Centered Awareness',
+        'Emotional Integration'
+      ]
+    },
+    {
+      id: 'collective-consciousness',
+      title: 'Collective Consciousness',
+      description: 'Connect with the shared wisdom and collective awakening of humanity.',
+      icon: <Users className="h-8 w-8" />,
+      color: 'from-blue-500 to-indigo-600',
+      route: '/circles',
+      features: [
+        'Sacred Circles',
+        'Community Wisdom',
+        'Collective Healing',
+        'Shared Experiences'
+      ]
+    },
+    {
+      id: 'cosmic-connection',
+      title: 'Cosmic Connection',
+      description: 'Expand your awareness to the infinite wisdom of the cosmos.',
+      icon: <Globe className="h-8 w-8" />,
+      color: 'from-purple-500 to-violet-600',
+      route: '/learning-3d',
+      features: [
+        'Universal Patterns',
+        'Sacred Geometry',
+        'Cosmic Consciousness',
+        'Infinite Perspectives'
+      ]
     }
+  ];
 
-    // Notify Aura of path completion via platform awareness
-    await recordGroveActivity('interaction', 'path_completion', pathData);
-    await notifyAuraOfEvent('grove_path_completed', { 
-      pathData, 
-      user_id: user?.id,
-      wisdom_gained: pathData.insights 
-    }, true);
-
-    // Navigate to Grove ecosystem view
-    setTimeout(() => {
-      setGroveState(prev => ({ ...prev, selectedPath: null }));
-    }, 2000);
+  const handlePathwaySelect = (pathway: Pathway) => {
+    setSelectedPathway(pathway.id);
+    navigate(pathway.route);
   };
 
-  const handleBackToEntry = () => {
-    setGroveState(prev => ({
-      ...prev,
-      hasEntered: false,
-      selectedPath: null
-    }));
-  };
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+      {/* Grove Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-12 space-y-6"
+      >
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <TreePine className="h-16 w-16 text-emerald-600" />
+          <div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent">
+              Sacred Grove
+            </h1>
+            <p className="text-xl text-muted-foreground mt-2">
+              Three pathways to collective wisdom and sacred community
+            </p>
+          </div>
+        </div>
 
-  const toggleResonanceCheck = () => {
-    setGroveState(prev => ({
-      ...prev,
-      showResonanceCheck: !prev.showResonanceCheck
-    }));
-  };
+        {/* Sacred Quote */}
+        <div className="max-w-2xl mx-auto">
+          <blockquote className="text-lg italic text-foreground/80">
+            "In the sacred grove, three paths converge - the journey within, the journey with others, 
+            and the journey to the infinite. Choose your path, but know that all paths lead home."
+          </blockquote>
+          <cite className="text-sm text-muted-foreground mt-2 block">— Ancient Grove Teachings</cite>
+        </div>
+      </motion.div>
 
-  if (!isVisible) return null;
-
-  // Path Experience View
-  if (groveState.selectedPath && !groveState.pathData) {
-    return (
-      <PathExperience
-        path={groveState.selectedPath}
-        onComplete={handlePathComplete}
-        onBack={handleBackToEntry}
-      />
-    );
-  }
-
-  // Grove Ecosystem View (after path completion)
-  if (groveState.pathData) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur-lg">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-          className="w-full max-w-7xl max-h-[95vh] overflow-hidden"
-        >
-          <Card className="bg-background/98 backdrop-blur-xl border-primary/20 shadow-2xl shadow-primary/10">
-            <CardHeader className="text-center border-b border-primary/10">
-              <CardTitle className="text-3xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                Sacred Grove Wisdom Ecosystem
-              </CardTitle>
-              <div className="flex items-center justify-center space-x-6 mt-4">
-                <div className="text-sm text-muted-foreground">
-                  Path: <Badge variant="secondary">{groveState.pathData.path}</Badge>
-                </div>
-                {signature && (
-                  <div className="text-sm text-muted-foreground">
-                    Signature: <Badge variant="outline">{signature.temperament}</Badge>
+      {/* Three Sacred Pathways */}
+      <div className="max-w-7xl mx-auto px-6 pb-12">
+        <div className="grid md:grid-cols-3 gap-8">
+          {pathways.map((pathway, index) => (
+            <motion.div
+              key={pathway.id}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.2 + 0.3 }}
+              className="group"
+            >
+              <Card 
+                className="h-full cursor-pointer transform transition-all duration-500 hover:scale-105 hover:shadow-2xl border-2 border-transparent hover:border-primary/20 bg-white/80 backdrop-blur-sm overflow-hidden"
+                onClick={() => handlePathwaySelect(pathway)}
+              >
+                <div className={`h-2 bg-gradient-to-r ${pathway.color}`} />
+                
+                <CardContent className="p-8 text-center space-y-6">
+                  {/* Pathway Icon */}
+                  <div className={`mx-auto w-20 h-20 rounded-full bg-gradient-to-r ${pathway.color} flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow duration-300`}>
+                    {pathway.icon}
                   </div>
-                )}
-                <div className="text-sm text-muted-foreground">
-                  Resonance: <Badge variant="outline">{Math.round(resonanceState.globalResonance * 100)}%</Badge>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="p-6">
-              <Tabs value={groveState.ecosystemView} onValueChange={(view) => 
-                setGroveState(prev => ({ ...prev, ecosystemView: view as any }))
-              }>
-                <TabsList className="grid w-full grid-cols-4 mb-6">
-                  <TabsTrigger value="overview" className="flex items-center space-x-2">
-                    <Star className="w-4 h-4" />
-                    <span>Overview</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="spheres" className="flex items-center space-x-2">
-                    <TreePine className="w-4 h-4" />
-                    <span>Resonance Spheres</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="spirals" className="flex items-center space-x-2">
-                    <Brain className="w-4 h-4" />
-                    <span>Evolution Spirals</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="gates" className="flex items-center space-x-2">
-                    <Eye className="w-4 h-4" />
-                    <span>Mystery Gates</span>
-                  </TabsTrigger>
-                </TabsList>
 
-                <TabsContent value="overview" className="space-y-6">
-                  {/* Path Echo */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <Card className="bg-primary/5 border-primary/20">
-                      <CardContent className="p-6">
-                        <div className="flex items-center space-x-3 mb-4">
-                          {groveState.pathData.path === 'discovery' && <Compass className="h-6 w-6 text-alignment" />}
-                          {groveState.pathData.path === 'purpose' && <Sparkles className="h-6 w-6 text-purpose" />}
-                          {groveState.pathData.path === 'connection' && <Heart className="h-6 w-6 text-resonance" />}
-                          <h3 className="text-lg font-semibold">Your Path Echo</h3>
-                          <Badge variant="secondary" className="bg-primary/10 text-primary">
-                            {groveState.pathData.path.charAt(0).toUpperCase() + groveState.pathData.path.slice(1)} Path
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Your journey has created unique resonance patterns that guide your ecosystem experience.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
+                  {/* Pathway Title */}
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                      {pathway.title}
+                    </h2>
+                    <p className="text-muted-foreground mt-3 leading-relaxed">
+                      {pathway.description}
+                    </p>
+                  </div>
 
-                  {/* Ecosystem Insights */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    <Card className="bg-secondary/5 border-secondary/20">
-                      <CardHeader>
-                        <CardTitle className="flex items-center space-x-2">
-                          <Zap className="w-5 h-5 text-pulse" />
-                          <span>Living Ecosystem Insights</span>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        {getEcosystemInsights().map((insight, index) => (
-                          <div key={index} className="p-3 rounded border-l-2 border-pulse/50 bg-pulse/5">
-                            <h4 className="font-medium text-pulse">{insight.title}</h4>
-                            <p className="text-sm text-muted-foreground mt-1">{insight.content}</p>
-                          </div>
-                        ))}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-
-                  {/* Grove Areas Quick Access */}
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {[
-                      {
-                        title: "Resonance Spheres",
-                        description: "3D clusters of wisdom insights",
-                        icon: TreePine,
-                        view: "spheres",
-                        color: "text-alignment"
-                      },
-                      {
-                        title: "Evolution Spirals", 
-                        description: "Growth pattern visualization",
-                        icon: Brain,
-                        view: "spirals",
-                        color: "text-purpose"
-                      },
-                      {
-                        title: "Mystery Gates",
-                        description: "Portals to undefined wisdom",
-                        icon: Eye,
-                        view: "gates",
-                        color: "text-resonance"
-                      }
-                    ].map((area, index) => (
+                  {/* Pathway Features */}
+                  <div className="space-y-3">
+                    {pathway.features.map((feature, featureIndex) => (
                       <motion.div
-                        key={area.title}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.7 + index * 0.1 }}
+                        key={feature}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.2 + featureIndex * 0.1 + 0.5 }}
+                        className="flex items-center gap-3 text-sm text-muted-foreground"
                       >
-                        <Card 
-                          className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:border-primary/40"
-                          onClick={() => setGroveState(prev => ({ ...prev, ecosystemView: area.view as any }))}
-                        >
-                          <CardContent className="p-6 text-center">
-                            <area.icon className={`h-8 w-8 mx-auto mb-3 ${area.color}`} />
-                            <h4 className="font-semibold mb-2">{area.title}</h4>
-                            <p className="text-xs text-muted-foreground">{area.description}</p>
-                          </CardContent>
-                        </Card>
+                        <Sparkles className="h-4 w-4 text-primary/60" />
+                        <span>{feature}</span>
                       </motion.div>
                     ))}
                   </div>
-                </TabsContent>
 
-                <TabsContent value="spheres" className="h-[600px]">
-                  <ResonanceSpheres 
-                    isVisible={true}
-                    onSphereSelect={(sphere) => console.log('Selected sphere:', sphere)}
-                  />
-                </TabsContent>
-
-                <TabsContent value="spirals" className="h-[400px] md:h-[600px] overflow-y-auto -webkit-overflow-scrolling-touch">
-                  <EvolutionSpirals 
-                    isVisible={true}
-                    userId={user?.id}
-                  />
-                </TabsContent>
-
-                <TabsContent value="gates" className="h-[400px] md:h-[600px] overflow-y-auto -webkit-overflow-scrolling-touch">
-                  <MysteryGates 
-                    isVisible={true}
-                    communityResonance={resonanceState.globalResonance}
-                  />
-                </TabsContent>
-              </Tabs>
-
-              {/* Grove Tools */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.0 }}
-                className="mt-6 pt-6 border-t border-primary/10"
-              >
-                <div className="flex flex-wrap gap-4 justify-between">
-                  <Button
-                    onClick={toggleResonanceCheck}
-                    variant="outline"
-                    className="bg-primary/5 border-primary/30 hover:bg-primary/10"
-                  >
-                    3-Point Resonance Check
-                  </Button>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleBackToEntry}
-                      variant="outline"
-                      className="bg-secondary/5 border-secondary/30 hover:bg-secondary/10"
+                  {/* Pathway CTA */}
+                  <div className="pt-4">
+                    <Button 
+                      variant="outline" 
+                      className={`w-full border-2 transition-all duration-300 group-hover:bg-gradient-to-r group-hover:${pathway.color} group-hover:text-white group-hover:border-transparent group-hover:shadow-lg`}
                     >
-                      Back to Grove Entry
-                    </Button>
-                    <Button
-                      onClick={onClose}
-                      className="bg-primary text-primary-foreground flex items-center gap-2"
-                    >
-                      <Home className="w-4 h-4" />
-                      Return to Homepage
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Enter Sacred Path
                     </Button>
                   </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Sacred Grove Wisdom */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1 }}
+          className="mt-16 text-center"
+        >
+          <Card className="bg-gradient-to-r from-emerald-100/50 to-teal-100/50 border-emerald-200/50 backdrop-blur-sm">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <Heart className="h-8 w-8 text-emerald-600" />
+                <Users className="h-8 w-8 text-blue-600" />
+                <Globe className="h-8 w-8 text-purple-600" />
+              </div>
+              
+              <h3 className="text-2xl font-semibold text-foreground mb-4">
+                The Sacred Grove Awaits
+              </h3>
+              
+              <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+                Each pathway offers unique gifts, yet all are interconnected in the web of sacred wisdom. 
+                Whether you seek to heal, to connect, or to explore the mysteries of existence, 
+                the grove holds space for your journey. Choose with your heart, and trust that 
+                your path will reveal exactly what you need when you need it.
+              </p>
+              
+              <div className="mt-8 flex items-center justify-center gap-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-emerald-600">∞</div>
+                  <div className="text-xs text-muted-foreground">Infinite Wisdom</div>
                 </div>
-              </motion.div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">◉</div>
+                  <div className="text-xs text-muted-foreground">Sacred Unity</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">◈</div>
+                  <div className="text-xs text-muted-foreground">Divine Truth</div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
-
-        {/* Resonance Check Modal */}
-        <ResonanceCheck
-          isOpen={groveState.showResonanceCheck}
-          onClose={() => setGroveState(prev => ({ ...prev, showResonanceCheck: false }))}
-        />
       </div>
-    );
-  }
-
-  // Initial Entry View
-  return (
-    <SacredGroveEntry
-      isVisible={true}
-      onPathSelect={handlePathSelect}
-      onClose={onClose}
-    />
+    </div>
   );
 };
+
+export default SacredGrove;

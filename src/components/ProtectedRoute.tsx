@@ -1,6 +1,8 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import { logger } from '@/lib/logger';
+import { OnboardingChecker } from '@/components/OnboardingChecker';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,7 +20,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -27,7 +29,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  return <>{children}</>;
+  // Wrap authenticated routes with onboarding checker
+  return (
+    <OnboardingChecker>
+      {children}
+    </OnboardingChecker>
+  );
 };
 
 export default ProtectedRoute;

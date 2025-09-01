@@ -1,0 +1,59 @@
+/* Sacred Shifter Screensaver Styles */
+
+.screensaver-overlay {
+  @apply fixed inset-0 z-[9999];
+  background: radial-gradient(ellipse at center, rgba(88, 28, 135, 0.1) 0%, rgba(15, 118, 110, 0.05) 45%, rgba(0, 0, 0, 0.9) 100%);
+}
+
+.screensaver-logo {
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.45));
+  transition: filter 0.3s ease;
+}
+
+.screensaver-logo.high-contrast {
+  filter: 
+    drop-shadow(0 2px 12px rgba(0, 0, 0, 0.45))
+    drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+}
+
+.screensaver-tagline {
+  @apply text-balance max-w-[54ch] mx-auto;
+  filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.55));
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.screensaver-hint {
+  @apply fixed bottom-8 left-1/2 transform -translate-x-1/2;
+  @apply text-sm text-white/60 transition-opacity duration-1000;
+  animation: fadeInOut 4s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+/* Vignette effect */
+.screensaver-vignette {
+  @apply absolute inset-0 pointer-events-none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.1) 80%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+}
+
+/* Reduced motion styles */
+@media (prefers-reduced-motion: reduce) {
+  .screensaver-logo,
+  .screensaver-tagline {
+    animation: none !important;
+  }
+  
+  .screensaver-hint {
+    animation: none !important;
+    opacity: 0.6;
+  }
+}

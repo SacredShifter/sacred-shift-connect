@@ -173,7 +173,7 @@ export function AkashicConstellation() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [hoveredEntry, setHoveredEntry] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'constellation' | 'grid'>('constellation');
+  const [viewMode, setViewMode] = useState<'constellation' | 'grid' | 'fractal'>('constellation');
 
   const filteredEntries = useMemo(() => {
     return entries.filter(entry => {
@@ -261,7 +261,6 @@ export function AkashicConstellation() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-full">
-      <Slogan variant="watermark" />
       {/* Sacred Header */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -345,6 +344,14 @@ export function AkashicConstellation() {
             >
               <Eye className="h-4 w-4 mr-2" />
               Grid
+            </Button>
+            <Button
+              variant={viewMode === 'fractal' ? 'default' : 'outline'}
+              onClick={() => setViewMode('fractal')}
+              size="sm"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Fractal
             </Button>
           </div>
           

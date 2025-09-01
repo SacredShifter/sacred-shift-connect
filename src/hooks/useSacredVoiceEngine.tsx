@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface BiometricState {
   heartRate: number;
@@ -34,9 +35,12 @@ export function useSacredVoiceEngine() {
   // Initialize Web Audio API context
   const initializeAudioContext = useCallback(() => {
     if (!audioContext) {
-      const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-      setAudioContext(context);
-      return context;
+      const AudioContextClass = getAudioContextClass();
+      if (AudioContextClass) {
+        const context = new AudioContextClass();
+        setAudioContext(context);
+        return context;
+      }
     }
     return audioContext;
   }, [audioContext]);

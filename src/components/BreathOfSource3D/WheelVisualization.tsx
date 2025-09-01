@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -101,21 +101,12 @@ export default function WheelVisualization({
       </mesh>
 
       {/* Orbital particles */}
-      <points ref={particleRingRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={particleCount}
-            array={ringParticles.positions}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={particleCount}
-            array={ringParticles.colors}
-            itemSize={3}
-          />
-        </bufferGeometry>
+      <points ref={particleRingRef} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(ringParticles.positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(ringParticles.colors, 3));
+        return geo;
+      }, [ringParticles.positions, ringParticles.colors])}>
         <pointsMaterial
           size={0.04}
           transparent

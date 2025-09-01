@@ -31,7 +31,13 @@ import {
   Map,
   Rss,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  BarChart3,
+  Wind,
+  Waves,
+  Play,
+  Moon,
+  Sun
 } from 'lucide-react';
 
 const Index = () => {
@@ -59,7 +65,16 @@ const Index = () => {
 
   const modules = [
     {
-      title: 'Sacred Mesh',
+      title: 'Sacred Journey Dashboard',
+      description: 'Track your consciousness evolution and spiritual growth with detailed metrics and insights',
+      icon: BarChart3,
+      path: '/dashboard',
+      gradient: 'from-primary/20 to-accent/20',
+      glow: 'shadow-primary/30',
+      keywords: ['progress tracking', 'meditation metrics', 'consciousness evolution']
+    },
+    {
+      title: 'Mesh',
       description: 'The crown jewel - sovereign peer-to-peer communication that transcends all networks',
       icon: Network,
       path: '/messages',
@@ -70,13 +85,32 @@ const Index = () => {
       status: meshStatus
     },
     {
-      title: 'Sacred Grove',
+      title: 'GAA Engine',
+      description: 'Geometrically Aligned Audio - Advanced consciousness harmonization technology with Deep5 Archetypes, biofeedback integration, and cosmic visualization',
+      icon: Waves,
+      path: '/gaa',
+      gradient: 'from-indigo-500 via-purple-500 to-pink-500',
+      glow: 'shadow-indigo-500/30',
+      keywords: ['consciousness', 'sacred geometry', 'audio therapy', 'archetypes'],
+      isFeatured: true
+    },
+    {
+      title: 'The Grove',
       description: 'Interactive 3D consciousness modules with breathing techniques and wisdom anchors',
       icon: Crown,
       path: '/grove',
       gradient: 'from-yellow-500 to-amber-600',
       glow: 'shadow-yellow-500/30',
       keywords: ['3D modules', 'breathing', 'interactive wisdom']
+    },
+    {
+      title: 'Breath of Source',
+      description: 'Sacred breathing practices for transformation, healing, and consciousness expansion',
+      icon: Wind,
+      path: '/breath',
+      gradient: 'from-sky-500 to-cyan-600',
+      glow: 'shadow-sky-500/30',
+      keywords: ['sacred breathing', 'transformation', 'consciousness expansion']
     },
     {
       title: '3D Learning Modules',
@@ -88,7 +122,7 @@ const Index = () => {
       keywords: ['3D modules', 'interactive learning', 'sacred geometry']
     },
     {
-      title: 'Sacred Feed',
+      title: 'Feed',
       description: 'Your personalized stream of consciousness transformation content',
       icon: Rss,
       path: '/feed',
@@ -97,7 +131,7 @@ const Index = () => {
       keywords: ['feed', 'consciousness', 'personalized']
     },
     {
-      title: 'Sacred Circles',
+      title: 'Circles',
       description: 'Connect with fellow seekers in transformative group experiences',
       icon: Users,
       path: '/circles',
@@ -142,7 +176,7 @@ const Index = () => {
       keywords: ['curated videos', 'chapter navigation', 'reflection tools']
     },
     {
-      title: 'Sacred Guidebook',
+      title: 'Guidebook',
       description: 'Ancient wisdom for modern transformation',
       icon: Scroll,
       path: '/guidebook',
@@ -151,7 +185,7 @@ const Index = () => {
       keywords: ['wisdom', 'ancient', 'guidance']
     },
     {
-      title: 'Sacred Meditation',
+      title: 'Meditation',
       description: 'Guided meditation experiences for consciousness expansion and inner peace',
       icon: Heart,
       path: '/meditation',
@@ -201,15 +235,37 @@ const Index = () => {
         <div className="text-center mb-12 space-y-6">
           <div className="flex justify-center mb-6">
             <img
-              src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/sacred-assets/uploads/Logo-MainSacredShifter-removebg-preview%20(1).png`}
+              src="https://mikltjgbvxrxndtszorb.supabase.co/storage/v1/object/public/sacred-assets/uploads/Logo-MainSacredShifter-removebg-preview%20(1).png"
               alt="Sacred Shifter"
               className="h-16 md:h-20 w-auto filter invert brightness-0 contrast-100"
             />
           </div>
           
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-2">
-            A sovereign platform where consciousness meets frontier technology. 
-            Encrypted mesh networks, sacred wisdom, and digital sovereignty united.
+          {/* Sacred Shifter Manifesto */}
+          <div className="space-y-4 max-w-4xl mx-auto">
+            <h1 className="text-2xl md:text-3xl font-bold font-sacred bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+              Sacred Shifter is the resonance field for awakening
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              We dissolve distortion through <span className="text-secondary font-medium">pattern</span>, 
+              <span className="text-accent font-medium"> awe</span>, and 
+              <span className="text-primary font-medium"> Truth</span> — guiding individuals and communities into coherence.
+            </p>
+            <div className="flex justify-center">
+              <Link 
+                to="/ethos" 
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all duration-300 text-primary font-medium"
+              >
+                <Scroll className="h-4 w-4" />
+                Read Our Sacred Ethos
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+          
+          <p className="text-sm text-muted-foreground/70 max-w-2xl mx-auto leading-relaxed italic">
+            This is not social media. It is a living mandala where geometry, breath, sound, 
+            and collective intention become technology for remembering who we are.
           </p>
         </div>
 
@@ -281,11 +337,11 @@ const Index = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-violet-400 via-blue-400 to-emerald-400 bg-clip-text text-transparent">
-                      Sacred Mesh
+                      Mesh
                     </h2>
                     <div className={`mesh-status ${meshStatus}`}>
                       <div className="mesh-status-dot" />
-                      <span>{meshStatus === 'active' ? 'Sacred Mesh Active' : 'Sacred Mesh Offline'}</span>
+                      <span>{meshStatus === 'active' ? 'Mesh Active' : 'Mesh Offline'}</span>
                     </div>
                   </div>
                 </div>
@@ -322,6 +378,74 @@ const Index = () => {
             <ChevronDown className="h-6 w-6" />
           </div>
         </div>
+
+        {/* Featured GAA Engine Section */}
+        {modules.find(m => m.isFeatured) && (
+          <div className="mb-8">
+            {(() => {
+              const gaaModule = modules.find(m => m.isFeatured);
+              return (
+                <Link to={gaaModule.path} className="group block">
+                  <Card className="portal-tile featured-module relative p-8 backdrop-blur-xl border-white/20 hover:border-primary/40 transition-all duration-500 group-hover:shadow-2xl overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10" />
+                    
+                    {/* Sacred geometry overlay */}
+                    <div className="sacred-geometry">
+                      <Waves className="w-full h-full text-primary/30" style={{ animation: 'merkaba-spin 12s linear infinite' }} />
+                    </div>
+                    
+                    <CardContent className="relative z-10 text-center">
+                      <div className="flex items-center justify-center gap-4 mb-6">
+                        <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-2xl">
+                          <Waves className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            {gaaModule.title}
+                          </h2>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Star className="w-4 h-4 text-amber-500" />
+                            <span className="text-sm text-muted-foreground">Advanced Consciousness Technology</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-6">
+                        {gaaModule.description}
+                      </p>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground mb-6">
+                        <div className="flex items-center gap-2">
+                          <Moon className="h-4 w-4 text-indigo-400" />
+                          <span>Deep5 Archetypes</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Sun className="h-4 w-4 text-purple-400" />
+                          <span>Polarity Control</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4 text-pink-400" />
+                          <span>Cosmic Visualization</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Brain className="h-4 w-4 text-cyan-400" />
+                          <span>Biofeedback Integration</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-center">
+                        <div className="px-6 py-3 rounded-full bg-gradient-to-r from-indigo-500/20 to-pink-500/20 border border-primary/30 flex items-center gap-2 text-primary font-medium">
+                          <Play className="w-4 h-4" />
+                          Enter GAA Dashboard →
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Portal Modules Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">

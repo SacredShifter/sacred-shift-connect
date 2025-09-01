@@ -9,13 +9,15 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Search, Send, Eye, Heart, Brain, MoreHorizontal, ArrowLeft, Wifi } from 'lucide-react';
+import { Search, Send, Eye, Heart, Brain, MoreHorizontal, ArrowLeft, Wifi, BookOpen, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import { formatDistance } from 'date-fns/formatDistance';
 import { StartDirectMessageModal } from '@/components/StartDirectMessageModal';
 import { SacredQuantumMessageInterface } from '@/components/SacredQuantumMessageInterface';
 import { SynchronicityThreads } from '@/components/SynchronicityThreads';
 import { QuantumChatCore } from '@/components/QuantumChat/QuantumChatCore';
 import { ClassicChatInterface } from '@/components/ClassicChatInterface';
+import { TeachingLayer } from '@/components/TeachingLayer';
+import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 import { toast } from 'sonner';
 
 type ViewMode = 'sacred' | 'quantum' | 'classic';
@@ -26,6 +28,7 @@ export default function Messages() {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('classic');
   const [showSynchronicity, setShowSynchronicity] = useState(false);
+  const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
 
   const { user } = useAuth();
   const { signature } = usePersonalSignature();
@@ -288,6 +291,37 @@ export default function Messages() {
                 Start New Conversation
               </Button>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Deeper Knowledge Section */}
+      <div className="p-4 border-t">
+        <div className="text-center">
+          <div className="bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-indigo-500/20 backdrop-blur-sm border border-cyan-400/30 rounded-xl p-6 max-w-2xl mx-auto">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeeperKnowledge(!showDeeperKnowledge)}
+              className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-bold py-4 px-8 text-xl gap-4 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-0"
+              size="lg"
+            >
+              <Sparkles className="w-6 h-6" />
+              {showDeeperKnowledge ? 'Hide' : 'Unlock'} Sacred Wisdom
+              <BookOpen className="w-6 h-6" />
+            </Button>
+            <p className="text-sm text-muted-foreground mt-3">
+              Explore the sacred art of conscious communication and divine correspondence
+            </p>
+          </div>
+        </div>
+
+        {/* Teaching Layer */}
+        {showDeeperKnowledge && (
+          <div className="mt-6">
+            <TeachingLayer
+              content={ALL_MODULE_TEACHINGS.messages}
+              moduleId="messages"
+            />
           </div>
         )}
       </div>

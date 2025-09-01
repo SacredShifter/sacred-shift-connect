@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
@@ -27,11 +27,15 @@ function Earth({ isBreathing, breathRate, breathingMode, onBreath, sunRef }: {
   const atmosphereRef = useRef<THREE.Mesh>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
 
-  const [dayTexture, nightTexture, cloudsTexture] = useTexture([
-    `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/sacred-assets/uploads/2k_earth_daymap.jpg`,
-    `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/sacred-assets/uploads/2k_earth_nightmap.jpg`,
-    `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/sacred-assets/uploads/2k_earth_clouds.jpg`,
-  ]);
+  // Fixed Earth textures - force reload
+  const earthTextures = [
+    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
+    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_lights_2048.png', 
+    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png',
+  ];
+  
+  console.log('Loading Earth textures:', earthTextures);
+  const [dayTexture, nightTexture, cloudsTexture] = useTexture(earthTextures);
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
@@ -257,7 +261,13 @@ function JetStream({ isActive }: { isActive: boolean }) {
       positions[i * 3 + 2] = radius * Math.sin(angle);
     }
     return positions;
-  }, []);
+  }, [particleCount]);
+
+  const geometry = React.useMemo(() => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return geo;
+  }, [positions]);
 
   useFrame(({ clock }) => {
     if (pointsRef.current && isActive) {
@@ -268,15 +278,7 @@ function JetStream({ isActive }: { isActive: boolean }) {
   if (!isActive) return null;
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleCount}
-          array={positions}
-          itemSize={3}
-        />
-      </bufferGeometry>
+    <points ref={pointsRef} geometry={geometry}>
       <pointsMaterial color="#ffffff" size={0.02} transparent opacity={0.5} />
     </points>
   );

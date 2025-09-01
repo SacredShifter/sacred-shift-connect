@@ -7,7 +7,12 @@ export const SceneRouter: React.FC = () => {
   const currentScene = state.context.currentScene;
 
   return (
-    <Suspense fallback={<mesh><sphereGeometry args={[1]} /><meshBasicMaterial color="#9370DB" wireframe /></mesh>}>
+    <Suspense fallback={
+      <mesh>
+        <sphereGeometry args={[1]} />
+        <meshBasicMaterial color="#9370DB" wireframe />
+      </mesh>
+    }>
       <group>
         <ambientLight intensity={0.3} color="#8A2BE2" />
         <pointLight position={[0, 5, 0]} intensity={0.5} color="#9370DB" />

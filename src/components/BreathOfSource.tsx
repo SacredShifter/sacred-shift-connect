@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { getAudioContextClass } from '@/utils/audio/SimpleAudioEngine';
 
 interface BreathingPreset {
   id: string;
@@ -94,7 +95,10 @@ const BreathOfSource: React.FC<{ autoOpen?: boolean }> = ({ autoOpen = false }) 
   // Initialize audio context
   const initializeAudio = () => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextClass();
+      if (AudioContextClass) {
+        audioContextRef.current = new AudioContextClass();
+      }
     }
     return audioContextRef.current;
   };

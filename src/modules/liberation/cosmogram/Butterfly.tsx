@@ -74,10 +74,11 @@ export const Butterfly: React.FC = () => {
           <meshStandardMaterial color={hovered ? '#f0f0f0' : '#ffffff'} side={THREE.DoubleSide} />
         </mesh>
       </group>
-      <points ref={particlesRef}>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" count={PARTICLE_COUNT} array={particles} itemSize={3} />
-        </bufferGeometry>
+      <points ref={particlesRef} geometry={useMemo(() => {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(particles, 3));
+        return geo;
+      }, [particles])}>
         <pointsMaterial size={0.05} color="#ffffff" transparent opacity={0.5} />
       </points>
     </group>

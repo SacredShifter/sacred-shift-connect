@@ -22,6 +22,7 @@ export default {
 				'sacred': ['Syne', 'system-ui', 'sans-serif'],
 				'body': ['Inter', 'system-ui', 'sans-serif'],
 				'codex': ['Crimson Text', 'serif'],
+				'mystical': ['Cinzel', 'serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -67,13 +68,19 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Sacred Shifter Frequency Colors
-				truth: 'hsl(var(--truth))',
-				resonance: 'hsl(var(--resonance))',
-				alignment: 'hsl(var(--alignment))',
-				purpose: 'hsl(var(--purpose))',
-				silence: 'hsl(var(--silence))',
-				pulse: 'hsl(var(--pulse))'
+			// Sacred Shifter Frequency Colors
+			truth: 'hsl(var(--truth))',
+			resonance: 'hsl(var(--resonance))',
+			alignment: 'hsl(var(--alignment))',
+			purpose: 'hsl(var(--purpose))',
+			silence: 'hsl(var(--silence))',
+			pulse: 'hsl(var(--pulse))',
+			// Sacred Routine Geometry Colors
+			phoenix: 'hsl(var(--phoenix))',
+			merkaba: 'hsl(var(--merkaba))',
+			seed: 'hsl(var(--seed))',
+			flower: 'hsl(var(--flower))',
+			metatron: 'hsl(var(--metatron))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

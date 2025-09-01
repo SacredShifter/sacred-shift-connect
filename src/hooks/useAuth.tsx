@@ -1,4 +1,5 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import type { ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
@@ -26,12 +27,13 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | undefined>(undefined);
   const [roleLoading, setRoleLoading] = useState(false);
+  
   const { handleAuthError } = useErrorHandler();
   
   logger.debug('AuthProvider state change', { 
@@ -198,7 +200,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [handleAuthError]);
 
   const signUp = async (email: string, password: string) => {
     logger.info('Starting user sign up', { component: 'useAuth', function: 'signUp', metadata: { email } });

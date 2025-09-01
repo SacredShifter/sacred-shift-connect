@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Trash2, Download, Shield, Eye, Bell } from 'lucide-react';
+import { Trash2, Download, Shield, Eye, Bell, Atom } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Settings = () => {
@@ -432,7 +432,29 @@ const Settings = () => {
           </div>
         </CardContent>
       </Card>
-      </div>
+
+      {/* Sacred Mesh Configuration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Atom className="h-5 w-5" />
+            Sacred Mesh Network
+          </CardTitle>
+          <CardDescription>
+            Manage your Sacred Mesh seeds and nature-inspired communication channels
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-center text-muted-foreground">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <Atom className="h-8 w-8 text-primary" />
+            </div>
+            <p>Sacred Mesh functionality is now integrated throughout the platform.</p>
+            <p className="text-sm mt-2">Create mesh seeds, manage handshakes, and configure nature-inspired transport adapters in the Privacy & Compliance section above.</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
     </div>
   );
 };

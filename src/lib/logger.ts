@@ -12,6 +12,7 @@ export interface LogContext {
   postId?: string;
   errorCode?: string;
   metadata?: Record<string, any>;
+  [key: string]: any; // Index signature to make it compatible with Sentry's Extras type
 }
 
 export interface LogEntry {
