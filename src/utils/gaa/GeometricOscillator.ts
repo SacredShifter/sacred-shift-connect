@@ -34,6 +34,7 @@ export class GeometricOscillator {
   }> = new Map();
   private masterGain: Tone.Gain;
   private masterCompressor: Tone.Compressor;
+  private masterAnalyser: Tone.Analyser;
 
   constructor(audioContext: AudioContext, config: GeometricOscillatorConfig) {
     this.config = config;
@@ -48,9 +49,11 @@ export class GeometricOscillator {
       attack: 0.003,
       release: 0.1
     });
+    this.masterAnalyser = new Tone.Analyser('waveform', 1024);
     
     this.masterGain.connect(this.masterCompressor);
-    this.masterCompressor.toDestination();
+    this.masterCompressor.connect(this.masterAnalyser);
+    this.masterAnalyser.toDestination();
     
     console.log('✅ GAA master audio chain ready');
   }
@@ -164,6 +167,28 @@ export class GeometricOscillator {
       panner.positionX.rampTo(geometry.center[0] * 10, 0.2);
       panner.positionY.rampTo(geometry.center[1] * 10, 0.2);
       panner.positionZ.rampTo(geometry.center[2] * 10, 0.2);
+    }
+  }
+
+  /**
+   * Updates the core audio parameters of a specific oscillator.
+   * This is more direct than recalculating from geometry.
+   */
+  setParameters(id: string, params: { fHz?: number, amp?: number, fcHz?: number }): void {
+    const components = this.oscillators.get(id);
+    if (!components) return;
+
+    const { osc, envelope, filter } = components;
+
+    if (params.fHz) {
+      osc.frequency.rampTo(params.fHz, 0.05);
+    }
+    if (params.amp) {
+      // Direct gain control on the envelope is tricky. For now, we assume amp is handled by envelope.
+      // A more advanced implementation might use a separate VCA.
+    }
+    if (params.fcHz) {
+      filter.frequency.rampTo(params.fcHz, 0.05);
     }
   }
 
@@ -285,5 +310,12 @@ export class GeometricOscillator {
         z: components.panner.positionZ.value
       }
     };
+  }
+
+  /**
+   * Get the master analyser node for monitoring
+   */
+  getAnalyserNode(): Tone.Analyser {
+    return this.masterAnalyser;
   }
 }

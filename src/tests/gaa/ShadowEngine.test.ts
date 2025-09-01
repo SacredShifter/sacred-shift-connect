@@ -87,6 +87,26 @@ describe('ShadowEngine', () => {
     expect(outputs2.weights.dark).toBeGreaterThan(outputs1.weights.dark);
   });
 
+  it('should calculate specific, predictable weights', () => {
+    const preset: GaaPreset = {
+      ...mockPreset,
+      polarity: { ...mockPreset.polarity, polarityEnabled: true, darkWeight: 0.5 },
+    };
+    const engine = new ShadowEngine(preset);
+
+    // With neutral bio-signals, shadowBias should be 0.5
+    const neutralBio: BioSignals = { hrv: 0.5, eegBandRatio: 0.5 };
+
+    // Manual calculation:
+    // hrvBias = 0.5, eegBias = 0.5
+    // shadowBias = 0.5 * (0.5 + (1 - 0.5)) = 0.5
+    // wDarkBase = 0.5
+    // wDark = 0.5 + 0.4 * 0.5 * (1 - 0.5) = 0.5 + 0.4 * 0.5 * 0.5 = 0.5 + 0.1 = 0.6
+    const outputs = engine.step(0.016, mockCoreFrame, neutralBio);
+    expect(outputs.weights.dark).toBeCloseTo(0.6);
+    expect(outputs.weights.light).toBeCloseTo(0.4);
+  });
+
   it('should return a snapshot of the current state', () => {
     const engine = new ShadowEngine(mockPreset);
     engine.step(0.016, mockCoreFrame, mockBioSignals);
