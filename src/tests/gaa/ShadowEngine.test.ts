@@ -4,9 +4,11 @@ import { GaaPreset, GaaCoreFrame, BioSignals } from '@/types/gaa';
 
 describe('ShadowEngine', () => {
   const mockPreset: GaaPreset = {
+    label: 'Test',
     polarity: {
       polarityEnabled: true,
       darkWeight: 0.5,
+      lightWeight: 0.5,
       shadowMode: false,
       darkEnergyEnabled: false,
       darkEnergy: {
@@ -20,9 +22,13 @@ describe('ShadowEngine', () => {
       },
     },
     params: {
-        alpha: [1, 1, 1, 1],
-        beta: [1, 1],
-        gamma: [1, 1],
+      R: 1, r: 0.5, n: 3, phi0: 0,
+      omega: 1, eta: 0.1,
+      kappaRef: 0.5, tauRef: 1,
+      alpha: [1, 1, 1, 1],
+      beta: [1, 1],
+      gamma: [1, 1],
+      Lmin: 0, Lmax: 1
     },
   };
 

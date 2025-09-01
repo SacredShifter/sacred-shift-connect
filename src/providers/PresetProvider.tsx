@@ -60,7 +60,8 @@ const createDefaultPresets = (): GAAPreset[] => {
         lightChannel: { enabled: true, amplitude: tradition === 'etteilla' ? 0.4 : 0.6, phase: 0, resonanceMode: 'harmonic' },
         darkChannel: { enabled: true, amplitude: tradition === 'etteilla' ? 0.6 : 0.4, phase: Math.PI, resonanceMode: 'chaotic' },
         polarityBalance: tradition === 'etteilla' ? -0.2 : 0.2,
-        darkEnergyDrift: { driftRate: 0.05, expansionFactor: 1.2 }
+        darkEnergyDrift: { driftRate: 0.05, expansionFactor: 1.2 },
+        timestamp: Date.now()
       },
       audioParams: {
         darkPhaseHonor: tradition === 'rws' ? 120 : tradition === 'marseille' ? 150 : tradition === 'thoth' ? 140 : 90,
@@ -81,7 +82,8 @@ const createDefaultPresets = (): GAAPreset[] => {
         lightChannel: { enabled: true, amplitude: 0.3, phase: 0, resonanceMode: 'harmonic' },
         darkChannel: { enabled: true, amplitude: 0.7, phase: Math.PI, resonanceMode: 'chaotic' },
         polarityBalance: -0.7,
-        darkEnergyDrift: { driftRate: 0.1, expansionFactor: 1.5 }
+        darkEnergyDrift: { driftRate: 0.1, expansionFactor: 1.5 },
+        timestamp: Date.now()
       },
       audioParams: {
         darkPhaseHonor: 60,
@@ -102,7 +104,8 @@ const createDefaultPresets = (): GAAPreset[] => {
         lightChannel: { enabled: true, amplitude: 0.2, phase: 0, resonanceMode: 'harmonic' },
         darkChannel: { enabled: true, amplitude: 0.8, phase: Math.PI, resonanceMode: 'chaotic' },
         polarityBalance: -0.8,
-        darkEnergyDrift: { driftRate: 0.15, expansionFactor: 1.8 }
+        darkEnergyDrift: { driftRate: 0.15, expansionFactor: 1.8 },
+        timestamp: Date.now()
       },
       audioParams: {
         darkPhaseHonor: 30,
@@ -123,7 +126,8 @@ const createDefaultPresets = (): GAAPreset[] => {
         lightChannel: { enabled: true, amplitude: 0.5, phase: 0, resonanceMode: 'harmonic' },
         darkChannel: { enabled: true, amplitude: 0.5, phase: Math.PI, resonanceMode: 'adaptive' },
         polarityBalance: 0,
-        darkEnergyDrift: { driftRate: 0.08, expansionFactor: 1.3 }
+        darkEnergyDrift: { driftRate: 0.08, expansionFactor: 1.3 },
+        timestamp: Date.now()
       },
       audioParams: {
         darkPhaseHonor: 45,
@@ -144,7 +148,8 @@ const createDefaultPresets = (): GAAPreset[] => {
         lightChannel: { enabled: true, amplitude: 0.8, phase: 0, resonanceMode: 'harmonic' },
         darkChannel: { enabled: true, amplitude: 0.2, phase: Math.PI, resonanceMode: 'harmonic' },
         polarityBalance: 0.8,
-        darkEnergyDrift: { driftRate: 0.02, expansionFactor: 1.1 }
+        darkEnergyDrift: { driftRate: 0.02, expansionFactor: 1.1 },
+        timestamp: Date.now()
       },
       audioParams: {
         darkPhaseHonor: 25,

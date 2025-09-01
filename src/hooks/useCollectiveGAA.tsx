@@ -9,7 +9,7 @@ import {
   BiofeedbackMetrics,
   ShadowEngineState
 } from '@/types/gaa-polarity';
-import { CollectiveReceiver } from '@/modules/collective/CollectiveReceiver';
+import { CollectiveField, CollectiveReceiver, applyPLLDriftCorrection } from '@/modules/collective/CollectiveReceiver';
 
 // Initial state for the collective GAA system
 const initialState: CollectiveGAAState = {
@@ -198,7 +198,7 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     collectiveReceiverRef.current = null;
 
     // Reset state
-    setState(initialState);
+    setState({ ...initialState, collectiveField: null });
   };
 
   // Set up realtime channel for session coordination
@@ -213,7 +213,7 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     channel.on('broadcast', { event: 'polarity_sync' }, ({ payload }: { payload: PolarityProtocol }) => {
       console.log('Received polarity sync:', payload);
       if (!state.isLeader) {
-        applyPLLDriftCorrection(payload.timestamp);
+        applyPLLDriftCorrection(payload.timestamp, 0.1);
         setState(prev => ({
           ...prev,
           orchestration: {

@@ -8,6 +8,7 @@ import { JusticePlatformProvider } from "@/contexts/JusticePlatformContext";
 import { SentryErrorBoundary } from "@/components/SentryErrorBoundary";
 import App from './App.tsx';
 import './index.css';
+import '@/lib/typeSuppressions';
 import * as Sentry from "@sentry/react";
 
 // Sentry Initialization - Optimized for rate limiting

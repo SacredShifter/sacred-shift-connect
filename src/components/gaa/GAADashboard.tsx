@@ -61,7 +61,8 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
     lightChannel: { enabled: true, amplitude: 0.7, phase: 0, resonanceMode: 'harmonic' },
     darkChannel: { enabled: true, amplitude: 0.3, phase: Math.PI, resonanceMode: 'chaotic' },
     polarityBalance: 0.3,
-    darkEnergyDrift: { driftRate: 0.05, expansionFactor: 1.2 }
+    darkEnergyDrift: { driftRate: 0.05, expansionFactor: 1.2 },
+    timestamp: Date.now()
   });
   const [sessionStartTime] = useState(Date.now());
   const [showInfoPanel, setShowInfoPanel] = useState(false);
