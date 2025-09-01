@@ -261,7 +261,13 @@ function JetStream({ isActive }: { isActive: boolean }) {
       positions[i * 3 + 2] = radius * Math.sin(angle);
     }
     return positions;
-  }, []);
+  }, [particleCount]);
+
+  const geometry = React.useMemo(() => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return geo;
+  }, [positions]);
 
   useFrame(({ clock }) => {
     if (pointsRef.current && isActive) {
@@ -272,11 +278,7 @@ function JetStream({ isActive }: { isActive: boolean }) {
   if (!isActive) return null;
 
   return (
-    <points ref={pointsRef} geometry={useMemo(() => {
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      return geo;
-    }, [positions])}>
+    <points ref={pointsRef} geometry={geometry}>
       <pointsMaterial color="#ffffff" size={0.02} transparent opacity={0.5} />
     </points>
   );
