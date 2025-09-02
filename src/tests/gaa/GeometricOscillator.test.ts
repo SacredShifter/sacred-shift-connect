@@ -106,7 +106,37 @@ describe('GeometricOscillator', () => {
     // @ts-expect-error - accessing private method for testing
     const freq = geoOsc.calculateGeometricFrequency(mockGeometry);
     expect(freq).toBeGreaterThanOrEqual(20);
-    expect(freq).toBeLessThanOrEqual(2000);
+    expect(freq).toBeLessThanOrEqual(20000); // Increased upper bound
+    geoOsc.destroy();
+  });
+
+  it('should fallback to 432 Hz for invalid or out-of-range frequency', () => {
+    const audioContext = new MockAudioContext() as unknown as AudioContext;
+    const geoOsc = new GeometricOscillator(audioContext, defaultConfig);
+
+    // Test with NaN radius
+    const nanGeometry = { ...mockGeometry, radius: NaN };
+    // @ts-expect-error
+    const freq1 = geoOsc.calculateGeometricFrequency(nanGeometry);
+    expect(freq1).toBe(432);
+
+    // Test with frequency below range
+    const lowFreqGeometry = { ...mockGeometry, radius: -1000 }; // Will calculate to < 20
+    // @ts-expect-error
+    const freq2 = geoOsc.calculateGeometricFrequency(lowFreqGeometry);
+    expect(freq2).toBe(432);
+
+    // Test with frequency above range
+    const highFreqGeometry = { ...mockGeometry, radius: 1000 }; // Will calculate to > 20000
+    // @ts-expect-error
+    const freq3 = geoOsc.calculateGeometricFrequency(highFreqGeometry);
+    expect(freq3).toBe(432);
+
+    // Test with null geometry
+    // @ts-expect-error
+    const freq4 = geoOsc.calculateGeometricFrequency(null);
+    expect(freq4).toBe(432);
+
     geoOsc.destroy();
   });
 

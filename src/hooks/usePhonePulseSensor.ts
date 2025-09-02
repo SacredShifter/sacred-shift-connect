@@ -4,8 +4,11 @@ const SAMPLES_PER_SECOND = 30;
 const BUFFER_SECONDS = 5;
 const BUFFER_SIZE = SAMPLES_PER_SECOND * BUFFER_SECONDS;
 
+export type SignalQuality = 'good' | 'weak' | 'no_signal';
+
 export const usePhonePulseSensor = () => {
   const [bpm, setBpm] = useState<number>(0);
+  const [signalQuality, setSignalQuality] = useState<SignalQuality>('no_signal');
   const [isSensing, setIsSensing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -14,6 +17,8 @@ export const usePhonePulseSensor = () => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const waveformBufferRef = useRef<number[]>([]);
   const lastPeakTimeRef = useRef<number>(0);
+  const bpmHistoryRef = useRef<number[]>([]);
+  const noSignalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const processSignal = useCallback(() => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -62,9 +67,23 @@ export const usePhonePulseSensor = () => {
             if (timeSinceLastPeak > 400 && timeSinceLastPeak < 2000) { // 30-150 BPM range
                 const estimatedBpm = 60000 / timeSinceLastPeak;
                 setBpm(prevBpm => (prevBpm * 0.9) + (estimatedBpm * 0.1)); // Smooth the reading
+
+                // Update signal quality based on BPM variance
+                const history = bpmHistoryRef.current;
+                history.push(estimatedBpm);
+                if (history.length > 10) history.shift();
+
+                if (history.length > 5) {
+                    const mean = history.reduce((a, b) => a + b, 0) / history.length;
+                    const variance = history.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / history.length;
+                    setSignalQuality(variance < 5 ? 'good' : 'weak');
+                }
             }
         }
         lastPeakTimeRef.current = peakTime;
+        // Reset no-signal timer
+        if (noSignalTimeoutRef.current) clearTimeout(noSignalTimeoutRef.current);
+        noSignalTimeoutRef.current = setTimeout(() => setSignalQuality('no_signal'), 2000);
     }
   }, []);
 
@@ -123,6 +142,10 @@ export const usePhonePulseSensor = () => {
     if (!isSensing) return;
     console.log('📷 Stopping phone pulse sensor...');
 
+    if (noSignalTimeoutRef.current) {
+        clearTimeout(noSignalTimeoutRef.current);
+        noSignalTimeoutRef.current = null;
+    }
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -161,6 +184,7 @@ export const usePhonePulseSensor = () => {
     bpm,
     isSensing,
     error,
+    signalQuality,
     startSensing,
     stopSensing,
   };
