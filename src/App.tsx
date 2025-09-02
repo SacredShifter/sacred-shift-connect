@@ -56,6 +56,7 @@ import { DevSitemap } from './components/SacredSitemap/DevSitemap';
 import { UserSitemap } from './components/SacredSitemap/UserSitemap';
 import Ethos from './pages/Ethos';
 import DailyPractice from './pages/DailyPractice';
+import TarotPage from './pages/Tarot';
 
 
 function App() {
@@ -152,6 +153,7 @@ function App() {
                    <Route path="/meditation" element={<Meditation />} />
                    <Route path="/journal" element={<Journal />} />
                    <Route path="/grove" element={<Grove />} />
+                   <Route path="/tarot" element={<TarotPage />} />
                    
                    {/* GAA System Routes */}
                    <Route path="/gaa" element={<GAADashboard />} />

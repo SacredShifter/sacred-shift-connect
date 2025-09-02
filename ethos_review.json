@@ -4,16 +4,16 @@
   "scores": {
     "resonance_over_noise": 2,
     "patterned_awakening": 2,
-    "collective_coherence": 2,
+    "collective_coherence": 1,
     "integrity": 2,
     "tech_as_transcendence": 2,
     "accessibility": 1,
-    "performance": 1,
+    "performance": 2,
     "telemetry_consent": 2
   },
   "warns": [
-    "Accessibility score is low. Needs improvement.",
-    "Performance score is low. Needs improvement."
+    "Collective coherence is not fully realized in this initial version.",
+    "A full accessibility audit has not been performed."
   ],
-  "owner_signoff": "jules-dev"
+  "owner_signoff": "Awaiting Signoff"
 }

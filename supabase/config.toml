@@ -48,10 +48,8 @@ verify_jwt = true
 [functions.publish-youtube]
 verify_jwt = true
 
-[[functions]]
-name = "ingest-seed"
+[functions.ingest-seed]
 verify_jwt = false
 
-[[functions]]
-name = "process-content-plan"
+[functions.process-content-plan]
 verify_jwt = false
