@@ -5,15 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useContentSources } from '@/hooks/useContentSources';
-import { ContentPlatform } from '@/components/PetalLotus';
 
 interface AddSourceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultPlatform?: ContentPlatform;
+  defaultPlatform?: string;
 }
 
-const PLATFORM_OPTIONS: { value: ContentPlatform; label: string; examples: string[] }[] = [
+const PLATFORM_OPTIONS: { value: string; label: string; examples: string[] }[] = [
   { 
     value: 'youtube', 
     label: 'YouTube', 
@@ -57,11 +56,27 @@ const PLATFORM_OPTIONS: { value: ContentPlatform; label: string; examples: strin
     ]
   },
   { 
-    value: 'podcast', 
-    label: 'Podcast', 
+    value: 'linkedin', 
+    label: 'LinkedIn', 
     examples: [
-      'https://feeds.example.com/podcast.xml',
-      'RSS Feed URL'
+      'https://www.linkedin.com/in/username',
+      'https://www.linkedin.com/company/company-name'
+    ]
+  },
+  { 
+    value: 'spotify', 
+    label: 'Spotify', 
+    examples: [
+      'https://open.spotify.com/show/xxxxxx',
+      'https://open.spotify.com/playlist/xxxxxx'
+    ]
+  },
+  { 
+    value: 'soundcloud', 
+    label: 'SoundCloud', 
+    examples: [
+      'https://soundcloud.com/username',
+      'https://soundcloud.com/username/sets/playlist'
     ]
   }
 ];
@@ -81,7 +96,7 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     source_name: '',
-    source_type: defaultPlatform || 'youtube' as ContentPlatform,
+    source_type: defaultPlatform || 'youtube',
     source_url: '',
     sync_frequency_hours: 24
   });
@@ -133,7 +148,7 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
             <Label htmlFor="source_type">Platform</Label>
             <Select
               value={formData.source_type}
-              onValueChange={(value: ContentPlatform) => 
+              onValueChange={(value: string) => 
                 setFormData(prev => ({ ...prev, source_type: value }))
               }
             >

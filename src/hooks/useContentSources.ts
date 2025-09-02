@@ -109,12 +109,14 @@ export const useContentSources = () => {
       const { data, error } = await (supabase as any)
         .from('content_sources')
         .insert({
-          ...sourceData,
+          source_name: sourceData.source_name,
+          source_type: sourceData.source_type,
+          source_url: sourceData.source_url,
+          sync_frequency_hours: sourceData.sync_frequency_hours,
           user_id: user.id,
           sync_status: 'pending',
           petal_position: Math.floor(Math.random() * 8) + 1,
           next_sync_at: nextSync.toISOString(),
-          source_platform: sourceData.source_type, // It's likely the table uses 'source_platform'
         })
         .select()
         .single();
