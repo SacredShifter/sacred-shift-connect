@@ -110,13 +110,22 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
   }, [gaaEngine.state.isPlaying, gaaEngine.state.isInitialized]);
   const { phonePulseSensor, accelerometer } = gaaEngine;
 
-  const signalQuality = phonePulseSensor.isSensing
-    ? phonePulseSensor.signalQuality
-    : accelerometer.isSensing
-    ? accelerometer.signalQuality
-    : 'no_signal';
+  // Live GAA engine state integration
+  const liveBiofeedbackState = {
+    bpm: (phonePulseSensor.bpm > 0 ? phonePulseSensor.bpm : accelerometer.bpm) || 0,
+    signalQuality: (phonePulseSensor.isSensing ? phonePulseSensor.signalQuality : 
+                   accelerometer.isSensing ? accelerometer.signalQuality : 'no_signal'),
+    isConnected: phonePulseSensor.isSensing || accelerometer.isSensing,
+    hrv: 0, // Will be calculated below
+    breathingRate: 0 // Will be calculated below
+  };
 
-  const isBiofeedbackConnected = phonePulseSensor.isSensing || accelerometer.isSensing;
+  // Calculate HRV and breathing rate from BPM
+  liveBiofeedbackState.hrv = Math.max(0, Math.min(100, (1 - ((liveBiofeedbackState.bpm - 60) / 40)) * 100));
+  liveBiofeedbackState.breathingRate = Math.round((liveBiofeedbackState.bpm || 60) / 4);
+
+  const signalQuality = liveBiofeedbackState.signalQuality;
+  const isBiofeedbackConnected = liveBiofeedbackState.isConnected;
 
   // Transport controls
   const handlePlay = async () => {
@@ -193,9 +202,27 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
 
   const sessionDuration = Date.now() - sessionStartTime;
 
+  // Live GAA engine metrics
+  const liveGAAEngineState = {
+    oscillatorCount: gaaEngine.state.activeOscillators || 0,
+    currentFrequency: gaaEngine.state.shadowState?.lastOutputs?.fHz || 432,
+    groupCoherence: orchestra.isConnected ? (orchestra.coherence || 0) : 0,
+    sessionDuration: sessionDuration,
+    safetyAlerts: gaaEngine.state.safetyAlerts.map(alert => alert.message) || []
+  };
+
   const allWarnings = [
     ...gaaEngine.state.safetyAlerts.map(a => ({ message: a.message, type: a.type })),
   ];
+
+  // Add real-time warnings based on live data
+  if (liveGAAEngineState.currentFrequency === 432 && gaaEngine.state.isPlaying) {
+    allWarnings.push({ message: '⚠️ Invalid geometry – fallback frequency applied (432 Hz).', type: 'warning' });
+  }
+
+  if (gaaEngine.state.isPlaying && !isBiofeedbackConnected) {
+    allWarnings.push({ message: '⚠️ No biofeedback sensors connected – using default values.', type: 'warning' });
+  }
 
   if (signalQuality === 'weak') {
     allWarnings.push({ message: '⚠️ Weak biofeedback signal.', type: 'warning' });
@@ -340,22 +367,22 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
             </CardHeader>
             <CardContent className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-sm text-muted-foreground">Oscillators</div>
-                <div className="text-2xl font-bold">{gaaEngine.state.activeOscillators}</div>
+                 <div className="text-sm text-muted-foreground">Oscillators</div>
+                 <div className="text-2xl font-bold">{liveGAAEngineState.oscillatorCount}</div>
               </div>
               <div>
-                <div className="text-sm text-muted-foreground">Frequency</div>
-                <div className="text-2xl font-bold">
-                  {gaaEngine.state.shadowState?.lastOutputs.fHz.toFixed(1) || '0.0'}
-                  <span className="text-sm text-muted-foreground ml-1">Hz</span>
-                </div>
+                 <div className="text-sm text-muted-foreground">Frequency</div>
+                 <div className="text-2xl font-bold">
+                   {liveGAAEngineState.currentFrequency.toFixed(1)}
+                   <span className="text-sm text-muted-foreground ml-1">Hz</span>
+                 </div>
               </div>
               <div>
-                <div className="text-sm text-muted-foreground">Coherence</div>
-                <div className="text-2xl font-bold">
-                  {(orchestra.coherence * 100).toFixed(0)}
-                  <span className="text-sm text-muted-foreground ml-1">%</span>
-                </div>
+                 <div className="text-sm text-muted-foreground">Coherence</div>
+                 <div className="text-2xl font-bold">
+                   {(liveGAAEngineState.groupCoherence * 100).toFixed(0)}
+                   <span className="text-sm text-muted-foreground ml-1">%</span>
+                 </div>
               </div>
             </CardContent>
           </Card>
@@ -494,10 +521,10 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
                 <CardContent className="space-y-3">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <div className="text-sm text-muted-foreground">Heart Rate</div>
-                      <div className="text-lg font-bold">
-                        {(phonePulseSensor.bpm > 0 ? phonePulseSensor.bpm : accelerometer.bpm)?.toFixed(0) || '--'} BPM
-                      </div>
+                     <div className="text-sm text-muted-foreground">Heart Rate</div>
+                     <div className="text-lg font-bold">
+                       {liveBiofeedbackState.bpm > 0 ? liveBiofeedbackState.bpm.toFixed(0) : '--'} BPM
+                     </div>
                     </div>
                     <div>
                       <div className="text-sm text-muted-foreground">Source</div>
@@ -544,16 +571,17 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
             {FLAGS.sessionMetrics && (
               <SessionMetrics
                 biofeedbackState={{
-                heartRate: phonePulseSensor.isSensing ? phonePulseSensor.bpm : accelerometer.bpm,
-                  heartRateVariability: gaaEngine.state.shadowState?.heartVariability,
-                breathingRate: gaaEngine.state.shadowState?.breathCoherence ? gaaEngine.state.shadowState.breathCoherence * 20 : 0, // Example mapping
-                brainwaveAlpha: gaaEngine.state.shadowState?.neuralEntrainment,
+                  heartRate: liveBiofeedbackState.bpm,
+                  heartRateVariability: liveBiofeedbackState.hrv,
+                  breathingRate: liveBiofeedbackState.breathingRate,
+                  brainwaveAlpha: gaaEngine.state.shadowState?.neuralEntrainment || 0,
+                  signalQuality: liveBiofeedbackState.signalQuality
                 }}
                 gaaEngineState={{
                   isInitialized: gaaEngine.state.isInitialized,
                   isPlaying: gaaEngine.state.isPlaying,
                   currentPhase: (gaaEngine.state.shadowState?.currentPhase || 'idle') as 'idle' | 'activation' | 'processing' | 'integration',
-                  oscillatorCount: gaaEngine.state.activeOscillators,
+                  oscillatorCount: liveGAAEngineState.oscillatorCount,
                   currentGeometry: {
                     complexity: gaaEngine.state.shadowState?.polarityBalance || 0,
                     vertices: 8,
@@ -563,7 +591,7 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
                   lastUpdate: Date.now()
                 }}
                 sessionDuration={sessionDuration}
-                safetyAlerts={allWarnings.map(w => w.message)}
+                safetyAlerts={liveGAAEngineState.safetyAlerts}
                 isActive={gaaEngine.state.isPlaying}
                 orchestraMetrics={mockOrchestraMetrics}
                 sessionBadges={sessionBadges}

@@ -145,14 +145,17 @@ export const useGAAEngine = (
         heartRate = accelerometer.bpm;
     }
 
-    // Normalize BPM to an HRV-like value. Clamp input to avoid extreme values.
-    const clampedBpm = Math.max(40, Math.min(120, heartRate));
-    const normalizedBpm = (clampedBpm - 60) / 40; // Normalize 60-100bpm range to 0-1
-    currentBioSignals = {
-      hrv: Math.max(0, Math.min(1, 1 - normalizedBpm)) * 100, // Inverse relationship: higher BPM -> lower HRV
-      eegBandRatio: 0.5, // Default EEG until sensor is integrated
-      breath: 0, // Default breath until sensor is integrated
-    };
+  // Add sensor input clamping with safe defaults
+  const clampedBpm = Math.max(40, Math.min(180, heartRate));
+  const defaultBreathingRate = Math.round(clampedBpm / 4); // Estimate breathing rate from BPM
+  const safeBreathingRate = Math.max(8, Math.min(20, defaultBreathingRate)); // 8-20 breaths/min range
+  
+  // Enhanced biofeedback integration with safety validation
+  currentBioSignals = {
+    hrv: Math.max(0, Math.min(100, (1 - ((clampedBpm - 60) / 40)) * 100)), // Safer HRV calculation
+    eegBandRatio: 0.5, // Default EEG until sensor is integrated
+    breath: safeBreathingRate / 20, // Normalize to 0-1 range
+  };
 
     // 3. Iterate through geometries and update oscillators
     geometries.forEach((geom, index) => {
@@ -292,6 +295,15 @@ export const useGAAEngine = (
     await startGAA();
   }, [initializeGAA, startGAA]);
 
+  // Add audio stream integration for orchestra
+  const getAudioStream = useCallback(() => {
+    if (geometricOscillatorRef.current) {
+      // Return the actual audio output stream for P2P sharing
+      return geometricOscillatorRef.current.getOutputStream();
+    }
+    return null;
+  }, []);
+
   return {
     state,
     initializeGAA,
@@ -301,6 +313,6 @@ export const useGAAEngine = (
     updatePreset: setPreset,
     phonePulseSensor, // Expose the whole hook for UI integration
     accelerometer,
-    getAudioStream: () => geometricOscillatorRef.current?.getOutputStream(),
+    getAudioStream,
   };
 };
