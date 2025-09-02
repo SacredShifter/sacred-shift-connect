@@ -14,54 +14,29 @@ import * as Sentry from "@sentry/react";
 
 // Sentry Initialization - Optimized for rate limiting
 if (!import.meta.env.DEV && import.meta.env.VITE_SENTRY_DSN && import.meta.env.PROD) {
-  // Error deduplication cache
-  const errorCache = new Set();
-  
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
     environment: import.meta.env.MODE,
     integrations: [
       Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration(),
+      // Replay is disabled for now to reduce noise
+      // Sentry.replayIntegration(),
     ],
-    // Reduced sample rates to prevent 429 errors
-    tracesSampleRate: 0.1, // 10% of transactions (reduced from 100%)
-    tracePropagationTargets: ["localhost", /^https:\/\/.*\.supabase\.co/],
-    // Session Replay - much lower rates
-    replaysSessionSampleRate: 0.01, // 1% of sessions (reduced from 10%)
-    replaysOnErrorSampleRate: 1.0, // Still capture all error sessions
+    // Turn off all sampling until the app is stable
+    tracesSampleRate: 0,
+    profilesSampleRate: 0,
+    replaysSessionSampleRate: 0,
+    replaysOnErrorSampleRate: 0,
     
-    // Rate limiting and filtering
+    // Filtering to reduce noise
     beforeSend(event) {
-      // Skip duplicate errors within 60 seconds
-      const errorKey = `${event.exception?.[0]?.type}-${event.exception?.[0]?.value}`;
-      if (errorCache.has(errorKey)) {
-        return null;
-      }
-      errorCache.add(errorKey);
-      setTimeout(() => errorCache.delete(errorKey), 60000);
-      
-      // Filter out common non-critical errors
-      const ignoredErrors = [
-        'ResizeObserver loop limit exceeded',
-        'Non-Error promise rejection captured',
-        'Network request failed',
-        'Load failed',
-        'Script error.'
-      ];
-      
-      if (ignoredErrors.some(ignored => 
-        event.message?.includes(ignored) || 
-        event.exception?.[0]?.value?.includes(ignored)
-      )) {
-        return null;
-      }
-      
+      // Drop info/log events as per instructions
+      if (event.level === 'log' || event.level === 'info') return null;
       return event;
     },
     
-    // Rate limit based on client-side throttling
-    maxBreadcrumbs: 50, // Reduce breadcrumb storage
+    maxBreadcrumbs: 20,
+    maxQueueSize: 30,
   });
 }
 

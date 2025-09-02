@@ -1,15 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Settings, Heart, Filter } from 'lucide-react';
+import { Sparkles, Plus, RefreshCw, Filter } from 'lucide-react';
+
+interface CurationHubAction {
+  icon: React.ElementType;
+  label: string;
+  onClick: () => void;
+}
 
 interface CurationHubProps {
   isExpanded: boolean;
   hasSelection: boolean;
+  actions: CurationHubAction[];
 }
 
 export const CurationHub: React.FC<CurationHubProps> = ({
   isExpanded,
-  hasSelection
+  hasSelection,
+  actions,
 }) => {
   return (
     <motion.div
@@ -39,16 +47,16 @@ export const CurationHub: React.FC<CurationHubProps> = ({
       {/* Orbital Icons */}
       {isExpanded && (
         <>
-          {[Settings, Heart, Filter].map((Icon, index) => {
-            const angle = (index * 120) - 90; // Start from top
-            const radius = 40;
+          {actions.map((action, index) => {
+            const angle = (index * (360 / actions.length)) - 90; // Start from top
+            const radius = 60;
             const x = Math.cos((angle * Math.PI) / 180) * radius;
             const y = Math.sin((angle * Math.PI) / 180) * radius;
 
             return (
               <motion.div
-                key={index}
-                className="absolute w-8 h-8 bg-card border border-border rounded-full flex items-center justify-center cursor-pointer hover:bg-accent"
+                key={action.label}
+                className="absolute w-10 h-10 bg-card border border-border rounded-full flex items-center justify-center cursor-pointer hover:bg-accent"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ 
                   scale: 1, 
@@ -61,8 +69,10 @@ export const CurationHub: React.FC<CurationHubProps> = ({
                   duration: 0.3
                 }}
                 whileHover={{ scale: 1.1 }}
+                onClick={action.onClick}
+                aria-label={action.label}
               >
-                <Icon className="w-4 h-4 text-muted-foreground" />
+                <action.icon className="w-5 h-5 text-muted-foreground" />
               </motion.div>
             );
           })}

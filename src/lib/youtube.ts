@@ -1,230 +1,68 @@
-// YouTube IFrame API wrapper for Sacred Ventilation playlist
+// lib/youtube.ts
 
-declare global {
-  interface Window {
-    onYouTubeIframeAPIReady: () => void;
-    YT: any;
+/**
+ * Parses a YouTube URL or handle to extract the channel ID or handle.
+ * @param urlOrHandle - The YouTube URL or handle (e.g., @username)
+ * @returns An object containing the channelId or handle.
+ */
+export function parseYouTubeExternalId(urlOrHandle: string): { channelId?: string; handle?: string } {
+  if (urlOrHandle.startsWith('@')) {
+    return { handle: urlOrHandle.substring(1) };
   }
-}
-
-export interface YouTubePlayerOptions {
-  onReady?: () => void;
-  onStateChange?: (state: number) => void;
-  onError?: (error: number) => void;
-}
-
-export class YouTubePlaylistPlayer {
-  private player: any = null;
-  private isAPIReady = false;
-  private containerId: string;
-  private playlistId: string;
-  private options: YouTubePlayerOptions;
   
-  constructor(containerId: string, playlistId: string, options: YouTubePlayerOptions = {}) {
-    this.containerId = containerId;
-    this.playlistId = playlistId;
-    this.options = options;
-    
-    this.initializeAPI();
-  }
-
-  private async initializeAPI() {
-    // Check if YouTube API is already loaded
-    if (window.YT && window.YT.Player) {
-      this.isAPIReady = true;
-      this.createPlayer();
-      return;
-    }
-
-    // Load YouTube IFrame API
-    return new Promise<void>((resolve) => {
-      // Set global callback for when API is ready
-      window.onYouTubeIframeAPIReady = () => {
-        this.isAPIReady = true;
-        this.createPlayer();
-        resolve();
-      };
-
-      // Check if script is already being loaded
-      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-        const script = document.createElement('script');
-        script.src = 'https://www.youtube.com/iframe_api';
-        script.async = true;
-        document.head.appendChild(script);
+  try {
+    const url = new URL(urlOrHandle);
+    if (url.hostname.includes('youtube.com')) {
+      if (url.pathname.startsWith('/channel/')) {
+        return { channelId: url.pathname.split('/')[2] };
       }
-    });
-  }
-
-  private createPlayer() {
-    if (!this.isAPIReady || !window.YT?.Player) return;
-
-    const container = document.getElementById(this.containerId);
-    if (!container) {
-      console.error(`Container with ID "${this.containerId}" not found`);
-      return;
-    }
-
-    this.player = new window.YT.Player(this.containerId, {
-      height: '0',
-      width: '0',
-      playerVars: {
-        listType: 'playlist',
-        list: this.playlistId,
-        autoplay: 0,
-        controls: 0,
-        disablekb: 1,
-        enablejsapi: 1,
-        fs: 0,
-        iv_load_policy: 3,
-        modestbranding: 1,
-        playsinline: 1,
-        rel: 0,
-        showinfo: 0,
-        loop: 1,
-        shuffle: 1, // Shuffle playlist
-      },
-      events: {
-        onReady: (event: any) => {
-          console.log('YouTube player ready');
-          // Start muted to comply with autoplay policies
-          event.target.mute();
-          this.options.onReady?.();
-        },
-        onStateChange: (event: any) => {
-          this.options.onStateChange?.(event.data);
-          
-          // Handle playlist end - restart with shuffle
-          if (event.data === window.YT.PlayerState.ENDED) {
-            this.shuffleAndPlay();
-          }
-        },
-        onError: (event: any) => {
-          console.error('YouTube player error:', event.data);
-          this.options.onError?.(event.data);
-        }
+      if (url.pathname.startsWith('/@')) {
+        return { handle: url.pathname.substring(2) };
       }
-    });
-  }
-
-  public async play() {
-    if (!this.player?.playVideo) {
-      console.warn('YouTube player not ready');
-      return;
     }
-
-    try {
-      // Unmute and play
-      this.player.unMute();
-      this.player.setVolume(30); // Start at moderate volume
-      await this.player.playVideo();
-    } catch (error) {
-      console.error('Failed to play YouTube playlist:', error);
+  } catch (error) {
+    // Not a valid URL, assume it's a handle if it doesn't start with @
+    if (!urlOrHandle.startsWith('@')) {
+      return { handle: urlOrHandle };
     }
   }
 
-  public pause() {
-    if (this.player?.pauseVideo) {
-      this.player.pauseVideo();
-    }
-  }
-
-  public stop() {
-    if (this.player?.stopVideo) {
-      this.player.stopVideo();
-    }
-  }
-
-  public mute() {
-    if (this.player?.mute) {
-      this.player.mute();
-    }
-  }
-
-  public unmute() {
-    if (this.player?.unMute) {
-      this.player.unMute();
-    }
-  }
-
-  public setVolume(volume: number) {
-    if (this.player?.setVolume) {
-      this.player.setVolume(Math.max(0, Math.min(100, volume)));
-    }
-  }
-
-  public getVolume(): number {
-    return this.player?.getVolume?.() || 0;
-  }
-
-  public shuffleAndPlay() {
-    if (this.player?.setShuffle) {
-      this.player.setShuffle(true);
-      this.player.nextVideo();
-      this.play();
-    }
-  }
-
-  public nextTrack() {
-    if (this.player?.nextVideo) {
-      this.player.nextVideo();
-    }
-  }
-
-  public previousTrack() {
-    if (this.player?.previousVideo) {
-      this.player.previousVideo();
-    }
-  }
-
-  public getCurrentTime(): number {
-    return this.player?.getCurrentTime?.() || 0;
-  }
-
-  public getDuration(): number {
-    return this.player?.getDuration?.() || 0;
-  }
-
-  public getPlayerState(): number {
-    return this.player?.getPlayerState?.() || -1;
-  }
-
-  public destroy() {
-    if (this.player?.destroy) {
-      this.player.destroy();
-      this.player = null;
-    }
-  }
-
-  public isPlaying(): boolean {
-    return this.getPlayerState() === window.YT?.PlayerState?.PLAYING;
-  }
-
-  public isPaused(): boolean {
-    return this.getPlayerState() === window.YT?.PlayerState?.PAUSED;
-  }
+  return {};
 }
 
-// Factory function for easier usage
-export function createPlaylistPlayer(
-  containerId: string, 
-  playlistId: string, 
-  options: YouTubePlayerOptions = {}
-): YouTubePlaylistPlayer {
-  return new YouTubePlaylistPlayer(containerId, playlistId, options);
+/**
+ * Resolves a YouTube handle to a channel ID using the YouTube API.
+ * This is a placeholder and would require a real API call.
+ * @param handle - The YouTube handle (e.g., username)
+ * @returns The YouTube channel ID (UC...).
+ */
+export async function resolveHandleToChannelId(handle: string): Promise<string> {
+  // In a real implementation, you would use the YouTube Data API v3.
+  // This would require an API key and fetching from:
+  // https://www.googleapis.com/youtube/v3/channels?forUsername={handle}&key={API_KEY}
+  // For now, we'll return a mock ID.
+  console.warn(`[YouTube] Mock resolving handle: @${handle}. Using mock ID.`);
+  return `UC_mock_${handle}_ID`;
 }
 
-// Utility to extract playlist ID from YouTube URL
-export function extractPlaylistId(url: string): string | null {
-  const match = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
-  return match ? match[1] : null;
-}
+/**
+ * Fetches the latest videos for a given YouTube channel.
+ * This is a placeholder and would require a real API call.
+ * @param channelId - The ID of the YouTube channel.
+ * @param pageToken - The token for the next page of results.
+ * @returns A list of video items and a token for the next page.
+ */
+export async function fetchChannelVideos(channelId: string, pageToken?: string) {
+  // In a real implementation, you would use the YouTube Data API v3.
+  // This would require an API key and fetching from:
+  // https://www.googleapis.com/youtube/v3/search?channelId={channelId}&part=snippet,id&order=date&maxResults=50&key={API_KEY}
+  console.warn(`[YouTube] Mock fetching videos for channel: ${channelId}.`);
 
-// Player state constants for convenience
-export const PLAYER_STATES = {
-  UNSTARTED: -1,
-  ENDED: 0,
-  PLAYING: 1,
-  PAUSED: 2,
-  BUFFERING: 3,
-  CUED: 5
-} as const;
+  return {
+    items: [
+      { external_id: 'mock_video_1', title: 'Mock Video 1', description: 'This is a mock video.', published_at: new Date().toISOString(), thumb_url: 'https://placehold.co/320x180', duration_seconds: 120 },
+      { external_id: 'mock_video_2', title: 'Mock Video 2', description: 'This is another mock video.', published_at: new Date().toISOString(), thumb_url: 'https://placehold.co/320x180', duration_seconds: 240 },
+    ],
+    nextPageToken: undefined,
+  };
+}
