@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import * as Tone from 'tone';
+import { useCollectiveGAA } from '@/hooks/useCollectiveGAA';
 import { GateOfLiberation } from '@/modules/liberation';
 import { UnhookingFromFearBroadcasts } from '@/modules/unhooking';
 import { ReconnectionWithLivingEarth } from '@/modules/earth';
@@ -51,6 +53,17 @@ export default function Liberation() {
   const [currentModule, setCurrentModule] = useState<ModulePhase>('selection');
   const [showTrustIntro, setShowTrustIntro] = useState(true);
   const navigate = useNavigate();
+  const { collectiveField, joinSession, createSession } = useCollectiveGAA(Tone.Transport);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session');
+    if (sessionId) {
+      joinSession(sessionId);
+    } else {
+      createSession();
+    }
+  }, [joinSession, createSession]);
 
   const handleModuleSelect = (moduleId: string) => {
     setCurrentModule(moduleId as ModulePhase);
@@ -64,6 +77,10 @@ export default function Liberation() {
     const module = modules.find(m => m.id === currentModule);
     if (module?.component) {
       const Component = module.component;
+      if (module.id === 'earth') {
+        // @ts-ignore
+        return <Component onExit={handleBackToSelection} collectiveField={collectiveField} />;
+      }
       return <Component onExit={handleBackToSelection} />;
     }
     return null;

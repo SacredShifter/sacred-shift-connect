@@ -297,7 +297,7 @@ export class GeometricOscillator {
    */
   private calculateGeometricFrequency(geometry: NormalizedGeometry): number {
     // --- Input Validation ---
-    if (!geometry || !Number.isFinite(geometry.radius) || !geometry.sacredRatios || !Number.isFinite(geometry.sacredRatios.phi)) {
+    if (!geometry || !Number.isFinite(geometry.radius) || geometry.radius <= 0 || !geometry.sacredRatios || !Number.isFinite(geometry.sacredRatios.phi)) {
         console.warn(`[GAA] Invalid geometry data received for frequency calculation. Falling back to 432Hz.`);
         return 432;
     }

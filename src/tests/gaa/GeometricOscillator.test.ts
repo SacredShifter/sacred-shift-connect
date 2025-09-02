@@ -302,6 +302,49 @@ describe('GeometricOscillator', () => {
     oscillator.destroy();
   });
 
+  describe('calculateGeometricFrequency', () => {
+    it('should return 432Hz for invalid geometry inputs', () => {
+        const audioContext = new MockAudioContext() as unknown as AudioContext;
+        const oscillator = new GeometricOscillator(audioContext, defaultConfig);
+
+        const baseGeom = { vertices: [[0,0,0]], faces: [[0,0,0]], normals: [[0,0,1]], center: [0,0,0], sacredRatios: { phi: 1.618, pi: 3.141, sqrt2: 1.414 }};
+
+        // @ts-expect-error
+        const freq1 = oscillator.calculateGeometricFrequency({ ...baseGeom, radius: Infinity });
+        // @ts-expect-error
+        const freq2 = oscillator.calculateGeometricFrequency({ ...baseGeom, radius: NaN });
+        // @ts-expect-error
+        const freq3 = oscillator.calculateGeometricFrequency({ ...baseGeom, radius: -10 }); // My validation also checks for <= 0
+        // @ts-expect-error
+        const freq4 = oscillator.calculateGeometricFrequency(null);
+
+        expect(freq1).toBe(432);
+        expect(freq2).toBe(432);
+        expect(freq3).toBe(432);
+        expect(freq4).toBe(432);
+
+        oscillator.destroy();
+    });
+
+    it('should always return a frequency within the audible range', () => {
+        const audioContext = new MockAudioContext() as unknown as AudioContext;
+        const oscillator = new GeometricOscillator(audioContext, defaultConfig);
+
+        const highFreqGeom = { ...mockGeometry, radius: 1000 };
+        const lowFreqGeom = { ...mockGeometry, radius: -1000 };
+
+        // @ts-expect-error
+        const highFreq = oscillator.calculateGeometricFrequency(highFreqGeom);
+        // @ts-expect-error
+        const lowFreq = oscillator.calculateGeometricFrequency(lowFreqGeom);
+
+        expect(highFreq).toBeLessThanOrEqual(2000);
+        expect(lowFreq).toBe(432); // Falls back due to invalid radius
+
+        oscillator.destroy();
+    });
+  });
+
   describe('Dynamic Load Balancing', () => {
     let performanceNow = 0;
     let rafCallback: FrameRequestCallback | null = null;

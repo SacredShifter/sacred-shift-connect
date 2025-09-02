@@ -9,19 +9,19 @@ import { HUD } from './ui/HUD';
 import { AudioEngine } from './audio/AudioEngine';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useCollectiveGAA } from '@/hooks/useCollectiveGAA';
+import { ParticipantState } from '@/modules/collective/CollectiveReceiver';
+import * as Tone from 'tone';
 
 interface ReconnectionWithLivingEarthProps {
   onExit?: () => void;
+  collectiveField: any; // Passed from parent
 }
 
 // Wrapper component to use the hook for the 3D map
-const EarthResonanceMapWrapper = () => {
-    const { collectiveField } = useCollectiveGAA();
-
+const EarthResonanceMapWrapper = ({ collectiveField }: { collectiveField: any }) => {
     const nodes: Node[] = useMemo(() => {
         if (!collectiveField || !collectiveField.participantStates) return [];
-        // @ts-ignore
-        return Object.values(collectiveField.participantStates).map((p: any) => ({
+        return Object.values(collectiveField.participantStates).map((p: ParticipantState) => ({
             id: p.userId,
             lat: p.lat ?? Math.random() * 180 - 90, // Fuzzed geolocation
             lon: p.lon ?? Math.random() * 360 - 180,
@@ -51,8 +51,7 @@ const EarthResonanceMapWrapper = () => {
 }
 
 // Wrapper component for the storytelling overlay
-const StorytellingWrapper = () => {
-    const { collectiveField } = useCollectiveGAA();
+const StorytellingWrapper = ({ collectiveField }: { collectiveField: any }) => {
     return (
         <StorytellingOverlay
             nodeCount={collectiveField?.nodeCount ?? 0}
@@ -62,7 +61,7 @@ const StorytellingWrapper = () => {
 }
 
 
-export default function ReconnectionWithLivingEarth({ onExit }: ReconnectionWithLivingEarthProps) {
+export default function ReconnectionWithLivingEarth({ onExit, collectiveField }: ReconnectionWithLivingEarthProps) {
   const [state, send] = useMachine(earthMachine);
 
   // Default exit handler if none provided
@@ -97,11 +96,11 @@ export default function ReconnectionWithLivingEarth({ onExit }: ReconnectionWith
               powerPreference: 'high-performance'
             }}
           >
-            <EarthResonanceMapWrapper />
+            <EarthResonanceMapWrapper collectiveField={collectiveField} />
           </Canvas>
           
           <HUD />
-          <StorytellingWrapper />
+          <StorytellingWrapper collectiveField={collectiveField} />
           <AudioEngine />
         </div>
       </EarthProvider>

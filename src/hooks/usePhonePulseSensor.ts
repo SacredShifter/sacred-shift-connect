@@ -94,19 +94,13 @@ export const usePhonePulseSensor = () => {
         video.srcObject = stream;
         video.play();
 
-        // Attempt to turn on the flash
+        // Flash/torch control has been removed due to non-standard API and browser compatibility issues.
+        // The capability check is left in place for future reference if the API becomes standardized.
         const track = stream.getVideoTracks()[0];
         const capabilities = track.getCapabilities();
         // @ts-ignore
         if (capabilities.torch) {
-            try {
-                // @ts-ignore
-                await track.applyConstraints({ advanced: [{ torch: true }] });
-            } catch (err) {
-                console.warn("Could not enable torch:", err);
-            }
-        } else {
-            console.warn("Flash/torch not available on this device.");
+            console.log("Device supports torch, but it is disabled for compatibility.");
         }
 
         lastPeakTimeRef.current = 0;
@@ -128,18 +122,6 @@ export const usePhonePulseSensor = () => {
       intervalRef.current = null;
     }
     if (streamRef.current) {
-        // Turn off flash
-        const track = streamRef.current.getVideoTracks()[0];
-        const capabilities = track.getCapabilities();
-        // @ts-ignore
-        if (capabilities.torch) {
-            try {
-                // @ts-ignore
-                track.applyConstraints({ advanced: [{ torch: false }] });
-            } catch (err) {
-                console.warn("Could not disable torch:", err);
-            }
-        }
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
     }

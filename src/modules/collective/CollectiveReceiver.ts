@@ -212,6 +212,30 @@ export class CollectiveReceiver {
     this.isConnected = false;
     this.updateNodeCount();
   }
+
+  public registerParticipant(participant: { user_id: string, display_name: string }) {
+    if (!this.participantStates.has(participant.user_id)) {
+      const newState: ParticipantState = {
+        userId: participant.user_id,
+        displayName: participant.display_name || 'Anonymous',
+        resonance: 0,
+        polarity: 0,
+        coherence: 0,
+        lastUpdate: Date.now()
+      };
+      this.participantStates.set(participant.user_id, newState);
+      this.updateNodeCount();
+      console.log(`[GAA] Participant ${participant.display_name} registered.`);
+    }
+  }
+
+  public unregisterParticipant(userId: string) {
+    if (this.participantStates.has(userId)) {
+      this.participantStates.delete(userId);
+      this.updateNodeCount();
+      console.log(`[GAA] Participant ${userId} unregistered.`);
+    }
+  }
 }
 
 export const applyPLLDriftCorrection = (phase: number, correction?: number) => {

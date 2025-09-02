@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 // This is a very simplified approach to motion-based HR estimation.
 // A real implementation would require more sophisticated signal processing.
