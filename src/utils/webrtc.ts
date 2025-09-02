@@ -33,7 +33,7 @@ export class WebRTCManager {
     console.log('Setting up WebRTC peer connection...');
     
     // STUN servers for NAT traversal, and TURN server for relay
-    const iceServers = [
+    const iceServers: RTCIceServer[] = [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' }
     ];
@@ -41,8 +41,8 @@ export class WebRTCManager {
     if (import.meta.env.VITE_TURN_URL) {
       iceServers.push({
         urls: import.meta.env.VITE_TURN_URL,
-        username: import.meta.env.VITE_TURN_USERNAME,
-        credential: import.meta.env.VITE_TURN_PASSWORD,
+        username: import.meta.env.VITE_TURN_USERNAME || '',
+        credential: import.meta.env.VITE_TURN_PASSWORD || '',
       });
     }
 

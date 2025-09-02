@@ -9,7 +9,7 @@ interface SyncNode {
   quality: number; // 0-1, connection quality
 }
 
-interface SyncMessage {
+export interface SyncMessage {
   type: 'phase_sync' | 'latency_probe' | 'coherence_update';
   nodeId: string;
   timestamp: number;

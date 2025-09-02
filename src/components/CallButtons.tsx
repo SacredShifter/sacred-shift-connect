@@ -30,12 +30,6 @@ export const CallButtons: React.FC<CallButtonsProps> = ({ userId, userName }) =>
     console.log('Initializing WebRTC manager for user:', user.id);
     
     const manager = new WebRTCManager(
-      // onRemoteStream
-      (stream) => {
-        console.log('Remote stream received:', stream);
-        setRemoteStream(stream);
-        setIsConnected(true);
-      },
       // onCallEnd
       () => {
         console.log('Call ended');
@@ -58,7 +52,17 @@ export const CallButtons: React.FC<CallButtonsProps> = ({ userId, userName }) =>
           description: `Call from user ${fromUserId.slice(0, 8)}...`
         });
       },
-      user.id
+      user.id,
+      // onDataChannelMessage
+      (event) => {
+        console.log('Data channel message:', event.data);
+      },
+      // onRemoteStream
+      (stream) => {
+        console.log('Remote stream received:', stream);
+        setRemoteStream(stream);
+        setIsConnected(true);
+      }
     );
 
     setWebrtcManager(manager);
@@ -111,8 +115,13 @@ export const CallButtons: React.FC<CallButtonsProps> = ({ userId, userName }) =>
         description: `Calling ${userName}...`
       });
 
-      const callId = await webrtcManager.initializeCall(userId);
-      setLocalStream(webrtcManager.getLocalStream());
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: true, 
+        audio: true 
+      });
+      
+      const callId = await webrtcManager.initializeCall(userId, stream);
+      setLocalStream(stream);
       setIsVideoCallOpen(true);
       
       console.log('Video call initiated with callId:', callId);
@@ -133,8 +142,13 @@ export const CallButtons: React.FC<CallButtonsProps> = ({ userId, userName }) =>
     try {
       console.log('Accepting call:', incomingCallId);
       
-      await webrtcManager.acceptCall(incomingCallId, incomingFromUserId);
-      setLocalStream(webrtcManager.getLocalStream());
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: true, 
+        audio: true 
+      });
+      
+      await webrtcManager.acceptCall(incomingCallId, incomingFromUserId, stream);
+      setLocalStream(stream);
       setIsIncomingCall(false);
       setIsVideoCallOpen(true);
       

@@ -97,10 +97,17 @@ export const useContentSources = () => {
     sync_frequency_hours?: number;
   }) => {
     try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error('User must be authenticated to add content sources');
+      }
+
       const { data, error } = await (supabase as any)
         .from('content_sources')
         .insert({
           ...sourceData,
+          user_id: user.id,
           sync_status: 'pending',
           petal_position: Math.floor(Math.random() * 8) + 1,
         })
