@@ -103,9 +103,6 @@ export const useContentSources = () => {
         throw new Error('User must be authenticated to add content sources');
       }
 
-      const nextSync = new Date();
-      nextSync.setHours(nextSync.getHours() + (sourceData.sync_frequency_hours || 24));
-
       const { data, error } = await (supabase as any)
         .from('content_sources')
         .insert({
@@ -114,9 +111,8 @@ export const useContentSources = () => {
           source_url: sourceData.source_url,
           sync_frequency_hours: sourceData.sync_frequency_hours,
           user_id: user.id,
-          sync_status: 'pending',
+          sync_status: 'active',
           petal_position: Math.floor(Math.random() * 8) + 1,
-          next_sync_at: nextSync.toISOString(),
         })
         .select()
         .single();
