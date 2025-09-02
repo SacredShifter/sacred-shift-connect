@@ -46,6 +46,7 @@ import JusticeQuantumCommandNexus from '@/pages/JusticeQuantumCommandNexus';
 import ConstellationMapper from "./pages/ConstellationMapper";
 import Grove from "./pages/Grove";
 import Liberation from "./pages/Liberation";
+import { CollectiveCoherenceCircle } from "@/modules/collective";
 import Shift from './pages/Shift';
 import Meditation from './pages/Meditation';
 import Breath from './pages/Breath';
@@ -195,6 +196,7 @@ function App() {
                   <Route path="/registry" element={<CollectiveAkashicConstellationPage />} />
                   <Route path="/resonance/entries/:id" element={<RegistryEntry />} />
                   <Route path="/liberation" element={<Liberation />} />
+                  <Route path="/collective" element={<CollectiveCoherenceCircle onExit={() => window.history.back()} />} />
                   <Route path="/learning-3d" element={<Learning3D />} />
                   <Route path="/shift" element={<Shift />} />
                   <Route path="/features-coming-soon" element={<FeaturesComingSoon />} />

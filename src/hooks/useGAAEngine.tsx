@@ -46,7 +46,11 @@ const defaultPreset: GaaPreset = {
  * GAA (Geometrically Aligned Audio) Engine Hook
  * Refactored to a centralized architecture with a main update loop.
  */
-export const useGAAEngine = (collectiveField: CollectiveField | null) => {
+export const useGAAEngine = (
+    collectiveField: CollectiveField | null,
+    phase?: number,
+    coherence?: number
+) => {
   const [preset, setPreset] = useState<GaaPreset>(defaultPreset);
   const [state, setState] = useState<GAAEngineState>({
     isInitialized: false,
@@ -165,11 +169,19 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
 
       // 4a. Apply collective field influence
       if (collectiveField) {
-        const { resonance, polarity, coherence } = collectiveField;
+        const { resonance, polarity } = collectiveField;
         // Simple blending - more sophisticated mapping can be done in ShadowEngine
         audioParams.fHz *= (1 + (resonance - 0.5) * 0.1);
-        audioParams.amp *= (1 + (coherence - 0.5) * 0.2);
+        if (coherence) {
+            audioParams.amp *= (1 + (coherence - 0.5) * 0.2);
+        }
         // Polarity will be handled inside ShadowEngine in a future iteration
+      }
+
+      if (phase) {
+        // This is a simplified application of phase. A more robust implementation
+        // would involve a proper phase-locking mechanism in the oscillator.
+        audioParams.fHz *= (1 + Math.sin(phase - mockCore.PhiN) * 0.01);
       }
 
       // 5. Create or update oscillator

@@ -148,6 +148,25 @@ export default function Liberation() {
           ))}
         </div>
 
+        {/* Collective Session Controls */}
+        <div className="mt-8 text-center">
+            <Button
+              variant="outline"
+              className="w-full mt-4 border-indigo-400 text-indigo-300 hover:bg-indigo-900/40"
+              onClick={() => {
+                const sessionId = prompt('Enter session ID to join (or leave blank to create a new one):');
+                if (sessionId) {
+                    navigate(`/collective?session=${sessionId}`);
+                } else {
+                    navigate('/collective');
+                }
+              }}
+              title="Enter a shared resonance field. Your sound will sync with others in real time."
+            >
+              🌐 Join Collective Session
+            </Button>
+        </div>
+
         {/* Journey Progress */}
         <div className="mt-16 p-6 rounded-lg border border-primary/20 bg-primary/5">
           <h2 className="text-xl font-semibold mb-4">Your Liberation Journey</h2>

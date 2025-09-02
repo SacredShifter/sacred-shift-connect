@@ -8,7 +8,8 @@ import {
   BiofeedbackMetrics,
   ShadowEngineState
 } from '@/types/gaa-polarity';
-import { CollectiveField, CollectiveReceiver, applyPLLDriftCorrection, ParticipantState } from '@/modules/collective/CollectiveReceiver';
+import { CollectiveField, CollectiveReceiver, ParticipantState } from '@/modules/collective/CollectiveReceiver';
+import { CollectiveSync } from '@/utils/gaa/CollectiveSync';
 
 // Initial state for the collective GAA system
 const initialState: CollectiveGAAState = {
@@ -37,8 +38,11 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
   const clockOffsetRef = useRef<number>(0);
   const clockSyncIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const collectiveReceiverRef = useRef<CollectiveReceiver | null>(null);
+  const collectiveSyncRef = useRef<CollectiveSync | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<{ [key: string]: MediaStream }>({});
+  const [phase, setPhase] = useState(0);
+  const [coherence, setCoherence] = useState(0);
 
   // --- Clock Synchronization Logic ---
   const syncClock = async () => {
@@ -100,6 +104,8 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
       return null;
     }
 
+    await startAudioStreaming();
+
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     const mockSession: GAASessionExtended = {
@@ -125,12 +131,38 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     setupRealtimeChannel(sessionId);
     
     if(userIdRef.current) {
-        collectiveReceiverRef.current = new CollectiveReceiver(userIdRef.current);
-        collectiveReceiverRef.current.onFieldUpdate((field) => {
+        const receiver = new CollectiveReceiver(userIdRef.current);
+        collectiveReceiverRef.current = receiver;
+
+        const sync = new CollectiveSync((newPhase, newCoherence) => {
+            setPhase(newPhase);
+            setCoherence(newCoherence);
+        });
+        collectiveSyncRef.current = sync;
+
+        receiver.onFieldUpdate((field) => {
           setState(prev => ({ ...prev, collectiveField: field }));
         });
-        collectiveReceiverRef.current.onStream((userId, stream) => {
+        receiver.onStream((userId, stream) => {
             setRemoteStreams(prev => ({...prev, [userId]: stream}));
+        });
+
+        receiver.onSignal((peerId, data) => {
+            if (channelRef.current) {
+                channelRef.current.send({
+                    type: 'broadcast',
+                    event: 'signal',
+                    payload: { from: userIdRef.current, to: peerId, signal: data },
+                });
+            }
+        });
+
+        sync.startSync((message) => {
+            receiver.broadcast(message);
+        });
+
+        receiver.onSyncMessage((message) => {
+            collectiveSyncRef.current?.handleSyncMessage(message, Date.now());
         });
     }
 
@@ -159,6 +191,8 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
       return false;
     }
 
+    await startAudioStreaming();
+
     // Simulate joining session
     const mockSession: GAASessionExtended = {
       id: sessionId,
@@ -183,12 +217,38 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     setupRealtimeChannel(sessionId);
 
     if(userIdRef.current) {
-        collectiveReceiverRef.current = new CollectiveReceiver(userIdRef.current);
-        collectiveReceiverRef.current.onFieldUpdate((field) => {
+        const receiver = new CollectiveReceiver(userIdRef.current);
+        collectiveReceiverRef.current = receiver;
+
+        const sync = new CollectiveSync((newPhase, newCoherence) => {
+            setPhase(newPhase);
+            setCoherence(newCoherence);
+        });
+        collectiveSyncRef.current = sync;
+
+        receiver.onFieldUpdate((field) => {
           setState(prev => ({ ...prev, collectiveField: field }));
         });
-        collectiveReceiverRef.current.onStream((userId, stream) => {
+        receiver.onStream((userId, stream) => {
             setRemoteStreams(prev => ({...prev, [userId]: stream}));
+        });
+
+        receiver.onSignal((peerId, data) => {
+            if (channelRef.current) {
+                channelRef.current.send({
+                    type: 'broadcast',
+                    event: 'signal',
+                    payload: { from: userIdRef.current, to: peerId, signal: data },
+                });
+            }
+        });
+
+        sync.startSync((message) => {
+            receiver.broadcast(message);
+        });
+
+        receiver.onSyncMessage((message) => {
+            collectiveSyncRef.current?.handleSyncMessage(message, Date.now());
         });
     }
 
@@ -218,7 +278,10 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
       channelRef.current = null;
     }
 
+    collectiveReceiverRef.current?.disconnect();
     collectiveReceiverRef.current = null;
+    collectiveSyncRef.current?.stopSync();
+    collectiveSyncRef.current = null;
 
     // Reset state
     setState({ ...initialState, collectiveField: null });
@@ -237,29 +300,10 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
 
     const channel = supabase.channel(`collective-session-${sessionId}`);
 
-    // *** Add broadcast handler for polarity_sync ***
-    channel.on('broadcast', { event: 'polarity_sync' }, ({ payload }: { payload: PolarityProtocol }) => {
-      console.log('Received polarity sync:', payload);
-      if (!state.isLeader) {
-        // Use the hook's own drift correction method
-        const networkTime = Date.now() + clockOffsetRef.current;
-        const timeError = networkTime - payload.timestamp;
-        const P = 0.0001;
-        const I = 0.00001;
-        const currentBpm = transport.bpm.value;
-        const adjustment = timeError * P + (timeError * I);
-        const newBpm = currentBpm + adjustment;
-        const clampedBpm = Math.max(30, Math.min(300, newBpm));
-        transport.bpm.rampTo(clampedBpm, 0.5);
-
-        setState(prev => ({
-          ...prev,
-          orchestration: {
-            ...prev.orchestration,
-            ...payload as any
-          }
-        }));
-      }
+    channel.on('broadcast', { event: 'signal' }, ({ payload }: { payload: { from: string, to: string, signal: any } }) => {
+        if (payload.to === userIdRef.current) {
+            collectiveReceiverRef.current?.signal(payload.from, payload.signal);
+        }
     });
 
     channel.on('broadcast', { event: 'state_update' }, ({ payload }: { payload: any }) => {
@@ -297,7 +341,13 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     })
     .on('presence', { event: 'join' }, ({ newPresences }) => {
       console.log('Participant joined:', newPresences);
-      newPresences.forEach(p => collectiveReceiverRef.current?.registerParticipant(p as any));
+      newPresences.forEach(p => {
+        const peerId = (p as any).user_id;
+        if (peerId !== userIdRef.current) {
+          console.log(`Initiating connection to ${peerId}`);
+          collectiveReceiverRef.current?.connect(peerId, true);
+        }
+      });
     })
     .on('presence', { event: 'leave' }, ({ leftPresences }) => {
       console.log('Participant left:', leftPresences);
@@ -441,76 +491,9 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     },
     // --- Placeholder for future advanced sync logic ---
     getNetworkTime: () => Date.now() + clockOffsetRef.current,
-    getParticipantLatency: (userId: string) => 0, // TODO: Implement latency detection
-    applyPLLDriftCorrection: (leaderTimestamp: number) => {
-        const networkTime = Date.now() + clockOffsetRef.current;
-        const timeError = networkTime - leaderTimestamp; // in ms
-
-        // PI controller for drift correction
-        const P = 0.0001; // Proportional gain
-        const I = 0.00001; // Integral gain
-
-        // Adjust transport BPM to correct for drift
-        const currentBpm = transport.bpm.value;
-        const adjustment = timeError * P + (timeError * I);
-        const newBpm = currentBpm + adjustment;
-
-        // Clamp BPM to reasonable values
-        const clampedBpm = Math.max(30, Math.min(300, newBpm));
-        transport.bpm.rampTo(clampedBpm, 0.5);
-      }
+    getParticipantLatency: (userId: string) => collectiveSyncRef.current?.getNetworkStats().averageLatency || 0,
+    phase,
+    coherence,
+    connectionStatus: state.connectionStatus,
   };
 };
-
-// --- Future Development Roadmap for Collective Sync ---
-//
-// PHASE 2: LATENCY & JITTER COMPENSATION
-//
-// 1. PHASE-LOCKED LOOP (PLL) FOR DRIFT CORRECTION:
-//    - The `applyPLLDriftCorrection` function below should be implemented.
-//    - It should compare the received timestamp of a message with the current network time.
-//    - The difference (phase error) should be fed into a PI controller (Proportional-Integral).
-//    - The output of the controller adjusts the playback rate of the local audio engine
-//      (e.g., `Tone.Transport.bpm`) to slowly pull the client back into phase with the leader.
-//
-// 2. JITTER BUFFER:
-//    - All incoming state messages should be put into a "jitter buffer" for a
-//      short, fixed period (e.g., 100-200ms).
-//    - After the delay, the client processes messages from the buffer in
-//      timestamp order, discarding any that are too old. This ensures smooth
-//      playback at the cost of a small, fixed latency.
-//
-// PHASE 3: SCALABLE ARCHITECTURE
-//
-// 1. DEDICATED REAL-TIME SERVER:
-//    - The Supabase broadcast model will not scale. A dedicated real-time server
-//      (e.g., Node.js with WebSockets, or a Phoenix server) is required.
-//    - The server would manage session state, process updates, and send targeted
-//      messages to clients, reducing client-side load.
-//
-// 2. WEBRTC DATA CHANNELS:
-//    - For even lower latency, a peer-to-peer mesh network using WebRTC data
-//      channels can be used. This is complex to manage for groups larger than ~8
-//      and would likely require a "selective forwarding unit" (SFU) server architecture.
-//
-// 1. CLOCK SYNCHRONIZATION:
-//    - Create a Supabase edge function that returns the server's timestamp.
-//    - Clients should periodically call this function and calculate a running average
-//      of the offset between their local clock and the server clock.
-//    - The `getNetworkTime()` function should return `Date.now() + clockOffset`.
-//
-// 2. LATENCY & JITTER COMPENSATION:
-//    - All broadcasted state updates MUST include a synchronized timestamp.
-//    - Receiving clients should put incoming messages into a "jitter buffer" for a
-//      short, fixed period (e.g., 100-200ms).
-//    - After the delay, the client processes the messages from the buffer in
-//      timestamp order, discarding any that are too old.
-//    - This ensures smooth playback at the cost of a small, fixed latency.
-//
-// 3. STATE SYNCHRONIZATION ARCHITECTURE:
-//    - Move away from Supabase broadcast for high-frequency state. It is not designed
-//      for this purpose and will not scale.
-//    - Option A: Dedicated Real-time Server (e.g., Node.js with WebSockets, or a Phoenix server).
-//      The server would manage the state of each session and send targeted updates to clients.
-//    - Option B: WebRTC Data Channels. For smaller groups, a peer-to-peer mesh network
-//      can provide very low latency state updates. This is more complex to manage.

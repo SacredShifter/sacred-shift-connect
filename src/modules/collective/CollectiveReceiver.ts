@@ -74,7 +74,7 @@ export class CollectiveReceiver {
     this.onFieldUpdateCallback = callback;
   }
 
-  onSignal(callback: (userId: string, data: SignalData) => void) {
+  onSignal(callback: (peerId: string, data: SignalData) => void) {
     this.onSignalCallback = callback;
   }
 
@@ -161,6 +161,11 @@ export class CollectiveReceiver {
   private broadcastState(state: ParticipantState) {
     const message = JSON.stringify({ type: 'stateUpdate', payload: state });
     this.transport.send(new TextEncoder().encode(message));
+  }
+
+  public broadcast(message: any) {
+    const encoded = new TextEncoder().encode(JSON.stringify(message));
+    this.transport.send(encoded);
   }
 
   public updateParticipantState(userId: string, state: ParticipantState) {
