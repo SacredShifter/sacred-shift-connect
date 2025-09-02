@@ -8,17 +8,17 @@ import { OrbitControls, Stars, Text } from '@react-three/drei';
 import { Vector3, Mesh, Group } from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 import * as THREE from 'three';
-import { CosmicStructureData } from '@/types/gaa-polarity';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Telescope, Globe, Eye, Zap } from 'lucide-react';
+import { CosmicStructure } from '@/utils/cosmic/CosmicDataStream';
 
 interface CosmicVisualizationProps {
-  cosmicData: CosmicStructureData[];
+  cosmicData: CosmicStructure[];
   shadowEngineState: any;
   isActive: boolean;
-  onStructureSelect?: (structure: CosmicStructureData) => void;
+  onStructureSelect?: (structure: CosmicStructure) => void;
 }
 
 // Firmament Dome Component
@@ -75,7 +75,7 @@ const ShadowDome: React.FC<{ radius: number; intensity: number }> = ({ radius, i
 
 // Cosmic Structure Point
 const CosmicPoint: React.FC<{ 
-  structure: CosmicStructureData; 
+  structure: CosmicStructure; 
   position: Vector3;
   isSelected: boolean;
   onClick: () => void;
@@ -130,21 +130,21 @@ const CosmicPoint: React.FC<{
 
 // Main 3D Scene
 const CosmicScene: React.FC<{
-  cosmicData: CosmicStructureData[];
+  cosmicData: CosmicStructure[];
   shadowEngineState: any;
-  onStructureSelect?: (structure: CosmicStructureData) => void;
+  onStructureSelect?: (structure: CosmicStructure) => void;
 }> = ({ cosmicData, shadowEngineState, onStructureSelect }) => {
-  const [selectedStructure, setSelectedStructure] = useState<CosmicStructureData | null>(null);
+  const [selectedStructure, setSelectedStructure] = useState<CosmicStructure | null>(null);
   const groupRef = useRef<Group>(null);
   const isMobile = useIsMobile();
 
-  const handleStructureClick = (structure: CosmicStructureData) => {
+  const handleStructureClick = (structure: CosmicStructure) => {
     setSelectedStructure(structure);
     onStructureSelect?.(structure);
   };
 
   // Convert cosmic coordinates to 3D positions
-  const getStructurePosition = (structure: CosmicStructureData): Vector3 => {
+  const getStructurePosition = (structure: CosmicStructure): Vector3 => {
     const distance = Math.log((structure.coordinates.distance || 1000) + 1) * 2;
     const phi = (structure.coordinates?.rightAscension || 0) * Math.PI / 180;
     const theta = (structure.coordinates?.declination || 0) * Math.PI / 180;

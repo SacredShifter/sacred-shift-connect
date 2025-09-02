@@ -70,7 +70,7 @@ export class PrimeLatticeOscillator {
     let locked = false;
     for (const osc of this.oscillators) {
       for (const extFreq of externalFrequencies) {
-        const freq = osc.frequency.value;
+        const freq = typeof osc.frequency.value === 'number' ? osc.frequency.value : parseFloat(osc.frequency.value);
         const difference = Math.abs(freq - extFreq) / freq;
         if (difference < this.lockDetectionThreshold) {
           locked = true;

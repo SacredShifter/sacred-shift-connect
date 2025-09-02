@@ -2,7 +2,7 @@
  * GAA Master Dashboard - Main interface for all GAA components
  * Integrates Deep5 Archetypes, CosmicVis, Biofeedback, Orchestra, and Metrics
  */
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,7 +35,7 @@ import { GAAInfoPanel } from './GAAInfoPanel';
 import { GAADemoMode } from './GAADemoMode';
 import { CosmicVisualizationLegend } from './CosmicVisualizationLegend';
 import { PolarityProtocol, TarotTradition } from '@/types/gaa-polarity';
-import { CosmicDataStream, CosmicStructureData } from '@/utils/cosmic/CosmicDataStream';
+import { CosmicDataStream, CosmicStructure } from '@/utils/cosmic/CosmicDataStream';
 import { FLAGS } from '@/config/flags';
 
 // Archetype imports
@@ -74,7 +74,7 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
   const [shadowDomeVisible, setShadowDomeVisible] = useState(true);
   const [sessionBadges, setSessionBadges] = useState<string[]>([]);
   const cosmicDataStreamRef = useRef<CosmicDataStream | null>(null);
-  const [cosmicData, setCosmicData] = useState<CosmicStructureData[]>([]);
+  const [cosmicData, setCosmicData] = useState<CosmicStructure[]>([]);
 
   useEffect(() => {
     if (!cosmicDataStreamRef.current) {
@@ -96,6 +96,10 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
     };
   }, []);
 
+  // Core hooks
+  const orchestra = useCollectiveGAA(Tone.Transport);
+  const gaaEngine = useGAAEngine(orchestra.collectiveField);
+
   useEffect(() => {
     if (gaaEngine.state.isPlaying && gaaEngine.state.isInitialized) {
       const stream = gaaEngine.getAudioStream();
@@ -104,10 +108,6 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
       }
     }
   }, [gaaEngine.state.isPlaying, gaaEngine.state.isInitialized]);
-
-  // Core hooks
-  const orchestra = useCollectiveGAA(Tone.Transport);
-  const gaaEngine = useGAAEngine(orchestra.collectiveField);
   const { phonePulseSensor, accelerometer } = gaaEngine;
 
   const signalQuality = phonePulseSensor.isSensing
@@ -552,7 +552,7 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
                 gaaEngineState={{
                   isInitialized: gaaEngine.state.isInitialized,
                   isPlaying: gaaEngine.state.isPlaying,
-                  currentPhase: gaaEngine.state.shadowState?.currentPhase || 'idle',
+                  currentPhase: (gaaEngine.state.shadowState?.currentPhase || 'idle') as 'idle' | 'activation' | 'processing' | 'integration',
                   oscillatorCount: gaaEngine.state.activeOscillators,
                   currentGeometry: {
                     complexity: gaaEngine.state.shadowState?.polarityBalance || 0,

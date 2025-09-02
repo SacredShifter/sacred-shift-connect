@@ -221,6 +221,23 @@ export class CollectiveReceiver {
     this.isConnected = false;
     this.updateNodeCount();
   }
+
+  // Add missing methods for compatibility
+  onSyncMessage(callback: (message: any) => void): void {
+    // Basic sync message handling
+    console.log('Setting up sync message callback');
+    this.onSignalCallback = callback;
+  }
+
+  unregisterParticipant(userId: string): void {
+    this.participantStates.delete(userId);
+    this.aggregateStates(); // Use existing method instead of updateCollectiveField
+  }
+
+  // Add method for setting audio stream
+  setLocalAudioStream(stream: MediaStream): void {
+    this.localStream = stream;
+  }
 }
 
 export const applyPLLDriftCorrection = (phase: number, correction?: number) => {

@@ -29,6 +29,8 @@ export interface GeometricOscillatorConfig {
   gainLevel: number;
   profile?: AudioProfile;
   modulationDepth: number;
+  waveform?: 'sine' | 'square' | 'sawtooth' | 'triangle';
+  spatialPanning?: boolean;
 }
 
 export interface NormalizedGeometry {

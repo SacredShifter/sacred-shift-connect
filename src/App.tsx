@@ -81,7 +81,7 @@ function App() {
         sacredRatios: { phi: 1.618, pi: 3.14159, sqrt2: 1.414 }
       },
       audioMapping: { baseFrequency: 440, harmonicSeries: [1, 2, 3], amplitude: 0.5, duration: 10 },
-      discoveryMetadata: { confidence: 'confirmed' as const }
+      discoveryInfo: { confidence: 'confirmed' as const }
     }];
     
     return (

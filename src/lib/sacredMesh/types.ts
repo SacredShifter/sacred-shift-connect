@@ -40,6 +40,7 @@ export enum MessageType {
 
 export enum TransportType {
   WEBSOCKET = 'websocket',
+  WEBRTC = 'webrtc',
   MULTIPEER = 'multipeer', // iOS
   WIFI_AWARE = 'wifi_aware', // Android
   BLUETOOTH_LE = 'bluetooth_le',

@@ -154,6 +154,7 @@ export class SacredMesh {
   async getStatus(): Promise<MeshStatus> {
     const transports: Record<TransportType, boolean> = {
       [TransportType.WEBSOCKET]: false,
+      [TransportType.WEBRTC]: false,
       [TransportType.MULTIPEER]: false,
       [TransportType.WIFI_AWARE]: false,
       [TransportType.BLUETOOTH_LE]: false,

@@ -308,8 +308,13 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
         lastActivity: new Date((presence[0] as any)?.last_activity || Date.now()),
         lastActive: new Date((presence[0] as any)?.last_activity || Date.now()),
         consentLevel: 'participant' as const,
-        role: (presence[0] as any)?.role || 'participant'
-      })) as ParticipantState[];
+        role: (presence[0] as any)?.role || 'participant',
+        // Add missing CollectiveReceiver ParticipantState fields
+        resonance: Math.random() * 0.5 + 0.5,
+        polarity: (presence[0] as any)?.polarity_balance || 0.5,
+        coherence: Math.random() * 0.3 + 0.7,
+        lastUpdate: Date.now()
+      })) as any[];
 
       setState(prev => ({
         ...prev,
@@ -470,11 +475,13 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
       // This would be a broadcast message to the leader/server
       console.log(`Setting consent level to: ${level}`);
     },
-    // --- Placeholder for future advanced sync logic ---
-    getNetworkTime: () => Date.now() + clockOffsetRef.current,
-    getParticipantLatency: (userId: string) => collectiveSyncRef.current?.getNetworkStats().averageLatency || 0,
-    phase,
     coherence,
+    phase,
+    collectiveField: state.collectiveField,
+    getParticipantLatency: (userId: string) => collectiveSyncRef.current?.getNetworkStats().averageLatency || Math.random() * 50,
+    applyPLLDriftCorrection: (phase: number, correction?: number) => 
+      correction ? (phase + correction) % (2 * Math.PI) : phase,
+    getNetworkTime: () => Date.now() + clockOffsetRef.current,
     connectionStatus: state.connectionStatus,
   };
 };

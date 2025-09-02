@@ -73,6 +73,11 @@ export type ShadowEngineState = {
   darkPhaseActive: boolean;
   weights: { dark: number; light: number };
   lastOutputs: GaaOutputs;
+  heartVariability?: number;
+  breathCoherence?: number;
+  neuralEntrainment?: number;
+  currentPhase?: string;
+  polarityBalance?: number;
 };
 
 // Simple biofeedback for UI display
