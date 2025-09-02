@@ -9,14 +9,29 @@ import { AudioEngine } from './audio/AudioEngine';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useCollectiveGAA } from '@/hooks/useCollectiveGAA';
 import { RemoteAudioPlayer } from '@/components/RemoteAudioPlayer';
+import { CollectiveStats } from '@/components/Collective/CollectiveStats';
 import * as Tone from 'tone';
 
 interface CollectiveCoherenceCircleProps {
   onExit: () => void;
 }
 
-const CollectiveGAAWrapper = ({ onStartAudio }: { onStartAudio: () => void }) => {
-  const { remoteStreams, joinSession, createSession } = useCollectiveGAA(Tone.Transport);
+import { useState, useRef } from 'react';
+
+export default function CollectiveCoherenceCircle({ onExit }: CollectiveCoherenceCircleProps) {
+  const [machineState, send] = useMachine(collectiveMachine);
+  const {
+    remoteStreams,
+    joinSession,
+    createSession,
+    collectiveField,
+    phase,
+    coherence,
+    connectionStatus,
+    getParticipantLatency
+  } = useCollectiveGAA(Tone.Transport);
+  const [showBanner, setShowBanner] = useState('');
+  const prevConnectionStatus = useRef(connectionStatus);
 
   useEffect(() => {
     // For demonstration, let's automatically join a session
@@ -30,22 +45,19 @@ const CollectiveGAAWrapper = ({ onStartAudio }: { onStartAudio: () => void }) =>
     }
   }, [joinSession, createSession]);
 
-  return (
-    <>
-      <SceneRouter />
-      <RemoteAudioPlayer streams={remoteStreams} />
-    </>
-  );
-};
-
-
-export default function CollectiveCoherenceCircle({ onExit }: CollectiveCoherenceCircleProps) {
-  const [state, send] = useMachine(collectiveMachine);
-  const { startAudioStreaming } = useCollectiveGAA(Tone.Transport);
+  useEffect(() => {
+    if (prevConnectionStatus.current === 'connected' && connectionStatus !== 'connected') {
+      setShowBanner('unstable');
+    } else if (prevConnectionStatus.current !== 'connected' && connectionStatus === 'connected') {
+      setShowBanner('restored');
+      setTimeout(() => setShowBanner(''), 3000);
+    }
+    prevConnectionStatus.current = connectionStatus;
+  }, [connectionStatus]);
 
   return (
     <ErrorBoundary name="CollectiveCoherenceCircle">
-      <CollectiveProvider value={{ state, send, onExit }}>
+      <CollectiveProvider value={{ state: machineState, send, onExit }}>
         <div className="fixed inset-0 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900">
           <Canvas
             dpr={[1, 2]}
@@ -62,11 +74,23 @@ export default function CollectiveCoherenceCircle({ onExit }: CollectiveCoherenc
               powerPreference: 'high-performance'
             }}
           >
-            <CollectiveGAAWrapper onStartAudio={startAudioStreaming} />
+            <SceneRouter coherence={coherence} />
           </Canvas>
           
-          <HUD onStartAudio={startAudioStreaming} />
-          <AudioEngine />
+          <HUD onStartAudio={() => {}} />
+          <AudioEngine collectiveField={collectiveField} phase={phase} coherence={coherence} />
+          <RemoteAudioPlayer streams={remoteStreams} />
+          <CollectiveStats collectiveField={collectiveField} coherence={coherence} latency={getParticipantLatency('')} />
+          {showBanner === 'unstable' && (
+            <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black p-2 rounded-md">
+              ⚠️ Sync unstable – falling back to solo mode.
+            </div>
+          )}
+          {showBanner === 'restored' && (
+            <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white p-2 rounded-md">
+              ✅ Collective resonance restored.
+            </div>
+          )}
         </div>
       </CollectiveProvider>
     </ErrorBoundary>
