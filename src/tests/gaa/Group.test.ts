@@ -70,12 +70,12 @@ describe('Group Simulation Test', () => {
         // @ts-ignore
         const followerOscillators = followerNode.oscillators;
         const leaderFirstPrimeFreq = leaderFrequencies[0];
-        followerOscillators[0].frequency.value = leaderFirstPrimeFreq + (Math.random() * 0.01 - 0.005);
+        followerOscillators[0].frequency.value = (leaderFirstPrimeFreq as any) + (Math.random() * 0.01 - 0.005);
     }
 
     const allOtherFrequencies = nodes.slice(1).flatMap(node =>
         // @ts-ignore
-        node.oscillators.map(o => o.frequency.value)
+        node.oscillators.map((o: any) => o.frequency.value as number)
     );
 
     // @ts-ignore

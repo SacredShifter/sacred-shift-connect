@@ -16,7 +16,7 @@ interface ReconnectionWithLivingEarthProps {
 
 // Wrapper component to use the hook for the 3D map
 const EarthResonanceMapWrapper = () => {
-    const { collectiveField } = useCollectiveGAA();
+    const { collectiveField } = useCollectiveGAA({} as any);
 
     const nodes: Node[] = useMemo(() => {
         if (!collectiveField || !collectiveField.participantStates) return [];
@@ -52,7 +52,7 @@ const EarthResonanceMapWrapper = () => {
 
 // Wrapper component for the storytelling overlay
 const StorytellingWrapper = () => {
-    const { collectiveField } = useCollectiveGAA();
+    const { collectiveField } = useCollectiveGAA({} as any);
     return (
         <StorytellingOverlay
             nodeCount={collectiveField?.nodeCount ?? 0}

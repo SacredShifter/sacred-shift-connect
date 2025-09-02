@@ -91,7 +91,7 @@ export class SacredMeshCrypto {
         hash: 'SHA-256'
       },
       privateKey,
-      data
+      (data as unknown) as ArrayBuffer
     );
     return new Uint8Array(signature);
   }
@@ -104,8 +104,8 @@ export class SacredMeshCrypto {
         hash: 'SHA-256'
       },
       publicKey,
-      signature,
-      data
+      (signature as unknown) as ArrayBuffer,
+      (data as unknown) as ArrayBuffer
     );
   }
 

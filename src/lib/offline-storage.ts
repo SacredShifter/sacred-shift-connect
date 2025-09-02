@@ -170,7 +170,7 @@ class SacredShifterStorage {
       dataToEncrypt
     );
 
-    return { encryptedData, iv };
+    return { encryptedData, iv: iv.buffer };
   }
 
   private async decrypt(encryptedData: ArrayBuffer, iv: ArrayBuffer): Promise<any> {
