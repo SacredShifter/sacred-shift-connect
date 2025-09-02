@@ -10,6 +10,12 @@ import { GaaBiofeedbackSimulator } from '@/utils/biofeedback/GaaBiofeedbackSimul
 import { usePhonePulseSensor } from './usePhonePulseSensor';
 import { useAccelerometer } from './useAccelerometer';
 
+export interface FallbackCounts {
+  sensor: number;
+  geometry: number;
+  frequency: number;
+}
+
 export interface GAAEngineState {
   isInitialized: boolean;
   isPlaying: boolean;
@@ -18,6 +24,7 @@ export interface GAAEngineState {
   shadowState: ShadowEngineState | null;
   isRecovering: boolean;
   bioSignals: BioSignals | null;
+  fallbackCounts: FallbackCounts;
 }
 
 // Default preset
@@ -57,6 +64,11 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
     shadowState: null,
     isRecovering: false,
     bioSignals: null,
+    fallbackCounts: {
+      sensor: 0,
+      geometry: 0,
+      frequency: 0,
+    },
   });
 
   // Refs to hold instances of our engine components
@@ -70,6 +82,27 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
   const phonePulseSensor = usePhonePulseSensor();
   const accelerometer = useAccelerometer();
 
+  const incrementFallback = useCallback((type: keyof FallbackCounts) => {
+    setState(prev => ({
+      ...prev,
+      fallbackCounts: {
+        ...prev.fallbackCounts,
+        [type]: prev.fallbackCounts[type] + 1,
+      },
+    }));
+  }, []);
+
+  const resetFallbackCounts = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      fallbackCounts: {
+        sensor: 0,
+        geometry: 0,
+        frequency: 0,
+      },
+    }));
+  }, []);
+
   // Centralized initialization
   const initializeGAA = useCallback(async () => {
     try {
@@ -82,9 +115,13 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
         modulationDepth: 0.2, spatialPanning: true
       };
 
-      geometricOscillatorRef.current = new GeometricOscillator(audioContext as AudioContext, geoConfig);
+      geometricOscillatorRef.current = new GeometricOscillator(
+        audioContext as AudioContext,
+        geoConfig,
+        (type) => incrementFallback(type)
+      );
       shadowEngineRef.current = new ShadowEngine(preset);
-      multiScaleLayerManagerRef.current = new MultiScaleLayerManager();
+      multiScaleLayerManagerRef.current = new MultiScaleLayerManager((type) => incrementFallback(type));
       safetySystemRef.current = new SafetySystem();
       biofeedbackSimulatorRef.current = new GaaBiofeedbackSimulator();
 
@@ -143,6 +180,7 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
         };
     } else {
       currentBioSignals = { hrv: 0.5, eegBandRatio: 0.5, breath: 0 };
+      incrementFallback('sensor');
     }
 
     // 1b. Update layer manager with real breath rate
@@ -298,5 +336,6 @@ export const useGAAEngine = (collectiveField: CollectiveField | null) => {
     updatePreset: setPreset,
     phonePulseSensor, // Expose the whole hook for UI integration
     accelerometer,
+    resetFallbackCounts,
   };
 };

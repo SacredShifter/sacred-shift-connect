@@ -42,6 +42,7 @@ import { GlowWrapper } from '@/components/dashboard/GlowWrapper';
 import { GAAControlPanel } from '@/components/dashboard/GAAControlPanel';
 import { GAAQuickAccess } from '@/components/dashboard/GAAQuickAccess';
 import { GAADashboard } from '@/components/gaa/GAADashboard';
+import { GAAAudioErrorBoundary } from '@/components/gaa/GAAAudioErrorBoundary';
 import { useDailyRoutine } from '@/providers/DailyRoutineProvider';
 
 const Dashboard = () => {
@@ -318,7 +319,9 @@ const Dashboard = () => {
 
           {/* GAA Engine Tab Content */}
           <TabsContent value="gaa" className="space-y-8">
-            <GAADashboard />
+            <GAAAudioErrorBoundary>
+              <GAADashboard />
+            </GAAAudioErrorBoundary>
           </TabsContent>
 
           {/* Profile Tab Content */}

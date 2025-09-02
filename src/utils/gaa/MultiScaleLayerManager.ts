@@ -68,15 +68,22 @@ const LAYER_PARAMS = {
   }
 };
 
+import { FallbackCounts } from './GeometricOscillator';
+
+type ManagerEvent = 'geometryFallback';
+
 export class MultiScaleLayerManager {
   private layers: LayerHierarchy;
   private state: MultiScaleState;
   private geometricNormalizer: GeometricNormalizer;
+  public fallbackCounts: Pick<FallbackCounts, 'geometry'> = { geometry: 0 };
   private breathRate: number = DEFAULT_BREATH_RATE_HZ;
   private startTime: number = performance.now();
+  private onFallback: (type: 'geometry') => void;
 
-  constructor() {
+  constructor(onFallback?: (type: 'geometry') => void) {
     this.geometricNormalizer = new GeometricNormalizer();
+    this.onFallback = onFallback || (() => {});
     
     // Initialize layer hierarchy with biologically-inspired parameters
     this.layers = JSON.parse(JSON.stringify(LAYER_PARAMS.HIERARCHY_DEFAULTS));
@@ -242,6 +249,8 @@ export class MultiScaleLayerManager {
 
     if (!geometry.faces || geometry.faces.length === 0) {
         console.warn(`[GAA] Invalid geometry generated for layer ${layerId} (no faces). Falling back to default geometry.`);
+        this.fallbackCounts.geometry++;
+        this.onFallback('geometry');
         return defaultGeometry;
     }
 
@@ -453,4 +462,5 @@ export class MultiScaleLayerManager {
       layer.phase = 0;
     });
   }
+
 }

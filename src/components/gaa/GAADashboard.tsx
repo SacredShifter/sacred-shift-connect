@@ -74,6 +74,7 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
   // Core hooks
   const orchestra = useCollectiveGAA(Tone.Transport);
   const gaaEngine = useGAAEngine(orchestra.collectiveField);
+    const { resetFallbackCounts } = gaaEngine;
   // const biofeedback = useEmbodiedBiofeedback(); // DEPRECATED: Integrated into useGAAEngine
 
   // MOCK BIOFEEDBACK for UI until full integration
@@ -590,6 +591,42 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
               </CardContent>
             </Card>
           )}
+
+          {/* Fallback Monitor */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  Engine Health
+                </span>
+                <Button variant="ghost" size="sm" onClick={resetFallbackCounts}>
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Reset
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Sensor Fallbacks</span>
+                <Badge variant={gaaEngine.state.fallbackCounts.sensor > 0 ? 'destructive' : 'default'}>
+                  {gaaEngine.state.fallbackCounts.sensor}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Geometry Fallbacks</span>
+                <Badge variant={gaaEngine.state.fallbackCounts.geometry > 0 ? 'destructive' : 'default'}>
+                  {gaaEngine.state.fallbackCounts.geometry}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Frequency Fallbacks</span>
+                <Badge variant={gaaEngine.state.fallbackCounts.frequency > 0 ? 'destructive' : 'default'}>
+                  {gaaEngine.state.fallbackCounts.frequency}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 

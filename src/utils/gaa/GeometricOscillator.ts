@@ -46,12 +46,21 @@ export interface NormalizedGeometry {
 
 const MAX_OSCILLATORS = 32; // Default max oscillators
 
+type GAAEvent = 'oscillatorError';
+
+export interface FallbackCounts {
+    frequency: number;
+    geometry: number;
+}
+
 export class GeometricOscillator {
   private config: GeometricOscillatorConfig;
   private _dynamicMaxOscillators: number = MAX_OSCILLATORS;
   private _lastFrameTime: number = 0;
   private _frameTimeHistory: number[] = [];
   private _monitoringHandle: number | null = null;
+  public fallbackCounts: FallbackCounts = { frequency: 0, geometry: 0 };
+  private onFallback: (type: 'frequency' | 'geometry') => void;
 
   private oscillators: Map<string, {
     osc: Tone.Oscillator;
@@ -71,8 +80,13 @@ export class GeometricOscillator {
   private pannerPool: Tone.Panner3D[] = [];
   private envelopePool: Tone.AmplitudeEnvelope[] = [];
 
-  constructor(audioContext: AudioContext, config: GeometricOscillatorConfig) {
+  constructor(
+    audioContext: AudioContext,
+    config: GeometricOscillatorConfig,
+    onFallback?: (type: 'frequency' | 'geometry') => void
+  ) {
     this.config = config;
+    this.onFallback = onFallback || (() => {});
     if (!this.config.profile) {
       this.config.profile = 'balanced';
     }
@@ -179,12 +193,23 @@ export class GeometricOscillator {
       return false;
     }
 
+    let osc, filter, gain, panner, envelope;
     try {
       const profile = AUDIO_PROFILES[this.config.profile];
       const frequency = this.calculateGeometricFrequency(geometry);
+
+      // The frequency calculation now has its own internal fallback,
+      // so we just need to check if it's a valid number.
+      if (!Number.isFinite(frequency)) {
+          console.error(`[GAA] Catastrophic failure in frequency calculation for ${id}. Got ${frequency}`);
+          this.fallbackCounts.frequency++;
+          this.onFallback('frequency');
+          return false;
+      }
+
       console.log(`🎵 Calculated frequency for ${id}: ${frequency.toFixed(2)}Hz`);
       
-      const osc = this.oscPool.pop() || new Tone.Oscillator();
+      osc = this.oscPool.pop() || new Tone.Oscillator();
       osc.set({ frequency, type: profile.waveform });
 
       const cutoff = this.calculateFilterFrequency(geometry);
@@ -228,10 +253,15 @@ export class GeometricOscillator {
       return true;
     } catch (error) {
       console.error(`❌ Failed to create oscillator ${id}:`, error);
+      this.emit('oscillatorError', { id, error });
+
       // Clean up any partially created resources if an error occurred
-      if (this.oscillators.has(id)) {
-        this.stopOscillator(id);
-      }
+      if (osc) this.oscPool.push(osc);
+      if (filter) this.filterPool.push(filter);
+      if (gain) this.gainPool.push(gain);
+      if (panner) this.pannerPool.push(panner);
+      if (envelope) this.envelopePool.push(envelope);
+
       return false;
     }
   }
@@ -299,6 +329,8 @@ export class GeometricOscillator {
     // --- Input Validation ---
     if (!geometry || !Number.isFinite(geometry.radius) || geometry.radius <= 0 || !geometry.sacredRatios || !Number.isFinite(geometry.sacredRatios.phi)) {
         console.warn(`[GAA] Invalid geometry data received for frequency calculation. Falling back to 432Hz.`);
+        this.fallbackCounts.frequency++;
+        this.onFallback('frequency');
         return 432;
     }
 
@@ -325,6 +357,8 @@ export class GeometricOscillator {
     // --- Output Validation ---
     if (!Number.isFinite(freq)) {
         console.warn(`[GAA] NaN frequency calculated. Falling back to 432Hz. Input radius: ${radius}`);
+        this.fallbackCounts.frequency++;
+        this.onFallback('frequency');
         return 432;
     }
 
@@ -452,4 +486,5 @@ export class GeometricOscillator {
   getAnalyserNode(): Tone.Analyser {
     return this.masterAnalyser;
   }
+
 }
