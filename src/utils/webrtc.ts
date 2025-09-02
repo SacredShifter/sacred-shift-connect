@@ -20,10 +20,11 @@ export class WebRTCManager {
   private isInitiator: boolean = false;
 
   constructor(
-    private onRemoteStream: (stream: MediaStream) => void,
     private onCallEnd: () => void,
     private onIncomingCall: (callId: string, fromUserId: string) => void,
-    private userId: string
+    private userId: string,
+    private onDataChannelMessage: (event: MessageEvent) => void,
+    private onRemoteStream?: (stream: MediaStream) => void
   ) {
     this.setupPeerConnection();
   }
@@ -31,26 +32,35 @@ export class WebRTCManager {
   private setupPeerConnection() {
     console.log('Setting up WebRTC peer connection...');
     
-    // STUN servers for NAT traversal
-    this.peerConnection = new RTCPeerConnection({
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
-    });
+    // STUN servers for NAT traversal, and TURN server for relay
+    const iceServers = [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ];
+
+    if (import.meta.env.VITE_TURN_URL) {
+      iceServers.push({
+        urls: import.meta.env.VITE_TURN_URL,
+        username: import.meta.env.VITE_TURN_USERNAME,
+        credential: import.meta.env.VITE_TURN_PASSWORD,
+      });
+    }
+
+    this.peerConnection = new RTCPeerConnection({ iceServers });
 
     this.peerConnection.ondatachannel = (event) => {
       this.dataChannel = event.channel;
-      this.dataChannel.onmessage = (event) => {
-        console.log('Data channel message:', event.data);
-      };
+      this.dataChannel.binaryType = 'arraybuffer';
+      this.dataChannel.onmessage = this.onDataChannelMessage;
     };
 
     // Handle remote stream
     this.peerConnection.ontrack = (event) => {
       console.log('Received remote stream:', event);
       this.remoteStream = event.streams[0];
-      this.onRemoteStream(this.remoteStream);
+      if (this.onRemoteStream) {
+        this.onRemoteStream(this.remoteStream);
+      }
     };
 
     // Handle ICE candidates
@@ -81,20 +91,16 @@ export class WebRTCManager {
     };
   }
 
-  async initializeCall(remoteUserId: string): Promise<string> {
+  async initializeCall(remoteUserId: string, stream?: MediaStream): Promise<string> {
     try {
       console.log('Initializing call to:', remoteUserId);
       this.callId = `call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       this.isInitiator = true;
 
-      // Get user media
-      this.localStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true
-      });
+      this.localStream = stream;
 
       // Add tracks to peer connection
-      this.localStream.getTracks().forEach(track => {
+      this.localStream?.getTracks().forEach(track => {
         if (this.peerConnection) {
           this.peerConnection.addTrack(track, this.localStream!);
         }
@@ -104,6 +110,7 @@ export class WebRTCManager {
       this.setupSignalingChannel(remoteUserId);
 
       this.dataChannel = this.peerConnection!.createDataChannel('gaa-sync');
+      this.dataChannel.onmessage = this.onDataChannelMessage;
 
       // Create offer
       const offer = await this.peerConnection!.createOffer();
@@ -132,20 +139,16 @@ export class WebRTCManager {
     }
   }
 
-  async acceptCall(callId: string, fromUserId: string): Promise<void> {
+  async acceptCall(callId: string, fromUserId: string, stream?: MediaStream): Promise<void> {
     try {
       console.log('Accepting call:', callId);
       this.callId = callId;
       this.isInitiator = false;
 
-      // Get user media
-      this.localStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true
-      });
+      this.localStream = stream;
 
       // Add tracks to peer connection
-      this.localStream.getTracks().forEach(track => {
+      this.localStream?.getTracks().forEach(track => {
         if (this.peerConnection) {
           this.peerConnection.addTrack(track, this.localStream!);
         }
@@ -315,6 +318,7 @@ export class WebRTCManager {
     this.remoteStream = null;
     this.onCallEnd();
   }
+
 
   toggleVideo(): void {
     if (this.localStream) {
