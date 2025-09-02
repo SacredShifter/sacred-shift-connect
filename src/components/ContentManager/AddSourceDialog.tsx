@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useContentSources } from '@/hooks/useContentSources';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
+import { AddChannelSchema, AddChannelInput } from '@/lib/schemas';
+import { addChannel } from '@/actions/addChannel';
 import { ContentPlatform } from '@/components/PetalLotus';
 
 interface AddSourceDialogProps {
@@ -19,59 +24,10 @@ const PLATFORM_OPTIONS: { value: ContentPlatform; label: string; examples: strin
     label: 'YouTube', 
     examples: [
       'https://www.youtube.com/channel/UCxxxxxx',
-      'https://www.youtube.com/@username',
-      'https://www.youtube.com/playlist?list=PLxxxxxx'
+      '@username',
     ]
   },
-  { 
-    value: 'facebook', 
-    label: 'Facebook', 
-    examples: [
-      'https://www.facebook.com/pagename',
-      'https://www.facebook.com/groups/groupid'
-    ]
-  },
-  { 
-    value: 'instagram', 
-    label: 'Instagram', 
-    examples: [
-      'https://www.instagram.com/username',
-      '@username'
-    ]
-  },
-  { 
-    value: 'tiktok', 
-    label: 'TikTok', 
-    examples: [
-      'https://www.tiktok.com/@username',
-      '@username'
-    ]
-  },
-  { 
-    value: 'twitter', 
-    label: 'Twitter/X', 
-    examples: [
-      'https://twitter.com/username',
-      'https://x.com/username',
-      '@username'
-    ]
-  },
-  { 
-    value: 'podcast', 
-    label: 'Podcast', 
-    examples: [
-      'https://feeds.example.com/podcast.xml',
-      'RSS Feed URL'
-    ]
-  }
-];
-
-const SYNC_FREQUENCIES = [
-  { value: 1, label: 'Every hour' },
-  { value: 6, label: 'Every 6 hours' },
-  { value: 12, label: 'Every 12 hours' },
-  { value: 24, label: 'Daily' },
-  { value: 168, label: 'Weekly' }
+  // Other platforms can be added back as their actions are supported
 ];
 
 export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
@@ -79,34 +35,45 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
   onOpenChange,
   defaultPlatform
 }) => {
-  const [formData, setFormData] = useState({
-    source_name: '',
-    source_type: defaultPlatform || 'youtube' as ContentPlatform,
-    source_url: '',
-    sync_frequency_hours: 24
+  const { toast } = useToast();
+  const form = useForm<AddChannelInput>({
+    resolver: zodResolver(AddChannelSchema),
+    defaultValues: {
+      platform: defaultPlatform || 'youtube',
+      urlOrHandle: '',
+      title: '',
+    },
   });
-  const [loading, setLoading] = useState(false);
-  const { addSource } = useContentSources();
 
-  const selectedPlatform = PLATFORM_OPTIONS.find(p => p.value === formData.source_type);
+  const { formState: { isSubmitting } } = form;
+  const selectedPlatform = form.watch('platform');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
+  const onSubmit = async (values: AddChannelInput) => {
     try {
-      await addSource(formData);
-      onOpenChange(false);
-      setFormData({
-        source_name: '',
-        source_type: defaultPlatform || 'youtube',
-        source_url: '',
-        sync_frequency_hours: 24
+      // For now, the action only supports YouTube.
+      // This check can be removed once other platforms are supported.
+      if (values.platform !== 'youtube') {
+        toast({
+          title: "Platform not supported yet",
+          description: "Only YouTube channels can be added at this time.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await addChannel(values);
+      toast({
+        title: "Channel added",
+        description: "The channel has been added to your library and will be synced shortly.",
       });
-    } catch (error) {
-      // Error is handled in the hook
-    } finally {
-      setLoading(false);
+      onOpenChange(false);
+      form.reset();
+    } catch (error: any) {
+      toast({
+        title: "Error adding channel",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   };
 
@@ -114,95 +81,73 @@ export const AddSourceDialog: React.FC<AddSourceDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add Content Source</DialogTitle>
+          <DialogTitle>Add New Channel</DialogTitle>
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="source_name">Source Name</Label>
-            <Input
-              id="source_name"
-              placeholder="My YouTube Channel"
-              value={formData.source_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, source_name: e.target.value }))}
-              required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="platform"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Platform</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PLATFORM_OPTIONS.map(platform => (
+                        <SelectItem key={platform.value} value={platform.value}>
+                          {platform.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="source_type">Platform</Label>
-            <Select
-              value={formData.source_type}
-              onValueChange={(value: ContentPlatform) => 
-                setFormData(prev => ({ ...prev, source_type: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PLATFORM_OPTIONS.map(platform => (
-                  <SelectItem key={platform.value} value={platform.value}>
-                    {platform.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="source_url">Source URL</Label>
-            <Input
-              id="source_url"
-              placeholder={selectedPlatform?.examples[0] || 'Enter URL'}
-              value={formData.source_url}
-              onChange={(e) => setFormData(prev => ({ ...prev, source_url: e.target.value }))}
-              required
+            <FormField
+              control={form.control}
+              name="urlOrHandle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>YouTube URL or @handle</FormLabel>
+                  <FormControl>
+                    <Input placeholder={PLATFORM_OPTIONS.find(p => p.value === selectedPlatform)?.examples[0] || ''} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {selectedPlatform && (
-              <div className="text-xs text-muted-foreground">
-                <div className="font-medium mb-1">Examples:</div>
-                {selectedPlatform.examples.map((example, i) => (
-                  <div key={i} className="font-mono">{example}</div>
-                ))}
-              </div>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="sync_frequency_hours">Sync Frequency</Label>
-            <Select
-              value={formData.sync_frequency_hours.toString()}
-              onValueChange={(value) => 
-                setFormData(prev => ({ ...prev, sync_frequency_hours: parseInt(value) }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SYNC_FREQUENCIES.map(freq => (
-                  <SelectItem key={freq.value} value={freq.value.toString()}>
-                    {freq.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Display Name (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="My Favorite Creator" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Adding...' : 'Add Source'}
-            </Button>
-          </div>
-        </form>
+            <DialogFooter className="pt-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Adding...' : 'Add Channel'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

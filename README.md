@@ -148,6 +148,31 @@ npm run test:ui      # Run tests with UI
 npm run lint         # Run ESLint
 ```
 
+### Channel Library Feature
+
+The Channel Library allows users to add and sync content from external sources like YouTube.
+
+#### Environment Variables
+
+To use the YouTube integration, you must add the following environment variable to your `.env` file:
+
+```
+YOUTUBE_API_KEY="your_youtube_api_key_here"
+```
+
+#### API and Server Actions
+
+The feature is powered by a set of server actions and API routes:
+
+- **`actions/addChannel.ts`**: Adds a new content source to the user's library.
+- **`actions/syncChannel.ts`**: Triggers a sync for a specific channel to fetch its latest content.
+- **`actions/listChannels.ts`**: Lists all the content sources for the current user.
+- **`actions/listContent.ts`**: Lists the content items for a given source.
+
+#### Manual Sync
+
+While syncing is designed to be automatic, you can trigger a manual sync for a specific channel by calling the `syncChannel` action with the `source_id`.
+
 ## Contributing & Standards
 
 ### Branching Model

@@ -1,216 +1,176 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Heart, Clock, Play, Grid, List } from 'lucide-react';
+import { Search, Heart, Clock, Grid } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useYouTubeAPI } from '@/hooks/useYouTubeAPI';
 import { useVideoMetadata } from '@/hooks/useVideoMetadata';
-import { YouTubeVideo, YouTubeChannel } from '@/types/youtube';
-import { ChannelHeader } from './ChannelHeader';
 import { VideoGrid } from './VideoGrid';
 import { SimpleVideoModal } from './SimpleVideoModal';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { listChannels } from '@/actions/listChannels';
+import { listContent } from '@/actions/listContent';
+import { ContentSource, ContentItem } from '@/hooks/useContentSources'; // Re-using interfaces
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const YouTubeLibrary: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const {
-    loading: apiLoading,
-    error: apiError,
-    getChannelInfo,
-    getChannelVideos,
-    searchVideos
-  } = useYouTubeAPI();
 
   const {
     metadata,
     loading: metadataLoading,
     toggleFavorite,
     toggleWatchLater,
-    getFavorites,
-    getWatchLater
   } = useVideoMetadata();
 
-  const [channel, setChannel] = useState<YouTubeChannel | null>(null);
-  const [videos, setVideos] = useState<YouTubeVideo[]>([]);
+  const [sources, setSources] = useState<ContentSource[]>([]);
+  const [videos, setVideos] = useState<ContentItem[]>([]);
+  const [selectedSource, setSelectedSource] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<ContentItem | null>(null);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState('date');
-  const [nextPageToken, setNextPageToken] = useState<string | undefined>();
+  const [loading, setLoading] = useState(true);
+  const [nextCursor, setNextCursor] = useState<string | undefined>();
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Show API key configuration notice
-  useEffect(() => {
-    if (apiError && apiError.includes('API')) {
-      toast({
-        variant: "destructive",
-        title: "YouTube API Configuration Required",
-        description: "Please configure your YouTube API key to access video content."
-      });
-    }
-  }, [apiError, toast]);
-
-  // Load channel info and initial videos
-  useEffect(() => {
-    const loadInitialData = async () => {
-      const channelData = await getChannelInfo();
-      if (channelData) {
-        setChannel(channelData);
+  const observer = useRef<IntersectionObserver>();
+  const lastVideoElementRef = useCallback((node: HTMLDivElement) => {
+    if (isLoadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && nextCursor) {
+        loadMoreVideos();
       }
+    });
+    if (node) observer.current.observe(node);
+  }, [isLoadingMore, nextCursor]);
 
-      const videosData = await getChannelVideos();
-      setVideos(videosData.videos);
-      setNextPageToken(videosData.nextPageToken);
-    };
+  useEffect(() => {
+    setLoading(true);
+    listChannels()
+      .then(setSources)
+      .catch(err => toast({ title: "Error fetching channels", description: err.message, variant: "destructive" }))
+      .finally(() => setLoading(false));
+  }, []);
 
-    loadInitialData();
-  }, [getChannelInfo, getChannelVideos]);
+  useEffect(() => {
+    setLoading(true);
+    setVideos([]);
+    setNextCursor(undefined);
+    listContent({ sourceId: selectedSource === 'all' ? undefined : selectedSource })
+      .then(({ items, nextCursor }) => {
+        setVideos(items);
+        setNextCursor(nextCursor);
+      })
+      .catch(err => toast({ title: "Error fetching videos", description: err.message, variant: "destructive" }))
+      .finally(() => setLoading(false));
+  }, [selectedSource]);
 
-  // Handle search
-  const handleSearch = useCallback(async (query: string) => {
-    if (query.trim()) {
-      const results = await searchVideos(query.trim());
-      setVideos(results.videos);
-      setNextPageToken(results.nextPageToken);
-    } else {
-      const videosData = await getChannelVideos();
-      setVideos(videosData.videos);
-      setNextPageToken(videosData.nextPageToken);
-    }
-  }, [searchVideos, getChannelVideos]);
+  const loadMoreVideos = useCallback(async () => {
+    if (!nextCursor || isLoadingMore) return;
+    setIsLoadingMore(true);
+    listContent({ sourceId: selectedSource === 'all' ? undefined : selectedSource, cursor: nextCursor })
+      .then(({ items, nextCursor: newCursor }) => {
+        setVideos(prev => [...prev, ...items]);
+        setNextCursor(newCursor);
+      })
+      .catch(err => toast({ title: "Error fetching more videos", description: err.message, variant: "destructive" }))
+      .finally(() => setIsLoadingMore(false));
+  }, [nextCursor, isLoadingMore, selectedSource]);
 
-  // Handle video play
-  const handlePlayVideo = (video: YouTubeVideo) => {
+  const handlePlayVideo = (video: ContentItem) => {
     setSelectedVideo(video);
     setIsPlayerOpen(true);
   };
 
-  // Handle player close
   const handleClosePlayer = () => {
     setIsPlayerOpen(false);
     setSelectedVideo(null);
   };
 
-  // Get filtered videos based on active tab
   const getFilteredVideos = () => {
-    switch (activeTab) {
-      case 'favorites':
-        const favoriteIds = getFavorites().map(m => m.video_id);
-        return videos.filter(v => favoriteIds.includes(v.id));
-      case 'watchLater':
-        const watchLaterIds = getWatchLater().map(m => m.video_id);
-        return videos.filter(v => watchLaterIds.includes(v.id));
-      default:
-        return videos;
-    }
+    // Favorites and Watch Later are now stubs as per instructions
+    return videos;
   };
 
-  // Sort videos
-  const getSortedVideos = (videosToSort: YouTubeVideo[]) => {
+  const getSortedVideos = (videosToSort: ContentItem[]) => {
     switch (sortBy) {
       case 'title':
         return [...videosToSort].sort((a, b) => a.title.localeCompare(b.title));
       case 'views':
-        return [...videosToSort].sort((a, b) => parseInt(b.viewCount) - parseInt(a.viewCount));
+        return [...videosToSort].sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
       case 'date':
       default:
         return [...videosToSort].sort((a, b) => 
-          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+          new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime()
         );
     }
   };
 
   const filteredVideos = getFilteredVideos();
   const sortedVideos = getSortedVideos(filteredVideos);
-  const loading = apiLoading || metadataLoading;
+  const totalLoading = loading || metadataLoading;
 
   return (
-    <div className="container mx-auto px-4 py-4 md:py-6 space-y-6 md:space-y-8 overflow-y-auto -webkit-overflow-scrolling-touch">
-      {/* Channel Header */}
-      <ChannelHeader channel={channel} loading={loading && !channel} />
-
-      {/* Search and Filters */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="space-y-4"
-      >
+    <div className="container mx-auto px-4 py-4 md:py-6 space-y-6 md:space-y-8">
+      {sources.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search Sacred Shifter videos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
-              className="pl-10 bg-background/60 backdrop-blur-sm border-border/30"
-            />
-          </div>
-          
-          <Button onClick={() => handleSearch(searchQuery)} disabled={loading}>
-            Search
-          </Button>
-        </div>
-
-        {/* Tabs and Sort */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-            <TabsList className="grid w-full grid-cols-3 max-w-md">
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                <Grid className="h-4 w-4" />
-                All Videos
-              </TabsTrigger>
-              <TabsTrigger value="favorites" className="flex items-center gap-2">
-                <Heart className="h-4 w-4" />
-                Favorites
-              </TabsTrigger>
-              <TabsTrigger value="watchLater" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Watch Later
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Sort by..." />
+          <Select value={selectedSource} onValueChange={setSelectedSource}>
+            <SelectTrigger className="w-full sm:w-64">
+              <SelectValue placeholder="Select a channel..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="date">Date Added</SelectItem>
-              <SelectItem value="title">Title</SelectItem>
-              <SelectItem value="views">View Count</SelectItem>
+              <SelectItem value="all">All Channels</SelectItem>
+              {sources.map(source => (
+                <SelectItem key={source.id} value={source.id}>{source.source_name}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-      </motion.div>
+      )}
 
-      {/* Video Count */}
-      {!loading && (
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+          <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsTrigger value="all" className="flex items-center gap-2"><Grid className="h-4 w-4" />All Videos</TabsTrigger>
+            <TabsTrigger value="favorites" className="flex items-center gap-2" disabled><Heart className="h-4 w-4" />Favorites</TabsTrigger>
+            <TabsTrigger value="watchLater" className="flex items-center gap-2" disabled><Clock className="h-4 w-4" />Watch Later</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-40"><SelectValue placeholder="Sort by..." /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date">Date Added</SelectItem>
+            <SelectItem value="title">Title</SelectItem>
+            <SelectItem value="views">View Count</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {!totalLoading && (
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-sm">
-            {sortedVideos.length} video{sortedVideos.length !== 1 ? 's' : ''}
-          </Badge>
+          <Badge variant="outline" className="text-sm">{videos.length} video{videos.length !== 1 ? 's' : ''}</Badge>
         </div>
       )}
 
-      {/* Video Grid */}
       <VideoGrid
         videos={sortedVideos}
-        loading={loading}
+        loading={totalLoading}
         onPlay={handlePlayVideo}
         onWatchLater={toggleWatchLater}
         onFavorite={toggleFavorite}
         metadata={metadata}
         showCTAs={true}
+        lastVideoRef={lastVideoElementRef}
       />
+      {isLoadingMore && <div className="flex justify-center"><Skeleton className="w-16 h-16 rounded-full" /></div>}
 
-      {/* Video Player Modal */}
       <SimpleVideoModal
         video={selectedVideo}
         isOpen={isPlayerOpen}
@@ -219,19 +179,6 @@ export const YouTubeLibrary: React.FC = () => {
         onFavorite={toggleFavorite}
         userMetadata={selectedVideo ? metadata[selectedVideo.id] : undefined}
       />
-
-      {/* API Configuration Notice */}
-      {!user && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-8"
-        >
-          <p className="text-muted-foreground">
-            Please sign in to save your video preferences and access personalized features.
-          </p>
-        </motion.div>
-      )}
     </div>
   );
 };

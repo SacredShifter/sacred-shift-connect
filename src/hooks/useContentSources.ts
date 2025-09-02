@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
+import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
+const SourceDataSchema = z.object({
+  source_name: z.string().min(1, "Source name is required."),
+  source_type: z.enum(["youtube", "facebook", "tiktok", "instagram", "twitter", "linkedin", "spotify", "soundcloud"]),
+  source_url: z.string().url("Invalid URL format.").optional(),
+  sync_frequency_hours: z.number().optional(),
+});
 
 export interface ContentSource {
   id: string;
@@ -36,6 +44,8 @@ export interface ContentItem {
   created_at: string;
   updated_at: string;
 }
+
+let inFlight = false;
 
 export const useContentSources = () => {
   const [sources, setSources] = useState<ContentSource[]>([]);
@@ -96,7 +106,15 @@ export const useContentSources = () => {
     source_url?: string;
     sync_frequency_hours?: number;
   }) => {
+    if (inFlight) {
+      toast({ title: "Request in progress", description: "Please wait for the current operation to complete." });
+      return;
+    }
+    inFlight = true;
+
     try {
+      const validatedData = SourceDataSchema.parse(sourceData);
+
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
       if (userError || !user) {
@@ -104,36 +122,61 @@ export const useContentSources = () => {
       }
 
       const nextSync = new Date();
-      nextSync.setHours(nextSync.getHours() + (sourceData.sync_frequency_hours || 24));
+      nextSync.setHours(nextSync.getHours() + (validatedData.sync_frequency_hours || 24));
+
+      const payload = {
+        ...validatedData,
+        user_id: user.id,
+        sync_status: 'active',
+        petal_position: Math.floor(Math.random() * 8) + 1,
+        next_sync_at: nextSync.toISOString(),
+      };
 
       const { data, error } = await (supabase as any)
         .from('content_sources')
-        .insert({
-          ...sourceData,
-          user_id: user.id,
-          sync_status: 'active',
-          petal_position: Math.floor(Math.random() * 8) + 1,
-          next_sync_at: nextSync.toISOString(),
-        })
+        .upsert(payload, { onConflict: 'source_url, user_id' }) // Assuming source_url and user_id is a unique constraint
         .select()
         .single();
 
       if (error) throw error;
       
-      setSources(prev => [data, ...prev]);
+      setSources(prev => {
+        const existing = prev.find(s => s.id === data.id);
+        if (existing) {
+          return prev.map(s => s.id === data.id ? data : s);
+        }
+        return [data, ...prev];
+      });
+
       toast({
         title: "Source added successfully",
-        description: `${sourceData.source_name} has been added to your content sources.`
+        description: `${validatedData.source_name} has been added to your content sources.`
       });
 
       return data;
     } catch (error: any) {
-      toast({
-        title: "Error adding source",
-        description: error.message,
-        variant: "destructive"
-      });
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Invalid data",
+          description: error.errors.map(e => e.message).join('\n'),
+          variant: "destructive"
+        });
+      } else {
+        console.error('Upsert failed', {
+          message: error.message,
+          details: (error as any).details,
+          hint: (error as any).hint,
+          code: (error as any).code
+        });
+        toast({
+          title: "Error adding source",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
       throw error;
+    } finally {
+      inFlight = false;
     }
   };
 
