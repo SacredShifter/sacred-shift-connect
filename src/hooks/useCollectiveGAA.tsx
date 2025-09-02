@@ -64,15 +64,10 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     }
   };
 
-  const startAudioStreaming = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      setLocalStream(stream);
-      if (collectiveReceiverRef.current) {
-        collectiveReceiverRef.current.setLocalStream(stream);
-      }
-    } catch (error) {
-      console.error("Error accessing microphone:", error);
+  const setLocalAudioStream = (stream: MediaStream) => {
+    setLocalStream(stream);
+    if (collectiveReceiverRef.current) {
+      collectiveReceiverRef.current.setLocalStream(stream);
     }
   };
 
@@ -96,36 +91,31 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     };
   }, []);
 
-  // Create a new collective session (simulated)
-  const createSession = async (ceremonyType?: string): Promise<string | null> => {
+  // Create a new collective session
+  const createSession = async (ceremonyType: any = 'harmonic_convergence'): Promise<string | null> => {
     console.log('ethos.event: CollectiveSessionCreated');
     if (!userIdRef.current) {
       console.error('User not authenticated');
       return null;
     }
 
-    await startAudioStreaming();
+    const { data, error } = await supabase
+      .from('gaa_sessions')
+      .insert({
+        host_uid: userIdRef.current,
+        is_public: true,
+        settings: { ceremonyType },
+      })
+      .select()
+      .single();
 
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    const mockSession: GAASessionExtended = {
-      id: sessionId,
-      presetId: 'cosmic_harmony',
-      facilitatorId: userIdRef.current,
-      participantIds: [userIdRef.current],
-      status: 'active',
-      collectiveState: {
-        participants: [],
-        phaseCoherence: 0,
-        ceremonyType: (ceremonyType as any) || 'harmonic_convergence'
-      },
-      sessionAnalytics: {
-        startTime: new Date(),
-        totalParticipants: 1,
-        averageCoherence: 0,
-        peakCoherence: 0
-      }
-    };
+    if (error || !data) {
+      console.error('Error creating session:', error);
+      return null;
+    }
+
+    const newSession = data as unknown as GAASessionExtended;
+    const sessionId = newSession.id;
 
     // Set up realtime channel
     setupRealtimeChannel(sessionId);
@@ -171,19 +161,19 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
       sessionId,
       isLeader: true,
       isConnected: true,
-      currentSession: mockSession,
+      currentSession: newSession,
       connectionStatus: 'connected',
       orchestration: {
         participants: [],
         phaseCoherence: 0,
-        ceremonyType: (ceremonyType as any) || 'harmonic_convergence'
+        ceremonyType: ceremonyType
       }
     }));
 
     return sessionId;
   };
 
-  // Join an existing session (simulated)
+  // Join an existing session
   const joinSession = async (sessionId: string): Promise<boolean> => {
     console.log('ethos.event: CollectiveSessionJoined');
     if (!userIdRef.current) {
@@ -191,27 +181,18 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
       return false;
     }
 
-    await startAudioStreaming();
+    const { data, error } = await supabase
+      .from('gaa_sessions')
+      .select('*')
+      .eq('id', sessionId)
+      .single();
 
-    // Simulate joining session
-    const mockSession: GAASessionExtended = {
-      id: sessionId,
-      presetId: 'cosmic_harmony',
-      facilitatorId: 'other_user',
-      participantIds: ['other_user', userIdRef.current],
-      status: 'active',
-      collectiveState: {
-        phaseCoherence: 0.3,
-        participants: [],
-        ceremonyType: 'harmonic_convergence' as any
-      },
-      sessionAnalytics: {
-        startTime: new Date(),
-        totalParticipants: 2,
-        averageCoherence: 0.3,
-        peakCoherence: 0.5
-      }
-    };
+    if (error || !data) {
+      console.error('Error joining session:', error);
+      return false;
+    }
+
+    const session = data as unknown as GAASessionExtended;
 
     // Set up realtime channel
     setupRealtimeChannel(sessionId);
@@ -257,7 +238,7 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
       sessionId,
       isLeader: false,
       connectionStatus: 'connected',
-      currentSession: mockSession,
+      currentSession: session,
       isConnected: true,
       orchestration: {
         phaseCoherence: 0.3,
@@ -483,7 +464,7 @@ export const useCollectiveGAA = (transport: typeof Tone.Transport) => {
     updateParticipantState,
     syncPolarityProtocol,
     simulateParticipant,
-    startAudioStreaming,
+    setLocalAudioStream,
     remoteStreams,
     updateConsentLevel: (level: 'observer' | 'participant' | 'full_integration') => {
       // This would be a broadcast message to the leader/server

@@ -154,6 +154,12 @@ export class MultiScaleLayerManager {
     pointCount: number,
     layerIndex: number
   ): NormalizedGeometry {
+    // --- Null/undefined check ---
+    if (!layerId || !layer) {
+        console.warn('⚠️ Invalid layerId or layer provided to generateLayerGeometry. Using fallback.');
+        return this.createFallbackGeometry();
+    }
+
     const vertices: number[][] = [];
     const time = (performance.now() - this.startTime) / 1000;
     
@@ -164,35 +170,23 @@ export class MultiScaleLayerManager {
       
       switch (layerId) {
         case 'atomic':
-          // Quantum-like electron orbital patterns
           vertex = this.generateOrbitalPattern(t, layer.phase, 0.1);
           break;
-          
         case 'molecular':
-          // Molecular bond patterns
           vertex = this.generateMolecularPattern(t, layer.phase, 0.3);
           break;
-          
         case 'cellular':
-          // Cellular membrane oscillations
           vertex = this.generateCellularPattern(t, layer.phase, 0.5);
           break;
-          
         case 'tissue':
-          // Tissue fiber alignment patterns
           vertex = this.generateTissuePattern(t, layer.phase, 0.7);
           break;
-          
         case 'organ':
-          // Organ rhythm patterns (heart, lung, etc.)
           vertex = this.generateOrganPattern(t, layer.phase, 0.9);
           break;
-          
         case 'organism':
-          // Whole-body integration patterns
           vertex = this.generateOrganismPattern(t, layer.phase, 1.0);
           break;
-          
         default:
           vertex = [Math.cos(t), Math.sin(t), 0];
       }
@@ -200,30 +194,72 @@ export class MultiScaleLayerManager {
       vertices.push(vertex);
     }
 
-    // Generate faces using Delaunay triangulation for correctness
-    const faces: number[][] = [];
-    if (vertices.length >= 3) {
+    // --- Fallback for invalid geometry ---
+    if (vertices.length < 3) {
+        console.warn(`⚠️ Generated only ${vertices.length} vertices for layer ${layerId}. Fallback to triangle.`);
+        return this.createFallbackGeometry(layer.weight);
+    }
+
+    try {
+      // Generate faces using Delaunay triangulation for correctness
+      const faces: number[][] = [];
       const delaunay = Delaunator.from(vertices.map(v => [v[0], v[1]]));
       for (let i = 0; i < delaunay.triangles.length; i += 3) {
         faces.push([delaunay.triangles[i], delaunay.triangles[i+1], delaunay.triangles[i+2]]);
       }
+
+      // If triangulation results in no faces, use fallback.
+      if (faces.length === 0) {
+        console.warn(`⚠️ Delaunay triangulation failed for layer ${layerId}. Fallback to triangle.`);
+        return this.createFallbackGeometry(layer.weight);
+      }
+
+      // Calculate normals
+      const normals: number[][] = vertices.map(() => [0, 0, 1]);
+
+      return this.geometricNormalizer.normalize({
+        vertices,
+        faces,
+        normals,
+        center: [0, 0, 0],
+        radius: layer.weight,
+        sacredRatios: {
+          phi: 1.618033988749,
+          pi: Math.PI,
+          sqrt2: Math.sqrt(2)
+        }
+      });
+    } catch (error) {
+      console.error(`❌ Error during Delaunay triangulation for layer ${layerId}:`, error);
+      return this.createFallbackGeometry(layer.weight);
     }
+  }
 
-    // Calculate normals
-    const normals: number[][] = vertices.map(() => [0, 0, 1]);
-
-    return this.geometricNormalizer.normalize({
-      vertices,
-      faces,
-      normals,
+  /**
+   * Creates a simple, stable triangular geometry as a fallback.
+   */
+  private createFallbackGeometry(radius: number = 1.0): NormalizedGeometry {
+    const fallbackGeometry = {
+      vertices: [
+        [-1, -0.5, 0],
+        [1, -0.5, 0],
+        [0, 1, 0]
+      ],
+      faces: [[0, 1, 2]],
+      normals: [
+        [0, 0, 1],
+        [0, 0, 1],
+        [0, 0, 1]
+      ],
       center: [0, 0, 0],
-      radius: layer.weight,
+      radius: radius,
       sacredRatios: {
         phi: 1.618033988749,
         pi: Math.PI,
         sqrt2: Math.sqrt(2)
       }
-    });
+    };
+    return this.geometricNormalizer.normalize(fallbackGeometry);
   }
 
   /**

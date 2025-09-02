@@ -6,6 +6,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Text } from '@react-three/drei';
 import { Vector3, Mesh, Group } from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 import * as THREE from 'three';
 import { CosmicStructureData } from '@/types/gaa-polarity';
 import { motion } from 'framer-motion';
@@ -135,6 +136,7 @@ const CosmicScene: React.FC<{
 }> = ({ cosmicData, shadowEngineState, onStructureSelect }) => {
   const [selectedStructure, setSelectedStructure] = useState<CosmicStructureData | null>(null);
   const groupRef = useRef<Group>(null);
+  const isMobile = useIsMobile();
 
   const handleStructureClick = (structure: CosmicStructureData) => {
     setSelectedStructure(structure);
@@ -157,7 +159,7 @@ const CosmicScene: React.FC<{
   return (
     <group ref={groupRef}>
       {/* Background stars */}
-      <Stars radius={50} depth={50} count={1000} factor={4} saturation={0} fade />
+      <Stars radius={50} depth={50} count={isMobile ? 500 : 1000} factor={4} saturation={0} fade />
       
       {/* Firmament dome */}
       <FirmamentDome 

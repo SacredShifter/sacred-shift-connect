@@ -84,6 +84,10 @@ export class CollectiveReceiver {
 
   setLocalStream(stream: MediaStream) {
     this.localStream = stream;
+    // @ts-ignore
+    for (const peer of this.transport.peers.values()) {
+      peer.addStream(stream);
+    }
   }
 
   // Entry point to connect to a new peer

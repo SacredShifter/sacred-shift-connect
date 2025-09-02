@@ -63,6 +63,7 @@ export class GeometricOscillator {
   private masterGain: Tone.Gain;
   private masterCompressor: Tone.Compressor;
   private masterAnalyser: Tone.Analyser;
+  private streamDestination: MediaStreamAudioDestinationNode;
 
   // Node pools for recycling
   private oscPool: Tone.Oscillator[] = [];
@@ -89,9 +90,11 @@ export class GeometricOscillator {
     });
     this.masterAnalyser = new Tone.Analyser('waveform', 1024);
     
+    this.streamDestination = Tone.getContext().createMediaStreamDestination();
     this.masterGain.connect(this.masterCompressor);
     this.masterCompressor.connect(this.masterAnalyser);
     this.masterAnalyser.toDestination();
+    this.masterCompressor.connect(this.streamDestination);
     
     console.log('✅ GAA master audio chain ready');
 
@@ -296,6 +299,14 @@ export class GeometricOscillator {
    * Calculate frequency based on geometric properties
    */
   private calculateGeometricFrequency(geometry: NormalizedGeometry): number {
+    // --- Fallback frequency in case of invalid calculation ---
+    const FALLBACK_FREQUENCY = 432;
+
+    if (!geometry || !geometry.sacredRatios || !geometry.vertices) {
+        console.warn('⚠️ Invalid geometry provided to calculateGeometricFrequency. Using fallback.');
+        return FALLBACK_FREQUENCY;
+    }
+
     const { sacredRatios, radius, vertices } = geometry;
     
     // Base frequency from sacred ratios
@@ -316,8 +327,13 @@ export class GeometricOscillator {
     );
     freq *= 1 + centerMagnitude * 0.3;
     
-    // Ensure frequency is in audible range
-    return Math.max(20, Math.min(2000, freq));
+    // --- Bounds and NaN check ---
+    if (isNaN(freq) || freq === null || freq < 20 || freq > 20000) {
+      console.warn(`⚠️ Calculated frequency is invalid or out of range (${freq} Hz). Falling back to ${FALLBACK_FREQUENCY} Hz.`);
+      return FALLBACK_FREQUENCY;
+    }
+
+    return freq;
   }
 
   /**
@@ -439,5 +455,9 @@ export class GeometricOscillator {
    */
   getAnalyserNode(): Tone.Analyser {
     return this.masterAnalyser;
+  }
+
+  getOutputStream(): MediaStream {
+    return this.streamDestination.stream;
   }
 }

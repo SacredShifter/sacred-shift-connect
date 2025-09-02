@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { SignalQuality } from './usePhonePulseSensor';
 
 // This is a very simplified approach to motion-based HR estimation.
 // A real implementation would require more sophisticated signal processing.
@@ -7,10 +8,13 @@ const BUFFER_SIZE = SAMPLE_RATE * 5; // 5 seconds of data
 
 export const useAccelerometer = () => {
   const [bpm, setBpm] = useState<number>(0);
+  const [signalQuality, setSignalQuality] = useState<SignalQuality>('no_signal');
   const [isSensing, setIsSensing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const dataBuffer = useRef<number[]>([]);
   const lastTimestamp = useRef<number>(0);
+  const bpmHistoryRef = useRef<number[]>([]);
+  const noSignalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMotionEvent = useCallback((event: DeviceMotionEvent) => {
     if (!event.acceleration) {
@@ -33,18 +37,29 @@ export const useAccelerometer = () => {
     if (dataBuffer.current.length > BUFFER_SIZE) {
       dataBuffer.current.shift();
 
-      // Simple peak detection on the acceleration data
-      // This is a naive way to estimate BPM from motion
       const peaks = findPeaks(dataBuffer.current);
       if (peaks.length > 1) {
         const timeBetweenPeaks = (peaks[1] - peaks[0]) / SAMPLE_RATE;
         const estimatedBpm = 60 / timeBetweenPeaks;
 
-        if(estimatedBpm > 40 && estimatedBpm < 180) { // Plausible range for motion
-             setBpm(prevBpm => (prevBpm * 0.9) + (estimatedBpm * 0.1));
+        if (estimatedBpm > 40 && estimatedBpm < 180) {
+          setBpm(prevBpm => (prevBpm * 0.9) + (estimatedBpm * 0.1));
+
+          const history = bpmHistoryRef.current;
+          history.push(estimatedBpm);
+          if (history.length > 10) history.shift();
+
+          if (history.length > 5) {
+            const mean = history.reduce((a, b) => a + b, 0) / history.length;
+            const variance = history.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / history.length;
+            setSignalQuality(variance < 10 ? 'good' : 'weak'); // Higher threshold for motion
+          }
         }
       }
     }
+
+    if (noSignalTimeoutRef.current) clearTimeout(noSignalTimeoutRef.current);
+    noSignalTimeoutRef.current = setTimeout(() => setSignalQuality('no_signal'), 2000);
   }, []);
 
   const startSensing = useCallback(() => {
@@ -72,9 +87,14 @@ export const useAccelerometer = () => {
   }, [handleMotionEvent]);
 
   const stopSensing = useCallback(() => {
+    if (noSignalTimeoutRef.current) {
+        clearTimeout(noSignalTimeoutRef.current);
+        noSignalTimeoutRef.current = null;
+    }
     window.removeEventListener('devicemotion', handleMotionEvent);
     setIsSensing(false);
     setBpm(0);
+    setSignalQuality('no_signal');
     dataBuffer.current = [];
   }, [handleMotionEvent]);
 
@@ -82,7 +102,7 @@ export const useAccelerometer = () => {
     return () => stopSensing();
   }, [stopSensing]);
 
-  return { bpm, isSensing, error, startSensing, stopSensing };
+  return { bpm, isSensing, error, signalQuality, startSensing, stopSensing };
 };
 
 // Helper function to find peaks in an array
