@@ -22,8 +22,8 @@ vi.mock('lucide-react', () => {
   });
 });
 
-const mockUseGAAEngine = useGAAEngine as vi.Mock;
-const mockUseCollectiveGAA = useCollectiveGAA as vi.Mock;
+const mockUseGAAEngine = useGAAEngine as ReturnType<typeof vi.fn>;
+const mockUseCollectiveGAA = useCollectiveGAA as ReturnType<typeof vi.fn>;
 
 describe('GAADashboard', () => {
   beforeEach(() => {

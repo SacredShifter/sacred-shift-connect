@@ -153,10 +153,10 @@ export class SacredMeshCrypto {
     const encrypted = await crypto.subtle.encrypt(
       {
         name: 'AES-GCM',
-        iv: nonce
+        iv: nonce.buffer as ArrayBuffer
       },
       key,
-      data
+      (data as unknown) as ArrayBuffer
     );
 
     // AES-GCM returns ciphertext + auth tag combined
@@ -177,7 +177,7 @@ export class SacredMeshCrypto {
     const decrypted = await crypto.subtle.decrypt(
       {
         name: 'AES-GCM',
-        iv: nonce
+        iv: nonce.buffer as ArrayBuffer
       },
       key,
       encrypted

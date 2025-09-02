@@ -60,7 +60,7 @@ describe('PresetManager', () => {
 
   it('should initialize and fetch presets when cache is empty', async () => {
     // Arrange
-    (sacredStorage.getAll as vi.Mock).mockResolvedValue([]);
+    (sacredStorage.getAll as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
     // Act
     await presetManager.initialize('test-user');
@@ -74,7 +74,7 @@ describe('PresetManager', () => {
 
   it('should initialize from cache when presets are available', async () => {
     // Arrange
-    (sacredStorage.getAll as vi.Mock).mockResolvedValue(mockPresets);
+    (sacredStorage.getAll as ReturnType<typeof vi.fn>).mockResolvedValue(mockPresets);
 
     // Act
     await presetManager.initialize('test-user');
@@ -91,7 +91,7 @@ describe('PresetManager', () => {
 
   it('should load a preset successfully after initialization', async () => {
     // Arrange
-    (sacredStorage.getAll as vi.Mock).mockResolvedValue(mockPresets);
+    (sacredStorage.getAll as ReturnType<typeof vi.fn>).mockResolvedValue(mockPresets);
     await presetManager.initialize('test-user');
 
     // Act
