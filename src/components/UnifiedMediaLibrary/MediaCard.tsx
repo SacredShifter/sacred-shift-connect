@@ -3,27 +3,7 @@ import { motion } from 'framer-motion';
 import { Play, Star, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-interface MediaItem {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail_url: string;
-  source_platform?: string;
-  source_url?: string;
-  external_url?: string;
-  category_name?: string;
-  featured_priority: number;
-  energy_level: number;
-  consciousness_level: string;
-  genre_tags: string[];
-  mood_tags: string[];
-  teaching_notes?: string;
-  created_at: string;
-  content_type?: string;
-  author_name?: string;
-  author_url?: string;
-}
+import { MediaItem } from './types';
 
 interface MediaCardProps {
   media: MediaItem;

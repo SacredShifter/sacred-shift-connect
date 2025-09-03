@@ -4,23 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MediaCard } from './MediaCard';
 import { icons } from 'lucide-react';
-
-interface MediaItem {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail_url: string;
-  source_platform: string;
-  source_url: string;
-  category_name?: string;
-  featured_priority: number;
-  energy_level: number;
-  consciousness_level: string;
-  genre_tags: string[];
-  mood_tags: string[];
-  teaching_notes?: string;
-  created_at: string;
-}
+import { MediaItem } from './types';
 
 interface CategoryCarouselProps {
   title: string;

@@ -2,27 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-
-interface MediaItem {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail_url: string;
-  source_platform?: string;
-  source_url?: string;
-  external_url?: string;
-  category_name?: string;
-  featured_priority: number;
-  energy_level: number;
-  consciousness_level: string;
-  genre_tags: string[];
-  mood_tags: string[];
-  teaching_notes?: string;
-  created_at: string;
-  content_type?: string;
-  author_name?: string;
-  author_url?: string;
-}
+import { MediaItem } from './types';
 
 interface MediaModalProps {
   media: MediaItem | null;

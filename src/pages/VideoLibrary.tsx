@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 import { Grid, Flower, Plus, BookOpen, ChevronDown, ChevronUp, Play } from 'lucide-react';
 import { YouTubeLibrary } from '@/components/YouTubeLibrary/YouTubeLibrary';
 import { UnifiedMediaLibrary } from '@/components/UnifiedMediaLibrary/UnifiedMediaLibrary';
