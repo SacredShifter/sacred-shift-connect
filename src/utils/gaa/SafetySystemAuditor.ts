@@ -273,7 +273,7 @@ export class SafetySystemAuditor {
       this.violations.push({
         type: 'visual',
         severity: 'high',
-        message: `Color contrast too low: ${visual.colorContrast.toFixed(1):1}`,
+        message: `Color contrast too low: ${visual.colorContrast.toFixed(1)}`,
         currentValue: visual.colorContrast,
         threshold: this.thresholds.visual.minColorDifference,
         recommendation: 'Increase color contrast to meet WCAG AA standards',

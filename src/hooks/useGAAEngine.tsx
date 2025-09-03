@@ -4,6 +4,11 @@ import { GaaPreset, ShadowEngineState, BioSignals, GaaCoreFrame } from '@/types/
 import { CollectiveField } from '@/modules/collective/CollectiveReceiver';
 import { GeometricOscillator, GeometricOscillatorConfig, NormalizedGeometry } from '@/utils/gaa/GeometricOscillator';
 import { SafetySystem, SafetyAlert } from '@/utils/gaa/SafetySystem';
+import { GeometricFrequencyFixer } from '@/utils/gaa/GeometricFrequencyFixer';
+import { PLLDriftCorrection } from '@/utils/gaa/PLLDriftCorrection';
+import { CollectiveReceiverGrid } from '@/utils/gaa/CollectiveReceiverGrid';
+import { BroadcastChannelFallback } from '@/utils/gaa/BroadcastChannelFallback';
+import { TelemetryHooks } from '@/utils/gaa/TelemetryHooks';
 import { MultiScaleLayerManager } from '@/utils/gaa/MultiScaleLayerManager';
 import { ShadowEngine } from '@/dsp/ShadowEngine';
 import { usePhonePulseSensor } from './usePhonePulseSensor';
