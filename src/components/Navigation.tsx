@@ -1,3 +1,12 @@
+/**
+ * @deprecated This component is now replaced by the dual navigation system.
+ * Use AdaptiveNavigation with NavigationProvider instead.
+ * 
+ * For reference, the new system provides:
+ * - SacredJourneyNavigation: Progressive unlock based on Tao Flow
+ * - ExplorerNavigation: Full access to all modules
+ */
+
 import { useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
