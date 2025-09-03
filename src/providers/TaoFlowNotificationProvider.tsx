@@ -23,6 +23,7 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
   const [celebrationStage, setCelebrationStage] = useState<TaoStage | null>(null);
   const [showRevealModal, setShowRevealModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
+  const [justCelebrated, setJustCelebrated] = useState(false);
   
   const { getAllUnlockedModules, currentStage } = useTaoFlowProgress();
   const [previousStage, setPreviousStage] = useState<TaoStage>(currentStage);
@@ -35,6 +36,10 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
       setCelebrationStage(currentStage);
       setShowCelebrationModal(true);
       setPreviousStage(currentStage);
+      setJustCelebrated(true);
+      
+      // Clear the flag after a delay to allow module reveals later
+      setTimeout(() => setJustCelebrated(false), 3000);
     }
   }, [currentStage, previousStage]);
 
@@ -43,8 +48,8 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
     const unlockedModules = getAllUnlockedModules();
     const currentModuleCount = unlockedModules.length;
     
-    if (currentModuleCount > previousModuleCount && previousModuleCount > 0) {
-      // New module unlocked - find the newest one
+    if (currentModuleCount > previousModuleCount && previousModuleCount > 0 && !justCelebrated) {
+      // New module unlocked - find the newest one (but not if we just showed a celebration)
       const newModule = unlockedModules[unlockedModules.length - 1];
       if (newModule) {
         setRevealModule(newModule);
@@ -53,7 +58,7 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
     }
     
     setPreviousModuleCount(currentModuleCount);
-  }, [getAllUnlockedModules, previousModuleCount]);
+  }, [getAllUnlockedModules, previousModuleCount, justCelebrated]);
 
   const showModuleReveal = (module: TaoModule) => {
     setRevealModule(module);

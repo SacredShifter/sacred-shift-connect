@@ -73,7 +73,8 @@ const JourneyMap: React.FC = () => {
               {unlockedModules.map(module => (
                 <div 
                   key={module.path}
-                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                  onClick={() => window.location.href = module.path}
                 >
                   <span className="text-sm font-medium">{module.name}</span>
                   <Badge variant="secondary" className="ml-2">

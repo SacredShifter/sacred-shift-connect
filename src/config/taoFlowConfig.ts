@@ -31,16 +31,6 @@ export const taoFlowConfig: TaoFlowConfig = {
   // ================ WU WEI STAGE (UNCARVED BLOCK) ================
   // Foundation modules that auto-reveal during onboarding
   wuWei: {
-    dashboard: {
-      name: "Sacred Journey Dashboard",
-      path: "/dashboard", 
-      education: "high",
-      reveal: "auto",
-      predecessors: [],
-      successors: ["home", "breath", "profile"],
-      alternatives: ["home"], // Always accessible via home
-      fadeEducation: false
-    },
 
     home: {
       name: "Sacred Community Hub",
@@ -58,22 +48,12 @@ export const taoFlowConfig: TaoFlowConfig = {
       path: "/profile",
       education: "medium",
       reveal: "auto",
-      predecessors: ["dashboard"],
-      successors: ["settings", "breath"],
+      predecessors: ["home"],
+      successors: ["breath"],
       alternatives: ["home"], // Can access via home menu
       fadeEducation: false
     },
 
-    settings: {
-      name: "Sacred Configuration", 
-      path: "/settings",
-      education: "medium",
-      reveal: "tooltip",
-      predecessors: ["profile"],
-      successors: ["privacy", "dailyPractice"],
-      alternatives: ["profile"], // Always accessible from profile
-      fadeEducation: false
-    },
 
     help: {
       name: "Sacred Guidance Center",
@@ -113,7 +93,7 @@ export const taoFlowConfig: TaoFlowConfig = {
       path: "/daily-ritual", 
       education: "high",
       reveal: "tooltip",
-      predecessors: ["breath", "settings"],
+      predecessors: ["breath"],
       successors: ["meditation", "journal"],
       alternatives: ["breath"], // Breath practice unlocks
       fadeEducation: true
@@ -205,7 +185,7 @@ export const taoFlowConfig: TaoFlowConfig = {
   // Deep work unlocked through wisdom-based triggers
   advancedCeremony: {
     circles: {
-      name: "Deep Community Circles",
+      name: "Circles",
       path: "/circles",
       education: "low",
       reveal: "ceremony", // Requires sustained community engagement
@@ -297,12 +277,12 @@ export const taoFlowConfig: TaoFlowConfig = {
   // Integration and service, hidden until mastery
   returnToSilence: {
     registry: {
-      name: "Akashic Constellation Registry",
+      name: "Collective Codex",
       path: "/registry", 
       education: "low",
       reveal: "mastery", // Service through knowledge sharing
       predecessors: ["shift", "collective"],
-      successors: ["sonicShifter", "adminMastery", "teachingMastery"],
+      successors: ["sonicShifter", "adminMastery"],
       alternatives: ["liberation"], // Liberation service path
       fadeEducation: true
     },
@@ -313,7 +293,7 @@ export const taoFlowConfig: TaoFlowConfig = {
       education: "low",
       reveal: "mastery", // Conceptual until implementation
       predecessors: ["shift", "liberation"],
-      successors: ["teachingMastery", "adminMastery"],
+      successors: ["adminMastery"],
       alternatives: ["registry"], // Knowledge service alternative
       fadeEducation: true
     },
@@ -324,21 +304,11 @@ export const taoFlowConfig: TaoFlowConfig = {
       education: "low", 
       reveal: "mastery", // Hidden until ceremony completion
       predecessors: ["shift", "collective"],
-      successors: ["teachingMastery"],
+      successors: [],
       alternatives: ["registry"], // Service through curation
       fadeEducation: true
     },
 
-    teachingMastery: {
-      name: "Teaching & Mentoring Tools", 
-      path: "/teaching", // Future implementation
-      education: "low",
-      reveal: "mastery", // Unlocks after helping others
-      predecessors: ["registry", "adminMastery"],
-      successors: [],
-      alternatives: ["sonicShifter"], // Technology-assisted teaching
-      fadeEducation: true
-    },
 
     // Support modules for the Return stage
     privacy: {
@@ -359,20 +329,10 @@ export const taoFlowConfig: TaoFlowConfig = {
       reveal: "auto", // Always available
       predecessors: ["help"],
       successors: [],
-      alternatives: ["teachingMastery"], // Teaching alternative for mastery level
+      alternatives: [], // Always available
       fadeEducation: true
     },
 
-    status: {
-      name: "Consciousness Mesh Status",
-      path: "/status",
-      education: "low", 
-      reveal: "wisdom", // Technical wisdom access
-      predecessors: ["adminMastery"],
-      successors: [],
-      alternatives: ["privacy"], // Sovereignty alternative
-      fadeEducation: true
-    }
   }
 };
 

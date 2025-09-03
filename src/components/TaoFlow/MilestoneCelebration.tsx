@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,6 +57,7 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
   onContinue
 }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [showFireworks, setShowFireworks] = useState(false);
   const [animationPhase, setAnimationPhase] = useState(0);
 
@@ -88,8 +90,13 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
   const IconComponent = stage.icon;
 
   const handleContinue = () => {
-    onContinue?.();
     onClose();
+    onContinue?.();
+  };
+
+  const handleReflect = () => {
+    onClose();
+    navigate('/journal');
   };
 
   return (
@@ -207,7 +214,7 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 1.5, duration: 0.6 }}
             >
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="outline" onClick={handleReflect}>
                 Reflect in Silence
               </Button>
               <Button 
