@@ -28,8 +28,8 @@ export const KarmaJournal: React.FC<KarmaJournalProps> = ({ userId }) => {
   
   // UI state
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
-  const [outcomeFilter, setOutcomeFilter] = useState<string>('');
-  const [tagFilter, setTagFilter] = useState<string>('');
+  const [outcomeFilter, setOutcomeFilter] = useState<string>('all');
+  const [tagFilter, setTagFilter] = useState<string>('all');
 
   const handleAddTag = () => {
     if (currentTag.trim() && !tags.includes(currentTag.trim())) {
@@ -71,7 +71,10 @@ export const KarmaJournal: React.FC<KarmaJournalProps> = ({ userId }) => {
     setExpandedEntries(newExpanded);
   };
 
-  const filteredReflections = getFilteredReflections(outcomeFilter, tagFilter);
+  const filteredReflections = getFilteredReflections(
+    outcomeFilter === 'all' ? undefined : outcomeFilter, 
+    tagFilter === 'all' ? undefined : tagFilter
+  );
   const allTags = Array.from(new Set(reflections.flatMap(r => r.tags)));
 
   const resetForm = () => {
@@ -195,7 +198,7 @@ export const KarmaJournal: React.FC<KarmaJournalProps> = ({ userId }) => {
                   <SelectValue placeholder="Filter by outcome" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All outcomes</SelectItem>
+                  <SelectItem value="all">All outcomes</SelectItem>
                   <SelectItem value="positive">✨ Positive</SelectItem>
                   <SelectItem value="negative">⚡ Negative</SelectItem>
                   <SelectItem value="neutral">🌱 Neutral</SelectItem>
@@ -208,7 +211,7 @@ export const KarmaJournal: React.FC<KarmaJournalProps> = ({ userId }) => {
                     <SelectValue placeholder="Filter by tag" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All tags</SelectItem>
+                    <SelectItem value="all">All tags</SelectItem>
                     {allTags.map((tag) => (
                       <SelectItem key={tag} value={tag}>{tag}</SelectItem>
                     ))}
@@ -216,13 +219,13 @@ export const KarmaJournal: React.FC<KarmaJournalProps> = ({ userId }) => {
                 </Select>
               )}
               
-              {(outcomeFilter || tagFilter) && (
+              {((outcomeFilter && outcomeFilter !== 'all') || (tagFilter && tagFilter !== 'all')) && (
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => {
-                    setOutcomeFilter('');
-                    setTagFilter('');
+                    setOutcomeFilter('all');
+                    setTagFilter('all');
                   }}
                 >
                   Clear filters
