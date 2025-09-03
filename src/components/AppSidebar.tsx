@@ -16,7 +16,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TooltipWrapper } from "@/components/HelpSystem/TooltipWrapper";
 import { getNavigationForRole } from "@/config/navigation";
-import { useTaoFlowProgress } from "@/hooks/useTaoFlowProgress";
+// Removed Tao Flow filtering - now handled in Journey Map
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -26,38 +26,8 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
   const [userProfile, setUserProfile] = useState<{ display_name?: string; avatar_url?: string } | null>(null);
   
-  // Get Tao Flow progress
-  const { getAllUnlockedModules, isLoading: taoLoading } = useTaoFlowProgress();
-  
-  // Get navigation items filtered by Tao Flow progress and user role
-  const getFilteredNavigation = () => {
-    if (taoLoading) return getNavigationForRole(userRole); // Fallback to role-based while loading
-    
-    const roleBasedNavigation = getNavigationForRole(userRole);
-    const unlockedModules = getAllUnlockedModules();
-    const unlockedPaths = new Set(unlockedModules.map(m => m.path));
-    
-    // Filter navigation groups based on unlocked modules
-    return roleBasedNavigation.map(group => ({
-      ...group,
-      children: group.children.filter(item => {
-        // Always show account items, help items, and sign out
-        if (group.id === 'grp-account' || group.id === 'grp-help' || item.id === 'signout') {
-          return true;
-        }
-        
-        // Admin/creator items are role-gated, not Tao Flow gated
-        if (group.roles && group.roles.includes('admin')) {
-          return true;
-        }
-        
-        // Filter by Tao Flow unlock status
-        return item.path ? unlockedPaths.has(item.path) : true;
-      })
-    })).filter(group => group.children.length > 0);
-  };
-  
-  const navigationGroups = getFilteredNavigation();
+  // Get navigation items filtered by user role only (Tao Flow filtering moved to Journey Map)
+  const navigationGroups = getNavigationForRole(userRole);
 
   const isActive = (path: string) => currentPath === path;
 
