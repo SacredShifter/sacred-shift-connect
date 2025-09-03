@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MediaCard } from './MediaCard';
 import { icons } from 'lucide-react';
-import { MediaItem } from './types';
+import { MediaItem } from '../types';
 
 interface CategoryCarouselProps {
   title: string;

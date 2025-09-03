@@ -8,7 +8,7 @@ import { CategoryCarousel } from './CategoryCarousel';
 import { UnifiedSearch } from './UnifiedSearch';
 import { MediaModal } from './MediaModal';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { MediaItem, MediaCategory } from './types';
+import { MediaItem, MediaCategory } from '../types';
 
 
 export const UnifiedMediaLibrary: React.FC = () => {

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Play, Star, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MediaItem } from './types';
+import { MediaItem } from '../types';
 
 interface MediaCardProps {
   media: MediaItem;

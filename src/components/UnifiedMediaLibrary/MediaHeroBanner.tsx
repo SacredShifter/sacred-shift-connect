@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Play, Info, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MediaItem } from './types';
+import { MediaItem } from '../types';
 
 interface MediaHeroBannerProps {
   featuredContent: MediaItem[];
