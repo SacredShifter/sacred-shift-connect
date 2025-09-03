@@ -1,27 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-interface ConsciousnessState {
-  brainwave_state: 'delta' | 'theta' | 'alpha' | 'beta' | 'gamma';
-  emotional_state: 'calm' | 'excited' | 'contemplative' | 'focused' | 'transcendent';
-  spiritual_awakening_level: number; // 1-10
-  preferred_content_archetypes: string[];
-  current_energy_frequency: string;
-  time_of_day: number; // 0-23
-  lunar_phase: 'new' | 'waxing' | 'full' | 'waning';
-}
-
-interface ContentRecommendation {
-  id: string;
-  title: string;
-  description: string;
-  consciousness_level: string;
-  energy_frequency: string;
-  archetype: string;
-  resonance_score: number;
-  why_recommended: string;
-  consciousness_alignment: string;
-}
+import { 
+  ConsciousnessState, 
+  ConsciousnessRecommendation, 
+  BiofeedbackData, 
+  ConsciousnessMetrics,
+  ConsciousnessEvolution,
+  SacredPattern,
+  Vector3D
+} from '@/types/consciousness';
 
 interface UserResonanceProfile {
   preferred_frequencies: string[];
