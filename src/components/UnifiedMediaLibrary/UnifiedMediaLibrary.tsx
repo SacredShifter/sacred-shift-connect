@@ -96,9 +96,22 @@ export const UnifiedMediaLibrary: React.FC = () => {
 
       if (error) throw error;
       
-      const formattedData = data?.map(item => ({
-        ...item,
-        category_name: item.media_categories?.name
+      const formattedData = data?.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description || '',
+        thumbnail_url: item.thumbnail_url || '',
+        source_platform: item.source_platform || 'unknown',
+        source_url: item.source_url || '',
+        category_name: item.media_categories?.name,
+        category_id: item.category_id,
+        featured_priority: item.featured_priority || 0,
+        energy_level: item.energy_level || 0,
+        consciousness_level: item.consciousness_level || 'beginner',
+        genre_tags: item.genre_tags || [],
+        mood_tags: item.mood_tags || [],
+        teaching_notes: item.teaching_notes,
+        created_at: item.created_at
       })) || [];
       
       setFeaturedContent(formattedData);
@@ -124,9 +137,22 @@ export const UnifiedMediaLibrary: React.FC = () => {
         
         return {
           categoryId: category.id,
-          content: data?.map(item => ({
-            ...item,
-            category_name: item.media_categories?.name
+          content: data?.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            description: item.description || '',
+            thumbnail_url: item.thumbnail_url || '',
+            source_platform: item.source_platform || 'unknown',
+            source_url: item.source_url || '',
+            category_name: item.media_categories?.name,
+            category_id: item.category_id,
+            featured_priority: item.featured_priority || 0,
+            energy_level: item.energy_level || 0,
+            consciousness_level: item.consciousness_level || 'beginner',
+            genre_tags: item.genre_tags || [],
+            mood_tags: item.mood_tags || [],
+            teaching_notes: item.teaching_notes,
+            created_at: item.created_at
           })) || []
         };
       });
