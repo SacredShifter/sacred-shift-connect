@@ -39,7 +39,7 @@ export class GAAIntegrationManager {
     // Initialize all components
     this.pllCorrection = new PLLDriftCorrection();
     this.receiverGrid = new CollectiveReceiverGrid();
-    this.broadcastFallback = new BroadcastChannelFallback('gaa-collective');
+    this.broadcastFallback = new BroadcastChannelFallback('gaa-collective', 'gaa-manager');
     this.stressRunner = new StressTestRunner();
     this.safetyAuditor = new SafetySystemAuditor();
     this.telemetry = new TelemetryHooks();

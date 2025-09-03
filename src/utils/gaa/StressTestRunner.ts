@@ -195,7 +195,7 @@ export class StressTestRunner {
       participants.push(participantId);
       
       // Add participant to grid
-      const state: Partial<ParticipantGridState> = {
+      const state: Partial<ParticipantGridState> & { userId: string } = {
         userId: participantId,
         phase: Math.random() * 2 * Math.PI,
         frequency: 0.8 + Math.random() * 0.4, // 0.8-1.2 Hz
@@ -211,7 +211,7 @@ export class StressTestRunner {
         latency: this.config.simulatedLatency + (Math.random() - 0.5) * this.config.networkJitter
       };
       
-      this.collectiveGrid.updateParticipant(state);
+      this.collectiveGrid?.updateParticipant(state);
       
       // Add to PLL
       if (state.phase !== undefined) {
@@ -231,7 +231,7 @@ export class StressTestRunner {
       participants.forEach(participantId => {
         const existing = this.collectiveGrid?.getFieldState().participants.find(p => p.userId === participantId);
         if (existing) {
-          const updatedState: Partial<ParticipantGridState> = {
+          const updatedState: Partial<ParticipantGridState> & { userId: string } = {
             userId: participantId,
             phase: existing.phase + 0.1 + (Math.random() - 0.5) * 0.05,
             frequency: existing.frequency + (Math.random() - 0.5) * 0.01,
