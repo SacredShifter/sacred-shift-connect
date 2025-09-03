@@ -4644,6 +4644,7 @@ export type Database = {
         Row: {
           api_credentials: Json | null
           created_at: string
+          external_id: string
           id: string
           last_sync_at: string | null
           next_sync_at: string | null
@@ -4661,6 +4662,7 @@ export type Database = {
         Insert: {
           api_credentials?: Json | null
           created_at?: string
+          external_id: string
           id?: string
           last_sync_at?: string | null
           next_sync_at?: string | null
@@ -4678,6 +4680,7 @@ export type Database = {
         Update: {
           api_credentials?: Json | null
           created_at?: string
+          external_id?: string
           id?: string
           last_sync_at?: string | null
           next_sync_at?: string | null
@@ -15023,6 +15026,33 @@ export type Database = {
           id?: string
           index_small?: number
           title?: string
+        }
+        Relationships: []
+      }
+      tarot_journal_logs: {
+        Row: {
+          card_id: number
+          created_at: string
+          id: number
+          interpretation: string | null
+          is_reversed: boolean
+          user_id: string
+        }
+        Insert: {
+          card_id: number
+          created_at?: string
+          id?: number
+          interpretation?: string | null
+          is_reversed: boolean
+          user_id: string
+        }
+        Update: {
+          card_id?: number
+          created_at?: string
+          id?: number
+          interpretation?: string | null
+          is_reversed?: boolean
+          user_id?: string
         }
         Relationships: []
       }
