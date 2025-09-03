@@ -116,14 +116,15 @@ function App() {
       <ProductionReadyErrorBoundary>
       <PerformanceMonitor />
       <ErrorBoundary name="Root">
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-        <SacredScreensaver 
-          timeout={120000} 
-          enabled={true}
-        >
-          <div className="min-h-screen relative w-full bg-black">
+        <AppProviders>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+          <SacredScreensaver 
+            timeout={120000} 
+            enabled={true}
+          >
+            <div className="min-h-screen relative w-full bg-black">
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/confirm" element={<AuthConfirm />} />
@@ -211,6 +212,7 @@ function App() {
             </div>
         </SacredScreensaver>
         </TooltipProvider>
+      </AppProviders>
       </ErrorBoundary>
     </ProductionReadyErrorBoundary>
   );

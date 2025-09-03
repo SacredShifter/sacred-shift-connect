@@ -10,6 +10,7 @@ import { PresetProvider } from './PresetProvider';
 import { RealtimeOrchestraProvider } from './RealtimeOrchestraProvider';
 import { SafetyProvider } from './SafetyProvider';
 import { DailyRoutineProvider } from './DailyRoutineProvider';
+import { TaoFlowProvider } from './TaoFlowProvider';
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -18,19 +19,21 @@ interface AppProvidersProps {
 export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
     <AuthProvider>
-      <BiofeedbackProvider>
-        <CosmicDataProvider>
-          <PresetProvider>
-            <RealtimeOrchestraProvider>
-              <SafetyProvider>
-                <DailyRoutineProvider>
-                  {children}
-                </DailyRoutineProvider>
-              </SafetyProvider>
-            </RealtimeOrchestraProvider>
-          </PresetProvider>
-        </CosmicDataProvider>
-      </BiofeedbackProvider>
+      <TaoFlowProvider>
+        <BiofeedbackProvider>
+          <CosmicDataProvider>
+            <PresetProvider>
+              <RealtimeOrchestraProvider>
+                <SafetyProvider>
+                  <DailyRoutineProvider>
+                    {children}
+                  </DailyRoutineProvider>
+                </SafetyProvider>
+              </RealtimeOrchestraProvider>
+            </PresetProvider>
+          </CosmicDataProvider>
+        </BiofeedbackProvider>
+      </TaoFlowProvider>
     </AuthProvider>
   );
 };

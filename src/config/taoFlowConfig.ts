@@ -3,6 +3,8 @@
  * Guardian's map of consciousness unfolding through Wu Wei principles
  */
 
+export type TaoStage = 'wuWei' | 'yinYang' | 'advancedCeremony' | 'returnToSilence';
+
 export interface TaoModule {
   name: string;
   path: string;
