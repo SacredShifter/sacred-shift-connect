@@ -1,7 +1,7 @@
 /**
  * Biofeedback Provider - Manages biometric data and safety protocols
  */
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { BiofeedbackMetrics } from '@/types/gaa-polarity';
 
 interface BiofeedbackContextType {
@@ -35,18 +35,23 @@ interface BiofeedbackProviderProps {
 }
 
 export const BiofeedbackProvider: React.FC<BiofeedbackProviderProps> = ({ children }) => {
-  // Simple static implementation to prevent React hook errors
+  const [isConnected, setIsConnected] = useState(false);
+  const [metrics, setMetrics] = useState<BiofeedbackMetrics | null>(null);
+  
   const value: BiofeedbackContextType = {
-    metrics: null,
-    isConnected: false,
+    metrics,
+    isConnected,
     hrvLow: false,
     stressDetected: false,
     connect: async () => {
       console.log('Biofeedback connection simulated');
+      setIsConnected(true);
       return true;
     },
     disconnect: () => {
       console.log('Biofeedback disconnected');
+      setIsConnected(false);
+      setMetrics(null);
     }
   };
 

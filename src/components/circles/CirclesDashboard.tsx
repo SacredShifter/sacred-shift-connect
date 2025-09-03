@@ -129,7 +129,7 @@ export const CirclesDashboard: React.FC = () => {
 
         <MessagingCore 
           circleId={selectedCircle.id} 
-          currentUserId={user?.id || ''} 
+          userId={user?.id || ''} 
         />
       </div>
     );
