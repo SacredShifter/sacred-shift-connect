@@ -3,6 +3,12 @@ import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
 import { Text } from '@react-three/drei';
 import type { ConstellationNode } from '@/config/sacredGeometry';
+import { LotusNode } from './metaphors/LotusNode';
+import { PoolNode } from './metaphors/PoolNode';
+import { MandalaNode } from './metaphors/MandalaNode';
+import { TreeNode } from './metaphors/TreeNode';
+import { StarNode } from './metaphors/StarNode';
+import { VoidNode } from './metaphors/VoidNode';
 
 interface ConstellationNodeMeshProps {
   node: ConstellationNode;
@@ -116,24 +122,59 @@ export const ConstellationNodeMesh: React.FC<ConstellationNodeMeshProps> = ({
     }
   };
 
+  // Render specialized metaphor component
+  const renderMetaphorNode = () => {
+    const commonProps = {
+      node,
+      isSelected,
+      isHovered,
+      onClick,
+      onPointerEnter: handlePointerEnter,
+      onPointerLeave: handlePointerLeave
+    };
+
+    switch (node.visualMetaphor) {
+      case 'lotus':
+        return <LotusNode {...commonProps} />;
+      case 'pool': 
+        return <PoolNode {...commonProps} />;
+      case 'mandala':
+        return <MandalaNode {...commonProps} />;
+      case 'tree':
+        return <TreeNode {...commonProps} />;
+      case 'star':
+        return <StarNode {...commonProps} />;
+      case 'void':
+        return <VoidNode {...commonProps} />;
+      case 'crystal':
+      case 'spiral':
+      case 'web':
+      case 'flame':
+      default:
+        // Fallback to basic geometry for missing components
+        return (
+          <mesh
+            onClick={handleClick}
+            onPointerEnter={handlePointerEnter}
+            onPointerLeave={handlePointerLeave}
+          >
+            {getNodeGeometry()}
+            <meshStandardMaterial 
+              color={getNodeColor()}
+              emissive={getNodeColor()}
+              emissiveIntensity={node.isUnlocked ? 0.2 : 0.05}
+              transparent
+              opacity={node.isUnlocked ? 0.8 : 0.4}
+              wireframe={node.visualMetaphor === 'web'}
+            />
+          </mesh>
+        );
+    }
+  };
+
   return (
     <group ref={groupRef} position={position}>
-      {/* Main node */}
-      <mesh
-        onClick={handleClick}
-        onPointerEnter={handlePointerEnter}
-        onPointerLeave={handlePointerLeave}
-      >
-        {getNodeGeometry()}
-        <meshStandardMaterial 
-          color={getNodeColor()}
-          emissive={getNodeColor()}
-          emissiveIntensity={node.isUnlocked ? 0.2 : 0.05}
-          transparent
-          opacity={node.isUnlocked ? 0.8 : 0.4}
-          wireframe={node.visualMetaphor === 'web'}
-        />
-      </mesh>
+      {renderMetaphorNode()}
       
       {/* Module label */}
       {(isHovered || isSelected) && (

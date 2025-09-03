@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 interface SoundSystemProps {
   onUnlock: (modulePath: string) => void;
@@ -23,7 +23,7 @@ export const SoundSystem: React.FC<SoundSystemProps> = ({
     }
   }, []);
   
-  const playUnlockTone = (modulePath: string) => {
+  const playUnlockTone = useCallback((modulePath: string) => {
     if (!audioContext) return;
     
     // Sacred frequencies for different module types
@@ -59,23 +59,24 @@ export const SoundSystem: React.FC<SoundSystemProps> = ({
     
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 2);
-  };
+  }, [audioContext, volume]);
   
   useEffect(() => {
-    const handleUnlock = (modulePath: string) => {
-      playUnlockTone(modulePath);
-      onUnlock(modulePath);
+    const handleUnlock = (event: Event) => {
+      const customEvent = event as CustomEvent<{ modulePath: string }>;
+      if (customEvent.detail?.modulePath) {
+        playUnlockTone(customEvent.detail.modulePath);
+        onUnlock(customEvent.detail.modulePath);
+      }
     };
     
     // Listen for unlock events
-    window.addEventListener('constellation-unlock', (event: any) => {
-      handleUnlock(event.detail.modulePath);
-    });
+    window.addEventListener('constellation-unlock', handleUnlock as EventListener);
     
     return () => {
-      window.removeEventListener('constellation-unlock', handleUnlock);
+      window.removeEventListener('constellation-unlock', handleUnlock as EventListener);
     };
-  }, [audioContext, onUnlock, volume]);
+  }, [playUnlockTone, onUnlock]);
   
   return null; // This component doesn't render anything visual
 };
