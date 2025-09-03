@@ -24,7 +24,8 @@ import {
   FlaskConical,
   FileSearch,
   BarChart3,
-  Waves
+  Waves,
+  MapPin
 } from "lucide-react";
 
 export type Role = "seeker" | "creator" | "admin";
@@ -64,6 +65,13 @@ export const NAV_CONFIG: NavGroup[] = [
         icon: BarChart3, 
         path: "/dashboard",
         tooltip: "Sacred Journey Dashboard - Your consciousness evolution center"
+      },
+      { 
+        id: "journey-map", 
+        label: "Journey Map", 
+        icon: MapPin, 
+        path: "/journey-map",
+        tooltip: "Sacred Journey Map - Track your Tao Flow progression through consciousness stages"
       },
       { 
         id: "home", 

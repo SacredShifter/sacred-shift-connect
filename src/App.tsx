@@ -57,6 +57,7 @@ import { DevSitemap } from './components/SacredSitemap/DevSitemap';
 import { UserSitemap } from './components/SacredSitemap/UserSitemap';
 import Ethos from './pages/Ethos';
 import DailyPractice from './pages/DailyPractice';
+import JourneyMap from './pages/JourneyMap';
 
 
 function App() {
@@ -139,6 +140,7 @@ function App() {
                 >
                   <Route path="/" element={<Index />} />
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/journey-map" element={<JourneyMap />} />
                   <Route path="/daily-ritual" element={<DailyRitual />} />
                   
                   {/* Redirects for old routes */}

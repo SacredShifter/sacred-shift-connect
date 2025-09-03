@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { FeaturedContentSection } from '@/components/FeaturedContentSection';
+import { TaoProgressBadge } from '@/components/TaoProgressBadge';
 import { 
   MessageCircle, 
   BookOpen, 
@@ -267,6 +268,13 @@ const Index = () => {
             This is not social media. It is a living mandala where geometry, breath, sound, 
             and collective intention become technology for remembering who we are.
           </p>
+        </div>
+
+        {/* Tao Flow Progress */}
+        <div className="mb-8 flex justify-center">
+          <div className="w-full max-w-md">
+            <TaoProgressBadge variant="detailed" />
+          </div>
         </div>
 
 
