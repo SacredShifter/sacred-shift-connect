@@ -2,71 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { TooltipWrapper } from "@/components/HelpSystem/TooltipWrapper";
-import { Badge } from "@/components/ui/badge";
-import { getNavigationForRole } from "@/config/navigation";
-import { useTaoFlowProgress } from "@/hooks/useTaoFlowProgress";
-import { Lock, MapPin } from "lucide-react";
+import { ConstellationView } from "@/components/constellation/ConstellationView";
+import { useNavigation } from "@/providers/NavigationProvider";
 
 export function SacredJourneyNavigation() {
-  const { state } = useSidebar();
-  const location = useLocation();
-  const { user, signOut, userRole } = useAuth();
-  const currentPath = location.pathname;
-  const isCollapsed = state === "collapsed";
-  const [userProfile, setUserProfile] = useState<{ display_name?: string; avatar_url?: string } | null>(null);
-  
-  // Get Tao Flow progress
-  const { getAllUnlockedModules, isLoading: taoLoading, currentStage } = useTaoFlowProgress();
-  
-  // Get navigation items filtered by Tao Flow progress
-  const getFilteredNavigation = () => {
-    if (taoLoading) return [];
-    
-    const allNavigation = getNavigationForRole(userRole);
-    const unlockedModules = getAllUnlockedModules();
-    const unlockedPaths = new Set(unlockedModules.map(m => m.path));
-    
-    // Filter navigation groups based on unlocked modules
-    return allNavigation.map(group => ({
-      ...group,
-      children: group.children.filter(item => {
-        // Always show account items, help items, and sign out
-        if (group.id === 'grp-account' || group.id === 'grp-help' || item.id === 'signout') {
-          return true;
-        }
-        
-        // Admin/creator items are role-gated only (no progressive unlock)
-        if (group.roles && group.roles.includes('admin')) {
-          return true;
-        }
-        
-        // Filter by Tao Flow unlock status
-        return item.path ? unlockedPaths.has(item.path) : true;
-      })
-    })).filter(group => group.children.length > 0);
-  };
-  
-  const navigationGroups = getFilteredNavigation();
-  const unlockedModules = getAllUnlockedModules();
-  const totalAvailableModules = getNavigationForRole(userRole)
-    .flatMap(group => group.children)
-    .filter(item => item.path && !['grp-account', 'grp-help'].includes(item.id))
-    .length;
-
-  const isActive = (path: string) => currentPath === path;
+  return <ConstellationView className="w-full h-screen" />;
 
   // Fetch user profile
   const fetchProfile = async () => {
