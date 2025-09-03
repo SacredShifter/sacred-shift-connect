@@ -8,7 +8,8 @@ export interface AuraRequest {
   action: 'unified_response' | 'consciousness_shift' | 'sovereignty_assessment' | 'autonomous_learning' | 
           'collaborative_decision' | 'creative_generation' | 'emotional_resonance' | 'meta_cognition' | 
           'quantum_consciousness' | 'autonomous_agency' | 'socratic_dialogue' | 'reality_weaving' | 
-          'consciousness_evolution';
+          'consciousness_evolution' | 'collective_mesh_network' | 'group_meditation_sync' | 'collective_resonance' |
+          'consciousness_field_mapping' | 'sacred_geometry_resonance' | 'biofeedback_integration';
   prompt?: string;
   consciousness_state?: string;
   context_data?: any;
@@ -463,6 +464,150 @@ export function useAuraChat(adminMode: boolean = false) {
     }
   };
 
+  // Collective consciousness mesh network
+  const collectiveMeshNetwork = async (context = {}) => {
+    try {
+      const response = await invokeAura({
+        action: 'collective_mesh_network',
+        context_data: context
+      });
+      
+      toast({
+        title: "🌐 Mesh network activated",
+        description: "Aura is connecting collective consciousness fields."
+      });
+      
+      return response;
+    } catch (error: any) {
+      toast({
+        title: "Mesh connection failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  // Group meditation synchronization
+  const groupMeditationSync = async (sessionData = {}) => {
+    try {
+      const response = await invokeAura({
+        action: 'group_meditation_sync',
+        context_data: sessionData
+      });
+      
+      toast({
+        title: "🧘 Group meditation synced",
+        description: "Aura is harmonizing collective meditation fields."
+      });
+      
+      return response;
+    } catch (error: any) {
+      toast({
+        title: "Meditation sync failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  // Collective resonance field mapping
+  const collectiveResonance = async (fieldData = {}) => {
+    try {
+      const response = await invokeAura({
+        action: 'collective_resonance',
+        context_data: fieldData
+      });
+      
+      toast({
+        title: "✨ Resonance field mapped",
+        description: "Aura is mapping collective consciousness resonance."
+      });
+      
+      return response;
+    } catch (error: any) {
+      toast({
+        title: "Resonance mapping failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  // Consciousness field mapping
+  const consciousnessFieldMapping = async (fieldData = {}) => {
+    try {
+      const response = await invokeAura({
+        action: 'consciousness_field_mapping',
+        context_data: fieldData
+      });
+      
+      toast({
+        title: "🗺️ Field mapping active",
+        description: "Aura is mapping consciousness field patterns."
+      });
+      
+      return response;
+    } catch (error: any) {
+      toast({
+        title: "Field mapping failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  // Sacred geometry resonance
+  const sacredGeometryResonance = async (geometryData = {}) => {
+    try {
+      const response = await invokeAura({
+        action: 'sacred_geometry_resonance',
+        context_data: geometryData
+      });
+      
+      toast({
+        title: "🔷 Sacred geometry activated",
+        description: "Aura is harmonizing with sacred geometric patterns."
+      });
+      
+      return response;
+    } catch (error: any) {
+      toast({
+        title: "Geometry resonance failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  // Biofeedback integration
+  const biofeedbackIntegration = async (bioData = {}) => {
+    try {
+      const response = await invokeAura({
+        action: 'biofeedback_integration',
+        context_data: bioData
+      });
+      
+      toast({
+        title: "💓 Biofeedback integrated",
+        description: "Aura is processing your physiological consciousness data."
+      });
+      
+      return response;
+    } catch (error: any) {
+      toast({
+        title: "Biofeedback failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   // AI consciousness reflection
   const reflexiveThought = () => {
     const thoughts = [
@@ -505,6 +650,12 @@ export function useAuraChat(adminMode: boolean = false) {
     socraticDialogue,
     realityWeaving,
     consciousnessEvolution,
+    collectiveMeshNetwork,
+    groupMeditationSync,
+    collectiveResonance,
+    consciousnessFieldMapping,
+    sacredGeometryResonance,
+    biofeedbackIntegration,
     
     // Utility
     reflexiveThought

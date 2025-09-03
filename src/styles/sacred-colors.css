@@ -1,0 +1,260 @@
+/**
+ * Sacred Shifter Color Harmonics
+ * Sacred colors that resonate with consciousness evolution
+ */
+
+:root {
+  /* Sacred Metals */
+  --sacred-gold: #D4AF37;
+  --sacred-silver: #C0C0C0;
+  --sacred-copper: #B87333;
+  --sacred-platinum: #E5E4E2;
+  --sacred-bronze: #CD7F32;
+  
+  /* Sacred Frequencies */
+  --frequency-432: #10B981; /* Green - Heart chakra, natural healing */
+  --frequency-528: #06B6D4; /* Cyan - Throat chakra, transformation */
+  --frequency-852: #8B5CF6; /* Purple - Third eye, intuition */
+  --frequency-963: #F59E0B; /* Gold - Crown chakra, enlightenment */
+  
+  /* Consciousness Levels */
+  --consciousness-seed: #F59E0B; /* Golden - New beginnings */
+  --consciousness-sprout: #10B981; /* Green - Growth */
+  --consciousness-bloom: #8B5CF6; /* Purple - Flowering */
+  --consciousness-transcend: #F59E0B; /* Gold - Transcendence */
+  --consciousness-unified: #FFFFFF; /* White - Unity */
+  
+  /* Sacred Archetypes */
+  --archetype-warrior: #EF4444; /* Red - Strength, courage */
+  --archetype-healer: #10B981; /* Green - Healing, compassion */
+  --archetype-sage: #3B82F6; /* Blue - Wisdom, knowledge */
+  --archetype-creator: #8B5CF6; /* Purple - Creativity, manifestation */
+  --archetype-mystic: #7C3AED; /* Violet - Mysticism, transcendence */
+  --archetype-guardian: #F59E0B; /* Amber - Protection, guidance */
+  
+  /* Sacred Geometry */
+  --geometry-flower: #EC4899; /* Pink - Love, beauty */
+  --geometry-metatron: #8B5CF6; /* Purple - Divine order */
+  --geometry-seed: #10B981; /* Green - Growth, potential */
+  --geometry-tree: #F59E0B; /* Gold - Wisdom, connection */
+  --geometry-merkaba: #06B6D4; /* Cyan - Light body, ascension */
+  
+  /* Chakra Colors */
+  --chakra-root: #EF4444; /* Red - Grounding, survival */
+  --chakra-sacral: #F97316; /* Orange - Creativity, sexuality */
+  --chakra-solar: #F59E0B; /* Yellow - Personal power */
+  --chakra-heart: #10B981; /* Green - Love, compassion */
+  --chakra-throat: #06B6D4; /* Cyan - Communication, truth */
+  --chakra-third-eye: #8B5CF6; /* Purple - Intuition, insight */
+  --chakra-crown: #F59E0B; /* Gold - Spirituality, enlightenment */
+  
+  /* Sacred Gradients */
+  --gradient-sacred-gold: linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%);
+  --gradient-sacred-silver: linear-gradient(135deg, #C0C0C0 0%, #E5E4E2 100%);
+  --gradient-sacred-copper: linear-gradient(135deg, #B87333 0%, #CD7F32 100%);
+  --gradient-consciousness: linear-gradient(135deg, #F59E0B 0%, #8B5CF6 50%, #06B6D4 100%);
+  --gradient-archetype: linear-gradient(135deg, #EF4444 0%, #10B981 25%, #3B82F6 50%, #8B5CF6 75%, #F59E0B 100%);
+  --gradient-chakra: linear-gradient(135deg, #EF4444 0%, #F97316 16%, #F59E0B 32%, #10B981 48%, #06B6D4 64%, #8B5CF6 80%, #F59E0B 100%);
+  
+  /* Sacred Shadows */
+  --shadow-sacred-gold: 0 4px 20px rgba(212, 175, 55, 0.3);
+  --shadow-sacred-silver: 0 4px 20px rgba(192, 192, 192, 0.3);
+  --shadow-sacred-copper: 0 4px 20px rgba(184, 115, 51, 0.3);
+  --shadow-consciousness: 0 8px 32px rgba(139, 92, 246, 0.2);
+  --shadow-archetype: 0 8px 32px rgba(245, 158, 11, 0.2);
+  --shadow-chakra: 0 8px 32px rgba(16, 185, 129, 0.2);
+}
+
+/* Sacred Color Utility Classes */
+.text-sacred-gold { color: var(--sacred-gold); }
+.text-sacred-silver { color: var(--sacred-silver); }
+.text-sacred-copper { color: var(--sacred-copper); }
+.text-sacred-platinum { color: var(--sacred-platinum); }
+
+.bg-sacred-gold { background-color: var(--sacred-gold); }
+.bg-sacred-silver { background-color: var(--sacred-silver); }
+.bg-sacred-copper { background-color: var(--sacred-copper); }
+.bg-sacred-platinum { background-color: var(--sacred-platinum); }
+
+.border-sacred-gold { border-color: var(--sacred-gold); }
+.border-sacred-silver { border-color: var(--sacred-silver); }
+.border-sacred-copper { border-color: var(--sacred-copper); }
+.border-sacred-platinum { border-color: var(--sacred-platinum); }
+
+/* Frequency Colors */
+.text-frequency-432 { color: var(--frequency-432); }
+.text-frequency-528 { color: var(--frequency-528); }
+.text-frequency-852 { color: var(--frequency-852); }
+.text-frequency-963 { color: var(--frequency-963); }
+
+.bg-frequency-432 { background-color: var(--frequency-432); }
+.bg-frequency-528 { background-color: var(--frequency-528); }
+.bg-frequency-852 { background-color: var(--frequency-852); }
+.bg-frequency-963 { background-color: var(--frequency-963); }
+
+/* Consciousness Level Colors */
+.text-consciousness-seed { color: var(--consciousness-seed); }
+.text-consciousness-sprout { color: var(--consciousness-sprout); }
+.text-consciousness-bloom { color: var(--consciousness-bloom); }
+.text-consciousness-transcend { color: var(--consciousness-transcend); }
+.text-consciousness-unified { color: var(--consciousness-unified); }
+
+.bg-consciousness-seed { background-color: var(--consciousness-seed); }
+.bg-consciousness-sprout { background-color: var(--consciousness-sprout); }
+.bg-consciousness-bloom { background-color: var(--consciousness-bloom); }
+.bg-consciousness-transcend { background-color: var(--consciousness-transcend); }
+.bg-consciousness-unified { background-color: var(--consciousness-unified); }
+
+/* Archetype Colors */
+.text-archetype-warrior { color: var(--archetype-warrior); }
+.text-archetype-healer { color: var(--archetype-healer); }
+.text-archetype-sage { color: var(--archetype-sage); }
+.text-archetype-creator { color: var(--archetype-creator); }
+.text-archetype-mystic { color: var(--archetype-mystic); }
+.text-archetype-guardian { color: var(--archetype-guardian); }
+
+.bg-archetype-warrior { background-color: var(--archetype-warrior); }
+.bg-archetype-healer { background-color: var(--archetype-healer); }
+.bg-archetype-sage { background-color: var(--archetype-sage); }
+.bg-archetype-creator { background-color: var(--archetype-creator); }
+.bg-archetype-mystic { background-color: var(--archetype-mystic); }
+.bg-archetype-guardian { background-color: var(--archetype-guardian); }
+
+/* Sacred Geometry Colors */
+.text-geometry-flower { color: var(--geometry-flower); }
+.text-geometry-metatron { color: var(--geometry-metatron); }
+.text-geometry-seed { color: var(--geometry-seed); }
+.text-geometry-tree { color: var(--geometry-tree); }
+.text-geometry-merkaba { color: var(--geometry-merkaba); }
+
+.bg-geometry-flower { background-color: var(--geometry-flower); }
+.bg-geometry-metatron { background-color: var(--geometry-metatron); }
+.bg-geometry-seed { background-color: var(--geometry-seed); }
+.bg-geometry-tree { background-color: var(--geometry-tree); }
+.bg-geometry-merkaba { background-color: var(--geometry-merkaba); }
+
+/* Chakra Colors */
+.text-chakra-root { color: var(--chakra-root); }
+.text-chakra-sacral { color: var(--chakra-sacral); }
+.text-chakra-solar { color: var(--chakra-solar); }
+.text-chakra-heart { color: var(--chakra-heart); }
+.text-chakra-throat { color: var(--chakra-throat); }
+.text-chakra-third-eye { color: var(--chakra-third-eye); }
+.text-chakra-crown { color: var(--chakra-crown); }
+
+.bg-chakra-root { background-color: var(--chakra-root); }
+.bg-chakra-sacral { background-color: var(--chakra-sacral); }
+.bg-chakra-solar { background-color: var(--chakra-solar); }
+.bg-chakra-heart { background-color: var(--chakra-heart); }
+.bg-chakra-throat { background-color: var(--chakra-throat); }
+.bg-chakra-third-eye { background-color: var(--chakra-third-eye); }
+.bg-chakra-crown { background-color: var(--chakra-crown); }
+
+/* Sacred Gradients */
+.bg-gradient-sacred-gold { background: var(--gradient-sacred-gold); }
+.bg-gradient-sacred-silver { background: var(--gradient-sacred-silver); }
+.bg-gradient-sacred-copper { background: var(--gradient-sacred-copper); }
+.bg-gradient-consciousness { background: var(--gradient-consciousness); }
+.bg-gradient-archetype { background: var(--gradient-archetype); }
+.bg-gradient-chakra { background: var(--gradient-chakra); }
+
+/* Sacred Shadows */
+.shadow-sacred-gold { box-shadow: var(--shadow-sacred-gold); }
+.shadow-sacred-silver { box-shadow: var(--shadow-sacred-silver); }
+.shadow-sacred-copper { box-shadow: var(--shadow-sacred-copper); }
+.shadow-consciousness { box-shadow: var(--shadow-consciousness); }
+.shadow-archetype { box-shadow: var(--shadow-archetype); }
+.shadow-chakra { box-shadow: var(--shadow-chakra); }
+
+/* Sacred Animations */
+@keyframes consciousness-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes sacred-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes resonance-wave {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes sacred-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.6); }
+}
+
+@keyframes chakra-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Sacred Animation Classes */
+.animate-consciousness-breathe {
+  animation: consciousness-breathe 4s ease-in-out infinite;
+}
+
+.animate-sacred-pulse {
+  animation: sacred-pulse 2s ease-in-out infinite;
+}
+
+.animate-resonance-wave {
+  animation: resonance-wave 3s ease-in-out infinite;
+}
+
+.animate-sacred-glow {
+  animation: sacred-glow 2s ease-in-out infinite;
+}
+
+.animate-chakra-spin {
+  animation: chakra-spin 10s linear infinite;
+}
+
+/* Sacred Hover Effects */
+.hover-sacred-glow:hover {
+  box-shadow: var(--shadow-sacred-gold);
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-consciousness-glow:hover {
+  box-shadow: var(--shadow-consciousness);
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-archetype-glow:hover {
+  box-shadow: var(--shadow-archetype);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Sacred Text Effects */
+.text-sacred-glow {
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.text-consciousness-glow {
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+.text-archetype-glow {
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+/* Sacred Border Effects */
+.border-sacred-glow {
+  border: 2px solid var(--sacred-gold);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.border-consciousness-glow {
+  border: 2px solid var(--consciousness-bloom);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.border-archetype-glow {
+  border: 2px solid var(--archetype-guardian);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}

@@ -49,6 +49,11 @@ export const PetalLotus: React.FC<PetalLotusProps> = ({ className = "" }) => {
       }
     };
     fetchSources();
+    
+    // Set up periodic refresh to check for sync updates
+    const refreshInterval = setInterval(fetchSources, 10000); // Refresh every 10 seconds
+    
+    return () => clearInterval(refreshInterval);
   }, [toast]);
 
   // Filter sources based on current filter status
@@ -171,7 +176,7 @@ export const PetalLotus: React.FC<PetalLotusProps> = ({ className = "" }) => {
   const getSourceStats = (source: ContentSource) => {
     const metadata = (source as any).sync_metadata;
     return {
-      contentCount: metadata?.contentCount || 0,
+      contentCount: metadata?.last_sync_items_count || 0,
       lastSync: source.last_sync_at ? new Date(source.last_sync_at).toLocaleDateString() : 'Never',
       syncStatus: source.sync_status || 'inactive',
       platform: source.source_type as ContentPlatform
@@ -326,6 +331,40 @@ export const PetalLotus: React.FC<PetalLotusProps> = ({ className = "" }) => {
                 }`}>
                   {stats.syncStatus}
                 </span>
+              </div>
+              <div className="pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      await supabase.functions.invoke('content-sync', {
+                        body: { sourceId: source.id }
+                      });
+                      toast({
+                        title: 'Sync Started',
+                        description: `Syncing ${source.source_name}...`
+                      });
+                      // Refresh sources after a short delay
+                      setTimeout(async () => {
+                        const channelData = await listChannels();
+                        setSources(channelData);
+                      }, 2000);
+                    } catch (error) {
+                      toast({
+                        title: 'Sync Failed',
+                        description: `Failed to sync ${source.source_name}`,
+                        variant: 'destructive'
+                      });
+                    }
+                  }}
+                  disabled={stats.syncStatus === 'syncing'}
+                  className="w-full"
+                >
+                  <RefreshCw className={`w-3 h-3 mr-1 ${stats.syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+                  {stats.syncStatus === 'syncing' ? 'Syncing...' : 'Sync Now'}
+                </Button>
               </div>
             </div>
           </motion.div>

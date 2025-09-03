@@ -1,9 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FlowerOfLife, Sparkles, Zap, Heart, Brain, Globe } from 'lucide-react';
+import { Flower, Sparkles, Zap, Heart, Brain, Globe, Gem, Play, RectangleHorizontal, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { MetatronCube } from './MetatronCube';
+import { SeedOfLife } from './SeedOfLife';
+import { TreeOfLife } from './TreeOfLife';
+
+import { ConsciousnessRecommendation } from '@/types/consciousness';
 
 interface ContentItem {
   id: string;
@@ -28,15 +33,16 @@ const SacredGeometryGrid: React.FC<SacredGeometryGridProps> = ({
   onContentSelect 
 }) => {
   const [selectedContent, setSelectedContent] = useState<string | null>(null);
+  const [currentLayout, setCurrentLayout] = useState(layout);
 
   const layouts = {
-    'flower-of-life': FlowerOfLifeLayout,
-    'metatron-cube': MetatronCubeLayout,
-    'seed-of-life': SeedOfLifeLayout,
-    'tree-of-life': TreeOfLifeLayout
+    'flower-of-life': { component: FlowerOfLifeLayout, icon: Flower, label: 'Flower of Life' },
+    'metatron-cube': { component: MetatronCubeLayout, icon: Gem, label: 'Metatron\'s Cube' },
+    'seed-of-life': { component: SeedOfLifeLayout, icon: Play, label: 'Seed of Life' },
+    'tree-of-life': { component: TreeOfLifeLayout, icon: Star, label: 'Tree of Life' }
   };
 
-  const LayoutComponent = layouts[layout];
+  const LayoutComponent = layouts[currentLayout].component;
 
   const handleContentSelect = (content: ContentItem) => {
     setSelectedContent(content.id);
@@ -45,6 +51,24 @@ const SacredGeometryGrid: React.FC<SacredGeometryGridProps> = ({
 
   return (
     <div className="w-full h-full relative">
+      {/* Layout Selector */}
+      <div className="absolute top-4 left-4 z-20">
+        <div className="flex gap-1 bg-background/80 backdrop-blur-sm border border-border/30 rounded-lg p-1">
+          {Object.entries(layouts).map(([key, { icon: Icon, label }]) => (
+            <Button
+              key={key}
+              variant={currentLayout === key ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setCurrentLayout(key as any)}
+              className="flex items-center gap-1 text-xs"
+            >
+              <Icon className="w-3 h-3" />
+              {label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
       <LayoutComponent 
         content={content} 
         onContentSelect={handleContentSelect}
@@ -206,14 +230,33 @@ const MetatronCubeLayout: React.FC<{
   onContentSelect: (content: ContentItem) => void;
   selectedContent: string | null;
 }> = ({ content, onContentSelect, selectedContent }) => {
+  // Transform ContentItem to ConsciousnessRecommendation
+  const transformedContent: ConsciousnessRecommendation[] = content.map(item => ({
+    id: item.id,
+    type: 'content' as const,
+    title: item.title,
+    description: item.description,
+    consciousnessLevel: item.consciousness_level,
+    archetype: item.archetype,
+    energyFrequency: item.energy_frequency,
+    sacredGeometry: 'metatron-cube',
+    resonanceScore: item.resonance_score,
+    estimatedImpact: item.resonance_score,
+    duration: 15, // Default duration
+    prerequisites: [],
+    benefits: [],
+    timestamp: new Date()
+  }));
+
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="text-center text-muted-foreground">
-        <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
-        <p>Metatron's Cube Layout</p>
-        <p className="text-sm">Coming soon...</p>
-      </div>
-    </div>
+    <MetatronCube
+      content={transformedContent}
+      onContentSelect={(rec) => {
+        const originalItem = content.find(item => item.id === rec.id);
+        if (originalItem) onContentSelect(originalItem);
+      }}
+      className="w-full h-full"
+    />
   );
 };
 
@@ -223,14 +266,33 @@ const SeedOfLifeLayout: React.FC<{
   onContentSelect: (content: ContentItem) => void;
   selectedContent: string | null;
 }> = ({ content, onContentSelect, selectedContent }) => {
+  // Transform ContentItem to ConsciousnessRecommendation
+  const transformedContent: ConsciousnessRecommendation[] = content.map(item => ({
+    id: item.id,
+    type: 'content' as const,
+    title: item.title,
+    description: item.description,
+    consciousnessLevel: item.consciousness_level,
+    archetype: item.archetype,
+    energyFrequency: item.energy_frequency,
+    sacredGeometry: 'seed-of-life',
+    resonanceScore: item.resonance_score,
+    estimatedImpact: item.resonance_score,
+    duration: 15, // Default duration
+    prerequisites: [],
+    benefits: [],
+    timestamp: new Date()
+  }));
+
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="text-center text-muted-foreground">
-        <Heart className="w-12 h-12 mx-auto mb-4 opacity-50" />
-        <p>Seed of Life Layout</p>
-        <p className="text-sm">Coming soon...</p>
-      </div>
-    </div>
+    <SeedOfLife
+      content={transformedContent}
+      onContentSelect={(rec) => {
+        const originalItem = content.find(item => item.id === rec.id);
+        if (originalItem) onContentSelect(originalItem);
+      }}
+      className="w-full h-full"
+    />
   );
 };
 
@@ -240,14 +302,33 @@ const TreeOfLifeLayout: React.FC<{
   onContentSelect: (content: ContentItem) => void;
   selectedContent: string | null;
 }> = ({ content, onContentSelect, selectedContent }) => {
+  // Transform ContentItem to ConsciousnessRecommendation
+  const transformedContent: ConsciousnessRecommendation[] = content.map(item => ({
+    id: item.id,
+    type: 'content' as const,
+    title: item.title,
+    description: item.description,
+    consciousnessLevel: item.consciousness_level,
+    archetype: item.archetype,
+    energyFrequency: item.energy_frequency,
+    sacredGeometry: 'tree-of-life',
+    resonanceScore: item.resonance_score,
+    estimatedImpact: item.resonance_score,
+    duration: 15, // Default duration
+    prerequisites: [],
+    benefits: [],
+    timestamp: new Date()
+  }));
+
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="text-center text-muted-foreground">
-        <Brain className="w-12 h-12 mx-auto mb-4 opacity-50" />
-        <p>Tree of Life Layout</p>
-        <p className="text-sm">Coming soon...</p>
-      </div>
-    </div>
+    <TreeOfLife
+      content={transformedContent}
+      onContentSelect={(rec) => {
+        const originalItem = content.find(item => item.id === rec.id);
+        if (originalItem) onContentSelect(originalItem);
+      }}
+      className="w-full h-full"
+    />
   );
 };
 
