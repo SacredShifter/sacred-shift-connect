@@ -167,14 +167,14 @@ export function AkashicEntryModal({ isOpen, onClose, onSubmit, initialData }: Ak
               Source Realm
             </Label>
             <Select 
-              value={formData.source_module} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, source_module: value }))}
+              value={formData.source_module || 'unknown'} 
+              onValueChange={(value) => setFormData(prev => ({ ...prev, source_module: value === 'unknown' ? '' : value }))}
             >
               <SelectTrigger className="bg-background/50">
                 <SelectValue placeholder="Where did this wisdom originate?" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Unknown Realm</SelectItem>
+                <SelectItem value="unknown">Unknown Realm</SelectItem>
                 {SOURCE_REALMS.map(realm => (
                   <SelectItem key={realm} value={realm}>{realm}</SelectItem>
                 ))}

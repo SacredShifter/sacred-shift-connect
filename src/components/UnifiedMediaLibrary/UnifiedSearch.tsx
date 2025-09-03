@@ -201,16 +201,16 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
                 <div>
                   <label className="text-sm font-medium mb-2 block">Category</label>
                   <Select
-                    value={filters.category || ''}
+                    value={filters.category || 'all'}
                     onValueChange={(value) =>
-                      setFilters(prev => ({ ...prev, category: value || undefined }))
+                      setFilters(prev => ({ ...prev, category: value === 'all' ? undefined : value }))
                     }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="All categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All categories</SelectItem>
+                      <SelectItem value="all">All categories</SelectItem>
                       {categories.map(category => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
@@ -224,16 +224,16 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
                 <div>
                   <label className="text-sm font-medium mb-2 block">Source Platform</label>
                   <Select
-                    value={filters.source || ''}
+                    value={filters.source || 'all'}
                     onValueChange={(value) =>
-                      setFilters(prev => ({ ...prev, source: value || undefined }))
+                      setFilters(prev => ({ ...prev, source: value === 'all' ? undefined : value }))
                     }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="All sources" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All sources</SelectItem>
+                      <SelectItem value="all">All sources</SelectItem>
                       {sourceOptions.map(source => (
                         <SelectItem key={source.value} value={source.value}>
                           <span className="flex items-center gap-2">
@@ -249,16 +249,16 @@ export const UnifiedSearch: React.FC<UnifiedSearchProps> = ({
                 <div>
                   <label className="text-sm font-medium mb-2 block">Consciousness Level</label>
                   <Select
-                    value={filters.consciousness_level || ''}
+                    value={filters.consciousness_level || 'all'}
                     onValueChange={(value) =>
-                      setFilters(prev => ({ ...prev, consciousness_level: value || undefined }))
+                      setFilters(prev => ({ ...prev, consciousness_level: value === 'all' ? undefined : value }))
                     }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="All levels" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All levels</SelectItem>
+                      <SelectItem value="all">All levels</SelectItem>
                       {consciousnessLevels.map(level => (
                         <SelectItem key={level.value} value={level.value}>
                           <span className={`${level.color} font-medium`}>
