@@ -7,7 +7,7 @@ interface TreeNodeProps {
   node: ConstellationNode;
   isSelected: boolean;
   isHovered: boolean;
-  onClick: (event: any) => void;
+  onClick: () => void;
   onPointerEnter: () => void;
   onPointerLeave: () => void;
 }

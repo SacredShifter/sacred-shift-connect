@@ -1,17 +1,17 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { Group, Vector3 } from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTaoFlowProgress } from '@/hooks/useTaoFlowProgress';
-import { generateConstellation, ConstellationNode } from '@/config/sacredGeometry';
+import { generateConstellation, type ConstellationNode } from '@/config/sacredGeometry';
 import { ConstellationNodeMesh } from './ConstellationNodeMesh';
 import { EnergyFlows } from './EnergyFlows';
 import { TeachingOverlay } from './TeachingOverlay';
-import { SacredBackground } from './SacredBackground';
+import { SoundSystem } from './SoundSystem';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Grid3X3, Navigation } from 'lucide-react';
+import { Grid3X3 } from 'lucide-react';
 import { useNavigation } from '@/providers/NavigationProvider';
 
 interface ConstellationViewProps {
@@ -23,7 +23,6 @@ function ConstellationScene() {
   const { getAllUnlockedModules, currentStage } = useTaoFlowProgress();
   const [selectedNode, setSelectedNode] = useState<ConstellationNode | null>(null);
   const [hoveredNode, setHoveredNode] = useState<ConstellationNode | null>(null);
-  const [cameraTarget, setCameraTarget] = useState(new Vector3(0, 0, 0));
   const navigate = useNavigate();
   
   const constellation = useMemo(() => {
@@ -49,6 +48,12 @@ function ConstellationScene() {
   const handleNodeClick = (node: ConstellationNode) => {
     if (node.isUnlocked) {
       setSelectedNode(node);
+      
+      // Emit unlock sound event
+      window.dispatchEvent(new CustomEvent('constellation-unlock', { 
+        detail: { modulePath: node.module.path } 
+      }));
+      
       // Navigate after a brief moment to show selection
       setTimeout(() => {
         navigate(node.module.path);
@@ -63,7 +68,23 @@ function ConstellationScene() {
   return (
     <>
       {/* Sacred background */}
-      <SacredBackground />
+      <points>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={100}
+            array={new Float32Array(Array.from({ length: 300 }, () => (Math.random() - 0.5) * 50))}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.02}
+          color="#a855f7"
+          transparent
+          opacity={0.6}
+          sizeAttenuation
+        />
+      </points>
       
       {/* Main constellation */}
       <group ref={groupRef}>
@@ -110,7 +131,6 @@ function ConstellationScene() {
         enableRotate={true}
         minDistance={5}
         maxDistance={25}
-        target={cameraTarget}
         autoRotate={false}
         autoRotateSpeed={0.5}
       />
@@ -166,6 +186,14 @@ export const ConstellationView: React.FC<ConstellationViewProps> = ({ className 
           </div>
         </motion.div>
       </div>
+      
+      {/* Sound system for sacred tones */}
+      <SoundSystem 
+        onUnlock={(modulePath) => {
+          console.log(`Sacred tone played for: ${modulePath}`);
+        }}
+        volume={0.2}
+      />
       
       {/* Teaching Overlay */}
       <AnimatePresence>

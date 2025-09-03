@@ -139,7 +139,7 @@ export const MandalaNode: React.FC<MandalaNodeProps> = ({
         <points>
           <bufferGeometry>
             <bufferAttribute
-              attachObject={['attributes', 'position']}
+              attach="attributes-position"
               count={50}
               array={new Float32Array(Array.from({ length: 150 }, () => (Math.random() - 0.5) * 3))}
               itemSize={3}

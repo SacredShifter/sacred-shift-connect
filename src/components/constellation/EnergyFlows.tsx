@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
-import { ConstellationNode } from '@/config/sacredGeometry';
+import type { ConstellationNode } from '@/config/sacredGeometry';
 
 interface EnergyFlowsProps {
   nodes: ConstellationNode[];
