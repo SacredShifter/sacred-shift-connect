@@ -8,8 +8,9 @@ interface MediaItem {
   title: string;
   description: string;
   thumbnail_url: string;
-  source_platform: string;
-  source_url: string;
+  source_platform?: string;
+  source_url?: string;
+  external_url?: string;
   category_name?: string;
   featured_priority: number;
   energy_level: number;
@@ -18,6 +19,9 @@ interface MediaItem {
   mood_tags: string[];
   teaching_notes?: string;
   created_at: string;
+  content_type?: string;
+  author_name?: string;
+  author_url?: string;
 }
 
 interface MediaModalProps {
@@ -56,11 +60,11 @@ export const MediaModal: React.FC<MediaModalProps> = ({
         </div>
         <p className="text-muted-foreground">{media.description}</p>
         <Button
-          onClick={() => window.open(media.source_url, '_blank')}
+          onClick={() => window.open(media.source_url || media.external_url, '_blank')}
           className="mt-4"
         >
           <Play className="w-4 h-4 mr-2" />
-          Play on {media.source_platform}
+          Play on {media.source_platform || 'Sacred Shifter'}
         </Button>
       </DialogContent>
     </Dialog>

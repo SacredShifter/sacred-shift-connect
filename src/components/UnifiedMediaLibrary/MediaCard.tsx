@@ -9,8 +9,9 @@ interface MediaItem {
   title: string;
   description: string;
   thumbnail_url: string;
-  source_platform: string;
-  source_url: string;
+  source_platform?: string;
+  source_url?: string;
+  external_url?: string;
   category_name?: string;
   featured_priority: number;
   energy_level: number;
@@ -19,6 +20,9 @@ interface MediaItem {
   mood_tags: string[];
   teaching_notes?: string;
   created_at: string;
+  content_type?: string;
+  author_name?: string;
+  author_url?: string;
 }
 
 interface MediaCardProps {

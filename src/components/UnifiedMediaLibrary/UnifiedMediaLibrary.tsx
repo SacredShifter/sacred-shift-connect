@@ -24,8 +24,9 @@ interface MediaItem {
   title: string;
   description: string;
   thumbnail_url: string;
-  source_platform: string;
-  source_url: string;
+  source_platform?: string;
+  source_url?: string;
+  external_url?: string;
   category_name?: string;
   category_id?: string;
   featured_priority: number;
@@ -35,6 +36,9 @@ interface MediaItem {
   mood_tags: string[];
   teaching_notes?: string;
   created_at: string;
+  content_type?: string;
+  author_name?: string;
+  author_url?: string;
 }
 
 export const UnifiedMediaLibrary: React.FC = () => {
@@ -101,8 +105,9 @@ export const UnifiedMediaLibrary: React.FC = () => {
         title: item.title,
         description: item.description || '',
         thumbnail_url: item.thumbnail_url || '',
-        source_platform: item.source_platform || 'unknown',
-        source_url: item.source_url || '',
+        source_platform: item.source_platform || 'Sacred Shifter',
+        source_url: item.source_url || item.external_url || '',
+        external_url: item.external_url,
         category_name: item.media_categories?.name,
         category_id: item.category_id,
         featured_priority: item.featured_priority || 0,
@@ -111,7 +116,10 @@ export const UnifiedMediaLibrary: React.FC = () => {
         genre_tags: item.genre_tags || [],
         mood_tags: item.mood_tags || [],
         teaching_notes: item.teaching_notes,
-        created_at: item.created_at
+        created_at: item.created_at,
+        content_type: item.content_type,
+        author_name: item.author_name,
+        author_url: item.author_url
       })) || [];
       
       setFeaturedContent(formattedData);
@@ -142,8 +150,9 @@ export const UnifiedMediaLibrary: React.FC = () => {
             title: item.title,
             description: item.description || '',
             thumbnail_url: item.thumbnail_url || '',
-            source_platform: item.source_platform || 'unknown',
-            source_url: item.source_url || '',
+            source_platform: item.source_platform || 'Sacred Shifter',
+            source_url: item.source_url || item.external_url || '',
+            external_url: item.external_url,
             category_name: item.media_categories?.name,
             category_id: item.category_id,
             featured_priority: item.featured_priority || 0,
@@ -152,7 +161,10 @@ export const UnifiedMediaLibrary: React.FC = () => {
             genre_tags: item.genre_tags || [],
             mood_tags: item.mood_tags || [],
             teaching_notes: item.teaching_notes,
-            created_at: item.created_at
+            created_at: item.created_at,
+            content_type: item.content_type,
+            author_name: item.author_name,
+            author_url: item.author_url
           })) || []
         };
       });
