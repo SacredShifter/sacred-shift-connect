@@ -1,10 +1,8 @@
-import * as React from 'react';
-import { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import { useErrorHandler } from './useErrorHandler';
 
 interface AuthContextType {
   user: User | null;
@@ -29,13 +27,16 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = React.useState<User | null>(null);
-  const [session, setSession] = React.useState<Session | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [userRole, setUserRole] = React.useState<string | undefined>(undefined);
-  const [roleLoading, setRoleLoading] = React.useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | undefined>(undefined);
+  const [roleLoading, setRoleLoading] = useState(false);
   
-  const { handleAuthError } = useErrorHandler();
+  // Simple error handler without hooks
+  const handleAuthError = (error: any, context: any) => {
+    logger.error('Auth error', context, error);
+  };
   
   logger.debug('AuthProvider state change', { 
     component: 'AuthProvider',
@@ -43,8 +44,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     metadata: { hasSession: !!session, loading }
   });
 
-  React.useEffect(() => {
-    // Set up auth state listener FIRST
+  useEffect(() => {
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         logger.authEvent(`Auth state changed: ${event}`, {
@@ -59,11 +60,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Fetch user role if logged in
         if (session?.user) {
-          // Set loading to false immediately but keep role loading true
           setLoading(false);
           setRoleLoading(true);
           
-          // Fetch roles immediately (not in timeout)
+          // Fetch roles
           (async () => {
             try {
               const { data: roles, error } = await supabase
@@ -94,12 +94,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     finalRole,
                   }
                 });
-                
-                logger.debug('User roles fetched successfully', {
-                  component: 'AuthProvider',
-                  userId: session.user.id,
-                  metadata: { isAdmin, roleCount: roles?.length, finalRole }
-                });
               }
             } catch (error) {
               handleAuthError(error, {
@@ -120,7 +114,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     );
 
-    // THEN check for existing session
+    // Check for existing session
     supabase.auth.getSession().then(async ({ data: { session }, error }) => {
       if (error) {
         logger.authEvent('Auth session error', {
@@ -137,6 +131,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setLoading(false);
         return;
       }
+      
       logger.debug('Initial session check completed', {
         component: 'AuthProvider',
         function: 'getSession',
@@ -146,11 +141,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       setSession(session);
       setUser(session?.user ?? null);
-      
-      // Set loading to false immediately for initial session
       setLoading(false);
       
-      // Fetch user role if logged in (immediately, not in background)
+      // Fetch user role if logged in
       if (session?.user) {
         setRoleLoading(true);
         (async () => {
@@ -201,7 +194,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
 
     return () => subscription.unsubscribe();
-  }, [handleAuthError]);
+  }, []);
 
   const signUp = async (email: string, password: string) => {
     logger.info('Starting user sign up', { component: 'useAuth', function: 'signUp', metadata: { email } });
