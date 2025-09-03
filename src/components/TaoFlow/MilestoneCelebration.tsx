@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, Crown, Zap, Heart } from 'lucide-react';
@@ -95,6 +95,12 @@ export const MilestoneCelebration: React.FC<MilestoneCelebrationProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl border-0 bg-gradient-to-br from-background to-background/95">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Sacred Milestone Achieved</DialogTitle>
+          <DialogDescription>
+            You have reached a new stage in your sacred journey with new capabilities unlocked.
+          </DialogDescription>
+        </DialogHeader>
         <div className="relative overflow-hidden">
           {/* Background Fireworks */}
           <AnimatePresence>

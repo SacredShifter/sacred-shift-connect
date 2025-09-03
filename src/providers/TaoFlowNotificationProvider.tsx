@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TaoModule, TaoStage } from '@/config/taoFlowConfig';
 import { useTaoFlowProgress } from '@/hooks/useTaoFlowProgress';
 import { ModuleRevealNotification } from '@/components/TaoFlow/ModuleRevealNotification';
@@ -17,6 +18,7 @@ interface TaoFlowNotificationProviderProps {
 }
 
 export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderProps> = ({ children }) => {
+  const navigate = useNavigate();
   const [revealModule, setRevealModule] = useState<TaoModule | null>(null);
   const [celebrationStage, setCelebrationStage] = useState<TaoStage | null>(null);
   const [showRevealModal, setShowRevealModal] = useState(false);
@@ -80,6 +82,21 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
     setCelebrationStage(null);
   };
 
+  const handleExploreModule = () => {
+    if (revealModule?.path) {
+      console.log('Exploring module:', revealModule.path);
+      navigate(revealModule.path);
+      handleRevealClose();
+    }
+  };
+
+  const handleContinueJourney = () => {
+    console.log('Continuing from milestone:', celebrationStage);
+    // Navigate to journey map to see progress
+    navigate('/journey-map');
+    handleCelebrationClose();
+  };
+
   const value = {
     showModuleReveal,
     showMilestoneCelebration,
@@ -95,10 +112,7 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
         newModule={revealModule}
         isOpen={showRevealModal}
         onClose={handleRevealClose}
-        onExplore={() => {
-          // Navigate to module or handle exploration
-          console.log('Exploring module:', revealModule?.path);
-        }}
+        onExplore={handleExploreModule}
       />
 
       {/* Milestone Celebration */}
@@ -106,10 +120,7 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
         newStage={celebrationStage}
         isOpen={showCelebrationModal}
         onClose={handleCelebrationClose}
-        onContinue={() => {
-          // Handle milestone continuation
-          console.log('Continuing from milestone:', celebrationStage);
-        }}
+        onContinue={handleContinueJourney}
       />
     </TaoFlowNotificationContext.Provider>
   );

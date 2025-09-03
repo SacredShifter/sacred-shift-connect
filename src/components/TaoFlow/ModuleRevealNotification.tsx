@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Lock, Unlock } from 'lucide-react';
@@ -55,6 +55,9 @@ export const ModuleRevealNotification: React.FC<ModuleRevealNotificationProps> =
             </motion.div>
             Module Unlocked
           </DialogTitle>
+          <DialogDescription>
+            A new module has been unlocked and is ready for you to explore in your sacred journey.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
