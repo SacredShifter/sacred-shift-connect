@@ -11,6 +11,8 @@ import { RealtimeOrchestraProvider } from './RealtimeOrchestraProvider';
 import { SafetyProvider } from './SafetyProvider';
 import { DailyRoutineProvider } from './DailyRoutineProvider';
 import { TaoFlowProvider } from './TaoFlowProvider';
+import { TaoFlowNotificationProvider } from './TaoFlowNotificationProvider';
+import { Toaster } from "@/components/ui/sonner";
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -20,19 +22,22 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
     <AuthProvider>
       <TaoFlowProvider>
-        <BiofeedbackProvider>
-          <CosmicDataProvider>
-            <PresetProvider>
-              <RealtimeOrchestraProvider>
-                <SafetyProvider>
-                  <DailyRoutineProvider>
-                    {children}
-                  </DailyRoutineProvider>
-                </SafetyProvider>
-              </RealtimeOrchestraProvider>
-            </PresetProvider>
-          </CosmicDataProvider>
-        </BiofeedbackProvider>
+        <TaoFlowNotificationProvider>
+          <BiofeedbackProvider>
+            <CosmicDataProvider>
+              <PresetProvider>
+                <RealtimeOrchestraProvider>
+                  <SafetyProvider>
+                    <DailyRoutineProvider>
+                      <Toaster />
+                      {children}
+                    </DailyRoutineProvider>
+                  </SafetyProvider>
+                </RealtimeOrchestraProvider>
+              </PresetProvider>
+            </CosmicDataProvider>
+          </BiofeedbackProvider>
+        </TaoFlowNotificationProvider>
       </TaoFlowProvider>
     </AuthProvider>
   );
