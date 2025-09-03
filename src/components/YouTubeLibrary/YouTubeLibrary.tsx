@@ -13,7 +13,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { listChannels } from '@/actions/listChannels';
 import { listContent } from '@/actions/listContent';
-import { ContentSource, ContentItem } from '@/hooks/useContentSources'; // Re-using interfaces
+import { ContentSource, ContentItem } from '@/hooks/useContentSources';
+import { YouTubeVideo } from '@/types/youtube';
+import { mapContentItemToYouTubeVideo } from '@/utils/videoMapping';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const YouTubeLibrary: React.FC = () => {
@@ -29,6 +31,7 @@ export const YouTubeLibrary: React.FC = () => {
 
   const [sources, setSources] = useState<ContentSource[]>([]);
   const [videos, setVideos] = useState<ContentItem[]>([]);
+  const [youtubeVideos, setYoutubeVideos] = useState<YouTubeVideo[]>([]);
   const [selectedSource, setSelectedSource] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVideo, setSelectedVideo] = useState<ContentItem | null>(null);
@@ -38,6 +41,12 @@ export const YouTubeLibrary: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [nextCursor, setNextCursor] = useState<string | undefined>();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Convert ContentItems to YouTubeVideos whenever videos change
+  useEffect(() => {
+    const mappedVideos = videos.map(mapContentItemToYouTubeVideo);
+    setYoutubeVideos(mappedVideos);
+  }, [videos]);
 
   const observer = useRef<IntersectionObserver>();
   const lastVideoElementRef = useCallback((node: HTMLDivElement) => {
@@ -94,27 +103,6 @@ export const YouTubeLibrary: React.FC = () => {
     setSelectedVideo(null);
   };
 
-  const getFilteredVideos = () => {
-    // Favorites and Watch Later are now stubs as per instructions
-    return videos;
-  };
-
-  const getSortedVideos = (videosToSort: ContentItem[]) => {
-    switch (sortBy) {
-      case 'title':
-        return [...videosToSort].sort((a, b) => a.title.localeCompare(b.title));
-      case 'views':
-        return [...videosToSort].sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
-      case 'date':
-      default:
-        return [...videosToSort].sort((a, b) => 
-          new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime()
-        );
-    }
-  };
-
-  const filteredVideos = getFilteredVideos();
-  const sortedVideos = getSortedVideos(filteredVideos);
   const totalLoading = loading || metadataLoading;
 
   return (
@@ -155,29 +143,33 @@ export const YouTubeLibrary: React.FC = () => {
 
       {!totalLoading && (
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-sm">{videos.length} video{videos.length !== 1 ? 's' : ''}</Badge>
+          <Badge variant="outline" className="text-sm">{youtubeVideos.length} video{youtubeVideos.length !== 1 ? 's' : ''}</Badge>
         </div>
       )}
 
       <VideoGrid
-        videos={sortedVideos}
+        videos={youtubeVideos}
         loading={totalLoading}
-        onPlay={handlePlayVideo}
+        onPlay={(video) => {
+          const contentItem = videos.find(item => item.external_id === video.id);
+          if (contentItem) {
+            handlePlayVideo(contentItem);
+          }
+        }}
         onWatchLater={toggleWatchLater}
         onFavorite={toggleFavorite}
         metadata={metadata}
         showCTAs={true}
-        lastVideoRef={lastVideoElementRef}
       />
       {isLoadingMore && <div className="flex justify-center"><Skeleton className="w-16 h-16 rounded-full" /></div>}
 
       <SimpleVideoModal
-        video={selectedVideo}
+        video={selectedVideo ? mapContentItemToYouTubeVideo(selectedVideo) : null}
         isOpen={isPlayerOpen}
         onClose={handleClosePlayer}
         onWatchLater={toggleWatchLater}
         onFavorite={toggleFavorite}
-        userMetadata={selectedVideo ? metadata[selectedVideo.id] : undefined}
+        userMetadata={selectedVideo ? metadata[selectedVideo.external_id] : undefined}
       />
     </div>
   );
