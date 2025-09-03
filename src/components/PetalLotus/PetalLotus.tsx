@@ -169,7 +169,7 @@ export const PetalLotus: React.FC<PetalLotusProps> = ({ className = "" }) => {
   ];
 
   const getSourceStats = (source: ContentSource) => {
-    const metadata = source.sync_metadata as any;
+    const metadata = (source as any).sync_metadata;
     return {
       contentCount: metadata?.contentCount || 0,
       lastSync: source.last_sync_at ? new Date(source.last_sync_at).toLocaleDateString() : 'Never',
@@ -292,13 +292,13 @@ export const PetalLotus: React.FC<PetalLotusProps> = ({ className = "" }) => {
             onClick={() => setSelectedSourceId(selectedSourceId === source.id ? undefined : source.id)}
           >
             <div className="flex items-center gap-3 mb-3">
-              <Thumbnail
-                src={source.sync_metadata?.channelInfo?.thumbnailUrl}
-                alt={source.source_name}
-                size="md"
-                fallbackIcon={platformConfig.icon}
-                className="flex-shrink-0"
-              />
+                             <Thumbnail
+                 src={(source as any).sync_metadata?.channelInfo?.thumbnailUrl}
+                 alt={source.source_name}
+                 size="md"
+                 fallbackIcon={platformConfig.icon}
+                 className="flex-shrink-0"
+               />
               <div className="flex-1">
                 <h3 className="font-medium">{source.source_name}</h3>
                 <p className="text-sm text-muted-foreground">{platformConfig.name}</p>
@@ -348,13 +348,13 @@ export const PetalLotus: React.FC<PetalLotusProps> = ({ className = "" }) => {
             onClick={() => setSelectedSourceId(selectedSourceId === source.id ? undefined : source.id)}
           >
             <div className="flex items-center gap-3">
-              <Thumbnail
-                src={source.sync_metadata?.channelInfo?.thumbnailUrl}
-                alt={source.source_name}
-                size="sm"
-                fallbackIcon={platformConfig.icon}
-                className="flex-shrink-0"
-              />
+                             <Thumbnail
+                 src={(source as any).sync_metadata?.channelInfo?.thumbnailUrl}
+                 alt={source.source_name}
+                 size="sm"
+                 fallbackIcon={platformConfig.icon}
+                 className="flex-shrink-0"
+               />
               <div className="flex-1">
                 <h3 className="font-medium">{source.source_name}</h3>
                 <p className="text-sm text-muted-foreground">{platformConfig.name}</p>
@@ -376,9 +376,23 @@ export const PetalLotus: React.FC<PetalLotusProps> = ({ className = "" }) => {
 
   return (
     <>
-      <div className={`relative w-full h-96 flex items-center justify-center ${className}`}>
-        {/* View Mode Toggle */}
-        <div className="absolute top-4 right-4 z-20">
+      <div className={`relative w-full h-96 flex flex-col ${className}`}>
+        {/* Header Bar with View Mode Toggle and Content Count */}
+        <div className="flex justify-between items-center p-4 border-b border-border/30 bg-background/80 backdrop-blur-sm z-20">
+          {/* Content Sources Count */}
+          <div className="flex items-center gap-4">
+            <div className="text-sm font-medium">{filteredSources.length} Content Sources</div>
+            <div className="text-xs text-muted-foreground">
+              {filteredSources.filter(s => s.sync_status === 'active').length} Active
+            </div>
+            {filterStatus !== 'all' && (
+              <div className="text-xs text-primary">
+                Filter: {filterStatus === 'active' ? 'Active Only' : 'Inactive Only'}
+              </div>
+            )}
+          </div>
+
+          {/* View Mode Toggle */}
           <div className="flex bg-background border rounded-lg p-1">
             {[
               { mode: 'lotus', icon: Globe, label: 'Lotus' },
@@ -404,28 +418,15 @@ export const PetalLotus: React.FC<PetalLotusProps> = ({ className = "" }) => {
           </div>
         </div>
 
-        {/* Content Sources Count */}
-        <div className="absolute top-4 left-4 z-20">
-          <div className="bg-background/80 backdrop-blur-sm border rounded-lg px-3 py-2">
-            <div className="text-sm font-medium">{filteredSources.length} Content Sources</div>
-            <div className="text-xs text-muted-foreground">
-              {filteredSources.filter(s => s.sync_status === 'active').length} Active
-            </div>
-            {filterStatus !== 'all' && (
-              <div className="text-xs text-primary mt-1">
-                Filter: {filterStatus === 'active' ? 'Active Only' : 'Inactive Only'}
-              </div>
-            )}
-          </div>
+        {/* Content Area - Now properly spaced below header */}
+        <div className="flex-1 p-4 overflow-auto">
+          {viewMode === 'lotus' && renderLotusView()}
+          {viewMode === 'grid' && renderGridView()}
+          {viewMode === 'list' && renderListView()}
+          {viewMode === 'resonance' && <ResonanceSearch />}
+          {viewMode === 'sacred-geometry' && <SacredGeometryGrid content={filteredSources.map(transformToContentItem)} />}
+          {viewMode === 'timeline' && <ResonanceTimeline content={filteredSources.map(transformToTimelineItem)} />}
         </div>
-
-        {/* View Content */}
-        {viewMode === 'lotus' && renderLotusView()}
-        {viewMode === 'grid' && renderGridView()}
-        {viewMode === 'list' && renderListView()}
-        {viewMode === 'resonance' && <ResonanceSearch />}
-        {viewMode === 'sacred-geometry' && <SacredGeometryGrid content={filteredSources.map(transformToContentItem)} />}
-        {viewMode === 'timeline' && <ResonanceTimeline content={filteredSources.map(transformToTimelineItem)} />}
 
         {/* Empty State */}
         {filteredSources.length === 0 && (
