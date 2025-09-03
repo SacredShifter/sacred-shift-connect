@@ -3,13 +3,14 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Grid, Flower, Plus, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { YouTubeLibrary } from '@/components/YouTubeLibrary/YouTubeLibrary';
+import { UnifiedMediaLibrary } from '@/components/UnifiedMediaLibrary/UnifiedMediaLibrary';
 import { PetalLotus, ContentPlatform } from '@/components/PetalLotus';
 import { ContentManager } from '@/components/ContentManager';
 import { TeachingLayer } from '@/components/TeachingLayer';
 import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 
 const VideoLibrary: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'lotus' | 'grid' | 'manage'>('lotus');
+  const [viewMode, setViewMode] = useState<'netflix' | 'lotus' | 'grid' | 'manage'>('netflix');
   const [selectedPlatform, setSelectedPlatform] = useState<ContentPlatform | undefined>();
   const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
 
@@ -42,6 +43,15 @@ const VideoLibrary: React.FC = () => {
             {/* View Mode Toggle */}
             <div className="flex justify-center gap-2 mb-8">
               <Button
+                variant={viewMode === 'netflix' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('netflix')}
+                className="gap-2"
+              >
+                <Play className="w-4 h-4" />
+                Netflix View
+              </Button>
+              <Button
                 variant={viewMode === 'lotus' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('lotus')}
@@ -71,7 +81,9 @@ const VideoLibrary: React.FC = () => {
             </div>
           </motion.div>
           
-          {viewMode === 'lotus' ? (
+          {viewMode === 'netflix' ? (
+            <UnifiedMediaLibrary />
+          ) : viewMode === 'lotus' ? (
             <div className="space-y-8">
               <PetalLotus
                 selectedPlatform={selectedPlatform}

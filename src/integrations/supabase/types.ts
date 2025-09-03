@@ -4400,6 +4400,8 @@ export type Database = {
         Row: {
           author_name: string | null
           author_url: string | null
+          category_id: string | null
+          consciousness_level: string | null
           content_type: Database["public"]["Enums"]["content_item_type"]
           content_url: string
           created_at: string
@@ -4407,13 +4409,21 @@ export type Database = {
           curation_status: string | null
           description: string | null
           duration_seconds: number | null
+          energy_level: number | null
           engagement_score: number | null
           external_id: string
+          featured_priority: number | null
+          genre_tags: string[] | null
           id: string
+          mood_tags: string[] | null
+          netflix_style_metadata: Json | null
           published_at: string | null
           raw_metadata: Json | null
+          recommended_time_of_day: string[] | null
+          sacred_geometry_association: string | null
           source_id: string
           tags: string[] | null
+          teaching_notes: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
@@ -4422,6 +4432,8 @@ export type Database = {
         Insert: {
           author_name?: string | null
           author_url?: string | null
+          category_id?: string | null
+          consciousness_level?: string | null
           content_type: Database["public"]["Enums"]["content_item_type"]
           content_url: string
           created_at?: string
@@ -4429,13 +4441,21 @@ export type Database = {
           curation_status?: string | null
           description?: string | null
           duration_seconds?: number | null
+          energy_level?: number | null
           engagement_score?: number | null
           external_id: string
+          featured_priority?: number | null
+          genre_tags?: string[] | null
           id?: string
+          mood_tags?: string[] | null
+          netflix_style_metadata?: Json | null
           published_at?: string | null
           raw_metadata?: Json | null
+          recommended_time_of_day?: string[] | null
+          sacred_geometry_association?: string | null
           source_id: string
           tags?: string[] | null
+          teaching_notes?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
@@ -4444,6 +4464,8 @@ export type Database = {
         Update: {
           author_name?: string | null
           author_url?: string | null
+          category_id?: string | null
+          consciousness_level?: string | null
           content_type?: Database["public"]["Enums"]["content_item_type"]
           content_url?: string
           created_at?: string
@@ -4451,19 +4473,34 @@ export type Database = {
           curation_status?: string | null
           description?: string | null
           duration_seconds?: number | null
+          energy_level?: number | null
           engagement_score?: number | null
           external_id?: string
+          featured_priority?: number | null
+          genre_tags?: string[] | null
           id?: string
+          mood_tags?: string[] | null
+          netflix_style_metadata?: Json | null
           published_at?: string | null
           raw_metadata?: Json | null
+          recommended_time_of_day?: string[] | null
+          sacred_geometry_association?: string | null
           source_id?: string
           tags?: string[] | null
+          teaching_notes?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
           view_count?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "content_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "media_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "content_items_source_id_fkey"
             columns: ["source_id"]
@@ -9067,6 +9104,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      media_categories: {
+        Row: {
+          color_scheme: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          icon_name: string | null
+          id: string
+          is_active: boolean
+          is_featured: boolean
+          name: string
+          sacred_geometry: string | null
+          updated_at: string
+        }
+        Insert: {
+          color_scheme?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          name: string
+          sacred_geometry?: string | null
+          updated_at?: string
+        }
+        Update: {
+          color_scheme?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          name?: string
+          sacred_geometry?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       meditation_music: {
         Row: {
@@ -19447,6 +19526,15 @@ export type Database = {
           is_circle_member: boolean
         }[]
       }
+      get_featured_content_by_category: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category_id: string
+          category_name: string
+          content_count: number
+          featured_items: Json
+        }[]
+      }
       get_journey_audio_mapping: {
         Args: { template_id: string }
         Returns: {
@@ -19947,6 +20035,32 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      search_unified_media: {
+        Args: {
+          category_filter?: string
+          consciousness_level_filter?: string
+          limit_count?: number
+          search_query?: string
+          source_filter?: string
+        }
+        Returns: {
+          category_id: string
+          category_name: string
+          consciousness_level: string
+          created_at: string
+          description: string
+          energy_level: number
+          featured_priority: number
+          genre_tags: string[]
+          id: string
+          mood_tags: string[]
+          source_platform: string
+          source_url: string
+          teaching_notes: string
+          thumbnail_url: string
+          title: string
+        }[]
       }
       should_show_placeholders: {
         Args: Record<PropertyKey, never>
