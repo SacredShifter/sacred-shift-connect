@@ -247,6 +247,33 @@ export const useContentSources = () => {
     }
   };
 
+  const deleteSource = async (id: string) => {
+    try {
+      const { error } = await (supabase as any)
+        .from('content_sources')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setSources(prev => prev.filter(source => source.id !== id));
+      setItems(prev => prev.filter(item => item.source_id !== id));
+
+      toast({
+        title: "Source deleted",
+        description: "Content source has been removed from your library."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error deleting source",
+        description: error.message,
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchSources();
   }, []);
@@ -258,6 +285,7 @@ export const useContentSources = () => {
     addSource,
     toggleSource,
     syncSource,
+    deleteSource,
     fetchItems,
     fetchSources
   };

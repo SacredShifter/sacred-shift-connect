@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,20 +44,7 @@ export function AuraModuleDiscussion() {
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetchPendingConcepts();
-    loadConversationHistory();
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const fetchPendingConcepts = async () => {
+  const fetchPendingConcepts = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('aura_module_concepts')
@@ -71,9 +58,9 @@ export function AuraModuleDiscussion() {
     } catch (error) {
       console.error('Error fetching concepts:', error);
     }
-  };
+  }, []);
 
-  const loadConversationHistory = async () => {
+  const loadConversationHistory = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('ai_conversation_memory')
@@ -102,6 +89,19 @@ export function AuraModuleDiscussion() {
     } catch (error) {
       console.error('Error loading conversation:', error);
     }
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchPendingConcepts();
+    loadConversationHistory();
+  }, [fetchPendingConcepts, loadConversationHistory]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const saveConversation = async (newMessages: Message[]) => {

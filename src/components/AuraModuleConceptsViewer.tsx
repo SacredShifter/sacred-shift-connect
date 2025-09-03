@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,11 +32,7 @@ export function AuraModuleConceptsViewer() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchConcepts();
-  }, []);
-
-  const fetchConcepts = async () => {
+  const fetchConcepts = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('aura_module_concepts')
@@ -55,7 +51,11 @@ export function AuraModuleConceptsViewer() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchConcepts();
+  }, [fetchConcepts]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {

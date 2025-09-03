@@ -11,8 +11,8 @@ export interface LogContext {
   sessionId?: string;
   postId?: string;
   errorCode?: string;
-  metadata?: Record<string, any>;
-  [key: string]: any; // Index signature to make it compatible with Sentry's Extras type
+  metadata?: Record<string, unknown>;
+  [key: string]: unknown; // Index signature to make it compatible with Sentry's Extras type
 }
 
 export interface LogEntry {
@@ -195,7 +195,7 @@ export const logger = new Logger();
 
 // Development helper to view logs
 if (import.meta.env.DEV) {
-  (window as any).viewLogs = () => {
+  (window as Record<string, unknown>).viewLogs = () => {
     const logs = JSON.parse(localStorage.getItem('ss_logs') || '[]');
     console.table(logs);
     return logs;

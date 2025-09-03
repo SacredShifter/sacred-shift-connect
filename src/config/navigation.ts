@@ -201,6 +201,13 @@ export const NAV_CONFIG: NavGroup[] = [
         redirectFrom: ["/youtube", "/videos"],
         tooltip: "Multi-platform content curation hub with sacred geometry visualization"
       },
+      { 
+        id: "sacred-resonance", 
+        label: "Sacred Resonance", 
+        icon: Sparkles, 
+        path: "/sacred-resonance",
+        tooltip: "AI-powered content discovery through consciousness resonance and sacred geometry"
+      },
     ]
   },
   {

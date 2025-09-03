@@ -31,8 +31,110 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@sacred_shifter" />
     <meta name="twitter:image" content="/sacred-shifter-logo.png" />
-  </head>
 
+    <!-- Global polyfill for Node.js compatibility -->
+    <script>
+      // Fix global reference for simple-peer and other Node.js modules
+      if (typeof global === 'undefined') {
+        window.global = window;
+      }
+      
+      // Fix process for Node.js compatibility
+      if (typeof process === 'undefined') {
+        window.process = { 
+          env: {}, 
+          browser: true,
+          nextTick: (fn) => setTimeout(fn, 0),
+          platform: 'browser',
+          arch: 'x64'
+        };
+      }
+      
+      // Fix Buffer if not available
+      if (typeof Buffer === 'undefined') {
+        window.Buffer = {
+          from: (data) => {
+            if (data instanceof ArrayBuffer) return new Uint8Array(data);
+            if (Array.isArray(data)) return new Uint8Array(data);
+            if (typeof data === 'string') {
+              const encoder = new TextEncoder();
+              return encoder.encode(data);
+            }
+            return new Uint8Array(0);
+          },
+          alloc: (size) => new Uint8Array(size),
+          allocUnsafe: (size) => new Uint8Array(size),
+          isBuffer: (obj) => obj instanceof Uint8Array
+        };
+      }
+      
+      // Fix crypto if not available
+      if (typeof crypto === 'undefined') {
+        window.crypto = window.msCrypto || {
+          getRandomValues: (array) => {
+            for (let i = 0; i < array.length; i++) {
+              array[i] = Math.floor(Math.random() * 256);
+            }
+            return array;
+          }
+        };
+      }
+    </script>
+
+    <!-- NUCLEAR WEBSOCKET KILLER - EXECUTES BEFORE VITE LOADS -->
+    <script>
+      (function() {
+        'use strict';
+        console.log('🚨 NUCLEAR WEBSOCKET KILLER: Pre-loading WebSocket blockade...');
+        
+        // Block WebSocket constructor before anything else loads
+        if (typeof window !== 'undefined') {
+          const OriginalWebSocket = window.WebSocket;
+          window.WebSocket = function(url, protocols) {
+            console.warn('🚨 NUCLEAR OPTION: WebSocket connection BLOCKED at HTML level:', url);
+            // Return a completely dead WebSocket
+            return {
+              readyState: 3,
+              url: url,
+              protocol: protocols ? (Array.isArray(protocols) ? protocols[0] : protocols) : '',
+              extensions: '',
+              bufferedAmount: 0,
+              onopen: null,
+              onclose: null,
+              onmessage: null,
+              onerror: null,
+              close: () => console.warn('🚨 Mock WebSocket close() called'),
+              send: () => console.warn('🚨 Mock WebSocket send() called'),
+              addEventListener: () => {},
+              removeEventListener: () => {},
+              dispatchEvent: () => false
+            };
+          };
+          
+          // Block fetch to WebSocket URLs
+          const originalFetch = window.fetch;
+          window.fetch = function(input, init) {
+            const url = typeof input === 'string' ? input : input.toString();
+            if (url.startsWith('ws://') || url.startsWith('wss://')) {
+              console.warn('🚨 NUCLEAR OPTION: WebSocket fetch BLOCKED at HTML level:', url);
+              return Promise.reject(new Error('🚨 WebSocket connections are COMPLETELY DISABLED'));
+            }
+            return originalFetch(input, init);
+          };
+          
+          console.log('🚨 NUCLEAR WEBSOCKET KILLER: HTML-level blockade activated');
+        }
+      })();
+    </script>
+    
+    <!-- Early-loading polyfills for Node.js compatibility -->
+    <script>
+      // Polyfill for global
+      if (typeof global === 'undefined') {
+        window.global = window;
+      }
+    </script>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

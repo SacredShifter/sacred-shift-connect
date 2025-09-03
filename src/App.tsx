@@ -51,6 +51,7 @@ import Meditation from './pages/Meditation';
 import Breath from './pages/Breath';
 import Learning3D from './pages/Learning3D';
 import FeaturesComingSoon from './pages/FeaturesComingSoon';
+import SacredResonanceDiscovery from './pages/SacredResonanceDiscovery';
 import AdminLogs from './pages/AdminLogs';
 import { DevSitemap } from './components/SacredSitemap/DevSitemap';
 import { UserSitemap } from './components/SacredSitemap/UserSitemap';
@@ -204,9 +205,10 @@ function App() {
                   <Route path="/resonance/entries/:id" element={<RegistryEntry />} />
                   <Route path="/liberation" element={<Liberation />} />
                   <Route path="/collective" element={<CollectiveCoherenceCircle onExit={() => window.history.back()} />} />
-                  <Route path="/learning-3d" element={<Learning3D />} />
-                  <Route path="/shift" element={<Shift />} />
-                  <Route path="/features-coming-soon" element={<FeaturesComingSoon />} />
+                          <Route path="/learning-3d" element={<Learning3D />} />
+        <Route path="/shift" element={<Shift />} />
+        <Route path="/features-coming-soon" element={<FeaturesComingSoon />} />
+        <Route path="/sacred-resonance" element={<SacredResonanceDiscovery />} />
                   <Route path="/dev/sitemap" element={<DevSitemap />} />
                   <Route path="/ethos" element={<Ethos />} />
                 </Route>

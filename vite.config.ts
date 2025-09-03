@@ -20,17 +20,41 @@ export default defineConfig(({ mode }) => {
 
   return {
     server: {
-      host: "::",
-      port: 8080,
+      host: "127.0.0.1",
+      port: 5173, // Use Vite's default port
+      strictPort: true,
+      hmr: false, // Completely disable HMR
+      watch: {
+        ignored: ['**/*'] // Disable file watching
+      },
+      cors: true,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      }
     },
     plugins,
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+        "events": path.resolve(__dirname, "./src/lib/events-polyfill.ts")
       }
+    },
+    define: {
+      global: 'globalThis',
+      __VITE_HMR_DISABLE__: true,
+      __VITE_DISABLE_HMR__: true
+    },
+    optimizeDeps: {
+      include: ['simple-peer'],
+      exclude: []
     },
     build: {
       sourcemap: true,
+      rollupOptions: {
+        external: [],
+      },
     }
   };
 });
