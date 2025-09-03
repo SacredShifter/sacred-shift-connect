@@ -33,6 +33,7 @@ import { ProfileSetupFlow } from '@/components/Profile/ProfileSetupFlow';
 import { useProfile } from '@/hooks/useProfile';
 import Settings from '@/pages/Settings';
 import { MirrorInsightsWidget } from '@/components/dashboard/MirrorInsightsWidget';
+import { PulseFiComingSoon } from '@/components/pulseFi/PulseFiComingSoon';
 import { EnhancedTruthSpark } from '@/components/dashboard/EnhancedTruthSpark';
 import { FloatingMirrorToggle } from '@/components/dashboard/FloatingMirrorToggle';
 import { SynchronicityMirror } from '@/components/synchronicity/SynchronicityMirror';
@@ -183,6 +184,11 @@ const Dashboard = () => {
               </GlowWrapper>
 
               <DailyResonanceWeather />
+            </div>
+
+            {/* Pulse-Fi Coming Soon Banner */}
+            <div className="mb-8">
+              <PulseFiComingSoon variant="banner" />
             </div>
 
             {/* Main Dashboard Grid */}

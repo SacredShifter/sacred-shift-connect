@@ -25,7 +25,8 @@ import {
   FileSearch,
   BarChart3,
   Waves,
-  MapPin
+  MapPin,
+  Wifi
 } from "lucide-react";
 
 export type Role = "seeker" | "creator" | "admin";
@@ -170,6 +171,20 @@ export const NAV_CONFIG: NavGroup[] = [
         icon: Stars, 
         path: "/constellation",
         tooltip: "AI-powered consciousness cartography and pattern recognition"
+      },
+    ]
+  },
+  {
+    id: "grp-hardware", 
+    label: "Hardware",
+    collapsedByDefault: false,
+    children: [
+      { 
+        id: "pulse-fi", 
+        label: "Pulse-Fi Add-On", 
+        icon: Wifi, 
+        path: "/hardware/pulse-fi",
+        tooltip: "Wi-Fi sensing technology for vitals, security, and biofeedback (Coming Soon)"
       },
     ]
   },

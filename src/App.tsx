@@ -56,6 +56,7 @@ import AdminLogs from './pages/AdminLogs';
 import { DevSitemap } from './components/SacredSitemap/DevSitemap';
 import { UserSitemap } from './components/SacredSitemap/UserSitemap';
 import Ethos from './pages/Ethos';
+import HardwarePulseFi from './pages/HardwarePulseFi';
 import DailyPractice from './pages/DailyPractice';
 import JourneyMap from './pages/JourneyMap';
 
@@ -157,13 +158,16 @@ function App() {
                    <Route path="/journal" element={<Journal />} />
                    <Route path="/grove" element={<Grove />} />
                    
-                   {/* GAA System Routes */}
-                   <Route path="/gaa" element={<GAADashboard />} />
-                   <Route path="/gaa/archetypes" element={<TarotMode />} />
-                   <Route path="/gaa/cosmic" element={<CosmicPage />} />
-                   <Route path="/gaa/metrics" element={<MetricsPage />} />
-                   
-                   {/* Community Routes */}
+                    {/* GAA System Routes */}
+                    <Route path="/gaa" element={<GAADashboard />} />
+                    <Route path="/gaa/archetypes" element={<TarotMode />} />
+                    <Route path="/gaa/cosmic" element={<CosmicPage />} />
+                    <Route path="/gaa/metrics" element={<MetricsPage />} />
+                    
+                    {/* Hardware Routes */}
+                    <Route path="/hardware/pulse-fi" element={<HardwarePulseFi />} />
+                    
+                    {/* Community Routes */}
                   <Route path="/circles" element={<Circles />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/codex" element={<Codex />} />

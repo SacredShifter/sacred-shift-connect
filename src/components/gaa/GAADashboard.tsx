@@ -30,6 +30,7 @@ import * as Tone from 'tone';
 import { useGAAEngine } from '@/hooks/useGAAEngine';
 import { useCollectiveGAA } from '@/hooks/useCollectiveGAA';
 import { SessionMetrics } from './SessionMetrics';
+import { GAAHardwareTeaser } from '@/components/pulseFi/GAAHardwareTeaser';
 import { CosmicVisualization } from './CosmicVisualization';
 import { GAAInfoPanel } from './GAAInfoPanel';
 import { GAADemoMode } from './GAADemoMode';
@@ -536,6 +537,11 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
                 </CardContent>
               </Card>
             )}
+
+            {/* Hardware Biofeedback Teaser */}
+            <GAAHardwareTeaser 
+              onLearnMore={() => window.open('/hardware/pulse-fi', '_blank')}
+            />
           </div>
 
           {/* Right Column */}
