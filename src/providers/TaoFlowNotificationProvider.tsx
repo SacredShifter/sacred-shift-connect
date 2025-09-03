@@ -28,20 +28,40 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
   const { getAllUnlockedModules, currentStage } = useTaoFlowProgress();
   const [previousStage, setPreviousStage] = useState<TaoStage>(currentStage);
   const [previousModuleCount, setPreviousModuleCount] = useState(0);
+  const [celebratedStages, setCelebratedStages] = useState<Set<TaoStage>>(new Set());
+
+  // Load celebrated stages from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('tao-celebrated-stages');
+    if (saved) {
+      try {
+        const stages = JSON.parse(saved);
+        setCelebratedStages(new Set(stages));
+      } catch (error) {
+        console.warn('Failed to parse celebrated stages:', error);
+      }
+    }
+  }, []);
 
   // Track stage changes
   useEffect(() => {
-    if (currentStage !== previousStage) {
-      // Stage has changed - show celebration
+    if (currentStage !== previousStage && !celebratedStages.has(currentStage)) {
+      // Stage has changed and hasn't been celebrated yet - show celebration
       setCelebrationStage(currentStage);
       setShowCelebrationModal(true);
       setPreviousStage(currentStage);
       setJustCelebrated(true);
       
+      // Mark this stage as celebrated
+      const newCelebratedStages = new Set(celebratedStages);
+      newCelebratedStages.add(currentStage);
+      setCelebratedStages(newCelebratedStages);
+      localStorage.setItem('tao-celebrated-stages', JSON.stringify(Array.from(newCelebratedStages)));
+      
       // Clear the flag after a delay to allow module reveals later
       setTimeout(() => setJustCelebrated(false), 3000);
     }
-  }, [currentStage, previousStage]);
+  }, [currentStage, previousStage, celebratedStages]);
 
   // Track new module unlocks
   useEffect(() => {
