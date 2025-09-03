@@ -1,16 +1,41 @@
 import React, { useState } from 'react';
 import { SacredJournalInterface } from '@/components/SacredJournalInterface';
+import { KarmaJournal } from '@/components/karma/KarmaJournal';
 import { TeachingLayer } from '@/components/TeachingLayer';
 import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 import { Button } from '@/components/ui/button';
-import { BookOpen, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/hooks/useAuth';
+import { BookOpen, Sparkles, Heart, Scroll } from 'lucide-react';
 
 const Journal = () => {
   const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
+  const { user } = useAuth();
+
+  if (!user) return null;
 
   return (
     <div className="space-y-6">
-      <SacredJournalInterface />
+      <Tabs defaultValue="sacred" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="sacred" className="flex items-center gap-2">
+            <Scroll className="w-4 h-4" />
+            Sacred Journal
+          </TabsTrigger>
+          <TabsTrigger value="karma" className="flex items-center gap-2">
+            <Heart className="w-4 h-4" />
+            Karma Journal
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="sacred">
+          <SacredJournalInterface />
+        </TabsContent>
+        
+        <TabsContent value="karma">
+          <KarmaJournal userId={user.id} />
+        </TabsContent>
+      </Tabs>
       
       {/* Deeper Knowledge Toggle */}
       <div className="text-center">
