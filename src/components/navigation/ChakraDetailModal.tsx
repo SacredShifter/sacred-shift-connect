@@ -23,15 +23,36 @@ export const ChakraDetailModal: React.FC<ChakraDetailModalProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  // Mapping modules to chakras based on energetic alignment
+  const moduleToChakraMapping: Record<string, string[]> = {
+    root: ['/dashboard', '/profile', '/settings', '/privacy', '/support'],
+    sacral: ['/journal', '/messages', '/library'],
+    'solar-plexus': ['/gaa', '/learning-3d', '/labs'],
+    heart: ['/circles', '/grove', '/feed', '/collective'],
+    throat: ['/codex', '/breath', '/help', '/guidebook'],
+    'third-eye': ['/meditation', '/constellation', '/shift'],
+    crown: ['/journey-map', '/liberation', '/ai-admin', '/hardware/pulse-fi']
+  };
+
+  const getModuleLink = () => {
+    const chakraPaths = moduleToChakraMapping[chakra.id];
+    return chakraPaths && chakraPaths.length > 0 ? chakraPaths[0] : '/dashboard';
+  };
+
   const handleStartPractice = () => {
-    // Navigate to the specific module practice
-    navigate(`/chakra/${chakra.id}/${bell.moduleId}`);
+    const moduleLink = getModuleLink();
+    navigate(moduleLink);
     onClose();
   };
 
   const handleOpenJournal = () => {
-    // Navigate to journal with chakra context
     navigate('/journal', { state: { chakraContext: chakra.id, bellContext: bell.moduleId } });
+    onClose();
+  };
+
+  const handleNavigateToModule = () => {
+    const moduleLink = getModuleLink();
+    navigate(moduleLink);
     onClose();
   };
 
@@ -150,27 +171,42 @@ export const ChakraDetailModal: React.FC<ChakraDetailModalProps> = ({
 
               <Separator />
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3">
+              {/* Navigation & Action Buttons */}
+              <div className="space-y-3">
+                {/* Primary Module Navigation */}
                 <Button 
-                  onClick={handleStartPractice}
-                  className="flex-1"
+                  onClick={handleNavigateToModule}
+                  className="w-full"
                   style={{ backgroundColor: chakra.color }}
                   disabled={!bell.isUnlocked}
                 >
-                  <Play className="w-4 h-4 mr-2" />
-                  {bell.isCompleted ? "Practice Again" : "Start Practice"}
+                  <Zap className="w-4 h-4 mr-2" />
+                  Enter {chakra.name} Module
                 </Button>
                 
-                <Button 
-                  variant="outline" 
-                  onClick={handleOpenJournal}
-                  className="flex-1"
-                  style={{ borderColor: chakra.color, color: chakra.color }}
-                >
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Open Journal
-                </Button>
+                {/* Secondary Actions */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button 
+                    onClick={handleStartPractice}
+                    variant="outline"
+                    className="flex-1"
+                    style={{ borderColor: chakra.color, color: chakra.color }}
+                    disabled={!bell.isUnlocked}
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    {bell.isCompleted ? "Practice Again" : "Start Practice"}
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={handleOpenJournal}
+                    className="flex-1"
+                    style={{ borderColor: chakra.color, color: chakra.color }}
+                  >
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    Open Journal
+                  </Button>
+                </div>
               </div>
 
               {/* Progress Note */}
