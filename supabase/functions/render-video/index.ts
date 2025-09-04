@@ -24,16 +24,44 @@ serve(async (req) => {
     // Get content plan first to generate EDL
     const { data: plan, error: planError } = await supabase
       .from('content_plans')
-      .select(`
-        *,
-        content_blocks(*)
-      `)
+      .select('*')
       .eq('id', planId)
       .single()
 
     if (planError || !plan) {
-      throw new Error('Content plan not found')
+      throw new Error(`Content plan not found: ${planError?.message || 'Plan does not exist'}`)
     }
+
+    console.log('Retrieved plan:', { 
+      id: plan.id, 
+      outline: plan.outline, 
+      script_md: plan.script_md?.length || 0 
+    })
+
+    // Extract content blocks from outline or create default structure
+    let contentBlocks = []
+    if (plan.outline && Array.isArray(plan.outline)) {
+      contentBlocks = plan.outline
+    } else if (plan.outline && plan.outline.sections) {
+      contentBlocks = plan.outline.sections
+    } else if (plan.script_md) {
+      // If no outline, create blocks from script
+      const scriptSections = plan.script_md.split('\n\n').filter(section => section.trim())
+      contentBlocks = scriptSections.map((section, index) => ({
+        id: `section-${index}`,
+        type: 'text',
+        content: section.trim()
+      }))
+    } else {
+      // Fallback: create a single block
+      contentBlocks = [{
+        id: 'default-block',
+        type: 'text',
+        content: plan.intent || 'Default content block'
+      }]
+    }
+
+    console.log(`Processed ${contentBlocks.length} content blocks from plan`)
 
     // Generate Edit Decision List (EDL) from content blocks
     const edl = {
@@ -43,17 +71,17 @@ serve(async (req) => {
       tracks: [
         {
           type: "video",
-          clips: plan.content_blocks?.map((block: any, index: number) => ({
-            id: block.id,
-            type: block.type,
+          clips: contentBlocks.map((block: any, index: number) => ({
+            id: block.id || `block-${index}`,
+            type: block.type || 'text',
             startTime: index * 5000, // 5 seconds per block
             duration: 5000,
-            content: block.content,
+            content: block.content || block.text || 'Content block',
             transitions: {
               in: index === 0 ? "fade" : "cut",
-              out: index === plan.content_blocks.length - 1 ? "fade" : "cut"
+              out: index === contentBlocks.length - 1 ? "fade" : "cut"
             }
-          })) || []
+          }))
         },
         {
           type: "audio",
@@ -62,16 +90,16 @@ serve(async (req) => {
       ],
       metadata: {
         createdAt: new Date().toISOString(),
-        planTitle: plan.title,
-        blockCount: plan.content_blocks?.length || 0
+        planTitle: plan.intent || 'Video Plan',
+        blockCount: contentBlocks.length,
+        planId: plan.id
       }
     }
 
     // Calculate total duration
-    edl.totalDuration = (plan.content_blocks?.length || 0) * 5000
+    edl.totalDuration = contentBlocks.length * 5000
 
     console.log('Generated EDL:', JSON.stringify(edl, null, 2))
-    console.log('Plan data:', { id: planId, title: plan.title, blocksCount: plan.content_blocks?.length })
 
     // Validate EDL before insertion
     const edlString = JSON.stringify(edl)
@@ -95,13 +123,13 @@ serve(async (req) => {
       throw new Error(`Failed to create render job: ${createError.message}`)
     }
 
-    console.log(`Created render job ${renderJob.id} with EDL containing ${plan.content_blocks?.length || 0} blocks`)
+    console.log(`Created render job ${renderJob.id} with EDL containing ${contentBlocks.length} blocks`)
 
     const startTime = Date.now()
 
     // Simulate video rendering process
-    console.log(`Rendering video for plan: ${plan.title}`)
-    console.log(`Processing ${plan.content_blocks?.length || 0} content blocks with preset ${preset}`)
+    console.log(`Rendering video for plan: ${plan.intent || 'Unknown Plan'}`)
+    console.log(`Processing ${contentBlocks.length} content blocks with preset ${preset}`)
     
     // In a real implementation, this would:
     // 1. Parse the EDL to understand the editing timeline
@@ -111,7 +139,7 @@ serve(async (req) => {
     // 5. Upload to storage
     
     // For now, simulate processing time based on content complexity
-    const processingTime = Math.max(3000, (plan.content_blocks?.length || 1) * 1000)
+    const processingTime = Math.max(3000, contentBlocks.length * 1000)
     await new Promise(resolve => setTimeout(resolve, processingTime))
 
     const finalProcessingTime = Date.now() - startTime
@@ -145,7 +173,7 @@ serve(async (req) => {
           metadata: { 
             preset, 
             quality: 'HD',
-            blockCount: plan.content_blocks?.length || 0,
+            blockCount: contentBlocks.length,
             edlVersion: edl.version
           }
         },
@@ -166,7 +194,7 @@ serve(async (req) => {
         outputPath,
         processingTimeMs: finalProcessingTime,
         edl: edl,
-        blocksProcessed: plan.content_blocks?.length || 0
+        blocksProcessed: contentBlocks.length
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
