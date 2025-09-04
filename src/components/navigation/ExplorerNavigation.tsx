@@ -53,7 +53,7 @@ export function ExplorerNavigation() {
       const { data } = await supabase
         .from('profiles')
         .select('display_name, avatar_url')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .maybeSingle();
       
       setUserProfile(data);

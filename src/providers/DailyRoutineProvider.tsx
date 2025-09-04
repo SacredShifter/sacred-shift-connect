@@ -123,8 +123,8 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
       const { data, error } = await supabase
         .from('profiles')
         .select('display_name, bio')
-        .eq('user_id', user.id)
-        .single();
+        .eq('id', user.id)
+        .maybeSingle();
       
       if (error) throw error;
       

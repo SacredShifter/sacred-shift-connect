@@ -35,20 +35,7 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
   };
 
   const handleBellClick = (chakra: EnhancedChakraData, bell: ModuleBell) => {
-    // Navigate to the module if it has a direct path
-    if (bell.moduleId.startsWith('/')) {
-      navigate(bell.moduleId);
-      return;
-    }
-
-    // Otherwise, navigate to the first available module for this chakra
-    const chakraPaths = moduleToChakraMapping[chakra.id];
-    if (chakraPaths && chakraPaths.length > 0) {
-      navigate(chakraPaths[0]);
-      return;
-    }
-
-    // Fallback: show modal with details
+    // Show modal with details for bell interactions
     setSelectedChakra(chakra);
     setSelectedBell(bell);
     setShowDetailModal(true);
