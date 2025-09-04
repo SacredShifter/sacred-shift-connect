@@ -108,18 +108,20 @@ export const TaoFlowProvider: React.FC<TaoFlowProviderProps> = ({ children }) =>
     return 'wuWei';
   };
 
-  // API methods
+  // API methods - EVERYTHING IS UNLOCKED NOW
   const isUnlocked = (modulePath: string): boolean => {
-    return isModuleUnlocked(modulePath, progress);
+    return true; // No more restrictions!
   };
 
   const getUnlockedModulesForStage = (stage: TaoStage): TaoModule[] => {
-    return getUnlockedModules(stage, progress);
+    // Return ALL modules for the stage - no restrictions
+    return getUnlockedModules(stage, { ...progress, breathSessions: 999, journalEntries: 999, meditationMinutes: 999, circleParticipation: 999, codeEntries: 999 });
   };
 
   const getAllUnlockedModules = (): TaoModule[] => {
     const stages: TaoStage[] = ['wuWei', 'yinYang', 'advancedCeremony', 'returnToSilence'];
-    return stages.flatMap(stage => getUnlockedModules(stage, progress));
+    // Return ALL modules from all stages - complete freedom
+    return stages.flatMap(stage => getUnlockedModules(stage, { ...progress, breathSessions: 999, journalEntries: 999, meditationMinutes: 999, circleParticipation: 999, codeEntries: 999 }));
   };
 
   const updateProgress = (updates: Partial<TaoProgress>) => {

@@ -6,6 +6,7 @@ import { useTaoFlowProgress } from '@/hooks/useTaoFlowProgress';
 import { ChakraPortal } from './ChakraPortal';
 import { BambooChimeGarden } from './BambooChimeGarden';
 import { ChakraAudioSystem } from './ChakraAudioSystem';
+import { ProgressGuidance } from '@/components/navigation/ProgressGuidance';
 import { chakraData } from '@/data/chakraData';
 import { taoFlowConfig, TaoModule } from '@/config/taoFlowConfig';
 
@@ -43,29 +44,31 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
   const [viewMode, setViewMode] = useState<'portals' | 'garden'>('portals');
   const { getAllUnlockedModules, isModuleUnlocked } = useTaoFlowProgress();
   
-  // Get all unlocked modules
-  const unlockedModules = getAllUnlockedModules();
+  // Get all available modules - NO RESTRICTIONS
+  const allModules = getAllUnlockedModules();
   
-  // Organize modules by chakra - ALWAYS show all 7 chakras regardless of unlock status
+  // Organize modules by chakra - ALL CHAKRAS ARE ACCESSIBLE
   const chakraModules = useMemo(() => {
     const organized = chakraData.map((chakra) => {
       const chakraId = chakra.id.replace('Chakra', '').toLowerCase();
       const modulePaths = moduleToChakraMapping[chakraId as keyof typeof moduleToChakraMapping] || [];
       
+      // Show ALL modules for each chakra - find them in the config rather than just unlocked ones
       const availableModules = modulePaths
-        .map(path => unlockedModules.find(m => m.path === path))
+        .map(path => allModules.find(m => m.path === path))
         .filter((module): module is TaoModule => module !== undefined);
         
       return {
         ...chakra,
         modules: availableModules,
-        isUnlocked: true // FORCE all chakras to show - this is the sacred journey
+        isUnlocked: true, // ALL chakras are always accessible
+        isRecommended: chakraId === 'root' || chakraId === 'heart' // Suggest starting points
       };
     });
     
     // Always show all 7 chakras in the sacred journey - Crown to Root order
     return organized.reverse(); // Reverse to start with Crown at top
-  }, [unlockedModules]);
+  }, [allModules]);
 
   return (
     <div className={`relative w-full h-full bg-background overflow-hidden ${className}`}>
@@ -108,17 +111,25 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
         className="w-full h-full"
       >
         {viewMode === 'portals' ? (
-          <div className="flex flex-col items-center justify-center min-h-screen py-8 px-4">
-            <div className="max-w-md w-full space-y-6">
-              {chakraModules.map((chakra, index) => (
-                <ChakraPortal
-                  key={chakra.id}
-                  chakra={chakra}
-                  modules={chakra.modules}
-                  isUnlocked={chakra.isUnlocked}
-                  delay={index * 0.1}
-                />
-              ))}
+          <div className="relative min-h-screen bg-gradient-to-b from-background via-background/95 to-background">
+            {/* Progress Guidance */}
+            <div className="pt-6 px-4">
+              <ProgressGuidance />
+            </div>
+            
+            <div className="flex flex-col items-center justify-center min-h-screen py-8 px-4">
+              <div className="max-w-md w-full space-y-6">
+                {chakraModules.map((chakra, index) => (
+                  <ChakraPortal
+                    key={chakra.id}
+                    chakra={chakra}
+                    modules={chakra.modules}
+                    isUnlocked={true}
+                    isRecommended={chakra.isRecommended}
+                    delay={index * 0.1}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         ) : (

@@ -1,12 +1,15 @@
 import React, { useRef, useState } from 'react';
-import { useFrame, ThreeEvent } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import { useNavigate } from 'react-router-dom';
-import { Mesh, Group, Vector3 } from 'three';
-import { ChakraData } from '@/data/chakraData';
+import { Group } from 'three';
 import { TaoModule } from '@/config/taoFlowConfig';
 
-interface ChakraModuleData extends ChakraData {
+interface ChakraModuleData {
+  id: string;
+  name: string;
+  color: string;
+  frequency: string;
   modules: TaoModule[];
   isUnlocked: boolean;
 }
@@ -17,176 +20,152 @@ interface BambooChimeProps {
   rotation: [number, number, number];
 }
 
-export const BambooChime: React.FC<BambooChimeProps> = ({ 
-  chakra, 
-  position, 
-  rotation 
+export const BambooChime: React.FC<BambooChimeProps> = ({
+  chakra,
+  position,
+  rotation
 }) => {
   const navigate = useNavigate();
   const groupRef = useRef<Group>(null);
-  const chimeRef = useRef<Mesh>(null);
+  const chimeRef = useRef<Group>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isSwaying, setIsSwaying] = useState(false);
 
+  // Ambient swaying animation
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
     
     const time = clock.getElapsedTime();
     
-    // Gentle ambient sway
+    // Ambient swaying
     const ambientSway = Math.sin(time * 0.5) * 0.02;
-    groupRef.current.rotation.z = ambientSway;
+    const ambientRotation = Math.sin(time * 0.3) * 0.05;
     
-    // Enhanced sway when hovered or recently interacted
-    if (isSwaying || isHovered) {
-      const swayIntensity = isHovered ? 0.2 : 0.1;
-      const swayFreq = isHovered ? 3 : 1.5;
-      groupRef.current.rotation.z += Math.sin(time * swayFreq) * swayIntensity;
+    // Interactive swaying when hovered or clicked
+    const interactiveSway = (isHovered || isSwaying) ? Math.sin(time * 3) * 0.1 : 0;
+    
+    groupRef.current.rotation.z = ambientSway + interactiveSway;
+    groupRef.current.rotation.x = ambientRotation;
+    
+    if (chimeRef.current) {
+      chimeRef.current.rotation.y = Math.sin(time * 2) * 0.03;
     }
   });
 
-  const handleClick = (event: ThreeEvent<MouseEvent>) => {
-    event.stopPropagation();
+  const handleClick = () => {
+    // Always allow access - no restrictions!
     
-    if (!chakra.isUnlocked || chakra.modules.length === 0) return;
-    
-    // Navigate to first available module
-    const targetModule = chakra.modules[0];
-    navigate(targetModule.path);
-    
-    // Trigger swaying animation
-    setIsSwaying(true);
-    setTimeout(() => setIsSwaying(false), 2000);
-    
-    // Emit chime selection event
-    window.dispatchEvent(new CustomEvent('chakra-bell', {
-      detail: { 
-        chakraId: chakra.id,
-        frequency: chakra.frequency,
-        modulePath: targetModule.path,
-        type: 'selection'
-      }
-    }));
+    if (chakra.modules.length > 0) {
+      const targetModule = chakra.modules[0];
+      navigate(targetModule.path);
+      
+      // Trigger swaying animation
+      setIsSwaying(true);
+      setTimeout(() => setIsSwaying(false), 2000);
+      
+      // Emit chime event
+      window.dispatchEvent(new CustomEvent('chakra-bell', {
+        detail: { 
+          chakraId: chakra.id,
+          frequency: chakra.frequency,
+          modulePath: targetModule.path,
+          type: 'selection'
+        }
+      }));
+    }
   };
 
   const handlePointerEnter = () => {
     setIsHovered(true);
     
-    if (chakra.isUnlocked) {
-      // Emit hover chime event
-      window.dispatchEvent(new CustomEvent('chakra-bell', {
-        detail: { 
-          chakraId: chakra.id,
-          frequency: chakra.frequency,
-          modulePath: chakra.modules[0]?.path || chakra.name,
-          type: 'hover'
-        }
-      }));
-    }
+    // Emit hover chime event
+    window.dispatchEvent(new CustomEvent('chakra-bell', {
+      detail: { 
+        chakraId: chakra.id,
+        frequency: chakra.frequency,
+        modulePath: chakra.modules[0]?.path || chakra.name,
+        type: 'hover'
+      }
+    }));
   };
 
   const handlePointerLeave = () => {
     setIsHovered(false);
   };
 
+  // Calculate color hue from chakra color
+  const hue = chakra.color.includes('hsl') 
+    ? parseInt(chakra.color.match(/\d+/)?.[0] || '0')
+    : 280;
+
   return (
     <group 
-      ref={groupRef} 
-      position={position} 
+      ref={groupRef}
+      position={position}
       rotation={rotation}
-      onClick={handleClick}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
+      onClick={handleClick}
     >
       {/* Bamboo hanging rod */}
-      <mesh position={[0, 2, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 0.8, 8]} />
+      <mesh position={[0, 0.5, 0]}>
+        <cylinderGeometry args={[0.02, 0.02, 1, 8]} />
+        <meshStandardMaterial color="#8B4513" />
+      </mesh>
+
+      {/* Hanging strings */}
+      {Array.from({ length: 5 }, (_, i) => (
+        <mesh key={`string-${i}`} position={[0, 0, (i - 2) * 0.2]}>
+          <cylinderGeometry args={[0.002, 0.002, 0.8, 4]} />
+          <meshBasicMaterial color="#654321" />
+        </mesh>
+      ))}
+
+      {/* Chime tubes */}
+      <group ref={chimeRef}>
+        {Array.from({ length: 5 }, (_, i) => (
+          <mesh key={`chime-${i}`} position={[0, -0.3, (i - 2) * 0.2]}>
+            <cylinderGeometry args={[0.015, 0.015, 0.4 + i * 0.1, 8]} />
+            <meshStandardMaterial 
+              color={`hsl(${hue}, 70%, ${60 + i * 5}%)`}
+              metalness={0.3}
+              roughness={0.2}
+              emissive={isHovered 
+                ? `hsl(${hue}, 70%, 20%)`
+                : 'black'
+              }
+              emissiveIntensity={0.3}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Central striker */}
+      <mesh position={[0, -0.1, 0]}>
+        <sphereGeometry args={[0.03, 8, 8]} />
         <meshStandardMaterial 
-          color="#8B7355" 
+          color="#CD853F" 
+          metalness={0.1}
           roughness={0.8}
         />
       </mesh>
-      
-      {/* Hanging strings */}
-      {Array.from({ length: 5 }, (_, i) => (
-        <mesh 
-          key={`string-${i}`}
-          position={[
-            (i - 2) * 0.15,
-            1.2 - i * 0.2,
-            0
-          ]}
-        >
-          <cylinderGeometry args={[0.005, 0.005, 0.8 + i * 0.3, 6]} />
-          <meshStandardMaterial 
-            color="#F5F5DC" 
-            transparent 
-            opacity={0.7}
-          />
-        </mesh>
-      ))}
-      
-      {/* Chime tubes */}
-      {Array.from({ length: 5 }, (_, i) => {
-        const tubeHeight = 0.8 + i * 0.3;
-        const hue = chakra.color.match(/\d+/)?.[0] || '0';
-        
-        return (
-          <mesh 
-            key={`chime-${i}`}
-            ref={i === 2 ? chimeRef : undefined}
-            position={[
-              (i - 2) * 0.15,
-              0.8 - tubeHeight / 2,
-              0
-            ]}
-          >
-            <cylinderGeometry args={[0.02, 0.02, tubeHeight, 12]} />
-            <meshStandardMaterial 
-              color={chakra.isUnlocked 
-                ? `hsl(${hue}, 70%, ${60 + i * 5}%)`
-                : "#666666"
-              }
-              metalness={0.6}
-              roughness={0.2}
-              emissive={chakra.isUnlocked && isHovered 
-                ? `hsl(${hue}, 70%, 20%)`
-                : "#000000"
-              }
-              emissiveIntensity={isHovered ? 0.2 : 0}
-            />
-          </mesh>
-        );
-      })}
-      
-      {/* Central striker */}
-      <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[0.04, 8, 8]} />
-        <meshStandardMaterial 
-          color="#CD853F"
-          roughness={0.6}
-        />
-      </mesh>
-      
+
       {/* Chakra label */}
-      {chakra.isUnlocked && (
-        <Text
-          position={[0, -1.5, 0]}
-          fontSize={0.2}
-          color={chakra.isUnlocked ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))"}
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Inter-Regular.woff"
-        >
-          {chakra.name}
-        </Text>
-      )}
-      
+      <Text
+        position={[0, -1.8, 0]}
+        fontSize={0.2}
+        color="hsl(var(--foreground))"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {chakra.name}
+      </Text>
+
       {/* Module count indicator */}
-      {chakra.isUnlocked && chakra.modules.length > 0 && (
+      {chakra.modules.length > 0 && (
         <Text
-          position={[0, -1.8, 0]}
-          fontSize={0.12}
+          position={[0, -2.1, 0]}
+          fontSize={0.15}
           color="hsl(var(--muted-foreground))"
           anchorX="center"
           anchorY="middle"
@@ -196,8 +175,8 @@ export const BambooChime: React.FC<BambooChimeProps> = ({
         </Text>
       )}
       
-      {/* Energy field for unlocked chimes */}
-      {chakra.isUnlocked && isHovered && (
+      {/* Energy field for all chimes */}
+      {isHovered && (
         <mesh>
           <sphereGeometry args={[1.5, 16, 16]} />
           <meshBasicMaterial 

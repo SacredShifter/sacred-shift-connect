@@ -10,9 +10,11 @@ interface ChakraPortalProps {
   chakra: ChakraData & { 
     modules: TaoModule[];
     isUnlocked: boolean;
+    isRecommended?: boolean;
   };
   modules: TaoModule[];
   isUnlocked: boolean;
+  isRecommended?: boolean;
   delay: number;
 }
 
@@ -20,6 +22,7 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
   chakra, 
   modules, 
   isUnlocked,
+  isRecommended = false,
   delay 
 }) => {
   const navigate = useNavigate();
@@ -27,7 +30,7 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
   const [selectedModule, setSelectedModule] = useState<TaoModule | null>(null);
 
   const handlePortalClick = () => {
-    if (!isUnlocked || modules.length === 0) return;
+    // Always allow access - no restrictions!
     
     if (modules.length === 1) {
       // Single module - navigate directly
@@ -67,7 +70,7 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
   const handleHover = (hovering: boolean) => {
     setIsHovered(hovering);
     
-    if (hovering && isUnlocked) {
+    if (hovering) {
       // Emit hover bell event
       window.dispatchEvent(new CustomEvent('chakra-bell', {
         detail: { 
@@ -94,14 +97,12 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
       <Card 
         className={`
           relative overflow-hidden cursor-pointer transition-all duration-500
-          ${isUnlocked 
-            ? 'border-primary/30 hover:border-primary/60 bg-card/10 hover:bg-card/20' 
-            : 'border-muted/20 bg-card/5 cursor-not-allowed opacity-50'
-          }
-          ${isHovered && isUnlocked ? 'shadow-xl' : 'shadow-md'}
+          border-primary/30 hover:border-primary/60 bg-card/10 hover:bg-card/20
+          ${isRecommended ? 'ring-2 ring-primary/50 shadow-lg' : ''}
+          ${isHovered ? 'shadow-xl' : 'shadow-md'}
         `}
         style={{
-          boxShadow: isHovered && isUnlocked 
+          boxShadow: isHovered 
             ? `0 0 30px hsl(${chakra.color.replace('hsl(', '').replace(')', '')} / 0.3)` 
             : undefined
         }}
@@ -113,7 +114,7 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
         <div 
           className={`
             absolute inset-0 transition-opacity duration-500
-            ${isHovered && isUnlocked ? 'opacity-20' : 'opacity-0'}
+            ${isHovered ? 'opacity-20' : 'opacity-0'}
           `}
           style={{
             background: `radial-gradient(circle at center, ${chakra.color} 0%, transparent 70%)`
@@ -122,9 +123,9 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
 
         {/* Breathing Animation */}
         <motion.div
-          animate={isUnlocked ? {
+          animate={{
             scale: [1, 1.02, 1],
-          } : {}}
+          }}
           transition={{
             duration: 4,
             repeat: Infinity,
@@ -135,7 +136,7 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
           {/* Chakra Symbol */}
           <div className="flex items-center justify-center mb-4">
             <motion.div
-              animate={isHovered && isUnlocked ? {
+              animate={isHovered ? {
                 rotate: [0, 360],
                 scale: [1, 1.1, 1]
               } : {}}
@@ -146,14 +147,12 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
               className={`
                 w-16 h-16 rounded-full flex items-center justify-center
                 border-2 transition-colors duration-300
-                ${isUnlocked 
-                  ? 'border-primary/40 bg-primary/10' 
-                  : 'border-muted/30 bg-muted/5'
-                }
+                border-primary/40 bg-primary/10
+                ${isRecommended ? 'animate-pulse' : ''}
               `}
               style={{
-                borderColor: isUnlocked ? chakra.color : undefined,
-                backgroundColor: isUnlocked ? `${chakra.color}20` : undefined
+                borderColor: chakra.color,
+                backgroundColor: `${chakra.color}20`
               }}
             >
               <span className="text-2xl font-sacred">
@@ -172,9 +171,10 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
             </p>
             
             {/* Module Count */}
-            {isUnlocked && modules.length > 0 && (
+            {modules.length > 0 && (
               <p className="text-xs text-primary/70">
                 {modules.length} {modules.length === 1 ? 'module' : 'modules'} available
+                {isRecommended && <span className="text-primary font-medium"> • Recommended</span>}
               </p>
             )}
             
@@ -186,8 +186,7 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
         </motion.div>
 
         {/* Portal Energy Rings */}
-        {isUnlocked && (
-          <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none">
             {Array.from({ length: 3 }, (_, i) => (
               <motion.div
                 key={i}
@@ -209,7 +208,6 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
               />
             ))}
           </div>
-        )}
       </Card>
 
       {/* Module Selection Modal */}
