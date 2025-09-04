@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { ChakraColumn } from './ChakraColumn';
 import { ChakraProgressSpine } from './ChakraProgressSpine';
 import { ParticleField } from './ParticleField';
@@ -16,12 +17,38 @@ interface BambooChimeGardenProps {
 export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({ 
   chakraModules 
 }) => {
+  const navigate = useNavigate();
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedChakra, setSelectedChakra] = useState<EnhancedChakraData | null>(null);
   const [selectedBell, setSelectedBell] = useState<ModuleBell | null>(null);
   const [strikeRipples, setStrikeRipples] = useState<Array<{ id: string; chakraId: string; position: [number, number, number] }>>([]);
 
+  // Mapping modules to chakras based on energetic alignment
+  const moduleToChakraMapping: Record<string, string[]> = {
+    root: ['/dashboard', '/profile', '/settings', '/privacy', '/support'],
+    sacral: ['/journal', '/messages', '/library'],
+    'solar-plexus': ['/gaa', '/learning-3d', '/labs'],
+    heart: ['/circles', '/grove', '/feed', '/collective'],
+    throat: ['/codex', '/breath', '/help', '/guidebook'],
+    'third-eye': ['/meditation', '/constellation', '/shift'],
+    crown: ['/journey-map', '/liberation', '/ai-admin', '/hardware/pulse-fi']
+  };
+
   const handleBellClick = (chakra: EnhancedChakraData, bell: ModuleBell) => {
+    // Navigate to the module if it has a direct path
+    if (bell.moduleId.startsWith('/')) {
+      navigate(bell.moduleId);
+      return;
+    }
+
+    // Otherwise, navigate to the first available module for this chakra
+    const chakraPaths = moduleToChakraMapping[chakra.id];
+    if (chakraPaths && chakraPaths.length > 0) {
+      navigate(chakraPaths[0]);
+      return;
+    }
+
+    // Fallback: show modal with details
     setSelectedChakra(chakra);
     setSelectedBell(bell);
     setShowDetailModal(true);
@@ -196,7 +223,7 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
           <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-1 rounded">Reorganized</span>
         </p>
         <p className="mb-2">Chakras align vertically from Root to Crown. Each bell represents one frequency.</p>
-        <p className="text-xs opacity-80">Hover bells for frequency info, click for detailed lessons. Watch ripples flow upward as you progress.</p>
+        <p className="text-xs opacity-80">Hover bells for frequency info, click to navigate to modules. Watch ripples flow upward as you progress.</p>
       </motion.div>
 
       {/* Progress Summary */}
