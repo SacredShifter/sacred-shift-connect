@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Star, Grid3X3, List, Table } from 'lucide-react';
+import { Sparkles, Star, List } from 'lucide-react';
 import { CodexConstellation } from './CodexConstellation';
 import { CodexList } from './CodexList';
 
-type ViewMode = 'constellation' | 'list' | 'table' | 'grid';
+type ViewMode = 'constellation' | 'list';
 
 export const PersonalCodexView: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('constellation');
@@ -19,8 +19,6 @@ export const PersonalCodexView: React.FC = () => {
           </div>
         );
       case 'list':
-      case 'table':
-      case 'grid':
         return <CodexList />;
       default:
         return <CodexConstellation />;
@@ -61,24 +59,6 @@ export const PersonalCodexView: React.FC = () => {
         >
           <List className="h-4 w-4" />
           List
-        </Button>
-        <Button
-          variant={viewMode === 'table' ? 'default' : 'outline'}
-          onClick={() => setViewMode('table')}
-          size="sm"
-          className="gap-2"
-        >
-          <Table className="h-4 w-4" />
-          Table
-        </Button>
-        <Button
-          variant={viewMode === 'grid' ? 'default' : 'outline'}
-          onClick={() => setViewMode('grid')}
-          size="sm"
-          className="gap-2"
-        >
-          <Grid3X3 className="h-4 w-4" />
-          Grid
         </Button>
       </div>
 

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Star, Grid3X3, List, Table, Sparkles } from 'lucide-react';
+import { Users, Star, List } from 'lucide-react';
 import { CollectiveCodexConstellation } from '@/components/CollectiveAkashicConstellation/CollectiveCodexConstellation';
 import { CollectiveCodexList } from '@/components/CollectiveCodex/CollectiveCodexList';
 import { useRegistryOfResonance } from '@/hooks/useRegistryOfResonance';
 
-type ViewMode = 'constellation' | 'list' | 'table' | 'grid';
+type ViewMode = 'constellation' | 'list';
 
 export const CollectiveCodexView: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('constellation');
@@ -26,8 +26,6 @@ export const CollectiveCodexView: React.FC = () => {
           </div>
         );
       case 'list':
-      case 'table':
-      case 'grid':
         return <CollectiveCodexList />;
       default:
         return (
@@ -75,24 +73,6 @@ export const CollectiveCodexView: React.FC = () => {
         >
           <List className="h-4 w-4" />
           List
-        </Button>
-        <Button
-          variant={viewMode === 'table' ? 'default' : 'outline'}
-          onClick={() => setViewMode('table')}
-          size="sm"
-          className="gap-2"
-        >
-          <Table className="h-4 w-4" />
-          Table
-        </Button>
-        <Button
-          variant={viewMode === 'grid' ? 'default' : 'outline'}
-          onClick={() => setViewMode('grid')}
-          size="sm"
-          className="gap-2"
-        >
-          <Grid3X3 className="h-4 w-4" />
-          Grid
         </Button>
       </div>
 
