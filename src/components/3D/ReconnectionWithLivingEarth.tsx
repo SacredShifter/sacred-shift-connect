@@ -66,7 +66,6 @@ const BreathingEarth = () => {
           color="#2d5a3d"
           anchorX="center"
           anchorY="middle"
-          font="/fonts/Inter-Bold.woff"
         >
           {breathPhase === 'inhale' ? 'Gaia Inhales' : 'Gaia Exhales'}
         </Text>

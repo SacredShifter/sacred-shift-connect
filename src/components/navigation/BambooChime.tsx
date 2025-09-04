@@ -169,7 +169,6 @@ export const BambooChime: React.FC<BambooChimeProps> = ({
           color="hsl(var(--muted-foreground))"
           anchorX="center"
           anchorY="middle"
-          font="/fonts/Inter-Regular.woff"
         >
           {chakra.modules.length} {chakra.modules.length === 1 ? 'module' : 'modules'}
         </Text>

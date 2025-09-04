@@ -178,7 +178,6 @@ export const Expansion = forwardRef<ExpansionHandles, {}>((props, ref) => {
             color="#FFFFFF"
             anchorX="center"
             anchorY="middle"
-            font="/fonts/Inter-Regular.woff"
             maxWidth={8}
             textAlign="center"
           >
@@ -200,7 +199,6 @@ export const Expansion = forwardRef<ExpansionHandles, {}>((props, ref) => {
         color="#FFFFFF"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/Inter-Medium.woff"
         maxWidth={15}
         textAlign="center"
       >

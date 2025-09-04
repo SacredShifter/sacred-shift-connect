@@ -72,7 +72,6 @@ export const Crossing: React.FC = () => {
         color="#FFFFFF"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/Inter-Medium.woff"
         maxWidth={12}
         textAlign="center"
       >

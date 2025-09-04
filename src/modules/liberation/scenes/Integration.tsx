@@ -89,7 +89,6 @@ export const Integration: React.FC = () => {
         color="#FFFFFF"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/Inter-Medium.woff"
         maxWidth={12}
         textAlign="center"
       >
@@ -104,7 +103,6 @@ export const Integration: React.FC = () => {
         color="#CCCCCC"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/Inter-Regular.woff"
         maxWidth={15}
         textAlign="center"
       >
