@@ -23,9 +23,8 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
     <AuthProvider>
       <NavigationProvider>
-        {/* TaoFlow system temporarily disabled for production 
         <TaoFlowProvider>
-          <TaoFlowNotificationProvider>*/}
+          <TaoFlowNotificationProvider>
             <BiofeedbackProvider>
               <CosmicDataProvider>
                 <PresetProvider>
@@ -40,8 +39,8 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
                 </PresetProvider>
               </CosmicDataProvider>
             </BiofeedbackProvider>
-        {/* </TaoFlowNotificationProvider>
-        </TaoFlowProvider>*/}
+          </TaoFlowNotificationProvider>
+        </TaoFlowProvider>
       </NavigationProvider>
     </AuthProvider>
   );
