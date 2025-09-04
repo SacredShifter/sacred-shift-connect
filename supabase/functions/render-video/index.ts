@@ -21,24 +21,7 @@ serve(async (req) => {
     
     console.log(`Starting video render for plan ${planId} with preset ${preset}`)
 
-    // Create render job
-    const { data: renderJob, error: createError } = await supabase
-      .from('render_jobs')
-      .insert({
-        plan_id: planId,
-        preset: preset,
-        status: 'processing'
-      })
-      .select()
-      .single()
-
-    if (createError) {
-      throw new Error(`Failed to create render job: ${createError.message}`)
-    }
-
-    console.log(`Created render job ${renderJob.id}`)
-
-    // Get content plan with related data
+    // Get content plan first to generate EDL
     const { data: plan, error: planError } = await supabase
       .from('content_plans')
       .select(`
@@ -49,33 +32,80 @@ serve(async (req) => {
       .single()
 
     if (planError || !plan) {
-      await supabase
-        .from('render_jobs')
-        .update({ 
-          status: 'failed', 
-          error: 'Content plan not found',
-          completed_at: new Date().toISOString()
-        })
-        .eq('id', renderJob.id)
-      
       throw new Error('Content plan not found')
     }
+
+    // Generate Edit Decision List (EDL) from content blocks
+    const edl = {
+      version: "1.0",
+      preset: preset,
+      totalDuration: 0,
+      tracks: [
+        {
+          type: "video",
+          clips: plan.content_blocks?.map((block: any, index: number) => ({
+            id: block.id,
+            type: block.type,
+            startTime: index * 5000, // 5 seconds per block
+            duration: 5000,
+            content: block.content,
+            transitions: {
+              in: index === 0 ? "fade" : "cut",
+              out: index === plan.content_blocks.length - 1 ? "fade" : "cut"
+            }
+          })) || []
+        },
+        {
+          type: "audio",
+          clips: []
+        }
+      ],
+      metadata: {
+        createdAt: new Date().toISOString(),
+        planTitle: plan.title,
+        blockCount: plan.content_blocks?.length || 0
+      }
+    }
+
+    // Calculate total duration
+    edl.totalDuration = (plan.content_blocks?.length || 0) * 5000
+
+    // Create render job with EDL
+    const { data: renderJob, error: createError } = await supabase
+      .from('render_jobs')
+      .insert({
+        plan_id: planId,
+        preset: preset,
+        edl: JSON.stringify(edl),
+        status: 'processing'
+      })
+      .select()
+      .single()
+
+    if (createError) {
+      throw new Error(`Failed to create render job: ${createError.message}`)
+    }
+
+    console.log(`Created render job ${renderJob.id} with EDL containing ${plan.content_blocks?.length || 0} blocks`)
 
     const startTime = Date.now()
 
     // Simulate video rendering process
     console.log(`Rendering video for plan: ${plan.title}`)
+    console.log(`Processing ${plan.content_blocks?.length || 0} content blocks with preset ${preset}`)
     
     // In a real implementation, this would:
-    // 1. Generate video segments from content blocks
-    // 2. Combine audio, video, and transitions
-    // 3. Apply the selected preset (aspect ratio, duration, etc.)
-    // 4. Upload to storage
+    // 1. Parse the EDL to understand the editing timeline
+    // 2. Generate video segments from content blocks according to EDL
+    // 3. Combine audio, video, and transitions as specified in EDL
+    // 4. Apply the selected preset (aspect ratio, duration, etc.)
+    // 5. Upload to storage
     
-    // For now, simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 5000))
+    // For now, simulate processing time based on content complexity
+    const processingTime = Math.max(3000, (plan.content_blocks?.length || 1) * 1000)
+    await new Promise(resolve => setTimeout(resolve, processingTime))
 
-    const processingTime = Date.now() - startTime
+    const finalProcessingTime = Date.now() - startTime
     const outputPath = `renders/${renderJob.id}/output.mp4`
     const thumbPath = `renders/${renderJob.id}/thumb.jpg`
 
@@ -86,7 +116,7 @@ serve(async (req) => {
         status: 'completed',
         output_paths: [outputPath],
         completed_at: new Date().toISOString(),
-        processing_time_ms: processingTime
+        render_time_ms: finalProcessingTime
       })
       .eq('id', renderJob.id)
 
@@ -102,8 +132,13 @@ serve(async (req) => {
           plan_id: planId,
           type: 'video',
           storage_path: outputPath,
-          duration_ms: 60000, // Mock 60 second video
-          metadata: { preset, quality: 'HD' }
+          duration_ms: edl.totalDuration,
+          metadata: { 
+            preset, 
+            quality: 'HD',
+            blockCount: plan.content_blocks?.length || 0,
+            edlVersion: edl.version
+          }
         },
         {
           plan_id: planId,
@@ -120,7 +155,9 @@ serve(async (req) => {
         success: true,
         renderJobId: renderJob.id,
         outputPath,
-        processingTimeMs: processingTime
+        processingTimeMs: finalProcessingTime,
+        edl: edl,
+        blocksProcessed: plan.content_blocks?.length || 0
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
