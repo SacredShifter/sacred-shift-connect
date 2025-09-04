@@ -11074,6 +11074,36 @@ export type Database = {
           },
         ]
       }
+      pulse_fi_notifications: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          status: string
+          subscription_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          status?: string
+          subscription_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          status?: string
+          subscription_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       quantum_messages: {
         Row: {
           consciousness_state: string

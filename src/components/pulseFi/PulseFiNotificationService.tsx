@@ -32,15 +32,17 @@ export const PulseFiNotificationService = ({ variant = 'inline', onComplete }: P
     setIsLoading(true);
 
     try {
-      // Store subscription in Supabase
+      // Store subscription in Supabase - temporary workaround for missing types
       const { error } = await supabase
-        .from('pulse_fi_notifications')
-        .insert({
+        .from('pulse_fi_notifications' as any)
+        .upsert({
           email,
           user_id: user?.id || null,
           subscription_type: 'launch_notification',
-          status: 'active',
-          created_at: new Date().toISOString()
+          status: 'active'
+        }, {
+          onConflict: 'email',
+          ignoreDuplicates: false
         });
 
       if (error) throw error;
