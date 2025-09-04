@@ -161,16 +161,18 @@ export const BambooChime: React.FC<BambooChimeProps> = ({
         {chakra.name}
       </Text>
 
-      {/* Module count indicator */}
+      {/* Module list */}
       {chakra.modules.length > 0 && (
         <Text
           position={[0, -2.1, 0]}
-          fontSize={0.15}
+          fontSize={0.12}
           color="hsl(var(--muted-foreground))"
           anchorX="center"
           anchorY="middle"
+          maxWidth={3}
+          textAlign="center"
         >
-          {chakra.modules.length} {chakra.modules.length === 1 ? 'module' : 'modules'}
+          {chakra.modules.map(module => module.name).join(' • ')}
         </Text>
       )}
       
