@@ -46,8 +46,8 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
         }
       }));
     } else {
-      // Multiple modules - show selection
-      setSelectedModule(modules[0]); // For now, select first
+      // Multiple modules - show selection modal
+      setSelectedModule(modules[0]); // This triggers the modal
     }
   };
 
@@ -215,30 +215,41 @@ export const ChakraPortal: React.FC<ChakraPortalProps> = ({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center"
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setSelectedModule(null)}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-card border border-border rounded-2xl p-6 max-w-sm mx-4"
+            className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full"
             onClick={e => e.stopPropagation()}
           >
-            <h3 className="font-sacred text-lg mb-4 text-center">
-              Choose Your Path
+            <h3 className="font-sacred text-lg mb-2 text-center text-foreground">
+              {chakra.name} Modules
             </h3>
-            <div className="space-y-2">
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              Choose your path of exploration
+            </p>
+            <div className="space-y-3">
               {modules.map((module) => (
                 <Button
                   key={module.path}
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full justify-start h-auto p-4"
                   onClick={() => handleModuleSelect(module)}
                 >
-                  {module.name}
+                  <span className="font-medium">{module.name}</span>
                 </Button>
               ))}
             </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setSelectedModule(null)}
+              className="w-full mt-4"
+            >
+              Cancel
+            </Button>
           </motion.div>
         </motion.div>
       )}

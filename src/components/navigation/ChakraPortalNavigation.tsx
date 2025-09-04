@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ToggleLeft, ToggleRight } from 'lucide-react';
+import { ToggleLeft, ToggleRight, ArrowLeft, Home } from 'lucide-react';
 import { useTaoFlowProgress } from '@/hooks/useTaoFlowProgress';
 import { ChakraPortal } from './ChakraPortal';
 import { BambooChimeGarden } from './BambooChimeGarden';
@@ -41,6 +42,7 @@ const moduleToChakraMapping = {
 export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({ 
   className 
 }) => {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'portals' | 'garden'>('garden');
   const { getAllUnlockedModules, isModuleUnlocked } = useTaoFlowProgress();
   
@@ -79,32 +81,51 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
     <div className={`relative w-full h-full bg-background overflow-hidden ${className}`}>
       <ChakraAudioSystem />
       
-      {/* View Toggle */}
-      <motion.div 
-        className="absolute top-4 right-4 z-20"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setViewMode(prev => prev === 'portals' ? 'garden' : 'portals')}
-          className="bg-background/20 backdrop-blur-sm border-primary/20 hover:border-primary/40 text-foreground"
+      {/* Navigation Controls */}
+      <div className="absolute top-4 left-4 right-4 z-20 flex justify-between items-center">
+        {/* Back Navigation */}
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
         >
-          {viewMode === 'portals' ? (
-            <>
-              <ToggleRight className="w-4 h-4 mr-2" />
-              Garden View
-            </>
-          ) : (
-            <>
-              <ToggleLeft className="w-4 h-4 mr-2" />
-              Portal View
-            </>
-          )}
-        </Button>
-      </motion.div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/protected')}
+            className="bg-background/20 backdrop-blur-sm border-primary/20 hover:border-primary/40 text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Explorer
+          </Button>
+        </motion.div>
+
+        {/* View Toggle */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setViewMode(prev => prev === 'portals' ? 'garden' : 'portals')}
+            className="bg-background/20 backdrop-blur-sm border-primary/20 hover:border-primary/40 text-foreground"
+          >
+            {viewMode === 'portals' ? (
+              <>
+                <ToggleRight className="w-4 h-4 mr-2" />
+                Garden View
+              </>
+            ) : (
+              <>
+                <ToggleLeft className="w-4 h-4 mr-2" />
+                Portal View
+              </>
+            )}
+          </Button>
+        </motion.div>
+      </div>
 
       {/* Navigation Views */}
       <motion.div
@@ -116,13 +137,13 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
         className="w-full h-full"
       >
         {viewMode === 'portals' ? (
-          <div className="relative min-h-screen bg-gradient-to-b from-background via-background/95 to-background">
-            <div className="flex flex-col items-center py-8 px-4 space-y-6">
+          <div className="relative min-h-screen bg-gradient-to-b from-background via-background/95 to-background overflow-y-auto">
+            <div className="flex flex-col items-center py-20 px-4 space-y-6">
               <div className="pt-6">
                 <ProgressGuidance />
               </div>
               
-              <div className="max-w-md w-full space-y-6">
+              <div className="max-w-md w-full space-y-6 pb-20">
                 {chakraModules.map((chakra, index) => (
                   <ChakraPortal
                     key={chakra.id}
