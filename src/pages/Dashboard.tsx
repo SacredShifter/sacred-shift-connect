@@ -44,6 +44,7 @@ import { GAAControlPanel } from '@/components/dashboard/GAAControlPanel';
 import { GAAQuickAccess } from '@/components/dashboard/GAAQuickAccess';
 import { GAADashboard } from '@/components/gaa/GAADashboard';
 import { useDailyRoutine } from '@/providers/DailyRoutineProvider';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -142,21 +143,30 @@ const Dashboard = () => {
           <TabsContent value="journey" className="space-y-8">
             {/* Top Action Strip */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-primary mb-1">Resonance Chain</h3>
-                      <div className="flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-primary" />
-                        <span className="text-2xl font-bold">5</span>
-                        <span className="text-sm text-muted-foreground">day streak</span>
-                      </div>
-                    </div>
-                    <Target className="w-8 h-8 text-primary/60" />
-                  </div>
-                </CardContent>
-              </Card>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 cursor-help">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-semibold text-primary mb-1">Resonance Chain</h3>
+                            <div className="flex items-center gap-2">
+                              <Zap className="w-4 h-4 text-primary" />
+                              <span className="text-2xl font-bold">{profile?.streak_days || 0}</span>
+                              <span className="text-sm text-muted-foreground">day streak</span>
+                            </div>
+                          </div>
+                          <Target className="w-8 h-8 text-primary/60" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">Your Resonance Chain tracks consecutive days of spiritual practice. Each day you complete a sacred practice, your chain grows stronger, amplifying your connection to higher consciousness.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
               <Card className="bg-gradient-to-r from-accent/10 to-accent/5 border-accent/20">
                 <CardContent className="p-6">
@@ -221,7 +231,7 @@ const Dashboard = () => {
                       </div>
                     </Link>
 
-                    <Link to="/grove" className="block">
+                    <Link to="/daily-practice" className="block">
                       <div className="p-4 rounded-lg bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20 hover:border-emerald-500/40 transition-all cursor-pointer">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -274,12 +284,6 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* GAA Engine Section - Consolidated */}
-            <div className="mb-8">
-              <GlowWrapper elementId="gaa-engine">
-                <GAAQuickAccess />
-              </GlowWrapper>
-            </div>
 
             {/* Community & Support Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
