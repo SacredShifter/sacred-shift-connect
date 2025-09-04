@@ -46,9 +46,8 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
   // Get all unlocked modules
   const unlockedModules = getAllUnlockedModules();
   
-  // Organize modules by chakra - show ALL chakras for full sacred journey
+  // Organize modules by chakra - ALWAYS show all 7 chakras regardless of unlock status
   const chakraModules = useMemo(() => {
-    console.log('Total chakras in data:', chakraData.length);
     const organized = chakraData.map((chakra) => {
       const chakraId = chakra.id.replace('Chakra', '').toLowerCase();
       const modulePaths = moduleToChakraMapping[chakraId as keyof typeof moduleToChakraMapping] || [];
@@ -57,24 +56,13 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
         .map(path => unlockedModules.find(m => m.path === path))
         .filter((module): module is TaoModule => module !== undefined);
         
-      const result = {
+      return {
         ...chakra,
         modules: availableModules,
-        isUnlocked: availableModules.length > 0
+        isUnlocked: true // FORCE all chakras to show - this is the sacred journey
       };
-      
-      console.log(`Chakra ${chakra.name}:`, {
-        id: chakra.id,
-        chakraId,
-        modulePaths,
-        availableModules: availableModules.length,
-        isUnlocked: result.isUnlocked
-      });
-      
-      return result;
     });
     
-    console.log('Final organized chakras:', organized.length);
     // Always show all 7 chakras in the sacred journey - Crown to Root order
     return organized.reverse(); // Reverse to start with Crown at top
   }, [unlockedModules]);
