@@ -78,7 +78,7 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
   }, [allModules, isModuleUnlocked]);
 
   return (
-    <div className={`relative w-full h-full bg-background overflow-hidden ${className}`}>
+    <div className={`relative w-full h-full bg-background ${className}`}>
       <ChakraAudioSystem />
       
       {/* Navigation Controls */}
@@ -137,8 +137,8 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
         className="w-full h-full"
       >
         {viewMode === 'portals' ? (
-          <div className="relative min-h-screen bg-gradient-to-b from-background via-background/95 to-background overflow-y-auto">
-            <div className="flex flex-col items-center py-20 px-4 space-y-6">
+          <div className="relative h-full bg-gradient-to-b from-background via-background/95 to-background overflow-y-auto">
+            <div className="flex flex-col items-center py-20 px-4 space-y-6 min-h-full">
               <div className="pt-6">
                 <ProgressGuidance />
               </div>
