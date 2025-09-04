@@ -80,7 +80,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Creative Flow',
         frequency: 417,
         note: 'D#',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -88,7 +88,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Emotional Mastery',
         frequency: 432,
         note: 'E',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -96,7 +96,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Sacred Pleasure',
         frequency: 480,
         note: 'F',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       }
     ]
@@ -119,7 +119,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Personal Power',
         frequency: 528,
         note: 'F#',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -127,7 +127,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Divine Will',
         frequency: 540,
         note: 'G',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -135,7 +135,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Radiant Confidence',
         frequency: 600,
         note: 'G#',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       }
     ]
@@ -158,7 +158,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Universal Love',
         frequency: 639,
         note: 'A',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -166,7 +166,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Infinite Compassion',
         frequency: 672,
         note: 'A#',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -174,7 +174,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Sacred Forgiveness',
         frequency: 720,
         note: 'B',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -182,7 +182,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Heart Expansion',
         frequency: 768,
         note: 'C (higher)',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       }
     ]
@@ -205,7 +205,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Sacred Communication',
         frequency: 741,
         note: 'C#',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -213,7 +213,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Divine Truth',
         frequency: 768,
         note: 'D',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -221,7 +221,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Authentic Expression',
         frequency: 800,
         note: 'D#',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -229,7 +229,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Sound Healing',
         frequency: 852,
         note: 'E (higher)',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       }
     ]
@@ -252,7 +252,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Intuitive Awakening',
         frequency: 852,
         note: 'F',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -260,7 +260,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Inner Vision',
         frequency: 936,
         note: 'F#',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       }
     ]
@@ -283,7 +283,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Divine Transcendence',
         frequency: 963,
         note: 'G',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       },
       {
@@ -291,7 +291,7 @@ export const enhancedChakraData: EnhancedChakraData[] = [
         moduleName: 'Cosmic Connection',
         frequency: 1080,
         note: 'A',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       }
     ]
