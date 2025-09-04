@@ -81,15 +81,27 @@ export const PulseFiComingSoon: React.FC<PulseFiComingSoonProps> = ({
     },
     {
       name: "Guardian Pack",
-      price: "$399 AUD",
+      price: "$299 AUD",
       description: "Multi-room awareness",
       features: ["Full home coverage", "Security monitoring", "Advanced motion tracking", "Family health insights"]
     },
     {
       name: "GAA Pro",
-      price: "$499 AUD", 
+      price: "$399 AUD", 
       description: "Direct GAA Engine link",
-      features: ["Biofeedback integration", "Real-time audio adaptation", "Advanced coherence analytics", "Community resonance"]
+      features: [
+        "Heart rate monitoring", 
+        "Breath tracking", 
+        "Basic presence detection",
+        "Full home coverage", 
+        "Security monitoring", 
+        "Advanced motion tracking", 
+        "Family health insights",
+        "Biofeedback integration", 
+        "Real-time audio adaptation", 
+        "Advanced coherence analytics", 
+        "Community resonance"
+      ]
     }
   ];
 
