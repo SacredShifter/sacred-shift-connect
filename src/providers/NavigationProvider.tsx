@@ -16,9 +16,10 @@ interface NavigationProviderProps {
 
 export const NavigationProvider = ({ children }: NavigationProviderProps) => {
   const [mode, setMode] = useState<NavigationMode>(() => {
-    // Load from localStorage or default to explorer for immediate access
-    const saved = localStorage.getItem('navigation-mode');
-    return (saved as NavigationMode) || 'explorer';
+    // Force explorer mode for all users - clear any cached sacred-journey mode
+    localStorage.removeItem('navigation-mode');
+    localStorage.setItem('navigation-mode', 'explorer');
+    return 'explorer';
   });
 
   useEffect(() => {
