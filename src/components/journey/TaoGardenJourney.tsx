@@ -370,18 +370,17 @@ export const TaoGardenJourney: React.FC = () => {
     if (!reflectionModule || !reflection.trim()) return;
     
     try {
-      // Save to Supabase (tao_journey_reflections table)
+      // Save to Supabase using personal_codex_entries
       const { supabase } = await import('@/integrations/supabase/client');
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        await supabase.from('tao_journey_reflections').insert({
+        await supabase.from('personal_codex_entries').insert({
           user_id: user.id,
-          module_path: reflectionModule.path,
-          module_name: reflectionModule.name,
-          reflection_text: reflection,
-          bell_frequency: reflectionModule.frequency || 440,
-          journey_stage: progress.currentStage
+          title: `${reflectionModule.name} - Garden Bell Reflection`,
+          content: reflection,
+          entry_type: 'tao_journey',
+          tags: [reflectionModule.path, progress.currentStage, 'garden_bell']
         });
       }
     } catch (error) {

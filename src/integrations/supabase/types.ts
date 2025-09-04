@@ -15081,6 +15081,42 @@ export type Database = {
         }
         Relationships: []
       }
+      tao_journey_reflections: {
+        Row: {
+          bell_frequency: number | null
+          created_at: string
+          id: string
+          journey_stage: string
+          module_name: string
+          module_path: string
+          reflection_text: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bell_frequency?: number | null
+          created_at?: string
+          id?: string
+          journey_stage: string
+          module_name: string
+          module_path: string
+          reflection_text: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bell_frequency?: number | null
+          created_at?: string
+          id?: string
+          journey_stage?: string
+          module_name?: string
+          module_path?: string
+          reflection_text?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tarot_archetypes: {
         Row: {
           affirmation: string | null
