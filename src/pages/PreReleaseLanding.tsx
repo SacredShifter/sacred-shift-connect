@@ -156,24 +156,25 @@ const PreReleaseLanding: React.FC = () => {
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-4xl mx-auto text-center space-y-8">
           
-          {/* Logo and Title */}
+          {/* Logo */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="space-y-4"
+            className="space-y-6"
           >
-            <div className="flex justify-center mb-6">
-              <img 
+            <div className="flex justify-center">
+              <motion.img 
                 src="https://mikltjgbvxrxndtszorb.supabase.co/storage/v1/object/public/sacred-assets/uploads/Logo-MainSacredShifter-removebg-preview%20(1).png"
                 alt="Sacred Shifter" 
-                className="h-24 w-auto invert"
+                className="h-48 lg:h-64 w-auto invert drop-shadow-2xl"
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 1, delay: 0.2 }}
+                whileHover={{ scale: 1.05 }}
               />
             </div>
-            <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-              Sacred Shifter
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto font-light">
               A quantum leap in consciousness awaits. The Portal opens at the sacred moment.
             </p>
           </motion.div>
