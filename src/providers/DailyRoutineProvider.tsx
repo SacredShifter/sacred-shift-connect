@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export type DailyMode = 'guided' | 'free';
 export type TimeOfDay = 'morning' | 'evening' | 'anytime';
@@ -111,17 +113,99 @@ const SACRED_FLOW: DailyFlow = {
 
 export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useAuth();
+
+  // Fetch user profile for personalization
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('display_name, bio')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) throw error;
+      
+      // Generate synthetic personalization based on existing data
+      return {
+        consciousness_level: 'intermediate', // Default level
+        aura_signature: 'balanced', // Default aura
+        streak_days: 0 // Will be updated from actual tracking
+      };
+    },
+    enabled: !!user
+  });
+
+  // Generate personalized flow based on user profile
+  const getPersonalizedFlow = (): DailyFlow => {
+    const baseFlow = { ...SACRED_FLOW };
+    
+    if (!userProfile) return baseFlow;
+
+    // Stagger practices based on consciousness level
+    const level = userProfile.consciousness_level || 'beginner';
+    const aura = userProfile.aura_signature || 'neutral';
+    
+    // Adjust practices based on user level and aura
+    const personalizedSteps = baseFlow.steps.map((step, index) => {
+      let estimatedMinutes = step.estimatedMinutes;
+      let description = step.description;
+      
+      // Advanced users get longer, more intense practices
+      if (level === 'advanced') {
+        estimatedMinutes = Math.round(estimatedMinutes * 1.5);
+        description += ' (Advanced variation: deepen your awareness and extend the practice)';
+      } else if (level === 'beginner') {
+        estimatedMinutes = Math.max(5, Math.round(estimatedMinutes * 0.7));
+        description += ' (Gentle approach: start small and build gradually)';
+      }
+      
+      // Aura-based customization
+      if (aura === 'fiery' && step.id === 'nervous-system-clearing') {
+        description += ' Focus on cooling breath techniques to balance your natural intensity.';
+      } else if (aura === 'grounded' && step.id === 'energy-literacy') {
+        description += ' Trust your earthy intuition and physical sensations as guides.';
+      } else if (aura === 'ethereal' && step.id === 'sovereignty-anchoring') {
+        description += ' Ground this practice through physical movement or touch.';
+      }
+      
+      return {
+        ...step,
+        estimatedMinutes,
+        description
+      };
+    });
+
+    return {
+      ...baseFlow,
+      steps: personalizedSteps
+    };
+  };
+
   const [state, setState] = useState<DailyRoutineState>({
     mode: 'guided',
-    currentFlow: SACRED_FLOW,
+    currentFlow: getPersonalizedFlow(),
     todaysStep: null,
-    streak: 0,
+    streak: 0, // Will be calculated from actual meditation/breath sessions
     longestStreak: 0,
     completedToday: false,
     morningPrompt: null,
     eveningReflection: null,
     badges: []
   });
+
+  // Update flow when profile loads
+  useEffect(() => {
+    if (userProfile) {
+      setState(prev => ({
+        ...prev,
+        currentFlow: getPersonalizedFlow(),
+        streak: 0 // Static for now, could be enhanced with real streak calculation
+      }));
+    }
+  }, [userProfile]);
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -133,14 +217,14 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
           setState(prev => ({
             ...prev,
             ...parsed,
-            currentFlow: SACRED_FLOW // Always use fresh flow data
+            currentFlow: getPersonalizedFlow() // Always use personalized flow
           }));
         } catch (error) {
           console.warn('Failed to parse daily routine state:', error);
         }
       }
     }
-  }, [user?.id]);
+  }, [user?.id, userProfile]);
 
   // Save state to localStorage
   const saveState = (newState: DailyRoutineState) => {
@@ -154,14 +238,42 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
     setState(newState);
   };
 
-  // Get today's step based on mode and progress
+  // Get today's step based on mode and progress (staggered approach)
   const getTodaysStep = (): DailyStep | null => {
     if (!state.currentFlow) return null;
     
+    // Staggered approach: only show one practice at a time based on time of day
+    const now = new Date();
+    const hour = now.getHours();
+    
+    // Morning practices (6 AM - 12 PM)
+    if (hour >= 6 && hour < 12) {
+      const morningStep = state.currentFlow.steps.find(step => 
+        step.timeOfDay === 'morning' && !step.completed
+      );
+      if (morningStep) return morningStep;
+    }
+    
+    // Afternoon/anytime practices (12 PM - 6 PM) 
+    if (hour >= 12 && hour < 18) {
+      const anytimeStep = state.currentFlow.steps.find(step => 
+        step.timeOfDay === 'anytime' && !step.completed
+      );
+      if (anytimeStep) return anytimeStep;
+    }
+    
+    // Evening practices (6 PM - 11 PM)
+    if (hour >= 18 && hour < 23) {
+      const eveningStep = state.currentFlow.steps.find(step => 
+        step.timeOfDay === 'evening' && !step.completed
+      );
+      if (eveningStep) return eveningStep;
+    }
+    
+    // Fallback: guided mode shows current step, free mode shows next incomplete
     if (state.mode === 'guided') {
       return state.currentFlow.steps[state.currentFlow.currentStepIndex] || null;
     } else {
-      // Free mode: suggest next incomplete step or first step
       const incompleteStep = state.currentFlow.steps.find(step => !step.completed);
       return incompleteStep || state.currentFlow.steps[0];
     }
