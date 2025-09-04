@@ -37,27 +37,27 @@ export const enhancedChakraData: EnhancedChakraData[] = [
     theme: 'Grounding, safety, physical vitality',
     bells: [
       {
-        moduleId: 'foundation',
-        moduleName: 'Sacred Foundation',
+        moduleId: 'dashboard',
+        moduleName: 'Dashboard',
         frequency: 256,
         note: 'Low C',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'security',
-        moduleName: 'Inner Security',
+        moduleId: 'profile',
+        moduleName: 'Profile',
         frequency: 288,
         note: 'C#',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'vitality',
-        moduleName: 'Physical Vitality',
+        moduleId: 'settings',
+        moduleName: 'Settings',
         frequency: 396,
         note: 'D',
-        isUnlocked: false,
+        isUnlocked: true,
         isCompleted: false
       }
     ]
@@ -76,24 +76,24 @@ export const enhancedChakraData: EnhancedChakraData[] = [
     theme: 'Creativity, sexuality, emotional flow',
     bells: [
       {
-        moduleId: 'creativity',
-        moduleName: 'Creative Flow',
+        moduleId: 'journal',
+        moduleName: 'Journal',
         frequency: 417,
         note: 'D#',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'emotions',
-        moduleName: 'Emotional Mastery',
+        moduleId: 'messages',
+        moduleName: 'Messages',
         frequency: 432,
         note: 'E',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'pleasure',
-        moduleName: 'Sacred Pleasure',
+        moduleId: 'library',
+        moduleName: 'Library',
         frequency: 480,
         note: 'F',
         isUnlocked: true,
@@ -115,24 +115,24 @@ export const enhancedChakraData: EnhancedChakraData[] = [
     theme: 'Power, will, identity, self-confidence',
     bells: [
       {
-        moduleId: 'power',
-        moduleName: 'Personal Power',
+        moduleId: 'gaa',
+        moduleName: 'Guardian Administration',
         frequency: 528,
         note: 'F#',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'will',
-        moduleName: 'Divine Will',
+        moduleId: 'learning-3d',
+        moduleName: '3D Learning',
         frequency: 540,
         note: 'G',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'confidence',
-        moduleName: 'Radiant Confidence',
+        moduleId: 'labs',
+        moduleName: 'Labs',
         frequency: 600,
         note: 'G#',
         isUnlocked: true,
@@ -154,32 +154,32 @@ export const enhancedChakraData: EnhancedChakraData[] = [
     theme: 'Love, compassion, forgiveness, expansion',
     bells: [
       {
-        moduleId: 'love',
-        moduleName: 'Universal Love',
+        moduleId: 'circles',
+        moduleName: 'Circles',
         frequency: 639,
         note: 'A',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'compassion',
-        moduleName: 'Infinite Compassion',
+        moduleId: 'grove',
+        moduleName: 'Grove',
         frequency: 672,
         note: 'A#',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'forgiveness',
-        moduleName: 'Sacred Forgiveness',
+        moduleId: 'feed',
+        moduleName: 'Feed',
         frequency: 720,
         note: 'B',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'expansion',
-        moduleName: 'Heart Expansion',
+        moduleId: 'collective',
+        moduleName: 'Collective',
         frequency: 768,
         note: 'C (higher)',
         isUnlocked: true,
@@ -201,32 +201,32 @@ export const enhancedChakraData: EnhancedChakraData[] = [
     theme: 'Communication, truth, expression, sound',
     bells: [
       {
-        moduleId: 'communication',
-        moduleName: 'Sacred Communication',
+        moduleId: 'codex',
+        moduleName: 'Codex',
         frequency: 741,
         note: 'C#',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'truth',
-        moduleName: 'Divine Truth',
+        moduleId: 'breath',
+        moduleName: 'Breath',
         frequency: 768,
         note: 'D',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'expression',
-        moduleName: 'Authentic Expression',
+        moduleId: 'help',
+        moduleName: 'Help',
         frequency: 800,
         note: 'D#',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'sound',
-        moduleName: 'Sound Healing',
+        moduleId: 'guidebook',
+        moduleName: 'Guidebook',
         frequency: 852,
         note: 'E (higher)',
         isUnlocked: true,
@@ -248,16 +248,16 @@ export const enhancedChakraData: EnhancedChakraData[] = [
     theme: 'Intuition, vision, clarity, insight',
     bells: [
       {
-        moduleId: 'intuition',
-        moduleName: 'Intuitive Awakening',
+        moduleId: 'meditation',
+        moduleName: 'Meditation',
         frequency: 852,
         note: 'F',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'vision',
-        moduleName: 'Inner Vision',
+        moduleId: 'shift',
+        moduleName: 'Shift',
         frequency: 936,
         note: 'F#',
         isUnlocked: true,
@@ -279,16 +279,16 @@ export const enhancedChakraData: EnhancedChakraData[] = [
     theme: 'Oneness, transcendence, cosmic connection',
     bells: [
       {
-        moduleId: 'transcendence',
-        moduleName: 'Divine Transcendence',
+        moduleId: 'journey-map',
+        moduleName: 'Journey Map',
         frequency: 963,
         note: 'G',
         isUnlocked: true,
         isCompleted: false
       },
       {
-        moduleId: 'cosmic',
-        moduleName: 'Cosmic Connection',
+        moduleId: 'liberation',
+        moduleName: 'Liberation',
         frequency: 1080,
         note: 'A',
         isUnlocked: true,
