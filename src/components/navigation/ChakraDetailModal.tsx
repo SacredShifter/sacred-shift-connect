@@ -201,7 +201,7 @@ export const ChakraDetailModal: React.FC<ChakraDetailModalProps> = ({
                   disabled={!bell.isUnlocked}
                 >
                   <Zap className="w-4 h-4 mr-2" />
-                  Enter {chakra.name} Module
+                  Enter {bell.moduleName}
                 </Button>
                 
                 {/* Secondary Actions */}
