@@ -41,7 +41,7 @@ const moduleToChakraMapping = {
 export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({ 
   className 
 }) => {
-  const [viewMode, setViewMode] = useState<'portals' | 'garden'>('portals');
+  const [viewMode, setViewMode] = useState<'portals' | 'garden'>('garden');
   const { getAllUnlockedModules, isModuleUnlocked } = useTaoFlowProgress();
   
   // Get all available modules - NO RESTRICTIONS
@@ -112,12 +112,11 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
       >
         {viewMode === 'portals' ? (
           <div className="relative min-h-screen bg-gradient-to-b from-background via-background/95 to-background">
-            {/* Progress Guidance */}
-            <div className="pt-6 px-4">
-              <ProgressGuidance />
-            </div>
-            
-            <div className="flex flex-col items-center justify-center min-h-screen py-8 px-4">
+            <div className="flex flex-col items-center py-8 px-4 space-y-6">
+              <div className="pt-6">
+                <ProgressGuidance />
+              </div>
+              
               <div className="max-w-md w-full space-y-6">
                 {chakraModules.map((chakra, index) => (
                   <ChakraPortal
