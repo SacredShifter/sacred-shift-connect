@@ -7,6 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Info, 
   Heart, 
@@ -136,116 +137,118 @@ export const MeditationPracticeGuide: React.FC<MeditationPracticeGuideProps> = (
             </div>
           </CardHeader>
           
-          <CardContent className="h-[calc(100%-5rem)] overflow-y-auto">
-            {/* Teaching Progress Indicator */}
-            <div className="mb-6">
-              <TeachingProgressIndicator />
-            </div>
-            
-            <div className="space-y-4">
-              {practices.map((practice, index) => (
-                <motion.div
-                  key={practice.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Collapsible
-                    open={expandedPractice === practice.id}
-                    onOpenChange={(open) => setExpandedPractice(open ? practice.id : '')}
+          <CardContent className="h-[calc(100%-5rem)] p-0">
+            <ScrollArea className="h-full px-6">
+              {/* Teaching Progress Indicator */}
+              <div className="mb-6 mt-6">
+                <TeachingProgressIndicator />
+              </div>
+              
+              <div className="space-y-4 pb-6">
+                {practices.map((practice, index) => (
+                  <motion.div
+                    key={practice.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
                   >
-                    <Card className="bg-card/40 backdrop-blur-sm border border-primary/20 rounded-xl overflow-hidden">
-                      <CollapsibleTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className="w-full px-6 py-4 h-auto hover:bg-primary/5 rounded-none"
-                        >
-                          <div className="flex items-center gap-4 w-full">
-                            <div className={`p-2 rounded-lg bg-gradient-to-br ${practice.color}/20`}>
-                              {practice.icon}
-                            </div>
-                            <div className="text-left flex-1">
-                              <h3 className="font-sacred font-semibold text-lg">{practice.name}</h3>
-                              <p className="text-muted-foreground text-sm">{practice.description}</p>
-                            </div>
-                            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 data-[state=open]:rotate-180" />
-                          </div>
-                        </Button>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent className="px-6 pb-6">
-                        <div className="space-y-6 pt-4">
-                          {/* Benefits Section */}
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <Lightbulb className="w-4 h-4 text-purpose" />
-                              <h4 className="font-semibold text-purpose">Why This Matters</h4>
-                            </div>
-                            <ul className="space-y-2">
-                              {practice.benefits.map((benefit, idx) => (
-                                <li key={idx} className="flex items-start gap-2 text-sm">
-                                  <CheckCircle2 className="w-4 h-4 text-alignment mt-0.5 flex-shrink-0" />
-                                  <span>{benefit}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-
-                          {/* Instructions Section */}
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <Play className="w-4 h-4 text-resonance" />
-                              <h4 className="font-semibold text-resonance">How to Practice</h4>
-                            </div>
-                            <ol className="space-y-2">
-                              {practice.instructions.map((instruction, idx) => (
-                                <li key={idx} className="flex items-start gap-3 text-sm">
-                                  <span className="bg-resonance/20 text-resonance rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">
-                                    {idx + 1}
-                                  </span>
-                                  <span>{instruction}</span>
-                                </li>
-                              ))}
-                            </ol>
-                          </div>
-
-                          {/* Deeper Knowledge Toggle */}
-                          <div className="pt-4 border-t border-border/50">
-                            <Button
-                              onClick={() => toggleTeachings(practice.id)}
-                              variant="outline"
-                              className="w-full mb-3 bg-muted/50 hover:bg-muted"
-                            >
-                              <BookOpen className="w-4 h-4 mr-2" />
-                              {showTeachings[practice.id] ? 'Hide' : 'Show'} Deeper Knowledge
-                            </Button>
-                            
-                            {/* Teaching Layer */}
-                            {showTeachings[practice.id] && meditationTeachings[practice.id] && (
-                              <div className="mb-4">
-                                <TeachingLayer
-                                  content={meditationTeachings[practice.id]}
-                                  moduleId={`meditation-${practice.id}`}
-                                />
+                    <Collapsible
+                      open={expandedPractice === practice.id}
+                      onOpenChange={(open) => setExpandedPractice(open ? practice.id : '')}
+                    >
+                      <Card className="bg-card/40 backdrop-blur-sm border border-primary/20 rounded-xl overflow-hidden">
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="w-full px-6 py-4 h-auto hover:bg-primary/5 rounded-none"
+                          >
+                            <div className="flex items-center gap-4 w-full">
+                              <div className={`p-2 rounded-lg bg-gradient-to-br ${practice.color}/20`}>
+                                {practice.icon}
                               </div>
-                            )}
+                              <div className="text-left flex-1">
+                                <h3 className="font-sacred font-semibold text-lg">{practice.name}</h3>
+                                <p className="text-muted-foreground text-sm">{practice.description}</p>
+                              </div>
+                              <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 data-[state=open]:rotate-180" />
+                            </div>
+                          </Button>
+                        </CollapsibleTrigger>
+                        
+                        <CollapsibleContent className="px-6 pb-6">
+                          <div className="space-y-6 pt-4">
+                            {/* Benefits Section */}
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Lightbulb className="w-4 h-4 text-purpose" />
+                                <h4 className="font-semibold text-purpose">Why This Matters</h4>
+                              </div>
+                              <ul className="space-y-2">
+                                {practice.benefits.map((benefit, idx) => (
+                                  <li key={idx} className="flex items-start gap-2 text-sm">
+                                    <CheckCircle2 className="w-4 h-4 text-alignment mt-0.5 flex-shrink-0" />
+                                    <span>{benefit}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
 
-                            {/* Start Practice Button */}
-                            <Button
-                              onClick={() => handleStartPractice(practice.id)}
-                              className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
-                            >
-                              <Play className="w-4 h-4 mr-2" />
-                              Begin {practice.name}
-                            </Button>
+                            {/* Instructions Section */}
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Play className="w-4 h-4 text-resonance" />
+                                <h4 className="font-semibold text-resonance">How to Practice</h4>
+                              </div>
+                              <ol className="space-y-2">
+                                {practice.instructions.map((instruction, idx) => (
+                                  <li key={idx} className="flex items-start gap-3 text-sm">
+                                    <span className="bg-resonance/20 text-resonance rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">
+                                      {idx + 1}
+                                    </span>
+                                    <span>{instruction}</span>
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
+
+                            {/* Deeper Knowledge Toggle */}
+                            <div className="pt-4 border-t border-border/50">
+                              <Button
+                                onClick={() => toggleTeachings(practice.id)}
+                                variant="outline"
+                                className="w-full mb-3 bg-muted/50 hover:bg-muted"
+                              >
+                                <BookOpen className="w-4 h-4 mr-2" />
+                                {showTeachings[practice.id] ? 'Hide' : 'Show'} Deeper Knowledge
+                              </Button>
+                              
+                              {/* Teaching Layer */}
+                              {showTeachings[practice.id] && meditationTeachings[practice.id] && (
+                                <div className="mb-4">
+                                  <TeachingLayer
+                                    content={meditationTeachings[practice.id]}
+                                    moduleId={`meditation-${practice.id}`}
+                                  />
+                                </div>
+                              )}
+
+                              {/* Start Practice Button */}
+                              <Button
+                                onClick={() => handleStartPractice(practice.id)}
+                                className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
+                              >
+                                <Play className="w-4 h-4 mr-2" />
+                                Begin {practice.name}
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      </CollapsibleContent>
-                    </Card>
-                  </Collapsible>
-                </motion.div>
-              ))}
-            </div>
+                        </CollapsibleContent>
+                      </Card>
+                    </Collapsible>
+                  </motion.div>
+                ))}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
       </motion.div>
