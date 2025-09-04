@@ -91,6 +91,90 @@ export const NAV_CONFIG: NavGroup[] = [
     ]
   },
   {
+    id: "grp-practice",
+    label: "Practice",
+    defaultOpen: true,
+    children: [
+      { 
+        id: "breath", 
+        label: "Breath of Source", 
+        icon: Wind, 
+        path: "/breath",
+        tooltip: "Sacred breathing practices for transformation and consciousness expansion"
+      },
+      { 
+        id: "meditation", 
+        label: "Meditation", 
+        icon: Sparkles, 
+        path: "/meditation",
+        tooltip: "Individual practice and collective consciousness expansion"
+      },
+      { 
+        id: "journal", 
+        label: "Journal", 
+        icon: BookOpen, 
+        path: "/journal",
+        tooltip: "Sacred journaling for inner exploration and reflection"
+      },
+      { 
+        id: "grove", 
+        label: "The Grove", 
+        icon: TreePine, 
+        path: "/grove",
+        tooltip: "Community rituals & ceremonies"
+      },
+      { 
+        id: "gaa", 
+        label: "GAA Engine", 
+        icon: Waves, 
+        path: "/gaa",
+        tooltip: "Geometrically Aligned Audio - Advanced consciousness harmonization technology"
+      },
+      { 
+        id: "learning3d", 
+        label: "3D Learning", 
+        icon: Sparkles, 
+        path: "/learning-3d",
+        tooltip: "Interactive 3D learning modules for consciousness exploration"
+      },
+    ]
+  },
+  {
+    id: "grp-community",
+    label: "Community", 
+    defaultOpen: true,
+    children: [
+      { 
+        id: "circles", 
+        label: "Circles", 
+        icon: Users, 
+        path: "/circles",
+        tooltip: "Deep community engagement and consciousness evolution"
+      },
+      { 
+        id: "messages", 
+        label: "Messages", 
+        icon: MessageCircle, 
+        path: "/messages",
+        tooltip: "Private consciousness communication"
+      },
+      { 
+        id: "codex", 
+        label: "Codex", 
+        icon: Archive, 
+        path: "/codex",
+        tooltip: "Personal & Collective wisdom archives - unified knowledge exploration"
+      },
+      { 
+        id: "mapper", 
+        label: "Consciousness Mapper", 
+        icon: Stars, 
+        path: "/constellation",
+        tooltip: "AI-powered consciousness cartography and pattern recognition"
+      },
+    ]
+  },
+  {
     id: "grp-hardware", 
     label: "Hardware",
     collapsedByDefault: false,
