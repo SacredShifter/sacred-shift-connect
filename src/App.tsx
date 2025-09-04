@@ -10,7 +10,6 @@ import { ToolbarWithComponents } from "@/components/ToolbarWithComponents";
 import { GAADashboard } from "@/components/gaa/GAADashboard";
 import { CosmicVisualization } from "@/components/gaa/CosmicVisualization";
 import { SessionMetrics } from "@/components/gaa/SessionMetrics";
-import { AppProviders } from "@/providers/AppProviders";
 import { TermsOfService } from "@/pages/TermsOfService";
 import { PrivacyPolicy } from "@/pages/PrivacyPolicy";
 import { PrivacySettings } from "@/pages/PrivacySettings";
@@ -118,7 +117,6 @@ function App() {
       <ProductionReadyErrorBoundary>
       <PerformanceMonitor />
       <ErrorBoundary name="Root">
-        <AppProviders>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -218,7 +216,6 @@ function App() {
             </div>
         </SacredScreensaver>
         </TooltipProvider>
-      </AppProviders>
       </ErrorBoundary>
     </ProductionReadyErrorBoundary>
   );
