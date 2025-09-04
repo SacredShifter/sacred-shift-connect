@@ -1,21 +1,16 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, User, BookOpen, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
-import { CodexConstellation } from '@/components/Codex/CodexConstellation';
-import { CodexList } from '@/components/Codex/CodexList';
-import { CollectiveCodexConstellation } from '@/components/CollectiveAkashicConstellation/CollectiveCodexConstellation';
-import { CollectiveCodexList } from '@/components/CollectiveCodex/CollectiveCodexList';
-import { useRegistryOfResonance } from '@/hooks/useRegistryOfResonance';
+import { Users, User, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { SacredInitiationTest } from '@/components/SacredInitiationTest';
 import { TeachingLayer } from '@/components/TeachingLayer';
 import { ALL_MODULE_TEACHINGS } from '@/data/allModuleTeachings';
 import { Button } from '@/components/ui/button';
+import { PersonalCodexView } from '@/components/Codex/PersonalCodexView';
+import { CollectiveCodexView } from '@/components/Codex/CollectiveCodexView';
 
 export default function Codex() {
   const [activeTab, setActiveTab] = useState('personal');
   const [showDeeperKnowledge, setShowDeeperKnowledge] = useState(false);
-  const { entries: collectiveEntries } = useRegistryOfResonance();
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -46,66 +41,11 @@ export default function Codex() {
         </TabsList>
 
         <TabsContent value="personal" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                Personal Sacred Codex
-              </CardTitle>
-              <CardDescription>
-                Your personal collection of insights, revelations, and wisdom gathered on your journey. 
-                Create, organize, and reflect on your spiritual discoveries in both visual constellation and list formats.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Constellation View</h3>
-              <div className="min-h-[400px]">
-                <CodexConstellation />
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">List View</h3>
-              <CodexList />
-            </div>
-          </div>
+          <PersonalCodexView />
         </TabsContent>
 
         <TabsContent value="collective" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                Collective Sacred Codex
-              </CardTitle>
-              <CardDescription>
-                Explore and contribute to the shared wisdom of the Sacred Shifter community. Create, edit, 
-                and discover collective insights, teachings, and revelations.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Constellation View</h3>
-              <div className="min-h-[400px]">
-                <CollectiveCodexConstellation 
-                  entries={collectiveEntries || []}
-                  onEntryClick={(entry) => {
-                    console.log('Collective entry clicked:', entry);
-                  }}
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">List View</h3>
-              <CollectiveCodexList />
-            </div>
-          </div>
+          <CollectiveCodexView />
         </TabsContent>
 
         <TabsContent value="initiation" className="space-y-6">

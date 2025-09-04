@@ -210,7 +210,7 @@ export function CollectiveAkashicConstellation() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [hoveredEntry, setHoveredEntry] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'constellation' | 'grid' | 'fractal'>('constellation');
+  const [viewMode, setViewMode] = useState<'constellation' | 'grid' | 'list' | 'table'>('constellation');
   const [activeTab, setActiveTab] = useState('collective');
 
   const handleTabChange = (value: string) => {
@@ -407,20 +407,22 @@ export function CollectiveAkashicConstellation() {
               Constellation
             </Button>
             <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              onClick={() => setViewMode('grid')}
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              onClick={() => setViewMode('list')}
               size="sm"
+              className="gap-2"
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Grid
+              <Eye className="h-4 w-4" />
+              List
             </Button>
             <Button
-              variant={viewMode === 'fractal' ? 'default' : 'outline'}
-              onClick={() => setViewMode('fractal')}
+              variant={viewMode === 'table' ? 'default' : 'outline'}
+              onClick={() => setViewMode('table')}
               size="sm"
+              className="gap-2"
             >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Fractal
+              <Sparkles className="h-4 w-4" />
+              Table
             </Button>
             <Button onClick={() => setIsModalOpen(true)} className="gap-2 ml-2">
               <Plus className="h-4 w-4" />
@@ -516,13 +518,8 @@ export function CollectiveAkashicConstellation() {
             <Globe className="h-4 w-4 text-primary" />
           </div>
         </motion.div>
-      ) : viewMode === 'fractal' ? (
-        <CollectiveCodexConstellation 
-          entries={filteredEntries}
-          onEntryClick={(entry) => navigate(`/resonance/entries/${entry.id}`)}
-        />
-      ) : (
-        // Enhanced Grid View for Collective
+      ) : viewMode === 'list' || viewMode === 'table' || viewMode === 'grid' ? (
+        // Enhanced Grid/List/Table View for Collective
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEntries.map((entry, index) => {
             const category = COLLECTIVE_ARCHETYPAL_CATEGORIES[entry.entry_type] || COLLECTIVE_ARCHETYPAL_CATEGORIES['Consciousness Threads'];
@@ -615,7 +612,7 @@ export function CollectiveAkashicConstellation() {
             );
           })}
         </div>
-      )}
+      ) : null}
 
       {/* Sacred Collective Entry Modal */}
       <CollectiveAkashicEntryModal
