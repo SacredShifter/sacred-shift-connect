@@ -9,10 +9,14 @@ import { ParticleField } from './ParticleField';
 import { EnhancedChakraData, ModuleBell } from '@/data/enhancedChakraData';
 import { EnhancedChakraAudioSystem } from './EnhancedChakraAudioSystem';
 import { ChakraDetailModal } from './ChakraDetailModal';
+import { InstrumentChimeGarden, InstrumentMode } from './InstrumentChimeGarden';
+import { InstrumentModeToggle } from './InstrumentModeToggle';
 
 interface BambooChimeGardenProps {
   chakraModules: EnhancedChakraData[];
 }
+
+type GardenView = 'traditional' | 'instrument';
 
 export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({ 
   chakraModules 
@@ -22,6 +26,8 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
   const [selectedChakra, setSelectedChakra] = useState<EnhancedChakraData | null>(null);
   const [selectedBell, setSelectedBell] = useState<ModuleBell | null>(null);
   const [strikeRipples, setStrikeRipples] = useState<Array<{ id: string; chakraId: string; position: [number, number, number] }>>([]);
+  const [gardenView, setGardenView] = useState<GardenView>('traditional');
+  const [instrumentMode, setInstrumentMode] = useState<InstrumentMode>('navigation');
 
   // Mapping modules to chakras based on energetic alignment
   const moduleToChakraMapping: Record<string, string[]> = {
@@ -67,8 +73,60 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
       chakra.bells.some(bell => bell.isCompleted)
     ).map(chakra => chakra.id);
   };
+  // Toggle between traditional and instrument views
+  if (gardenView === 'instrument') {
+    return (
+      <div className="relative w-full h-full">
+        {/* Garden View Toggle */}
+        <div className="absolute top-4 left-4 right-4 z-30 flex justify-between items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-background/20 backdrop-blur-sm rounded-xl p-2 border border-primary/20"
+          >
+            <button
+              onClick={() => setGardenView('traditional')}
+              className="flex items-center space-x-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              🎋 Traditional View
+            </button>
+          </motion.div>
+
+          <InstrumentModeToggle
+            currentMode={instrumentMode}
+            onModeChange={setInstrumentMode}
+          />
+        </div>
+
+        <InstrumentChimeGarden
+          chakraModules={chakraModules}
+          mode={instrumentMode}
+          onModeChange={setInstrumentMode}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full h-full">
+      {/* Garden View Toggle */}
+      <div className="absolute top-4 left-4 z-30">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-background/20 backdrop-blur-sm rounded-xl p-2 border border-primary/20"
+        >
+          <button
+            onClick={() => setGardenView('instrument')}
+            className="flex items-center space-x-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            🎶 Instrument View
+          </button>
+        </motion.div>
+      </div>
+
       {/* Chakra Headers - Fixed positioning above 3D canvas */}
       <div className="absolute inset-0 pointer-events-none z-20">
         {chakraModules.map((chakra, index) => {
