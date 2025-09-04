@@ -96,6 +96,8 @@ export const useMirrorJournal = () => {
     if (!user) return null;
 
     try {
+      console.log('🔍 Attempting to update entry:', { id, updates, user_id: user.id });
+      
       const { data, error } = await supabase
         .from('mirror_journal_entries')
         .update(updates)
@@ -104,7 +106,12 @@ export const useMirrorJournal = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      console.log('📝 Update result:', { data, error });
+
+      if (error) {
+        console.error('❌ Update error:', error);
+        throw error;
+      }
 
       setEntries(prev => prev.map(entry => entry.id === id ? data : entry));
       toast({
@@ -114,6 +121,7 @@ export const useMirrorJournal = () => {
 
       return data;
     } catch (err: any) {
+      console.error('💥 Update failed:', err);
       toast({
         title: "Error updating entry",
         description: err.message,
