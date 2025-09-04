@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TaoModule, TaoStage } from '@/config/taoFlowConfig';
 import { useTaoFlowProgress } from '@/hooks/useTaoFlowProgress';
-import { ModuleRevealNotification } from '@/components/TaoFlow/ModuleRevealNotification';
 import { MilestoneCelebration } from '@/components/TaoFlow/MilestoneCelebration';
 
 interface TaoFlowNotificationContextType {
@@ -19,15 +18,11 @@ interface TaoFlowNotificationProviderProps {
 
 export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderProps> = ({ children }) => {
   const navigate = useNavigate();
-  const [revealModule, setRevealModule] = useState<TaoModule | null>(null);
   const [celebrationStage, setCelebrationStage] = useState<TaoStage | null>(null);
-  const [showRevealModal, setShowRevealModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
-  const [justCelebrated, setJustCelebrated] = useState(false);
   
-  const { getAllUnlockedModules, currentStage } = useTaoFlowProgress();
+  const { currentStage } = useTaoFlowProgress();
   const [previousStage, setPreviousStage] = useState<TaoStage>(currentStage);
-  const [previousModuleCount, setPreviousModuleCount] = useState(0);
   const [celebratedStages, setCelebratedStages] = useState<Set<TaoStage>>(new Set());
 
   // Load celebrated stages from localStorage on mount
@@ -50,39 +45,20 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
       setCelebrationStage(currentStage);
       setShowCelebrationModal(true);
       setPreviousStage(currentStage);
-      setJustCelebrated(true);
       
       // Mark this stage as celebrated
       const newCelebratedStages = new Set(celebratedStages);
       newCelebratedStages.add(currentStage);
       setCelebratedStages(newCelebratedStages);
       localStorage.setItem('tao-celebrated-stages', JSON.stringify(Array.from(newCelebratedStages)));
-      
-      // Clear the flag after a delay to allow module reveals later
-      setTimeout(() => setJustCelebrated(false), 3000);
     }
   }, [currentStage, previousStage, celebratedStages]);
 
-  // Track new module unlocks
-  useEffect(() => {
-    const unlockedModules = getAllUnlockedModules();
-    const currentModuleCount = unlockedModules.length;
-    
-    if (currentModuleCount > previousModuleCount && previousModuleCount > 0 && !justCelebrated) {
-      // New module unlocked - find the newest one (but not if we just showed a celebration)
-      const newModule = unlockedModules[unlockedModules.length - 1];
-      if (newModule) {
-        setRevealModule(newModule);
-        setShowRevealModal(true);
-      }
-    }
-    
-    setPreviousModuleCount(currentModuleCount);
-  }, [getAllUnlockedModules, previousModuleCount, justCelebrated]);
+  // MODULE UNLOCK NOTIFICATIONS DISABLED - No more annoying popups!
 
   const showModuleReveal = (module: TaoModule) => {
-    setRevealModule(module);
-    setShowRevealModal(true);
+    // MODULE REVEALS DISABLED - No more popups!
+    console.log('Module reveal disabled:', module.name);
   };
 
   const showMilestoneCelebration = (stage: TaoStage) => {
@@ -91,28 +67,13 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
   };
 
   const hideAllNotifications = () => {
-    setShowRevealModal(false);
     setShowCelebrationModal(false);
-    setRevealModule(null);
     setCelebrationStage(null);
-  };
-
-  const handleRevealClose = () => {
-    setShowRevealModal(false);
-    setRevealModule(null);
   };
 
   const handleCelebrationClose = () => {
     setShowCelebrationModal(false);
     setCelebrationStage(null);
-  };
-
-  const handleExploreModule = () => {
-    if (revealModule?.path) {
-      console.log('Exploring module:', revealModule.path);
-      navigate(revealModule.path);
-      handleRevealClose();
-    }
   };
 
   const handleContinueJourney = () => {
@@ -132,13 +93,7 @@ export const TaoFlowNotificationProvider: React.FC<TaoFlowNotificationProviderPr
     <TaoFlowNotificationContext.Provider value={value}>
       {children}
       
-      {/* Module Reveal Notification */}
-      <ModuleRevealNotification
-        newModule={revealModule}
-        isOpen={showRevealModal}
-        onClose={handleRevealClose}
-        onExplore={handleExploreModule}
-      />
+      {/* Module Reveal Notifications DISABLED - No more annoying popups! */}
 
       {/* Milestone Celebration */}
       <MilestoneCelebration
