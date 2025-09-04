@@ -7,7 +7,7 @@ import { ChakraPortal } from './ChakraPortal';
 import { BambooChimeGarden } from './BambooChimeGarden';
 import { ChakraAudioSystem } from './ChakraAudioSystem';
 import { ProgressGuidance } from '@/components/navigation/ProgressGuidance';
-import { chakraData } from '@/data/chakraData';
+import { enhancedChakraData } from '@/data/enhancedChakraData';
 import { taoFlowConfig, TaoModule } from '@/config/taoFlowConfig';
 
 interface ChakraPortalNavigationProps {
@@ -49,7 +49,7 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
   
   // Organize modules by chakra - ALL CHAKRAS ARE ACCESSIBLE
   const chakraModules = useMemo(() => {
-    const organized = chakraData.map((chakra) => {
+    return enhancedChakraData.map((chakra) => {
       const chakraId = chakra.id.replace('Chakra', '').toLowerCase();
       const modulePaths = moduleToChakraMapping[chakraId as keyof typeof moduleToChakraMapping] || [];
       
@@ -57,18 +57,23 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
       const availableModules = modulePaths
         .map(path => allModules.find(m => m.path === path))
         .filter((module): module is TaoModule => module !== undefined);
+
+      // Update bell unlock status based on available modules
+      const updatedBells = chakra.bells.map(bell => ({
+        ...bell,
+        isUnlocked: true, // For now, unlock all bells
+        isCompleted: isModuleUnlocked(bell.moduleId)
+      }));
         
       return {
         ...chakra,
         modules: availableModules,
+        bells: updatedBells,
         isUnlocked: true, // ALL chakras are always accessible
         isRecommended: chakraId === 'root' || chakraId === 'heart' // Suggest starting points
       };
-    });
-    
-    // Always show all 7 chakras in the sacred journey - Crown to Root order
-    return organized.reverse(); // Reverse to start with Crown at top
-  }, [allModules]);
+    }).reverse(); // Reverse to start with Crown at top
+  }, [allModules, isModuleUnlocked]);
 
   return (
     <div className={`relative w-full h-full bg-background overflow-hidden ${className}`}>
@@ -121,7 +126,24 @@ export const ChakraPortalNavigation: React.FC<ChakraPortalNavigationProps> = ({
                 {chakraModules.map((chakra, index) => (
                   <ChakraPortal
                     key={chakra.id}
-                    chakra={chakra}
+                    chakra={{
+                      id: chakra.id,
+                      name: chakra.name,
+                      sanskrit: chakra.sanskrit,
+                      position: chakra.position,
+                      color: chakra.color,
+                      frequency: chakra.baseFrequency,
+                      element: chakra.element,
+                      description: chakra.description,
+                      qualities: chakra.qualities,
+                      affirmation: chakra.affirmation,
+                      crystals: ['Amethyst', 'Clear Quartz'], // Default values for compatibility
+                      oils: ['Lavender', 'Frankincense'], // Default values for compatibility  
+                      meditation: 'Focus on this chakra energy center', // Default value for compatibility
+                      modules: chakra.modules,
+                      isUnlocked: chakra.isUnlocked,
+                      isRecommended: chakra.isRecommended
+                    }}
                     modules={chakra.modules}
                     isUnlocked={true}
                     isRecommended={chakra.isRecommended}
