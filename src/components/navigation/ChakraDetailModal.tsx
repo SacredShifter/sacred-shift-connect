@@ -23,20 +23,40 @@ export const ChakraDetailModal: React.FC<ChakraDetailModalProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // Mapping modules to chakras based on energetic alignment
-  const moduleToChakraMapping: Record<string, string[]> = {
-    root: ['/dashboard', '/profile', '/settings', '/privacy', '/support'],
-    sacral: ['/journal', '/messages', '/library'],
-    'solar-plexus': ['/gaa', '/learning-3d', '/labs'],
-    heart: ['/circles', '/grove', '/feed', '/collective'],
-    throat: ['/codex', '/breath', '/help', '/guidebook'],
-    'third-eye': ['/meditation', '/constellation', '/shift'],
-    crown: ['/journey-map', '/liberation', '/ai-admin', '/hardware/pulse-fi']
+  // Direct mapping from module IDs to routes
+  const moduleIdToRoute: Record<string, string> = {
+    // Root Chakra
+    'dashboard': '/dashboard',
+    'profile': '/profile', 
+    'settings': '/settings',
+    // Sacral Chakra
+    'journal': '/journal',
+    'messages': '/messages',
+    'library': '/library',
+    // Solar Plexus
+    'gaa': '/gaa',
+    'learning-3d': '/learning-3d',
+    'labs': '/labs',
+    // Heart Chakra
+    'circles': '/circles',
+    'grove': '/grove',
+    'feed': '/feed',
+    'collective': '/collective',
+    // Throat Chakra
+    'codex': '/codex',
+    'breath': '/breath',
+    'help': '/help',
+    'guidebook': '/guidebook',
+    // Third Eye
+    'meditation': '/meditation',
+    'shift': '/shift',
+    // Crown Chakra
+    'journey-map': '/journey-map',
+    'liberation': '/liberation'
   };
 
   const getModuleLink = () => {
-    const chakraPaths = moduleToChakraMapping[chakra.id];
-    return chakraPaths && chakraPaths.length > 0 ? chakraPaths[0] : '/dashboard';
+    return moduleIdToRoute[bell.moduleId] || '/dashboard';
   };
 
   const handleStartPractice = () => {
