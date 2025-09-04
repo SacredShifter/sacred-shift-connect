@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { BambooChime } from './BambooChime';
 import { ParticleField } from './ParticleField';
-import { EnhancedChakraData } from '@/data/enhancedChakraData';
+import { EnhancedChakraData, ModuleBell } from '@/data/enhancedChakraData';
 import { EnhancedChakraAudioSystem } from './EnhancedChakraAudioSystem';
+import { ReflectionModal } from './ReflectionModal';
 
 interface BambooChimeGardenProps {
   chakraModules: EnhancedChakraData[];
@@ -14,6 +15,15 @@ interface BambooChimeGardenProps {
 export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({ 
   chakraModules 
 }) => {
+  const [showReflectionModal, setShowReflectionModal] = useState(false);
+  const [selectedChakra, setSelectedChakra] = useState<EnhancedChakraData | null>(null);
+  const [selectedBell, setSelectedBell] = useState<ModuleBell | null>(null);
+
+  const handleBellClick = (chakra: EnhancedChakraData, bell: ModuleBell) => {
+    setSelectedChakra(chakra);
+    setSelectedBell(bell);
+    setShowReflectionModal(true);
+  };
   return (
     <div className="relative w-full h-full">
       {/* Zen Garden Background */}
@@ -67,6 +77,7 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
               chakra={chakra}
               position={[x, y, z]}
               rotation={[0, angle + Math.PI, 0]}
+              onBellClick={handleBellClick}
             />
           );
         })}
@@ -154,6 +165,20 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
         <p className="mb-2">Each chakra contains multiple practice bells tuned to specific frequencies.</p>
         <p className="text-xs opacity-80">Click individual bells to practice modules and record reflections in your Sacred Journal.</p>
       </motion.div>
+
+      {/* Reflection Modal - Outside Canvas */}
+      {showReflectionModal && selectedChakra && selectedBell && (
+        <ReflectionModal
+          isOpen={showReflectionModal}
+          onClose={() => {
+            setShowReflectionModal(false);
+            setSelectedChakra(null);
+            setSelectedBell(null);
+          }}
+          chakra={selectedChakra}
+          bell={selectedBell}
+        />
+      )}
     </div>
   );
 };

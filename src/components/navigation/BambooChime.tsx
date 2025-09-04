@@ -1,31 +1,29 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import { EnhancedChakraData, ModuleBell } from '@/data/enhancedChakraData';
 import { ChakraBellStrike } from './ChakraBellStrike';
-import { ReflectionModal } from './ReflectionModal';
 
 interface BambooChimeProps {
   chakra: EnhancedChakraData;
   position: [number, number, number];
   rotation: [number, number, number];
+  onBellClick: (chakra: EnhancedChakraData, bell: ModuleBell) => void;
 }
 
 export const BambooChime: React.FC<BambooChimeProps> = ({ 
   chakra, 
   position, 
-  rotation 
+  rotation,
+  onBellClick
 }) => {
   const navigate = useNavigate();
   const groupRef = useRef<THREE.Group>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isSwaying, setIsSwaying] = useState(false);
   const [strikeEffects, setStrikeEffects] = useState<Array<{ id: string; position: [number, number, number]; color: string }>>([]);
-  const [showReflectionModal, setShowReflectionModal] = useState(false);
-  const [selectedBell, setSelectedBell] = useState<ModuleBell | null>(null);
 
   // Ambient and interactive swaying animation
   useFrame(({ clock }) => {
@@ -103,9 +101,8 @@ export const BambooChime: React.FC<BambooChimeProps> = ({
       }
     }));
 
-    // Show reflection modal
-    setSelectedBell(bell);
-    setShowReflectionModal(true);
+    // Trigger modal via parent component
+    onBellClick(chakra, bell);
   }, [chakra, position]);
 
   return (
@@ -249,19 +246,6 @@ export const BambooChime: React.FC<BambooChimeProps> = ({
           </mesh>
         )}
       </group>
-
-      {/* Reflection Modal */}
-      {showReflectionModal && selectedBell && (
-        <ReflectionModal
-          isOpen={showReflectionModal}
-          onClose={() => {
-            setShowReflectionModal(false);
-            setSelectedBell(null);
-          }}
-          chakra={chakra}
-          bell={selectedBell}
-        />
-      )}
     </>
   );
 };
