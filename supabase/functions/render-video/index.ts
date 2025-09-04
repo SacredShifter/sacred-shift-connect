@@ -70,13 +70,22 @@ serve(async (req) => {
     // Calculate total duration
     edl.totalDuration = (plan.content_blocks?.length || 0) * 5000
 
+    console.log('Generated EDL:', JSON.stringify(edl, null, 2))
+    console.log('Plan data:', { id: planId, title: plan.title, blocksCount: plan.content_blocks?.length })
+
+    // Validate EDL before insertion
+    const edlString = JSON.stringify(edl)
+    if (!edlString || edlString === 'null' || edlString === 'undefined') {
+      throw new Error(`Invalid EDL generated: ${edlString}`)
+    }
+
     // Create render job with EDL
     const { data: renderJob, error: createError } = await supabase
       .from('render_jobs')
       .insert({
         plan_id: planId,
         preset: preset,
-        edl: JSON.stringify(edl),
+        edl: edlString,
         status: 'processing'
       })
       .select()
