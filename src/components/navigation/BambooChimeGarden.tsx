@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
-import { motion } from 'framer-motion';
-import { BambooChime } from './BambooChime';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChakraColumn } from './ChakraColumn';
+import { ChakraProgressSpine } from './ChakraProgressSpine';
 import { ParticleField } from './ParticleField';
 import { EnhancedChakraData, ModuleBell } from '@/data/enhancedChakraData';
 import { EnhancedChakraAudioSystem } from './EnhancedChakraAudioSystem';
-import { ReflectionModal } from './ReflectionModal';
+import { ChakraDetailModal } from './ChakraDetailModal';
 
 interface BambooChimeGardenProps {
   chakraModules: EnhancedChakraData[];
@@ -15,17 +16,84 @@ interface BambooChimeGardenProps {
 export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({ 
   chakraModules 
 }) => {
-  const [showReflectionModal, setShowReflectionModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedChakra, setSelectedChakra] = useState<EnhancedChakraData | null>(null);
   const [selectedBell, setSelectedBell] = useState<ModuleBell | null>(null);
+  const [strikeRipples, setStrikeRipples] = useState<Array<{ id: string; chakraId: string; position: [number, number, number] }>>([]);
 
   const handleBellClick = (chakra: EnhancedChakraData, bell: ModuleBell) => {
     setSelectedChakra(chakra);
     setSelectedBell(bell);
-    setShowReflectionModal(true);
+    setShowDetailModal(true);
+    
+    // Create ripple effect
+    const rippleId = Math.random().toString(36).substr(2, 9);
+    setStrikeRipples(prev => [...prev, {
+      id: rippleId,
+      chakraId: chakra.id,
+      position: [0, getChakraYPosition(chakra.id), 0]
+    }]);
+    
+    // Remove ripple after animation
+    setTimeout(() => {
+      setStrikeRipples(prev => prev.filter(r => r.id !== rippleId));
+    }, 2000);
+  };
+
+  // Calculate vertical positions for chakras (Root → Crown)
+  const getChakraYPosition = (chakraId: string) => {
+    const chakraOrder = ['root', 'sacral', 'solar-plexus', 'heart', 'throat', 'third-eye', 'crown'];
+    const index = chakraOrder.indexOf(chakraId);
+    return (index - 3) * 2.5; // Center heart chakra at 0, spread 2.5 units apart
+  };
+
+  // Get completed chakras for progress tracking
+  const getCompletedChakras = () => {
+    return chakraModules.filter(chakra => 
+      chakra.bells.some(bell => bell.isCompleted)
+    ).map(chakra => chakra.id);
   };
   return (
     <div className="relative w-full h-full">
+      {/* Chakra Headers - Fixed positioning above 3D canvas */}
+      <div className="absolute inset-0 pointer-events-none z-20">
+        {chakraModules.map((chakra, index) => {
+          const yPercent = 50 + (getChakraYPosition(chakra.id) / 10) * 30; // Convert 3D Y to screen %
+          const isCompleted = chakra.bells.some(bell => bell.isCompleted);
+          
+          return (
+            <motion.div
+              key={`header-${chakra.id}`}
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.2, duration: 0.8 }}
+              className="absolute left-8"
+              style={{ top: `${yPercent}%`, transform: 'translateY(-50%)' }}
+            >
+              <div 
+                className="flex items-center space-x-3 px-4 py-2 rounded-full bg-background/20 backdrop-blur-sm border"
+                style={{ 
+                  borderColor: chakra.color + '40',
+                  boxShadow: isCompleted ? `0 0 20px ${chakra.color}40` : 'none'
+                }}
+              >
+                <div 
+                  className="w-4 h-4 rounded-full animate-pulse"
+                  style={{ 
+                    backgroundColor: chakra.color,
+                    boxShadow: `0 0 10px ${chakra.color}`
+                  }}
+                />
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">{chakra.name}</h3>
+                  <p className="text-xs text-muted-foreground">{chakra.sanskrit}</p>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
       {/* Zen Garden Background */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -48,60 +116,64 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
         </div>
       </motion.div>
 
-      {/* 3D Enhanced Bamboo Garden */}
+      {/* 3D Vertical Chakra Garden */}
       <Canvas
-        camera={{ position: [0, 2, 10], fov: 50 }}
+        camera={{ position: [4, 0, 12], fov: 50 }}
         style={{ position: 'absolute', inset: 0 }}
       >
         <Environment preset="dawn" />
-        <ambientLight intensity={0.3} />
-        <pointLight position={[10, 10, 10]} intensity={0.6} />
-        <pointLight position={[-10, 5, -5]} intensity={0.4} color="#9966CC" />
+        <ambientLight intensity={0.4} />
+        <pointLight position={[8, 5, 8]} intensity={0.8} />
+        <pointLight position={[-5, 0, 5]} intensity={0.6} color="#9966CC" />
+        <pointLight position={[0, 8, 0]} intensity={0.5} color="#FFD700" />
         
         {/* Floating Particles */}
-        <ParticleField count={150} radius={12} color="#ffffff" opacity={0.4} speed={0.3} />
-        <ParticleField count={80} radius={8} color="#9966CC" opacity={0.6} speed={0.5} />
-        <ParticleField count={30} radius={15} color="#FFD700" opacity={0.8} speed={1.2} />
+        <ParticleField count={100} radius={15} color="#ffffff" opacity={0.3} speed={0.2} />
+        <ParticleField count={60} radius={20} color="#9966CC" opacity={0.4} speed={0.4} />
+        <ParticleField count={40} radius={25} color="#FFD700" opacity={0.6} speed={0.6} />
 
-        {/* Sacred Bamboo Chimes */}
+        {/* Chakra Progress Spine */}
+        <ChakraProgressSpine 
+          chakras={chakraModules}
+          completedChakras={getCompletedChakras()}
+          getYPosition={getChakraYPosition}
+        />
+
+        {/* Vertical Chakra Columns */}
         {chakraModules.map((chakra, index) => {
-          const angle = (index / chakraModules.length) * Math.PI * 2;
-          const radius = 5;
-          const x = Math.cos(angle) * radius;
-          const z = Math.sin(angle) * radius;
-          const y = (index - chakraModules.length / 2) * 0.4;
+          const yPosition = getChakraYPosition(chakra.id);
           
           return (
-            <BambooChime
+            <ChakraColumn
               key={chakra.id}
               chakra={chakra}
-              position={[x, y, z]}
-              rotation={[0, angle + Math.PI, 0]}
+              position={[0, yPosition, 0]}
               onBellClick={handleBellClick}
+              strikeRipples={strikeRipples.filter(r => r.chakraId === chakra.id)}
             />
           );
         })}
         
-        {/* Sacred Ground */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -4.5, 0]}>
-          <circleGeometry args={[25, 64]} />
+        {/* Sacred Ground Platform */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -10, 0]}>
+          <circleGeometry args={[30, 64]} />
           <meshStandardMaterial 
             color="hsl(var(--muted))" 
             transparent 
-            opacity={0.05}
-            roughness={0.8}
+            opacity={0.08}
+            roughness={0.9}
           />
         </mesh>
         
         <OrbitControls 
           enablePan={false}
-          minDistance={6}
-          maxDistance={12}
+          minDistance={8}
+          maxDistance={20}
           enableDamping
-          dampingFactor={0.05}
-          rotateSpeed={0.5}
-          autoRotate
-          autoRotateSpeed={0.5}
+          dampingFactor={0.08}
+          rotateSpeed={0.3}
+          minPolarAngle={Math.PI / 6}
+          maxPolarAngle={Math.PI - Math.PI / 6}
         />
       </Canvas>
 
@@ -112,73 +184,61 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
         enableNatureSounds={true}
       />
 
-      {/* Chakra Labels Overlay */}
-      {chakraModules.map((chakra, index) => {
-        const angle = (index / chakraModules.length) * Math.PI * 2;
-        const radius = 5;
-        const x = Math.cos(angle) * radius;
-        const z = Math.sin(angle) * radius;
-        
-        // Convert 3D position to screen position (approximate)
-        const screenX = 50 + (x / 10) * 30; // Rough conversion to percentage
-        const screenY = 50 - (z / 10) * 30; // Rough conversion to percentage
-        
-        return (
-          <motion.div
-            key={`label-${chakra.id}`}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5 + index * 0.1, duration: 0.8 }}
-            className="absolute text-center z-10 pointer-events-none"
-            style={{
-              left: `${screenX}%`,
-              top: `${screenY}%`,
-              transform: 'translate(-50%, -50%)'
-            }}
-          >
-            <div className="bg-background/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary/20">
-              <h3 className="text-sm font-medium text-foreground">{chakra.name}</h3>
-              <p className="text-xs text-muted-foreground">{chakra.sanskrit}</p>
-              <div className="text-xs text-primary space-y-1">
-                {chakra.bells.map(bell => (
-                  <div key={bell.moduleId} className={`${bell.isUnlocked ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {bell.moduleName} ({bell.note} - {bell.frequency}Hz)
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        );
-      })}
-
       {/* Enhanced Garden Instructions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.8 }}
+        transition={{ delay: 1.5, duration: 0.8 }}
         className="absolute bottom-6 left-6 text-sm text-muted-foreground bg-background/20 backdrop-blur-sm rounded-xl p-4 max-w-sm"
       >
         <p className="mb-2 font-medium flex items-center">
-          🎋 Sacred Chime Garden
-          <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-1 rounded">Enhanced</span>
+          🎋 Vertical Chime Garden
+          <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-1 rounded">Reorganized</span>
         </p>
-        <p className="mb-2">Each chakra contains multiple practice bells tuned to specific frequencies.</p>
-        <p className="text-xs opacity-80">Click individual bells to practice modules and record reflections in your Sacred Journal.</p>
+        <p className="mb-2">Chakras align vertically from Root to Crown. Each bell represents one frequency.</p>
+        <p className="text-xs opacity-80">Hover bells for frequency info, click for detailed lessons. Watch ripples flow upward as you progress.</p>
       </motion.div>
 
-      {/* Reflection Modal - Outside Canvas */}
-      {showReflectionModal && selectedChakra && selectedBell && (
-        <ReflectionModal
-          isOpen={showReflectionModal}
-          onClose={() => {
-            setShowReflectionModal(false);
-            setSelectedChakra(null);
-            setSelectedBell(null);
-          }}
-          chakra={selectedChakra}
-          bell={selectedBell}
-        />
-      )}
+      {/* Progress Summary */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 2, duration: 0.8 }}
+        className="absolute bottom-6 right-6 text-sm bg-background/20 backdrop-blur-sm rounded-xl p-4"
+      >
+        <p className="font-medium text-foreground mb-2">🌟 Progress</p>
+        <div className="space-y-1">
+          {chakraModules.map(chakra => {
+            const completed = chakra.bells.filter(bell => bell.isCompleted).length;
+            const total = chakra.bells.length;
+            return (
+              <div key={chakra.id} className="flex items-center space-x-2 text-xs">
+                <div 
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: completed > 0 ? chakra.color : '#555' }}
+                />
+                <span className="text-muted-foreground">{chakra.name}: {completed}/{total}</span>
+              </div>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* Detail Modal */}
+      <AnimatePresence>
+        {showDetailModal && selectedChakra && selectedBell && (
+          <ChakraDetailModal
+            isOpen={showDetailModal}
+            onClose={() => {
+              setShowDetailModal(false);
+              setSelectedChakra(null);
+              setSelectedBell(null);
+            }}
+            chakra={selectedChakra}
+            bell={selectedBell}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
