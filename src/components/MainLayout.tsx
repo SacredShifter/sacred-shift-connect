@@ -8,15 +8,29 @@ import { NotificationDropdown } from "@/components/NotificationDropdown";
 import { SovereignMeshHeader } from "@/components/SovereignMeshHeader";
 import { SacredBreadcrumbs } from "@/components/SacredSitemap/SacredBreadcrumbs";
 import { SacredBottomToolbar } from "@/components/SacredBottomToolbar";
+import { ChakraPortalNavigation } from "@/components/navigation/ChakraPortalNavigation";
+import { useNavigation } from "@/providers/NavigationProvider";
 
 
 export const MainLayout = () => {
   const location = useLocation();
+  const { mode } = useNavigation();
   const isHermetic = location.pathname.startsWith('/learn/hermetic');
   
+  // Sacred Journey mode: Full screen chakra portals
+  if (mode === 'sacred-journey' && !isHermetic) {
+    return (
+      <div className="min-h-screen w-full">
+        <UIErrorBoundary>
+          <ChakraPortalNavigation className="w-full h-screen" />
+        </UIErrorBoundary>
+      </div>
+    );
+  }
+  
+  // Explorer mode: Sidebar layout
   return (
     <SidebarProvider>
-      
       <div className="sidebar-layout min-h-screen flex w-full">
         {!isHermetic && (
           <UIErrorBoundary>
