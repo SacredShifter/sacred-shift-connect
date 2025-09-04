@@ -3,16 +3,12 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { BambooChime } from './BambooChime';
-import { ChakraData } from '@/data/chakraData';
-import { TaoModule } from '@/config/taoFlowConfig';
-
-interface ChakraModuleData extends ChakraData {
-  modules: TaoModule[];
-  isUnlocked: boolean;
-}
+import { ParticleField } from './ParticleField';
+import { EnhancedChakraData } from '@/data/enhancedChakraData';
+import { EnhancedChakraAudioSystem } from './EnhancedChakraAudioSystem';
 
 interface BambooChimeGardenProps {
-  chakraModules: ChakraModuleData[];
+  chakraModules: EnhancedChakraData[];
 }
 
 export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({ 
@@ -30,7 +26,6 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
         {/* Subtle patterns */}
         <div className="absolute inset-0 opacity-5">
           <svg className="w-full h-full" viewBox="0 0 1200 800">
-            {/* Zen circles */}
             <defs>
               <pattern id="zenRipples" patternUnits="userSpaceOnUse" width="200" height="200">
                 <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.3"/>
@@ -43,22 +38,28 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
         </div>
       </motion.div>
 
-      {/* 3D Bamboo Chimes */}
+      {/* 3D Enhanced Bamboo Garden */}
       <Canvas
-        camera={{ position: [0, 0, 8], fov: 50 }}
+        camera={{ position: [0, 2, 10], fov: 50 }}
         style={{ position: 'absolute', inset: 0 }}
       >
         <Environment preset="dawn" />
-        <ambientLight intensity={0.4} />
-        <pointLight position={[10, 10, 10]} intensity={0.8} />
+        <ambientLight intensity={0.3} />
+        <pointLight position={[10, 10, 10]} intensity={0.6} />
+        <pointLight position={[-10, 5, -5]} intensity={0.4} color="#9966CC" />
         
-        {/* Bamboo Chimes arranged in a circle */}
+        {/* Floating Particles */}
+        <ParticleField count={150} radius={12} color="#ffffff" opacity={0.4} speed={0.3} />
+        <ParticleField count={80} radius={8} color="#9966CC" opacity={0.6} speed={0.5} />
+        <ParticleField count={30} radius={15} color="#FFD700" opacity={0.8} speed={1.2} />
+
+        {/* Sacred Bamboo Chimes */}
         {chakraModules.map((chakra, index) => {
           const angle = (index / chakraModules.length) * Math.PI * 2;
-          const radius = 4;
+          const radius = 5;
           const x = Math.cos(angle) * radius;
           const z = Math.sin(angle) * radius;
-          const y = (index - chakraModules.length / 2) * 0.5; // Vertical spacing
+          const y = (index - chakraModules.length / 2) * 0.4;
           
           return (
             <BambooChime
@@ -70,14 +71,14 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
           );
         })}
         
-        {/* Gentle ground plane */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -4, 0]}>
-          <planeGeometry args={[20, 20]} />
+        {/* Sacred Ground */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -4.5, 0]}>
+          <circleGeometry args={[25, 64]} />
           <meshStandardMaterial 
             color="hsl(var(--muted))" 
             transparent 
-            opacity={0.1}
-            roughness={1}
+            opacity={0.05}
+            roughness={0.8}
           />
         </mesh>
         
@@ -93,28 +94,26 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
         />
       </Canvas>
 
-      {/* Garden Instructions */}
+      {/* Enhanced Audio System */}
+      <EnhancedChakraAudioSystem 
+        volume={0.4} 
+        enableAmbient={true}
+        enableNatureSounds={true}
+      />
+
+      {/* Enhanced Garden Instructions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1, duration: 0.8 }}
-        className="absolute bottom-6 left-6 text-sm text-muted-foreground bg-background/20 backdrop-blur-sm rounded-xl p-4 max-w-xs"
+        className="absolute bottom-6 left-6 text-sm text-muted-foreground bg-background/20 backdrop-blur-sm rounded-xl p-4 max-w-sm"
       >
-        <p className="mb-2 font-medium">🎋 Bamboo Chime Garden</p>
-        <p>Click on the chimes to enter modules. Hover to hear their sacred frequencies resonate through the garden.</p>
-      </motion.div>
-
-      {/* Active Resonance Indicator */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.2, duration: 0.8 }}
-        className="absolute top-6 left-6 text-xs text-muted-foreground bg-background/20 backdrop-blur-sm rounded-xl p-3"
-      >
-        <div className="flex items-center space-x-2">
-          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-          <span>Sacred frequencies active</span>
-        </div>
+        <p className="mb-2 font-medium flex items-center">
+          🎋 Sacred Chime Garden
+          <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-1 rounded">Enhanced</span>
+        </p>
+        <p className="mb-2">Each chakra contains multiple practice bells tuned to specific frequencies.</p>
+        <p className="text-xs opacity-80">Click individual bells to practice modules and record reflections in your Sacred Journal.</p>
       </motion.div>
     </div>
   );
