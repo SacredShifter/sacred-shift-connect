@@ -1,5 +1,5 @@
-import { ConstellationView } from "@/components/constellation/ConstellationView";
+import { ChakraPortalNavigation } from "@/components/navigation/ChakraPortalNavigation";
 
 export function SacredJourneyNavigation() {
-  return <ConstellationView className="w-full h-screen" />;
+  return <ChakraPortalNavigation className="w-full h-screen" />;
 }
