@@ -77,7 +77,7 @@ export const TeachingLayer: React.FC<TeachingLayerProps> = ({
       label: 'Metaphysical',
       icon: <Eye className="w-4 h-4" />,
       content: content.metaphysical,
-      unlocked: unlockedTiers.metaphysical,
+      unlocked: true, // UNLOCKED: Show extensive metaphysical knowledge
       color: 'from-purple-500 to-violet-500',
       description: 'Energetic and consciousness perspectives',
       sacredName: 'The Realm of Experience'
@@ -87,7 +87,7 @@ export const TeachingLayer: React.FC<TeachingLayerProps> = ({
       label: 'Esoteric',
       icon: <Sparkles className="w-4 h-4" />,
       content: content.esoteric,
-      unlocked: unlockedTiers.esoteric,
+      unlocked: true, // UNLOCKED: Show extensive esoteric knowledge
       color: 'from-amber-500 to-orange-500',
       description: 'Ancient wisdom and sacred teachings',
       sacredName: 'The Hidden Mysteries'
@@ -285,11 +285,16 @@ export const TeachingLayer: React.FC<TeachingLayerProps> = ({
                           <p className="text-sm text-muted-foreground italic mb-3">
                             "{tier.content.prompt}"
                           </p>
-                          <div className="bg-gradient-to-r from-violet-500/10 to-indigo-500/10 rounded-lg p-2 border border-violet-400/20">
-                            <p className="text-xs text-violet-200 text-center">
-                              Allow this question to resonate within your consciousness field
-                            </p>
-                          </div>
+                          <Button
+                            onClick={() => window.location.href = '/journal'}
+                            variant="outline"
+                            className="w-full bg-gradient-to-r from-violet-500/20 to-indigo-500/20 border-violet-400/40 hover:bg-violet-500/30 text-violet-100 hover:text-white transition-all duration-300"
+                          >
+                            <div className="flex items-center justify-center gap-2">
+                              <Heart className="w-4 h-4" />
+                              <span>Explore in Mirror Journal</span>
+                            </div>
+                          </Button>
                         </div>
                       </div>
                     </div>

@@ -114,9 +114,9 @@ export const MeditationPracticeGuide: React.FC<MeditationPracticeGuideProps> = (
       >
         <Card className="h-full bg-background/95 backdrop-blur-md border-primary/20">
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-xl font-sacred">
+            <div className="flex flex-col items-center gap-4">
+              <div className="text-center">
+                <CardTitle className="flex items-center justify-center gap-2 text-xl font-sacred">
                   <Heart className="w-5 h-5 text-primary" />
                   Sacred Practice Guide
                 </CardTitle>
