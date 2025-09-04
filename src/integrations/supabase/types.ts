@@ -4422,6 +4422,7 @@ export type Database = {
           recommended_time_of_day: string[] | null
           sacred_geometry_association: string | null
           source_id: string
+          source_platform: string | null
           tags: string[] | null
           teaching_notes: string | null
           thumbnail_url: string | null
@@ -4454,6 +4455,7 @@ export type Database = {
           recommended_time_of_day?: string[] | null
           sacred_geometry_association?: string | null
           source_id: string
+          source_platform?: string | null
           tags?: string[] | null
           teaching_notes?: string | null
           thumbnail_url?: string | null
@@ -4486,6 +4488,7 @@ export type Database = {
           recommended_time_of_day?: string[] | null
           sacred_geometry_association?: string | null
           source_id?: string
+          source_platform?: string | null
           tags?: string[] | null
           teaching_notes?: string | null
           thumbnail_url?: string | null
@@ -10893,6 +10896,7 @@ export type Database = {
           meditation_stats: Json | null
           mood_trends: Json | null
           onboarding_completed: boolean
+          pre_release_access: boolean | null
           primary_language: string | null
           resonance_tags: string[] | null
           show_email_to_circle_members: boolean | null
@@ -10934,6 +10938,7 @@ export type Database = {
           meditation_stats?: Json | null
           mood_trends?: Json | null
           onboarding_completed?: boolean
+          pre_release_access?: boolean | null
           primary_language?: string | null
           resonance_tags?: string[] | null
           show_email_to_circle_members?: boolean | null
@@ -10975,6 +10980,7 @@ export type Database = {
           meditation_stats?: Json | null
           mood_trends?: Json | null
           onboarding_completed?: boolean
+          pre_release_access?: boolean | null
           primary_language?: string | null
           resonance_tags?: string[] | null
           show_email_to_circle_members?: boolean | null
@@ -20120,6 +20126,7 @@ export type Database = {
           category_id: string
           category_name: string
           consciousness_level: string
+          content_url: string
           created_at: string
           description: string
           energy_level: number
@@ -20128,7 +20135,6 @@ export type Database = {
           id: string
           mood_tags: string[]
           source_platform: string
-          source_url: string
           teaching_notes: string
           thumbnail_url: string
           title: string

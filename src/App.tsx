@@ -58,6 +58,7 @@ import Ethos from './pages/Ethos';
 import HardwarePulseFi from './pages/HardwarePulseFi';
 import DailyPractice from './pages/DailyPractice';
 import JourneyMap from './pages/JourneyMap';
+import PreReleaseLanding from './pages/PreReleaseLanding';
 
 
 function App() {
@@ -126,6 +127,7 @@ function App() {
           >
             <div className="min-h-screen relative w-full bg-black">
             <Routes>
+              <Route path="/portal" element={<PreReleaseLanding />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/confirm" element={<AuthConfirm />} />
               <Route
