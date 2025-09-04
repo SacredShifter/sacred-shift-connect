@@ -101,6 +101,45 @@ export const BambooChimeGarden: React.FC<BambooChimeGardenProps> = ({
         enableNatureSounds={true}
       />
 
+      {/* Chakra Labels Overlay */}
+      {chakraModules.map((chakra, index) => {
+        const angle = (index / chakraModules.length) * Math.PI * 2;
+        const radius = 5;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        
+        // Convert 3D position to screen position (approximate)
+        const screenX = 50 + (x / 10) * 30; // Rough conversion to percentage
+        const screenY = 50 - (z / 10) * 30; // Rough conversion to percentage
+        
+        return (
+          <motion.div
+            key={`label-${chakra.id}`}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5 + index * 0.1, duration: 0.8 }}
+            className="absolute text-center z-10 pointer-events-none"
+            style={{
+              left: `${screenX}%`,
+              top: `${screenY}%`,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            <div className="bg-background/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary/20">
+              <h3 className="text-sm font-medium text-foreground">{chakra.name}</h3>
+              <p className="text-xs text-muted-foreground">{chakra.sanskrit}</p>
+              <div className="text-xs text-primary space-y-1">
+                {chakra.bells.map(bell => (
+                  <div key={bell.moduleId} className={`${bell.isUnlocked ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {bell.moduleName} ({bell.note} - {bell.frequency}Hz)
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
+
       {/* Enhanced Garden Instructions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

@@ -110,26 +110,6 @@ export const BambooChime: React.FC<BambooChimeProps> = ({
 
   return (
     <>
-      {/* Chakra Name Label */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5, duration: 0.8 }}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center z-10 pointer-events-none"
-      >
-        <div className="bg-background/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary/20">
-          <h3 className="text-sm font-medium text-foreground">{chakra.name}</h3>
-          <p className="text-xs text-muted-foreground">{chakra.sanskrit}</p>
-          <div className="text-xs text-primary">
-            {chakra.bells.map(bell => (
-              <div key={bell.moduleId} className={`${bell.isUnlocked ? 'text-primary' : 'text-muted-foreground'}`}>
-                {bell.moduleName} ({bell.note} - {bell.frequency}Hz)
-              </div>
-            ))}
-          </div>
-        </div>
-      </motion.div>
-
       {/* Strike Effects */}
       {strikeEffects.map(effect => (
         <ChakraBellStrike
