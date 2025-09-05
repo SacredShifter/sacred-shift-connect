@@ -1,10 +1,7 @@
-import * as React from 'react';
-import { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/lib/logger';
-import { useErrorHandler } from './useErrorHandler';
 
 interface AuthContextType {
   user: User | null;
@@ -35,9 +32,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [userRole, setUserRole] = useState<string | undefined>(undefined);
   const [roleLoading, setRoleLoading] = useState(false);
   
-  const { handleAuthError } = useErrorHandler();
+  // Simple error handler without hooks
+  const handleAuthError = (error: any, context: any) => {
+    console.error('Auth error:', context, error);
+  };
   
-  logger.debug('AuthProvider state change', { 
+  console.log('AuthProvider state change', { 
     component: 'AuthProvider',
     userId: user?.id,
     metadata: { hasSession: !!session, loading }
@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        logger.authEvent(`Auth state changed: ${event}`, {
+        console.log(`Auth state changed: ${event}`, {
           component: 'AuthProvider',
           function: 'onAuthStateChange',
           userId: session?.user?.id,
@@ -59,14 +59,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Fetch user role if logged in
         if (session?.user) {
+          // Set loading to false immediately but keep role loading true
+          setLoading(false);
           setRoleLoading(true);
           
-          // Fetch roles with proper error handling
-          supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .then(({ data: roles, error }) => {
+          // Fetch roles immediately (not in timeout)
+          (async () => {
+            try {
+              const { data: roles, error } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', session.user.id);
+              
               if (error) {
                 handleAuthError(error, {
                   component: 'AuthProvider',
@@ -80,7 +84,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const finalRole = isAdmin ? 'admin' : 'user';
                 setUserRole(finalRole);
                 
-                logger.debug('Role fetch result', {
+                console.log('Role fetch result', {
                   component: 'AuthProvider',
                   function: 'onAuthStateChange',
                   userId: session.user.id,
@@ -112,10 +116,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     );
 
-    // THEN check for existing session
+    // Check for existing session
     supabase.auth.getSession().then(async ({ data: { session }, error }) => {
       if (error) {
-        logger.authEvent('Auth session error', {
+        console.error('Auth session error', {
           component: 'AuthProvider',
           function: 'getSession',
           userId: undefined,
@@ -129,7 +133,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setLoading(false);
         return;
       }
-      logger.debug('Initial session check completed', {
+      
+      console.log('Initial session check completed', {
         component: 'AuthProvider',
         function: 'getSession',
         userId: session?.user?.id,
@@ -139,18 +144,66 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setSession(session);
       setUser(session?.user ?? null);
       
-      // Initial session is handled by the auth state change listener above
-      // No need to duplicate role fetching here
+      // Set loading to false immediately for initial session
       setLoading(false);
+      
+      // Fetch user role if logged in (immediately, not in background)
+      if (session?.user) {
+        setRoleLoading(true);
+        (async () => {
+          try {
+            const { data: roles, error } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', session.user.id);
+            
+            if (error) {
+              handleAuthError(error, {
+                component: 'AuthProvider',
+                function: 'fetchInitialUserRoles',
+                userId: session.user.id
+              });
+              setUserRole('user'); // Default to user role on error
+            } else {
+              const isAdmin = roles?.some(r => r.role === 'admin');
+              const finalRole = isAdmin ? 'admin' : 'user';
+              setUserRole(finalRole);
+              
+              logger.debug('Initial role fetch result', {
+                component: 'AuthProvider',
+                function: 'getSession',
+                userId: session.user.id,
+                metadata: {
+                  roles: roles?.map(r => r.role),
+                  isAdmin,
+                  finalRole,
+                }
+              });
+            }
+          } catch (error) {
+            handleAuthError(error, {
+              component: 'AuthProvider',
+              function: 'fetchInitialUserRoles',
+              userId: session?.user?.id
+            });
+            setUserRole('user'); // Default to user role on error
+          } finally {
+            setRoleLoading(false);
+          }
+        })();
+      } else {
+        setUserRole(undefined);
+        setRoleLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, [handleAuthError]);
+  }, []);
 
   const signUp = async (email: string, password: string) => {
-    logger.info('Starting user sign up', { component: 'useAuth', function: 'signUp', metadata: { email } });
+    console.log('Starting user sign up', { component: 'useAuth', function: 'signUp', metadata: { email } });
     const redirectUrl = `${window.location.origin}/auth/confirm`;
-    logger.debug('Using redirect URL for email confirmation', { component: 'useAuth', function: 'signUp', metadata: { redirectUrl } });
+    console.log('Using redirect URL for email confirmation', { component: 'useAuth', function: 'signUp', metadata: { redirectUrl } });
     
     try {
       const { error } = await supabase.auth.signUp({
@@ -162,14 +215,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
 
       if (error) {
-        logger.error('Supabase signUp failed', { component: 'useAuth', function: 'signUp' }, error);
+        console.error('Supabase signUp failed', { component: 'useAuth', function: 'signUp' }, error);
       } else {
-        logger.info('Supabase signUp successful, confirmation email sent', { component: 'useAuth', function: 'signUp', metadata: { email } });
+        console.log('Supabase signUp successful, confirmation email sent', { component: 'useAuth', function: 'signUp', metadata: { email } });
       }
 
       return { error };
     } catch (err) {
-      logger.error('Unhandled exception in signUp', { component: 'useAuth', function: 'signUp' }, err as Error);
+      console.error('Unhandled exception in signUp', { component: 'useAuth', function: 'signUp' }, err as Error);
       return { error: err };
     }
   };
