@@ -39,9 +39,6 @@ const Circles = () => {
   const { circles, loading, error, joinCircle, leaveCircle } = useSacredCircles();
   const { toast } = useToast();
   
-  // Debug logging
-  console.log('Circles component rendered:', { user: !!user, loading, error, circlesCount: circles?.length });
-  
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [createModalOpen, setCreateModalOpen] = useState(false);

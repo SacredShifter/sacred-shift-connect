@@ -253,8 +253,9 @@ export const useSacredCircles = () => {
       body: { invitation_id: invitationId }
     });
     if (error) throw new Error(error.message);
-    fetchCircles(); // Refresh circles to show new membership
-  }, [fetchCircles]);
+    // Don't call fetchCircles directly to avoid circular dependency
+    // The realtime subscription will handle the update
+  }, []);
 
   const rejectInvitation = useCallback(async (invitationId: string) => {
     const { error } = await supabase.functions.invoke('reject-invitation', {
@@ -289,13 +290,14 @@ export const useSacredCircles = () => {
 
         if (error) throw error;
 
-        fetchCircles();
+        // Don't call fetchCircles directly to avoid circular dependency
+        // The realtime subscription will handle the update
       } catch (err) {
         console.error('Error joining circle:', err);
         throw new Error('Failed to join Sacred Circle');
       }
     }
-  }, [user, circles, fetchCircles, requestToJoinCircle]);
+  }, [user, circles, requestToJoinCircle]);
 
   // Leave a Sacred Circle
   const leaveCircle = useCallback(async (circleId: string) => {
@@ -310,13 +312,13 @@ export const useSacredCircles = () => {
 
       if (error) throw error;
       
-      // Refresh circles data
-      fetchCircles();
+      // Don't call fetchCircles directly to avoid circular dependency
+      // The realtime subscription will handle the update
     } catch (err) {
       console.error('Error leaving circle:', err);
       throw new Error('Failed to leave Sacred Circle');
     }
-  }, [user, fetchCircles]);
+  }, [user]);
 
   // Create a new Sacred Circle
   const createCircle = useCallback(async (
@@ -353,14 +355,14 @@ export const useSacredCircles = () => {
           role: 'admin'
         });
 
-      // Refresh circles data
-      fetchCircles();
+      // Don't call fetchCircles directly to avoid circular dependency
+      // The realtime subscription will handle the update
       return data;
     } catch (err) {
       console.error('Error creating circle:', err);
       throw new Error('Failed to create Sacred Circle');
     }
-  }, [user, fetchCircles]);
+  }, [user]);
 
   // Set up real-time subscription for circle posts
   useRealtimeSubscription({
@@ -406,7 +408,7 @@ export const useSacredCircles = () => {
       fetchCircles();
       fetchRecentMessages();
     }
-  }, [user, fetchCircles, fetchRecentMessages]);
+  }, [user]); // Remove fetchCircles and fetchRecentMessages from dependencies to prevent infinite loop
 
   return {
     circles,
