@@ -122,7 +122,7 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('display_name, bio')
+        .select('display_name')
         .eq('id', user.id)
         .maybeSingle();
       
