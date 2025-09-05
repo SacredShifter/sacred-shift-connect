@@ -56,24 +56,84 @@ export const ChakraDetailModal: React.FC<ChakraDetailModalProps> = ({
   };
 
   const getModuleLink = () => {
-    return moduleIdToRoute[bell.moduleId] || '/dashboard';
+    try {
+      console.log('=== GET MODULE LINK CALLED ===');
+      console.log('Bell module ID:', bell.moduleId);
+      console.log('Available routes:', Object.keys(moduleIdToRoute));
+      
+      const route = moduleIdToRoute[bell.moduleId];
+      console.log('Found route for module ID:', route);
+      
+      const finalRoute = route || '/dashboard';
+      console.log('Final route to return:', finalRoute);
+      
+      return finalRoute;
+    } catch (error) {
+      console.error('=== ERROR IN GET MODULE LINK ===');
+      console.error('Error:', error);
+      console.error('Bell object:', bell);
+      return '/dashboard';
+    }
   };
 
   const handleStartPractice = () => {
-    const moduleLink = getModuleLink();
-    navigate(moduleLink);
-    onClose();
+    try {
+      console.log('=== START PRACTICE BUTTON CLICKED ===');
+      console.log('Bell data:', bell);
+      console.log('Module ID:', bell.moduleId);
+      
+      const moduleLink = getModuleLink();
+      console.log('Generated module link:', moduleLink);
+      console.log('About to navigate to:', moduleLink);
+      
+      navigate(moduleLink);
+      console.log('Navigation called successfully');
+      onClose();
+      console.log('Modal closed successfully');
+    } catch (error) {
+      console.error('=== ERROR IN START PRACTICE ===');
+      console.error('Error details:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
   };
 
   const handleOpenJournal = () => {
-    navigate('/journal', { state: { chakraContext: chakra.id, bellContext: bell.moduleId } });
-    onClose();
+    try {
+      console.log('=== OPEN JOURNAL BUTTON CLICKED ===');
+      navigate('/journal', { state: { chakraContext: chakra.id, bellContext: bell.moduleId } });
+      onClose();
+    } catch (error) {
+      console.error('=== ERROR IN OPEN JOURNAL ===');
+      console.error('Error details:', error);
+    }
   };
 
   const handleNavigateToModule = () => {
-    const moduleLink = getModuleLink();
-    navigate(moduleLink);
-    onClose();
+    try {
+      console.log('=== ENTER MODULE BUTTON CLICKED ===');
+      console.log('Bell data:', bell);
+      console.log('Module ID:', bell.moduleId);
+      console.log('Bell is unlocked:', bell.isUnlocked);
+      console.log('Bell is completed:', bell.isCompleted);
+      
+      const moduleLink = getModuleLink();
+      console.log('Generated module link:', moduleLink);
+      console.log('Module ID to route mapping:', moduleIdToRoute);
+      console.log('About to navigate to:', moduleLink);
+      
+      navigate(moduleLink);
+      console.log('Navigation called successfully');
+      onClose();
+      console.log('Modal closed successfully');
+    } catch (error) {
+      console.error('=== ERROR IN NAVIGATE TO MODULE ===');
+      console.error('Error details:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Bell object:', bell);
+      console.error('Chakra object:', chakra);
+    }
   };
 
   if (!isOpen) return null;
