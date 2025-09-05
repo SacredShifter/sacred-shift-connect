@@ -59,10 +59,14 @@ const queryClient = new QueryClient({
 });
 
 import { logger } from './lib/logger';
+import { initializeMonitoring } from './lib/monitoring';
 
 // Service Worker Registration for PWA
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
+  let beforeInstallPromptHandler: ((e: Event) => void) | null = null;
+  let appInstalledHandler: (() => void) | null = null;
+
+  const registerServiceWorker = async () => {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/'
@@ -74,7 +78,7 @@ if ('serviceWorker' in navigator) {
       });
       
       // Listen for PWA install prompt
-      window.addEventListener('beforeinstallprompt', (e) => {
+      beforeInstallPromptHandler = (e: Event) => {
         logger.info('Sacred Shifter PWA: Install prompt available', { component: 'pwa' });
         // Store the event so it can be triggered later
         (window as any).deferredPrompt = e;
@@ -82,13 +86,16 @@ if ('serviceWorker' in navigator) {
         // Show install button or UI element
         const installEvent = new CustomEvent('pwa-installable');
         window.dispatchEvent(installEvent);
-      });
+      };
       
       // PWA installed
-      window.addEventListener('appinstalled', () => {
+      appInstalledHandler = () => {
         logger.info('Sacred Shifter PWA: Successfully installed', { component: 'pwa' });
         (window as any).deferredPrompt = null;
-      });
+      };
+      
+      window.addEventListener('beforeinstallprompt', beforeInstallPromptHandler);
+      window.addEventListener('appinstalled', appInstalledHandler);
       
     } catch (error) {
       logger.error('Sacred Shifter PWA: Service Worker registration failed', { 
@@ -96,8 +103,26 @@ if ('serviceWorker' in navigator) {
         error: error.message 
       });
     }
-  });
+  };
+
+  window.addEventListener('load', registerServiceWorker);
+
+  // Cleanup function for PWA event listeners
+  const cleanupPWA = () => {
+    if (beforeInstallPromptHandler) {
+      window.removeEventListener('beforeinstallprompt', beforeInstallPromptHandler);
+    }
+    if (appInstalledHandler) {
+      window.removeEventListener('appinstalled', appInstalledHandler);
+    }
+  };
+
+  // Store cleanup function globally for potential use
+  (window as any).cleanupPWA = cleanupPWA;
 }
+
+// Initialize monitoring
+const monitoring = initializeMonitoring();
 
 // Initialize mobile-specific features
 if (Capacitor.isNativePlatform()) {

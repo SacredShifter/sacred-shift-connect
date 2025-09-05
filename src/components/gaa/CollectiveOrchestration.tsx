@@ -62,17 +62,20 @@ export const CollectiveOrchestration: React.FC<CollectiveOrchestrationProps> = (
       .channel(`collective-session-${sessionId}`)
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
-        const participantList = Object.values(state).map(presence => ({
-          userId: (presence[0] as any)?.user_id || (presence[0] as any)?.presence_ref || 'unknown',
-          displayName: (presence[0] as any)?.display_name || `User ${(presence[0] as any)?.presence_ref?.slice(-4) || '????'}`,
-          polarityBalance: (presence[0] as any)?.polarity_balance || 0.5,
-          biofeedback: (presence[0] as any)?.biofeedback || null,
-          shadowEngineState: (presence[0] as any)?.shadow_engine_state || null,
-          lastActivity: new Date((presence[0] as any)?.last_activity || Date.now()),
-          lastActive: new Date((presence[0] as any)?.last_activity || Date.now()),
-          consentLevel: 'participant' as const,
-          role: (presence[0] as any)?.role || 'participant'
-        })) as ParticipantState[];
+        const participantList = Object.values(state).map(presence => {
+          const presenceData = presence?.[0] as any;
+          return {
+            userId: presenceData?.user_id || presenceData?.presence_ref || 'unknown',
+            displayName: presenceData?.display_name || `User ${presenceData?.presence_ref?.slice(-4) || '????'}`,
+            polarityBalance: presenceData?.polarity_balance || 0.5,
+            biofeedback: presenceData?.biofeedback || null,
+            shadowEngineState: presenceData?.shadow_engine_state || null,
+            lastActivity: new Date(presenceData?.last_activity || Date.now()),
+            lastActive: new Date(presenceData?.last_activity || Date.now()),
+            consentLevel: 'participant' as const,
+            role: presenceData?.role || 'participant'
+          };
+        }) as ParticipantState[];
         setParticipants(participantList);
       })
       .on('presence', { event: 'join' }, ({ newPresences }) => {

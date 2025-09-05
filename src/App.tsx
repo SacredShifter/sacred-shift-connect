@@ -58,8 +58,8 @@ import { UserSitemap } from './components/SacredSitemap/UserSitemap';
 import Ethos from './pages/Ethos';
 import HardwarePulseFi from './pages/HardwarePulseFi';
 import DailyPractice from './pages/DailyPractice';
-import JourneyMap from './pages/JourneyMap';
-import PreReleaseLanding from './pages/PreReleaseLanding';
+import SacredTechShowcase from './components/LivingAdvertisement/SacredTechShowcase';
+import LivingAdLanding from './components/LivingAdvertisement/LivingAdLanding';
 
 
 function App() {
@@ -128,7 +128,8 @@ function App() {
           >
             <div className="min-h-screen relative w-full bg-black">
             <Routes>
-              <Route path="/portal" element={<PreReleaseLanding />} />
+              <Route path="/" element={<LivingAdLanding />} />
+              <Route path="/showcase" element={<SacredTechShowcase />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/confirm" element={<AuthConfirm />} />
               <Route
@@ -140,7 +141,7 @@ function App() {
                   </ProtectedRoute>
                 }
                 >
-                  <Route path="/" element={<Index />} />
+                  <Route path="/app" element={<Index />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/journey-map" element={<JourneyMap />} />
                   <Route path="/daily-ritual" element={<DailyRitual />} />
@@ -194,7 +195,7 @@ function App() {
             <Route path="/privacy" element={<PrivacySettings />} />
                   <Route path="/support-the-shift" element={<Support />} />
                   
-                  {/* Admin Routes */}
+                  {/* Admin Routes - All properly protected */}
                   <Route path="/ai-admin" element={<AdminRoute><JusticeQuantumCommandNexus /></AdminRoute>} />
                   <Route path="/admin/curation" element={<AdminRoute><VideoLibrary /></AdminRoute>} />
                   <Route path="/admin/logs" element={<AdminRoute><AdminLogs /></AdminRoute>} />

@@ -34,8 +34,11 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     let frameCount = 0;
     let lastTime = performance.now();
     let animationId: number;
+    let isActive = true;
 
     const measureFPS = () => {
+      if (!isActive) return;
+      
       frameCount++;
       const currentTime = performance.now();
       
@@ -52,7 +55,9 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
         }
       }
       
-      animationId = requestAnimationFrame(measureFPS);
+      if (isActive) {
+        animationId = requestAnimationFrame(measureFPS);
+      }
     };
 
     measureFPS();
@@ -93,7 +98,10 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     window.addEventListener('keydown', handleKeyPress);
 
     return () => {
-      cancelAnimationFrame(animationId);
+      isActive = false;
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
       clearInterval(memoryInterval);
       window.removeEventListener('keydown', handleKeyPress);
     };

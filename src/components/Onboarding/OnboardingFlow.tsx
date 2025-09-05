@@ -13,6 +13,7 @@ import { AuraIntroduction } from './AuraIntroduction';
 import { FirstStepInvitation } from './FirstStepInvitation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 export type UserPath = 'healing' | 'awakening' | 'explorer' | 'remembering';
 
@@ -24,6 +25,7 @@ interface OnboardingFlowProps {
 export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ isVisible, onComplete }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedPath, setSelectedPath] = useState<UserPath | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -71,6 +73,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ isVisible, onCom
         
         // Store path selection locally for other components
         localStorage.setItem(`sacred-path-${user.id}`, selectedPath || 'explorer');
+        
+        // Invalidate onboarding status query to refresh the UI
+        queryClient.invalidateQueries({ queryKey: ['onboardingStatus', user.id] });
       }
       
       onComplete();
@@ -78,7 +83,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ isVisible, onCom
       console.error('Error completing onboarding:', error);
       onComplete(); // Complete anyway to avoid blocking user
     }
-  }, [user, selectedPath, onComplete]);
+  }, [user, selectedPath, onComplete, queryClient]);
 
   const handlePathSelect = useCallback((path: UserPath) => {
     setSelectedPath(path);

@@ -84,18 +84,29 @@ const ResonanceSearch: React.FC = () => {
 
   // Fallback local search with resonance scoring
   const performLocalResonanceSearch = async (query: ResonanceQuery) => {
-    const { data: contentItems } = await supabase
-      .from('content_items')
-      .select('*')
-      .limit(20);
+    try {
+      const { data: contentItems, error } = await supabase
+        .from('content_items')
+        .select('*')
+        .limit(20);
 
-    if (contentItems) {
-      const scoredResults = contentItems.map(item => ({
-        ...item,
-        resonance_score: calculateResonanceScore(item, query)
-      })).sort((a, b) => b.resonance_score - a.resonance_score);
+      if (error) {
+        console.error('Error fetching content items:', error);
+        throw error;
+      }
 
-      setResults(scoredResults);
+      if (contentItems) {
+        const scoredResults = contentItems.map(item => ({
+          ...item,
+          resonance_score: calculateResonanceScore(item, query)
+        })).sort((a, b) => b.resonance_score - a.resonance_score);
+
+        setResults(scoredResults);
+      }
+    } catch (error) {
+      console.error('Error in local resonance search:', error);
+      // Fallback to mock data on error
+      setResults(generateMockResults(query));
     }
   };
 

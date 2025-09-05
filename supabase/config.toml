@@ -1,10 +1,10 @@
 project_id = "mikltjgbvxrxndtszorb"
 
 [functions.send-feedback]
-verify_jwt = false
+verify_jwt = true
 
 [functions.create-donation-payment]
-verify_jwt = false
+verify_jwt = true
 
 [functions.submit-waitlist]
 verify_jwt = false
@@ -13,13 +13,13 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.aura-core]
-verify_jwt = false
+verify_jwt = true
 
 [functions.aura-autonomous-engine]
-verify_jwt = false
+verify_jwt = true
 
 [functions.aura-autonomous-platform]
-verify_jwt = false
+verify_jwt = true
 
 [functions.voice-to-text]
 verify_jwt = true

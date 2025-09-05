@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -230,10 +231,12 @@ export const StartDirectMessageModal: React.FC<StartDirectMessageModalProps> = (
               </div>
 
               {loading ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                  <p className="text-sm">Loading users...</p>
-                </div>
+                <LoadingState 
+                  size="md" 
+                  text="Loading users..." 
+                  variant="default"
+                  className="py-8"
+                />
               ) : users.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />

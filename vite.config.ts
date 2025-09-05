@@ -23,15 +23,18 @@ export default defineConfig(({ mode }) => {
       host: "127.0.0.1",
       port: 5173, // Use Vite's default port
       strictPort: true,
-      hmr: false, // Completely disable HMR
-      watch: {
-        ignored: ['**/*'] // Disable file watching
+      hmr: mode === 'development' ? {
+        port: 5174,
+        host: 'localhost'
+      } : false, // Enable HMR in development only
+      watch: mode === 'development' ? {
+        ignored: ['**/node_modules/**', '**/dist/**']
+      } : {
+        ignored: ['**/*'] // Disable file watching in production
       },
-      cors: true,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      cors: {
+        origin: mode === 'development' ? ['http://localhost:5173', 'http://127.0.0.1:5173'] : false,
+        credentials: true
       }
     },
     plugins,

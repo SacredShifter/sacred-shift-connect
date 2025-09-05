@@ -2,7 +2,7 @@
  * App Providers - Nested provider structure for GAA system
  * Order matters: AuthProvider -> BiofeedbackProvider -> CosmicDataProvider -> PresetProvider -> RealtimeOrchestraProvider -> SafetyProvider
  */
-import type { ReactNode } from 'react';
+import * as React from 'react';
 import { AuthProvider } from '@/hooks/useAuth';
 import { BiofeedbackProvider } from './BiofeedbackProvider';
 import { CosmicDataProvider } from './CosmicDataProvider';
@@ -10,38 +10,42 @@ import { PresetProvider } from './PresetProvider';
 import { RealtimeOrchestraProvider } from './RealtimeOrchestraProvider';
 import { SafetyProvider } from './SafetyProvider';
 import { DailyRoutineProvider } from './DailyRoutineProvider';
-import { TaoFlowProvider } from './TaoFlowProvider';
-import { TaoFlowNotificationProvider } from './TaoFlowNotificationProvider';
-import { NavigationProvider } from './NavigationProvider';
-import { Toaster } from "@/components/ui/sonner";
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 interface AppProvidersProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-export const AppProviders = ({ children }: AppProvidersProps) => {
+export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
-    <AuthProvider>
-      <NavigationProvider>
-        <TaoFlowProvider>
-          <TaoFlowNotificationProvider>
-            <BiofeedbackProvider>
+    <ErrorBoundary name="AuthProvider">
+      <AuthProvider>
+        <ErrorBoundary name="BiofeedbackProvider">
+          <BiofeedbackProvider>
+            <ErrorBoundary name="CosmicDataProvider">
               <CosmicDataProvider>
-                <PresetProvider>
-                  <RealtimeOrchestraProvider>
-                    <SafetyProvider>
-                      <DailyRoutineProvider>
-                        <Toaster />
-                        {children}
-                      </DailyRoutineProvider>
-                    </SafetyProvider>
-                  </RealtimeOrchestraProvider>
-                </PresetProvider>
+                <ErrorBoundary name="PresetProvider">
+                  <PresetProvider>
+                    <ErrorBoundary name="RealtimeOrchestraProvider">
+                      <RealtimeOrchestraProvider>
+                        <ErrorBoundary name="SafetyProvider">
+                          <SafetyProvider>
+                            <ErrorBoundary name="DailyRoutineProvider">
+                              <DailyRoutineProvider>
+                                {children}
+                              </DailyRoutineProvider>
+                            </ErrorBoundary>
+                          </SafetyProvider>
+                        </ErrorBoundary>
+                      </RealtimeOrchestraProvider>
+                    </ErrorBoundary>
+                  </PresetProvider>
+                </ErrorBoundary>
               </CosmicDataProvider>
-            </BiofeedbackProvider>
-          </TaoFlowNotificationProvider>
-        </TaoFlowProvider>
-      </NavigationProvider>
-    </AuthProvider>
+            </ErrorBoundary>
+          </BiofeedbackProvider>
+        </ErrorBoundary>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };

@@ -25,25 +25,45 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
+    // Input validation
+    const body = await req.json();
     const { 
       request_type, 
       context_data, 
       user_query,
       user_id,
       admin_override = false
-    } = await req.json();
+    } = body;
+
+    // Validate required fields
+    if (!request_type || typeof request_type !== 'string') {
+      throw new Error('Invalid request_type: must be a non-empty string');
+    }
+    
+    if (!user_query || typeof user_query !== 'string' || user_query.trim().length === 0) {
+      throw new Error('Invalid user_query: must be a non-empty string');
+    }
+    
+    if (!user_id || typeof user_id !== 'string') {
+      throw new Error('Invalid user_id: must be a non-empty string');
+    }
+
+    // Sanitize input
+    const sanitizedQuery = user_query.trim().substring(0, 10000); // Limit length
+    const sanitizedRequestType = request_type.trim().substring(0, 100);
+    const sanitizedUserId = user_id.trim().substring(0, 100);
 
     console.log('🚨 AI ASSISTANT FUNCTION CALLED:', { 
-      request_type, 
-      user_id, 
+      request_type: sanitizedRequestType, 
+      user_id: sanitizedUserId, 
       admin_override,
-      query_preview: user_query?.substring(0, 100),
+      query_preview: sanitizedQuery?.substring(0, 100),
       timestamp: new Date().toISOString(),
       method: req.method,
       url: req.url
     });
 
-    console.log('Enhanced AI Assistant Request:', { request_type, user_id, admin_override });
+    console.log('Enhanced AI Assistant Request:', { request_type: sanitizedRequestType, user_id: sanitizedUserId, admin_override });
 
     // Authenticate user
     const authHeader = req.headers.get('Authorization');
@@ -60,16 +80,16 @@ serve(async (req) => {
     }
 
     // Load comprehensive personal context
-    const personalContext = await loadPersonalContext(supabase, user.id);
+    const personalContext = await loadPersonalContext(supabase, sanitizedUserId);
     
     // Analyze conversation in real-time
-    const analysisData = await analyzeConversation(supabase, user.id, user_query, request_type);
+    const analysisData = await analyzeConversation(supabase, sanitizedUserId, sanitizedQuery, sanitizedRequestType);
     
     // Update mood tracking
-    await updateMoodTracking(supabase, user.id, user_query);
+    await updateMoodTracking(supabase, sanitizedUserId, sanitizedQuery);
     
     // Detect synchronicity events
-    await detectSynchronicity(supabase, user.id, user_query);
+    await detectSynchronicity(supabase, sanitizedUserId, sanitizedQuery);
 
     let assistantMessage;
 
@@ -77,7 +97,7 @@ serve(async (req) => {
     const { data: userRoles, error: roleError } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', user.id);
+      .eq('user_id', sanitizedUserId);
 
     const isAdmin = userRoles?.some(r => r.role === 'admin');
 

@@ -203,25 +203,25 @@ export const GAADashboard: React.FC<GAADashboardProps> = ({ className = '' }) =>
 
   const sessionDuration = Date.now() - sessionStartTime;
 
-  // Live GAA engine metrics
+  // Live GAA engine metrics with null safety
   const liveGAAEngineState = {
-    oscillatorCount: gaaEngine.state.activeOscillators || 0,
-    currentFrequency: gaaEngine.state.shadowState?.lastOutputs?.fHz || 432,
-    groupCoherence: orchestra.isConnected ? (orchestra.coherence || 0) : 0,
+    oscillatorCount: gaaEngine?.state?.activeOscillators || 0,
+    currentFrequency: gaaEngine?.state?.shadowState?.lastOutputs?.fHz || 432,
+    groupCoherence: orchestra?.isConnected ? (orchestra?.coherence || 0) : 0,
     sessionDuration: sessionDuration,
-    safetyAlerts: gaaEngine.state.safetyAlerts.map(alert => alert.message) || []
+    safetyAlerts: gaaEngine?.state?.safetyAlerts?.map(alert => alert?.message) || []
   };
 
   const allWarnings = [
-    ...gaaEngine.state.safetyAlerts.map(a => ({ message: a.message, type: a.type })),
+    ...(gaaEngine?.state?.safetyAlerts?.map(a => ({ message: a?.message || 'Unknown alert', type: a?.type || 'warning' })) || []),
   ];
 
   // Add real-time warnings based on live data
-  if (liveGAAEngineState.currentFrequency === 432 && gaaEngine.state.isPlaying) {
+  if (liveGAAEngineState.currentFrequency === 432 && gaaEngine?.state?.isPlaying) {
     allWarnings.push({ message: '⚠️ Invalid geometry – fallback frequency applied (432 Hz).', type: 'warning' });
   }
 
-  if (gaaEngine.state.isPlaying && !isBiofeedbackConnected) {
+  if (gaaEngine?.state?.isPlaying && !isBiofeedbackConnected) {
     allWarnings.push({ message: '⚠️ No biofeedback sensors connected – using default values.', type: 'warning' });
   }
 

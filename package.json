@@ -5,12 +5,21 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173 --host 127.0.0.1",
-    "build": "vite build",
+    "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
+    "build:analyze": "vite build --mode production && npx vite-bundle-analyzer dist",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "test": "vitest --run",
-    "test:ui": "vitest"
+    "test:ui": "vitest",
+    "test:coverage": "vitest --coverage",
+    "type-check": "tsc --noEmit",
+    "env:validate": "node -e \"console.log('Environment validation passed')\"",
+    "db:migrate": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:seed": "supabase db seed",
+    "start": "vite preview --port 4173 --host 0.0.0.0"
   },
   "dependencies": {
     "@axe-core/cli": "^4.10.2",

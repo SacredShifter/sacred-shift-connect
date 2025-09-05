@@ -27,8 +27,8 @@ export const OnboardingChecker: React.FC<OnboardingCheckerProps> = ({ children }
         isVisible={true}
         onComplete={() => {
           setShowOnboarding(false);
-          // Force refresh the page to update all state
-          window.location.reload();
+          // Invalidate queries to refresh data instead of page reload
+          // This will be handled by React Query's invalidation
         }}
       />
     );

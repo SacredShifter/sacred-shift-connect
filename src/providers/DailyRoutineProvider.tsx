@@ -3,8 +3,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export type DailyMode = 'guided' | 'free';
+export type DailyMode = 'guided' | 'free' | 'sacred-timing';
 export type TimeOfDay = 'morning' | 'evening' | 'anytime';
+export type SacredTiming = 'dawn' | 'midday' | 'dusk' | 'midnight' | 'lunar-phase' | 'seasonal';
+export type LunarPhase = 'new' | 'waxing' | 'full' | 'waning';
+export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 
 export interface DailyStep {
   id: string;
@@ -13,9 +16,15 @@ export interface DailyStep {
   why: string;
   practice: string;
   timeOfDay: TimeOfDay;
+  sacredTiming?: SacredTiming;
+  lunarPhase?: LunarPhase;
+  season?: Season;
   estimatedMinutes: number;
   completed: boolean;
   completedAt?: Date;
+  chakraAlignment?: string[];
+  archetypeResonance?: string[];
+  energyFrequency?: string;
 }
 
 export interface DailyFlow {
@@ -36,6 +45,12 @@ export interface DailyRoutineState {
   morningPrompt: string | null;
   eveningReflection: string | null;
   badges: string[];
+  sacredTimingEnabled: boolean;
+  lunarPhase: LunarPhase;
+  season: Season;
+  customFlows: DailyFlow[];
+  preferredArchetype: string;
+  energyFrequency: string;
 }
 
 interface DailyRoutineContextType {
@@ -47,9 +62,49 @@ interface DailyRoutineContextType {
   setMorningPrompt: (prompt: string) => void;
   setEveningReflection: (reflection: string) => void;
   resetDaily: () => void;
+  toggleSacredTiming: () => void;
+  updateLunarPhase: (phase: LunarPhase) => void;
+  updateSeason: (season: Season) => void;
+  createCustomFlow: (flow: Omit<DailyFlow, 'id'>) => void;
+  updatePreferredArchetype: (archetype: string) => void;
+  updateEnergyFrequency: (frequency: string) => void;
+  getOptimalTiming: () => { bestTime: string; reason: string };
+  getSacredRecommendations: () => DailyStep[];
 }
 
 const DailyRoutineContext = createContext<DailyRoutineContextType | undefined>(undefined);
+
+// Sacred Timing Utilities
+const getLunarPhase = (): LunarPhase => {
+  const now = new Date();
+  const start = new Date(2000, 0, 6); // Known new moon
+  const days = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const phase = days % 29.53;
+  
+  if (phase < 7.38) return 'new';
+  if (phase < 14.77) return 'waxing';
+  if (phase < 22.15) return 'full';
+  return 'waning';
+};
+
+const getSeason = (): Season => {
+  const month = new Date().getMonth();
+  if (month >= 2 && month <= 4) return 'spring';
+  if (month >= 5 && month <= 7) return 'summer';
+  if (month >= 8 && month <= 10) return 'autumn';
+  return 'winter';
+};
+
+const getCurrentSacredTiming = (): { timing: SacredTiming; hour: number } => {
+  const hour = new Date().getHours();
+  
+  if (hour >= 5 && hour <= 7) return { timing: 'dawn', hour };
+  if (hour >= 11 && hour <= 13) return { timing: 'midday', hour };
+  if (hour >= 17 && hour <= 19) return { timing: 'dusk', hour };
+  if (hour >= 23 || hour <= 1) return { timing: 'midnight', hour };
+  
+  return { timing: 'lunar-phase', hour };
+};
 
 // Sacred Flow Data - The knowledge + why's we built yesterday
 const SACRED_FLOW: DailyFlow = {
@@ -65,8 +120,14 @@ const SACRED_FLOW: DailyFlow = {
       why: 'Your nervous system is the hardware through which consciousness flows. When it\'s clogged with stress, trauma, and overstimulation, you can\'t access your deeper knowing. This practice creates the clear channel needed for authentic awakening.',
       practice: 'Start with 5 minutes of conscious breathing. Focus on lengthening your exhale to activate your parasympathetic nervous system. Notice any tension and breathe into those areas.',
       timeOfDay: 'morning',
+      sacredTiming: 'dawn',
+      lunarPhase: 'waxing',
+      season: 'spring',
       estimatedMinutes: 10,
-      completed: false
+      completed: false,
+      chakraAlignment: ['root', 'heart'],
+      archetypeResonance: ['healer', 'mystic'],
+      energyFrequency: '432Hz'
     },
     {
       id: 'truth-orientation',
@@ -75,8 +136,14 @@ const SACRED_FLOW: DailyFlow = {
       why: 'Most people live in layers of conditioning, stories, and borrowed beliefs. Truth orientation means aligning with what is actually real in your direct experience, not what you\'ve been told is real. This becomes your North Star.',
       practice: 'Ask yourself: "What is most true for me right now?" Sit with this question without rushing to answer. Let truth emerge naturally from your body and heart.',
       timeOfDay: 'morning',
+      sacredTiming: 'dawn',
+      lunarPhase: 'new',
+      season: 'any',
       estimatedMinutes: 15,
-      completed: false
+      completed: false,
+      chakraAlignment: ['third-eye', 'crown'],
+      archetypeResonance: ['sage', 'mystic'],
+      energyFrequency: '528Hz'
     },
     {
       id: 'sovereignty-anchoring',
@@ -193,7 +260,13 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
     completedToday: false,
     morningPrompt: null,
     eveningReflection: null,
-    badges: []
+    badges: [],
+    sacredTimingEnabled: true,
+    lunarPhase: getLunarPhase(),
+    season: getSeason(),
+    customFlows: [],
+    preferredArchetype: 'seeker',
+    energyFrequency: '432Hz'
   });
 
   // Update flow when profile loads
@@ -350,6 +423,94 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
     saveState({ ...state, eveningReflection: reflection });
   };
 
+  // Sacred Timing Functions
+  const toggleSacredTiming = () => {
+    saveState({ ...state, sacredTimingEnabled: !state.sacredTimingEnabled });
+  };
+
+  const updateLunarPhase = (phase: LunarPhase) => {
+    saveState({ ...state, lunarPhase: phase });
+  };
+
+  const updateSeason = (season: Season) => {
+    saveState({ ...state, season: season });
+  };
+
+  const createCustomFlow = (flow: Omit<DailyFlow, 'id'>) => {
+    const newFlow = { ...flow, id: `custom-${Date.now()}` };
+    saveState({ ...state, customFlows: [...state.customFlows, newFlow] });
+  };
+
+  const updatePreferredArchetype = (archetype: string) => {
+    saveState({ ...state, preferredArchetype: archetype });
+  };
+
+  const updateEnergyFrequency = (frequency: string) => {
+    saveState({ ...state, energyFrequency: frequency });
+  };
+
+  const getOptimalTiming = () => {
+    const { timing, hour } = getCurrentSacredTiming();
+    const lunarPhase = state.lunarPhase;
+    
+    let bestTime = 'anytime';
+    let reason = 'No specific timing requirements';
+
+    if (state.sacredTimingEnabled) {
+      switch (timing) {
+        case 'dawn':
+          bestTime = '5:00-7:00 AM';
+          reason = 'Dawn is optimal for new beginnings and intention setting';
+          break;
+        case 'midday':
+          bestTime = '11:00 AM-1:00 PM';
+          reason = 'Midday is perfect for action and manifestation';
+          break;
+        case 'dusk':
+          bestTime = '5:00-7:00 PM';
+          reason = 'Dusk is ideal for reflection and integration';
+          break;
+        case 'midnight':
+          bestTime = '11:00 PM-1:00 AM';
+          reason = 'Midnight is powerful for deep spiritual work';
+          break;
+        case 'lunar-phase':
+          bestTime = `During ${lunarPhase} moon`;
+          reason = `The ${lunarPhase} moon phase enhances this practice`;
+          break;
+      }
+    }
+
+    return { bestTime, reason };
+  };
+
+  const getSacredRecommendations = (): DailyStep[] => {
+    if (!state.sacredTimingEnabled) return [];
+
+    const { timing } = getCurrentSacredTiming();
+    const lunarPhase = state.lunarPhase;
+    const season = state.season;
+
+    return state.currentFlow?.steps.filter(step => {
+      // Match sacred timing
+      if (step.sacredTiming && step.sacredTiming !== timing) return false;
+      
+      // Match lunar phase
+      if (step.lunarPhase && step.lunarPhase !== lunarPhase) return false;
+      
+      // Match season
+      if (step.season && step.season !== season) return false;
+      
+      // Match archetype
+      if (step.archetypeResonance && !step.archetypeResonance.includes(state.preferredArchetype)) return false;
+      
+      // Match energy frequency
+      if (step.energyFrequency && step.energyFrequency !== state.energyFrequency) return false;
+      
+      return true;
+    }) || [];
+  };
+
   const resetDaily = () => {
     saveState({
       ...state,
@@ -376,7 +537,15 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
       getProgressToNextBadge,
       setMorningPrompt,
       setEveningReflection,
-      resetDaily
+      resetDaily,
+      toggleSacredTiming,
+      updateLunarPhase,
+      updateSeason,
+      createCustomFlow,
+      updatePreferredArchetype,
+      updateEnergyFrequency,
+      getOptimalTiming,
+      getSacredRecommendations
     }}>
       {children}
     </DailyRoutineContext.Provider>
