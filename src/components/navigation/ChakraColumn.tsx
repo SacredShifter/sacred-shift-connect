@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { EnhancedChakraData, ModuleBell } from '@/data/enhancedChakraData';
+// Force rebuild - clear any cache issues with ResonanceRipple import
 import { ResonanceRipple } from './ResonanceRipple';
 
 interface ChakraColumnProps {
