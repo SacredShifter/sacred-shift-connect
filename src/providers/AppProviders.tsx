@@ -2,7 +2,7 @@
  * App Providers - Nested provider structure for GAA system
  * Order matters: AuthProvider -> BiofeedbackProvider -> CosmicDataProvider -> PresetProvider -> RealtimeOrchestraProvider -> SafetyProvider
  */
-import * as React from 'react';
+import type { ReactNode } from 'react';
 import { AuthProvider } from '@/hooks/useAuth';
 import { BiofeedbackProvider } from './BiofeedbackProvider';
 import { CosmicDataProvider } from './CosmicDataProvider';
@@ -16,10 +16,10 @@ import { NavigationProvider } from './NavigationProvider';
 import { Toaster } from "@/components/ui/sonner";
 
 interface AppProvidersProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
+export const AppProviders = ({ children }: AppProvidersProps) => {
   return (
     <AuthProvider>
       <NavigationProvider>
