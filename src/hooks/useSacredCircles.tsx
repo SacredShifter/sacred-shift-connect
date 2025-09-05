@@ -387,9 +387,9 @@ export const useSacredCircles = () => {
   useRealtimeSubscription({
     table: 'circle_groups',
     onPayload: (payload) => {
-      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-        fetchCircles();
-      }
+      // Temporarily disabled to prevent infinite loop
+      // TODO: Implement stable circle refresh mechanism
+      console.log('Circle group updated:', payload.eventType);
     }
   });
 
@@ -397,8 +397,9 @@ export const useSacredCircles = () => {
   useRealtimeSubscription({
     table: 'circle_group_members',
     onPayload: (payload) => {
-      // Refresh circles when membership changes
-      fetchCircles();
+      // Temporarily disabled to prevent infinite loop
+      // TODO: Implement stable membership refresh mechanism  
+      console.log('Circle membership updated:', payload.eventType);
     }
   });
 
