@@ -171,7 +171,7 @@ const Index = () => {
       title: 'YouTube Library',
       description: 'Curated video content with chapter navigation and reflection tools',
       icon: Video,
-      path: '/videos',
+      path: '/library',
       gradient: 'from-red-500 to-orange-600',
       glow: 'shadow-red-500/30',
       keywords: ['curated videos', 'chapter navigation', 'reflection tools']

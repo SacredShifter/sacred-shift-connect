@@ -60,9 +60,7 @@ export const ChakraDetailModal: React.FC<ChakraDetailModalProps> = ({
   };
 
   const handleStartPractice = () => {
-    console.log('handleStartPractice - bell.moduleId:', bell.moduleId);
     const moduleLink = getModuleLink();
-    console.log('handleStartPractice - moduleLink:', moduleLink);
     navigate(moduleLink);
     onClose();
   };
@@ -73,9 +71,7 @@ export const ChakraDetailModal: React.FC<ChakraDetailModalProps> = ({
   };
 
   const handleNavigateToModule = () => {
-    console.log('handleNavigateToModule - bell.moduleId:', bell.moduleId);
     const moduleLink = getModuleLink();
-    console.log('handleNavigateToModule - moduleLink:', moduleLink);
     navigate(moduleLink);
     onClose();
   };
