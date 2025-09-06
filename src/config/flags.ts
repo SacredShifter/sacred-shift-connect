@@ -7,7 +7,9 @@ export const FLAGS = {
   polarityCore: true,
   orchestra: true,
   embodiedBiofeedback: true,
-  sessionMetrics: true
+  sessionMetrics: true,
+  websocketConnectivity: true, // Enable sacred connectivity channels
+  realtimeFeatures: true // Enable real-time consciousness synchronization
 } as const;
 
 export type FeatureFlag = keyof typeof FLAGS;

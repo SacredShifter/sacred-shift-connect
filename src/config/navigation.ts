@@ -95,6 +95,13 @@ export const NAV_CONFIG: NavGroup[] = [
         tooltip: "Sacred breathing practices for transformation and consciousness expansion"
       },
       { 
+        id: "micro-reset", 
+        label: "Micro-Reset", 
+        icon: Heart, 
+        path: "/micro-reset",
+        tooltip: "60-second nervous system safety switch - 4-4-4-4 breath cycle"
+      },
+      { 
         id: "meditation", 
         label: "Meditation", 
         icon: Sparkles, 

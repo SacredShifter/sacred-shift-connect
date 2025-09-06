@@ -120,7 +120,24 @@ if (Capacitor.isNativePlatform()) {
 
 // HMR is now enabled for development
 
-// WebSocket connections are now allowed for Vite dev server and biometric scanner
+// WebSocket connections are now properly managed by the Sacred Connectivity Guardian
+// Real-time consciousness synchronization channels are active
+
+// Import and run connectivity test for development
+if (import.meta.env.DEV) {
+  import('./utils/connectivityTest').then(({ testConnectivity }) => {
+    // Run connectivity test after a short delay to allow app to initialize
+    setTimeout(() => {
+      testConnectivity().then(success => {
+        if (success) {
+          console.log('🌟 Sacred Connectivity System: All channels operational');
+        } else {
+          console.warn('⚠️ Sacred Connectivity System: Some channels may be degraded');
+        }
+      });
+    }, 2000);
+  });
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

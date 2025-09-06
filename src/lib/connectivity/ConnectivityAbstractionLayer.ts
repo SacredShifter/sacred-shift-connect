@@ -1,5 +1,10 @@
 // Sacred Shifter Connectivity Abstraction Layer (CAL)
 // Unified interface for all communication channels
+// Enhanced with Security, Metrics, and Hardware Integration
+
+import { securityModule, SecurityModule } from './SecurityModule';
+import { metricsModule, MetricsModule } from './MetricsModule';
+import { hardwareAdapter, HardwareAdapter } from './HardwareAdapter';
 
 export enum ConnectivityChannel {
   // Internet-based
@@ -88,29 +93,54 @@ export class ConnectivityAbstractionLayer {
   private peerCache: Map<string, PeerInfo> = new Map();
   private config: ConnectivityConfig;
   private isInitialized = false;
+  
+  // Enhanced modules
+  private security: SecurityModule;
+  private metrics: MetricsModule;
+  private hardware: HardwareAdapter;
 
   constructor(config: ConnectivityConfig) {
     this.config = config;
+    this.security = securityModule;
+    this.metrics = metricsModule;
+    this.hardware = hardwareAdapter;
   }
 
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
-    console.log('🌐 Initializing Connectivity Abstraction Layer...');
+    console.log('🌐 Initializing Enhanced Connectivity Abstraction Layer...');
 
-    // Initialize all configured channels
-    for (const channel of this.config.channels) {
-      try {
-        const adapter = await this.createAdapter(channel);
-        if (await adapter.available()) {
-          this.adapters.set(channel, adapter);
-          console.log(`✅ ${channel} adapter ready`);
-        } else {
-          console.log(`⚠️ ${channel} adapter not available`);
+    try {
+      // Initialize security module
+      await this.security.initialize();
+      console.log('🔐 Security module initialized');
+
+      // Initialize metrics module
+      await this.metrics.startCollection(1000);
+      console.log('📊 Metrics module initialized');
+
+      // Initialize hardware adapter
+      await this.hardware.initialize();
+      console.log('🔌 Hardware adapter initialized');
+
+      // Initialize all configured channels
+      for (const channel of this.config.channels) {
+        try {
+          const adapter = await this.createAdapter(channel);
+          if (await adapter.available()) {
+            this.adapters.set(channel, adapter);
+            console.log(`✅ ${channel} adapter ready`);
+          } else {
+            console.log(`⚠️ ${channel} adapter not available`);
+          }
+        } catch (error) {
+          console.error(`❌ Failed to initialize ${channel}:`, error);
         }
-      } catch (error) {
-        console.error(`❌ Failed to initialize ${channel}:`, error);
       }
+    } catch (error) {
+      console.error('❌ Failed to initialize enhanced CAL:', error);
+      throw error;
     }
 
     // Connect to available channels in fallback order
@@ -180,24 +210,45 @@ export class ConnectivityAbstractionLayer {
       throw new Error('CAL not initialized');
     }
 
-    // Try channels in priority order
-    for (const channel of this.config.fallbackOrder) {
-      if (this.activeChannels.has(channel)) {
-        const adapter = this.adapters.get(channel);
-        if (adapter && adapter.isConnected()) {
-          try {
-            await adapter.send(message);
-            console.log(`📤 Message sent via ${channel}`);
-            return;
-          } catch (error) {
-            console.warn(`⚠️ Failed to send via ${channel}:`, error);
-            continue;
+    const startTime = performance.now();
+
+    try {
+      // Encrypt message if recipient is specified
+      let secureMessage = message;
+      if (message.recipientId) {
+        secureMessage = await this.security.encryptMessage(message, message.recipientId);
+      }
+
+      // Try channels in priority order
+      for (const channel of this.config.fallbackOrder) {
+        if (this.activeChannels.has(channel)) {
+          const adapter = this.adapters.get(channel);
+          if (adapter && adapter.isConnected()) {
+            try {
+              await adapter.send(secureMessage);
+              
+              // Record metrics
+              const latency = performance.now() - startTime;
+              this.metrics.recordLatency(latency, channel, message.recipientId);
+              this.metrics.recordThroughput(secureMessage.content.length, channel);
+              
+              console.log(`📤 Message sent via ${channel} (${latency.toFixed(2)}ms)`);
+              return;
+            } catch (error) {
+              console.warn(`⚠️ Failed to send via ${channel}:`, error);
+              this.metrics.recordAuthenticationFailure(`send_error_${channel}`);
+              continue;
+            }
           }
         }
       }
-    }
 
-    throw new Error('No available channels for sending message');
+      throw new Error('No available channels for sending message');
+    } catch (error) {
+      console.error('❌ Failed to send message:', error);
+      this.metrics.recordAuthenticationFailure('send_failed');
+      throw error;
+    }
   }
 
   async discoverPeers(): Promise<PeerInfo[]> {
@@ -237,7 +288,56 @@ export class ConnectivityAbstractionLayer {
     return this.peerCache;
   }
 
+  // Get security module
+  getSecurityModule(): SecurityModule {
+    return this.security;
+  }
+
+  // Get metrics module
+  getMetricsModule(): MetricsModule {
+    return this.metrics;
+  }
+
+  // Get hardware adapter
+  getHardwareAdapter(): HardwareAdapter {
+    return this.hardware;
+  }
+
+  // Get enhanced metrics
+  getEnhancedMetrics(): any {
+    return {
+      security: this.security.getSecurityMetrics(),
+      metrics: this.metrics.getAllMetrics(),
+      hardware: this.hardware.getAllDevices(),
+      connectivity: {
+        activeChannels: this.activeChannels.size,
+        totalAdapters: this.adapters.size,
+        peerCount: this.peerCache.size
+      }
+    };
+  }
+
+  // Run stress test
+  async runStressTest(peerCount: number = 500): Promise<any> {
+    return await this.metrics.runStressTest({
+      peerCount,
+      durationMs: 60000, // 1 minute
+      messageRate: 10, // 10 messages per second
+      channels: Array.from(this.activeChannels),
+      enableEncryption: true,
+      enableAuthentication: true
+    });
+  }
+
   async shutdown(): Promise<void> {
+    console.log('🌐 Shutting down Enhanced Connectivity Abstraction Layer...');
+    
+    // Shutdown enhanced modules
+    await this.security.shutdown();
+    await this.metrics.shutdown();
+    await this.hardware.shutdown();
+    
+    // Shutdown adapters
     for (const [channel, adapter] of this.adapters) {
       try {
         await adapter.disconnect();
@@ -245,8 +345,11 @@ export class ConnectivityAbstractionLayer {
         console.warn(`⚠️ Error disconnecting ${channel}:`, error);
       }
     }
+    
     this.activeChannels.clear();
     this.isInitialized = false;
+    
+    console.log('🌐 Enhanced CAL shutdown complete');
   }
 }
 

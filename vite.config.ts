@@ -23,9 +23,13 @@ export default defineConfig(({ mode }) => {
       host: "127.0.0.1",
       port: 5173, // Use Vite's default port
       strictPort: true,
-      hmr: false, // Completely disable HMR
+      hmr: {
+        port: 5174, // Use different port for HMR to avoid conflicts
+        host: "127.0.0.1",
+        clientPort: 5174 // Tell the client to connect to this port
+      },
       watch: {
-        ignored: ['**/*'] // Disable file watching
+        ignored: ['**/node_modules/**', '**/dist/**'] // Only ignore unnecessary files
       },
       cors: true,
       headers: {
@@ -42,9 +46,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     define: {
-      global: 'globalThis',
-      __VITE_HMR_DISABLE__: true,
-      __VITE_DISABLE_HMR__: true
+      global: 'globalThis'
     },
     optimizeDeps: {
       include: ['simple-peer'],

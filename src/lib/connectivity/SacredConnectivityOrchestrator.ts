@@ -587,6 +587,11 @@ export class SacredConnectivityOrchestrator {
     };
   }
 
+  // Get active channels
+  getActiveChannels(): ConnectivityChannel[] {
+    return this.cal.getActiveChannels();
+  }
+
   // Get channel health
   getChannelHealth(): Map<ConnectivityChannel, ConnectivityHealth> {
     return new Map(this.channelHealth);
@@ -600,6 +605,11 @@ export class SacredConnectivityOrchestrator {
   // Get Aura insights
   getAuraInsights(): string[] {
     return [...this.auraInsights];
+  }
+
+  // Stop orchestrator (alias for shutdown)
+  async stop(): Promise<void> {
+    return this.shutdown();
   }
 
   // Shutdown the orchestrator

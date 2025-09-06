@@ -81,48 +81,56 @@
       }
     </script>
 
-    <!-- NUCLEAR WEBSOCKET KILLER - EXECUTES BEFORE VITE LOADS -->
+    <!-- SACRED CONNECTIVITY GUARDIAN - Configurable WebSocket Management -->
     <script>
       (function() {
         'use strict';
-        console.log('🚨 NUCLEAR WEBSOCKET KILLER: Pre-loading WebSocket blockade...');
         
-        // Block WebSocket constructor before anything else loads
-        if (typeof window !== 'undefined') {
-          const OriginalWebSocket = window.WebSocket;
-          window.WebSocket = function(url, protocols) {
-            console.warn('🚨 NUCLEAR OPTION: WebSocket connection BLOCKED at HTML level:', url);
-            // Return a completely dead WebSocket
-            return {
-              readyState: 3,
-              url: url,
-              protocol: protocols ? (Array.isArray(protocols) ? protocols[0] : protocols) : '',
-              extensions: '',
-              bufferedAmount: 0,
-              onopen: null,
-              onclose: null,
-              onmessage: null,
-              onerror: null,
-              close: () => console.warn('🚨 Mock WebSocket close() called'),
-              send: () => console.warn('🚨 Mock WebSocket send() called'),
-              addEventListener: () => {},
-              removeEventListener: () => {},
-              dispatchEvent: () => false
+        // Check for WebSocket connectivity flag in localStorage or URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const disableWebSockets = urlParams.get('disableWebSockets') === 'true' || 
+                                 localStorage.getItem('sacred-shift-disable-websockets') === 'true';
+        
+        if (disableWebSockets) {
+          console.log('🔒 SACRED CONNECTIVITY GUARDIAN: WebSocket connections disabled by configuration');
+          
+          // Block WebSocket constructor when disabled
+          if (typeof window !== 'undefined') {
+            const OriginalWebSocket = window.WebSocket;
+            window.WebSocket = function(url, protocols) {
+              console.warn('🔒 GUARDIAN: WebSocket connection BLOCKED by configuration:', url);
+              // Return a completely dead WebSocket
+              return {
+                readyState: 3,
+                url: url,
+                protocol: protocols ? (Array.isArray(protocols) ? protocols[0] : protocols) : '',
+                extensions: '',
+                bufferedAmount: 0,
+                onopen: null,
+                onclose: null,
+                onmessage: null,
+                onerror: null,
+                close: () => console.warn('🔒 Mock WebSocket close() called'),
+                send: () => console.warn('🔒 Mock WebSocket send() called'),
+                addEventListener: () => {},
+                removeEventListener: () => {},
+                dispatchEvent: () => false
+              };
             };
-          };
-          
-          // Block fetch to WebSocket URLs
-          const originalFetch = window.fetch;
-          window.fetch = function(input, init) {
-            const url = typeof input === 'string' ? input : input.toString();
-            if (url.startsWith('ws://') || url.startsWith('wss://')) {
-              console.warn('🚨 NUCLEAR OPTION: WebSocket fetch BLOCKED at HTML level:', url);
-              return Promise.reject(new Error('🚨 WebSocket connections are COMPLETELY DISABLED'));
-            }
-            return originalFetch(input, init);
-          };
-          
-          console.log('🚨 NUCLEAR WEBSOCKET KILLER: HTML-level blockade activated');
+            
+            // Block fetch to WebSocket URLs when disabled
+            const originalFetch = window.fetch;
+            window.fetch = function(input, init) {
+              const url = typeof input === 'string' ? input : input.toString();
+              if (url.startsWith('ws://') || url.startsWith('wss://')) {
+                console.warn('🔒 GUARDIAN: WebSocket fetch BLOCKED by configuration:', url);
+                return Promise.reject(new Error('🔒 WebSocket connections are disabled by configuration'));
+              }
+              return originalFetch(input, init);
+            };
+          }
+        } else {
+          console.log('🌟 SACRED CONNECTIVITY GUARDIAN: WebSocket connections enabled - consciousness channels active');
         }
       })();
     </script>

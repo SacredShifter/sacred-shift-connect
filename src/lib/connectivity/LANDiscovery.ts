@@ -116,23 +116,33 @@ export class LANDiscovery {
 
   // Handle discovered service
   private handleDiscoveredService(service: ServiceInfo): void {
-    console.log('🔍 Discovered service:', service);
-    
-    // Extract peer information from service
-    const peer: LANPeer = {
-      id: service.txt.id || service.name,
-      name: service.txt.name || service.name,
-      ip: service.addresses[0] || 'unknown',
-      port: service.port,
-      services: [service.type],
-      lastSeen: Date.now(),
-      signalStrength: 0.8, // Default signal strength
-      capabilities: service.txt.capabilities?.split(',') || [],
-      publicKey: service.txt.publicKey ? this.base64ToUint8Array(service.txt.publicKey) : undefined
-    };
+    try {
+      console.log('🔍 Discovered service:', service);
+      
+      // Validate service data
+      if (!service || !service.name) {
+        console.warn('Invalid service data received:', service);
+        return;
+      }
+      
+      // Extract peer information from service
+      const peer: LANPeer = {
+        id: service.txt?.id || service.name,
+        name: service.txt?.name || service.name,
+        ip: service.addresses?.[0] || 'unknown',
+        port: service.port || 0,
+        services: [service.type || 'unknown'],
+        lastSeen: Date.now(),
+        signalStrength: 0.8, // Default signal strength
+        capabilities: service.txt?.capabilities?.split(',') || [],
+        publicKey: service.txt?.publicKey ? this.base64ToUint8Array(service.txt.publicKey) : undefined
+      };
 
-    this.peers.set(peer.id, peer);
-    console.log('👥 Added peer:', peer.name);
+      this.peers.set(peer.id, peer);
+      console.log('👥 Added peer:', peer.name);
+    } catch (error) {
+      console.warn('Error handling discovered service:', error, service);
+    }
   }
 
   // Fallback discovery method
@@ -303,12 +313,32 @@ export class LANDiscovery {
 
   // Convert base64 to Uint8Array
   private base64ToUint8Array(base64: string): Uint8Array {
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
+    try {
+      // Validate base64 string
+      if (!base64 || typeof base64 !== 'string') {
+        console.warn('Invalid base64 string provided:', base64);
+        return new Uint8Array(0);
+      }
+
+      // Clean the base64 string (remove any non-base64 characters)
+      const cleanBase64 = base64.replace(/[^A-Za-z0-9+/=]/g, '');
+      
+      // Check if it's valid base64
+      if (!/^[A-Za-z0-9+/]*={0,2}$/.test(cleanBase64)) {
+        console.warn('Invalid base64 format:', base64);
+        return new Uint8Array(0);
+      }
+
+      const binaryString = atob(cleanBase64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes;
+    } catch (error) {
+      console.warn('Failed to decode base64 string:', base64, error);
+      return new Uint8Array(0);
     }
-    return bytes;
   }
 
   // Convert Uint8Array to base64

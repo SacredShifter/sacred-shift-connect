@@ -9,6 +9,7 @@ import { SessionMetrics } from '@/components/gaa/SessionMetrics';
 import SacredVoiceCallingDemo from '@/pages/SacredVoiceCallingDemo';
 import TransferHub from '@/routes/transfer';
 import GuardianSacredResonanceChamber from '@/pages/GuardianSacredResonanceChamber';
+import MicroResetPage from '@/pages/MicroResetPage';
 
 // Mock data for standalone routes
 const mockCosmicData = [
@@ -92,6 +93,7 @@ export const AppRoutes: React.FC = () => {
       <Route path="/sacred-voice-calling" element={<SacredVoiceCallingDemo />} />
       <Route path="/transfer" element={<TransferHub />} />
       <Route path="/guardian-chamber" element={<GuardianSacredResonanceChamber />} />
+      <Route path="/micro-reset" element={<MicroResetPage />} />
       <Route path="*" element={<GAADashboard />} />
     </Routes>
   );
