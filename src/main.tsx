@@ -118,66 +118,9 @@ if (Capacitor.isNativePlatform()) {
   });
 }
 
-// NUCLEAR OPTION: Completely disable HMR on client side
-if (import.meta.hot) {
-  import.meta.hot.dispose(() => {});
-  import.meta.hot.accept(() => {});
-}
+// HMR is now enabled for development
 
-// NUCLEAR VITE CLIENT KILLER: Block Vite's internal WebSocket client
-if (typeof window !== 'undefined') {
-  // Block Vite's internal WebSocket client
-  (window as any).__VITE_HMR_DISABLE__ = true;
-  (window as any).__VITE_DISABLE_HMR__ = true;
-  
-  // Override any Vite-related WebSocket attempts
-  if ((window as any).__VITE_HMR_SOCKET__) {
-    (window as any).__VITE_HMR_SOCKET__ = {
-      readyState: 3,
-      close: () => console.warn('🚨 Vite HMR socket blocked'),
-      send: () => console.warn('🚨 Vite HMR socket blocked'),
-      addEventListener: () => {},
-      removeEventListener: () => {}
-    };
-  }
-}
-
-// Disable any WebSocket connections
-if (typeof window !== 'undefined') {
-  // Override WebSocket constructor
-  const OriginalWebSocket = window.WebSocket;
-  (window as any).WebSocket = function(url: string, protocols?: string | string[]) {
-    console.warn('WebSocket connection blocked:', url);
-    // Return a mock WebSocket that does nothing
-    return {
-      readyState: 3, // CLOSED
-      url: url,
-      protocol: protocols ? (Array.isArray(protocols) ? protocols[0] : protocols) : '',
-      extensions: '',
-      bufferedAmount: 0,
-      onopen: null,
-      onclose: null,
-      onmessage: null,
-      onerror: null,
-      close: () => {},
-      send: () => {},
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      dispatchEvent: () => false
-    } as any;
-  };
-  
-  // Also block fetch to WebSocket URLs
-  const originalFetch = window.fetch;
-  window.fetch = function(input: RequestInfo | URL, init?: RequestInit) {
-    const url = typeof input === 'string' ? input : input.toString();
-    if (url.startsWith('ws://') || url.startsWith('wss://')) {
-      console.warn('WebSocket fetch blocked:', url);
-      return Promise.reject(new Error('WebSocket connections are disabled'));
-    }
-    return originalFetch(input, init);
-  };
-}
+// WebSocket connections are now allowed for Vite dev server and biometric scanner
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
