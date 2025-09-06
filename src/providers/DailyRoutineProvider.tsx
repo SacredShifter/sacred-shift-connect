@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
-export type DailyMode = 'guided' | 'free';
 export type TimeOfDay = 'morning' | 'evening' | 'anytime';
 
 export interface DailyStep {
@@ -14,18 +13,20 @@ export interface DailyStep {
   estimatedMinutes: number;
   completed: boolean;
   completedAt?: Date;
+  sensorFlow?: boolean; // Indicates if this step has biometric sensor integration
+  component?: string; // Component to render for this step
 }
 
 export interface DailyFlow {
   id: string;
   name: string;
   description: string;
-  steps: DailyStep[];
   currentStepIndex: number;
+  steps: DailyStep[];
 }
 
 export interface DailyRoutineState {
-  mode: DailyMode;
+  mode: 'guided' | 'free';
   currentFlow: DailyFlow | null;
   todaysStep: DailyStep | null;
   streak: number;
@@ -38,72 +39,73 @@ export interface DailyRoutineState {
 
 interface DailyRoutineContextType {
   state: DailyRoutineState;
-  setMode: (mode: DailyMode) => void;
-  completeStep: (stepId: string, reflection?: string) => void;
   getTodaysStep: () => DailyStep | null;
-  getProgressToNextBadge: () => { current: number; needed: number; badgeName: string } | null;
-  setMorningPrompt: (prompt: string) => void;
-  setEveningReflection: (reflection: string) => void;
-  resetDaily: () => void;
+  completeStep: (stepId: string, reflection?: string) => void;
+  setMode: (mode: 'guided' | 'free') => void;
+  resetFlow: () => void;
+  getProgress: () => { completed: number; total: number; percentage: number };
+  getStreakData: () => { current: number; longest: number; days: number[] };
 }
 
 const DailyRoutineContext = createContext<DailyRoutineContextType | undefined>(undefined);
 
-// Sacred Flow Data - The knowledge + why's we built yesterday
+// Sacred Flow Data - Evidence-Based, Awakening-Safe Daily Rituals
 const SACRED_FLOW: DailyFlow = {
   id: 'sacred-awakening-flow',
   name: 'Sacred Awakening Flow',
-  description: 'A 21-day journey to consciousness evolution and truth alignment',
+  description: 'Science-backed daily rituals for safe consciousness evolution with measurable results',
   currentStepIndex: 0,
   steps: [
     {
-      id: 'nervous-system-clearing',
-      title: 'Nervous System Clearing',
-      description: 'Begin with breath and presence to clear energetic debris',
-      why: 'Your nervous system is the hardware through which consciousness flows. When it\'s clogged with stress, trauma, and overstimulation, you can\'t access your deeper knowing. This practice creates the clear channel needed for authentic awakening.',
-      practice: 'Start with 5 minutes of conscious breathing. Focus on lengthening your exhale to activate your parasympathetic nervous system. Notice any tension and breathe into those areas.',
+      id: 'baseline-scan',
+      title: 'Baseline Scan',
+      description: 'Data-driven self-awareness check',
+      why: 'Awakening destabilizes the nervous system. A baseline scan shows you where you actually are (stress, calm, scattered). Tracking state over time helps you see your evolution in hard data. No guesswork, just measurable reality.',
+      practice: 'Rate your current state 1-10 across: Mood, Energy, Clarity, Stress. Optional: Let the app capture HRV/breath rate if hardware available. Takes 30 seconds. Data auto-saved to your evolution timeline.',
       timeOfDay: 'morning',
-      estimatedMinutes: 10,
-      completed: false
+      estimatedMinutes: 1,
+      completed: false,
+      sensorFlow: true,
+      component: 'BaselineScanFlow'
     },
     {
-      id: 'truth-orientation',
-      title: 'Truth Orientation',
-      description: 'Set your compass toward what is real and authentic',
-      why: 'Most people live in layers of conditioning, stories, and borrowed beliefs. Truth orientation means aligning with what is actually real in your direct experience, not what you\'ve been told is real. This becomes your North Star.',
-      practice: 'Ask yourself: "What is most true for me right now?" Sit with this question without rushing to answer. Let truth emerge naturally from your body and heart.',
-      timeOfDay: 'morning',
-      estimatedMinutes: 15,
-      completed: false
-    },
-    {
-      id: 'sovereignty-anchoring',
-      title: 'Sovereignty Anchoring',
-      description: 'Reclaim your power and inner authority',
-      why: 'True awakening requires sovereignty - the ability to trust your own inner guidance over external authorities. This isn\'t rebellion; it\'s maturity. You cannot awaken while constantly outsourcing your power to others.',
-      practice: 'Place your hand on your heart and declare: "I am the author of my own experience." Feel the truth of this in your body. Notice any resistance and breathe through it.',
+      id: 'micro-reset',
+      title: 'Micro-Reset',
+      description: '60-second nervous system safety switch',
+      why: 'Awakening often comes with overwhelm. Micro-resets train your nervous system to return to balance fast. Based on polyvagal theory - you can literally shift from fight/flight to rest/digest in under a minute with proper breathing.',
+      practice: 'Guided 4-4-4-4 breath cycle. App runs timer with visual cues. Inhale 4, hold 4, exhale 4, hold 4. Repeat for 60 seconds. Notice heart rate drop, clearer head. No belief required - it\'s physiology.',
       timeOfDay: 'anytime',
-      estimatedMinutes: 10,
+      estimatedMinutes: 1,
       completed: false
     },
     {
-      id: 'energy-literacy',
-      title: 'Energy Literacy',
-      description: 'Learn to read the subtle energetic information around you',
-      why: 'Everything is energy and information. When you can read energy directly, you bypass mental confusion and access direct knowing. This is your natural birthright as a conscious being.',
-      practice: 'Spend 10 minutes simply feeling the energy of your environment. Notice what feels expansive vs. contracting. Trust these subtle sensations over mental analysis.',
+      id: 'resonance-drop',
+      title: 'Resonance Drop',
+      description: 'Instant state shift through frequency entrainment',
+      why: 'Frequencies + fractals can shift brainwave states and give real-time "proof of shift." 432Hz activates parasympathetic nervous system. 528Hz increases cellular coherence. Fractals reduce stress by 60% in studies. No spirituality needed - it\'s neuroscience.',
+      practice: 'Press play → app delivers 1-3 min tone (432Hz, 528Hz) or fractal visual sequence. Focus on the pattern. Notice slight change in perception (relaxation, clarity, energy). This is brainwave entrainment, not belief.',
       timeOfDay: 'anytime',
-      estimatedMinutes: 15,
+      estimatedMinutes: 3,
       completed: false
     },
     {
-      id: 'integration-practices',
-      title: 'Integration Practices',
-      description: 'Embody insights through conscious action',
-      why: 'Awakening without integration is just spiritual bypassing. Real transformation happens when insights become lived reality through conscious practice and embodiment.',
-      practice: 'Choose one insight from today and commit to one specific action that embodies it. Take that action mindfully and notice the effects.',
+      id: 'fragment-capture',
+      title: 'Fragment Capture',
+      description: 'Capture insights before they slip away',
+      why: 'Awakening produces floods of insights. Capturing even a single word/image prevents them from slipping away and builds a timeline of your evolution. Memory consolidation requires active encoding - insights without capture are lost forever.',
+      practice: 'Type one word, speak one sentence, or snap one photo. That\'s it. Stored in Mirror Journal + linked into collective mesh. No pressure to be profound - just capture what\'s real right now.',
+      timeOfDay: 'anytime',
+      estimatedMinutes: 1,
+      completed: false
+    },
+    {
+      id: 'seal-close',
+      title: 'Seal / Close',
+      description: 'Daily safety anchor for better sleep',
+      why: 'Completion signals safety to the brain. Without closure, awakening can feel endless and raw. The brain needs clear boundaries between active processing and rest. This ritual creates a neurobiological "day is done" signal.',
+      practice: 'One swipe or tap to "seal field." Aura verifies completion. Visual confirmation that today\'s processing is complete. Brain recognizes the day is closed → better sleep, less looping thoughts.',
       timeOfDay: 'evening',
-      estimatedMinutes: 20,
+      estimatedMinutes: 1,
       completed: false
     }
   ]
@@ -135,6 +137,7 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
             ...parsed,
             currentFlow: SACRED_FLOW // Always use fresh flow data
           }));
+          console.log('Loaded SACRED_FLOW:', SACRED_FLOW.steps[0]);
         } catch (error) {
           console.warn('Failed to parse daily routine state:', error);
         }
@@ -159,11 +162,15 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
     if (!state.currentFlow) return null;
     
     if (state.mode === 'guided') {
-      return state.currentFlow.steps[state.currentFlow.currentStepIndex] || null;
+      const step = state.currentFlow.steps[state.currentFlow.currentStepIndex] || null;
+      console.log('Guided mode - current step:', step, 'sensorFlow:', step?.sensorFlow);
+      return step;
     } else {
       // Free mode: suggest next incomplete step or first step
       const incompleteStep = state.currentFlow.steps.find(step => !step.completed);
-      return incompleteStep || state.currentFlow.steps[0];
+      const step = incompleteStep || state.currentFlow.steps[0];
+      console.log('Free mode - current step:', step, 'sensorFlow:', step?.sensorFlow);
+      return step;
     }
   };
 
@@ -171,83 +178,82 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
   const completeStep = (stepId: string, reflection?: string) => {
     if (!state.currentFlow) return;
 
+    const updatedSteps = state.currentFlow.steps.map(step => 
+      step.id === stepId 
+        ? { ...step, completed: true, completedAt: new Date() }
+        : step
+    );
+
     const updatedFlow = {
       ...state.currentFlow,
-      steps: state.currentFlow.steps.map(step =>
-        step.id === stepId
-          ? { ...step, completed: true, completedAt: new Date() }
-          : step
-      )
+      steps: updatedSteps,
+      currentStepIndex: state.mode === 'guided' 
+        ? Math.min(state.currentFlow.currentStepIndex + 1, updatedSteps.length - 1)
+        : state.currentFlow.currentStepIndex
     };
-
-    // Calculate new streak
-    const newStreak = state.completedToday ? state.streak : state.streak + 1;
-    const newLongestStreak = Math.max(newStreak, state.longestStreak);
-
-    // Check for new badges
-    const newBadges = [...state.badges];
-    if (newStreak >= 7 && !newBadges.includes('week-warrior')) {
-      newBadges.push('week-warrior');
-    }
-    if (newStreak >= 21 && !newBadges.includes('truth-seeker')) {
-      newBadges.push('truth-seeker');
-    }
 
     const newState = {
       ...state,
-      currentFlow: {
-        ...updatedFlow,
-        currentStepIndex: state.mode === 'guided' 
-          ? Math.min(updatedFlow.currentStepIndex + 1, updatedFlow.steps.length - 1)
-          : updatedFlow.currentStepIndex
-      },
-      streak: newStreak,
-      longestStreak: newLongestStreak,
+      currentFlow: updatedFlow,
+      todaysStep: getTodaysStep(),
       completedToday: true,
-      badges: newBadges,
+      streak: state.streak + 1,
+      longestStreak: Math.max(state.longestStreak, state.streak + 1),
       eveningReflection: reflection || state.eveningReflection
     };
 
     saveState(newState);
   };
 
-  // Get progress to next badge
-  const getProgressToNextBadge = () => {
-    const { streak } = state;
-    
-    if (streak < 7) {
-      return { current: streak, needed: 7, badgeName: 'Week Warrior' };
-    } else if (streak < 21) {
-      return { current: streak, needed: 21, badgeName: 'Truth Seeker' };
-    } else if (streak < 100) {
-      return { current: streak, needed: 100, badgeName: 'Awakening Master' };
-    }
-    
-    return null;
+  // Set mode
+  const setMode = (mode: 'guided' | 'free') => {
+    const newState = { ...state, mode };
+    saveState(newState);
   };
 
-  const setMode = (mode: DailyMode) => {
-    saveState({ ...state, mode });
-  };
+  // Reset flow
+  const resetFlow = () => {
+    const resetFlow = {
+      ...SACRED_FLOW,
+      steps: SACRED_FLOW.steps.map(step => ({ ...step, completed: false, completedAt: undefined }))
+    };
 
-  const setMorningPrompt = (prompt: string) => {
-    saveState({ ...state, morningPrompt: prompt });
-  };
-
-  const setEveningReflection = (reflection: string) => {
-    saveState({ ...state, eveningReflection: reflection });
-  };
-
-  const resetDaily = () => {
-    saveState({
+    const newState = {
       ...state,
+      currentFlow: resetFlow,
+      currentStepIndex: 0,
+      todaysStep: resetFlow.steps[0],
+      streak: 0,
       completedToday: false,
       morningPrompt: null,
-      eveningReflection: null
-    });
+      eveningReflection: null,
+      badges: []
+    };
+
+    saveState(newState);
   };
 
-  // Update today's step when state changes
+  // Get progress
+  const getProgress = () => {
+    if (!state.currentFlow) return { completed: 0, total: 0, percentage: 0 };
+    
+    const completed = state.currentFlow.steps.filter(step => step.completed).length;
+    const total = state.currentFlow.steps.length;
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    
+    return { completed, total, percentage };
+  };
+
+  // Get streak data
+  const getStreakData = () => {
+    return {
+      current: state.streak,
+      longest: state.longestStreak,
+      days: [] // TODO: Implement day tracking
+    };
+  };
+
+  // Update todaysStep when state changes
   useEffect(() => {
     const todaysStep = getTodaysStep();
     if (todaysStep !== state.todaysStep) {
@@ -255,17 +261,18 @@ export const DailyRoutineProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   }, [state.currentFlow, state.mode]);
 
+  const value: DailyRoutineContextType = {
+    state,
+    getTodaysStep,
+    completeStep,
+    setMode,
+    resetFlow,
+    getProgress,
+    getStreakData
+  };
+
   return (
-    <DailyRoutineContext.Provider value={{
-      state,
-      setMode,
-      completeStep,
-      getTodaysStep,
-      getProgressToNextBadge,
-      setMorningPrompt,
-      setEveningReflection,
-      resetDaily
-    }}>
+    <DailyRoutineContext.Provider value={value}>
       {children}
     </DailyRoutineContext.Provider>
   );

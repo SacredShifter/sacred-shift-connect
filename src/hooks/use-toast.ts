@@ -181,7 +181,7 @@ function useToast() {
         listeners.splice(index, 1)
       }
     }
-  }, [state])
+  }, []) // Remove state from dependency array to prevent render phase updates
 
   return {
     ...state,

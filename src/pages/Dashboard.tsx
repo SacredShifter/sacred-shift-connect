@@ -43,6 +43,10 @@ import { GAAControlPanel } from '@/components/dashboard/GAAControlPanel';
 import { GAAQuickAccess } from '@/components/dashboard/GAAQuickAccess';
 import { GAADashboard } from '@/components/gaa/GAADashboard';
 import { useDailyRoutine } from '@/providers/DailyRoutineProvider';
+import { ResonanceChain } from '@/components/dashboard/ResonanceChain';
+import { TodaysPractice } from '@/components/dashboard/TodaysPractice';
+import { PulseFiAddon } from '@/components/dashboard/PulseFiAddon';
+import { SacredAchievements } from '@/components/dashboard/SacredAchievements';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -141,40 +145,9 @@ const Dashboard = () => {
           <TabsContent value="journey" className="space-y-8">
             {/* Top Action Strip */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-primary mb-1">Resonance Chain</h3>
-                      <div className="flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-primary" />
-                        <span className="text-2xl font-bold">5</span>
-                        <span className="text-sm text-muted-foreground">day streak</span>
-                      </div>
-                    </div>
-                    <Target className="w-8 h-8 text-primary/60" />
-                  </div>
-                </CardContent>
-              </Card>
+              <ResonanceChain />
 
-              <Card className="bg-gradient-to-r from-accent/10 to-accent/5 border-accent/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-accent mb-1">Today's Practice</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {dailyState.todaysStep?.title || 'Sacred Ritual Available'}
-                      </p>
-                    </div>
-                    <Link to="/daily-ritual">
-                      <Button size="sm" className="bg-accent hover:bg-accent/90">
-                        Begin
-                        <ChevronRight className="w-3 h-3 ml-1" />
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+              <TodaysPractice />
 
               <GlowWrapper elementId="truth-spark">
                 <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-secondary/20 rounded-lg">
@@ -215,7 +188,7 @@ const Dashboard = () => {
                       </div>
                     </Link>
 
-                    <Link to="/grove" className="block">
+                    <Link to="/breath-of-source" className="block">
                       <div className="p-4 rounded-lg bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20 hover:border-emerald-500/40 transition-all cursor-pointer">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -268,42 +241,11 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* GAA Engine Section - Consolidated */}
-            <div className="mb-8">
-              <GlowWrapper elementId="gaa-engine">
-                <GAAQuickAccess />
-              </GlowWrapper>
-            </div>
 
             {/* Community & Support Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <GlowWrapper elementId="sacred-achievements">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Trophy className="w-5 h-5 text-amber-500" />
-                      Sacred Achievements
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10">
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 rounded-full bg-amber-500" />
-                          <span className="text-sm">First Meditation Complete</span>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">New</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 rounded-full bg-primary" />
-                          <span className="text-sm">Mirror Mystic</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">2/5</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <SacredAchievements />
               </GlowWrapper>
 
               <GlowWrapper elementId="mirror-insights">
@@ -312,6 +254,10 @@ const Dashboard = () => {
 
               <GlowWrapper elementId="community-pulse">
                 <CommunityMirrorPulse />
+              </GlowWrapper>
+
+              <GlowWrapper elementId="pulsefi-addon">
+                <PulseFiAddon />
               </GlowWrapper>
             </div>
           </TabsContent>

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useIdleTimer } from 'react-idle-timer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ResonantField } from '@/screensavers/ResonantField';
+import { SacredScreensaverWithSound } from '@/screensavers/SacredScreensaverWithSound';
 
 interface SacredScreensaverProps {
   timeout?: number;
@@ -41,8 +41,7 @@ export default function SacredScreensaver({
         setIsActive(true);
       }
     },
-    onActive: handleExit,
-    onAction: handleExit,
+    // Remove onActive and onAction to prevent mouse movement from closing screensaver
     throttle: 500,
     crossTab: true
   });
@@ -94,7 +93,8 @@ export default function SacredScreensaver({
       {/* Screensaver Overlay */}
       <AnimatePresence>
         {isActive && (
-          <ResonantField 
+          <SacredScreensaverWithSound 
+            isActive={isActive}
             tagline="The resonance field for awakening"
             safeRadiusScale={0.25}
             onExit={handleExit}

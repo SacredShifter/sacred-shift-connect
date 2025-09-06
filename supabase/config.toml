@@ -1,5 +1,8 @@
 project_id = "mikltjgbvxrxndtszorb"
 
+[db]
+major_version = 15
+
 [functions.send-feedback]
 verify_jwt = false
 
@@ -48,10 +51,8 @@ verify_jwt = true
 [functions.publish-youtube]
 verify_jwt = true
 
-[[functions]]
-name = "ingest-seed"
+[functions.ingest-seed]
 verify_jwt = false
 
-[[functions]]
-name = "process-content-plan"
+[functions.process-content-plan]
 verify_jwt = false

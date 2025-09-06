@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Eye, Sparkles } from 'lucide-react';
+import { Zap, Eye, Sparkles, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSynchronicityMirror } from '@/hooks/useSynchronicityMirror';
+import { useMirrorJournal } from '@/hooks/useMirrorJournal';
+import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 interface EnhancedTruthSparkProps {
   onOpenMirror: (content?: string) => void;
@@ -12,16 +15,52 @@ interface EnhancedTruthSparkProps {
 
 export const EnhancedTruthSpark = ({ onOpenMirror }: EnhancedTruthSparkProps) => {
   const { currentReading, loading } = useSynchronicityMirror();
+  const { entries, createEntry } = useMirrorJournal();
+  const { toast } = useToast();
   const [showMirrorPrompt, setShowMirrorPrompt] = useState(false);
 
-  // Mock recent journal content
-  const recentJournalEntry = "Today I felt a deep connection to the patterns emerging in my practice...";
+  // Get recent journal content from actual entries
+  const recentJournalEntry = entries.length > 0 
+    ? entries[0].content 
+    : "Today I felt a deep connection to the patterns emerging in my practice...";
   const currentResonance = currentReading?.resonance_score || 0.78;
 
-  const handleSealToJournal = () => {
-    // Simulate sealing process
-    setShowMirrorPrompt(true);
-    setTimeout(() => setShowMirrorPrompt(false), 8000);
+  const handleSealToJournal = async () => {
+    try {
+      // Create a new journal entry with the current truth spark content
+      await createEntry({
+        title: 'Truth Spark Insight',
+        content: recentJournalEntry,
+        mood_tag: 'truth_spark',
+        chakra_alignment: 'heart',
+        is_draft: false
+      });
+
+      toast({
+        title: "Truth Sealed",
+        description: "Your insight has been preserved in your journal",
+      });
+
+      // Optionally open the mirror for deeper reflection
+      setShowMirrorPrompt(true);
+    } catch (error) {
+      console.error('Failed to seal truth to journal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save to journal. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleYesReflect = () => {
+    // Generate mirror reading and open it
+    onOpenMirror(recentJournalEntry);
+    setShowMirrorPrompt(false);
+  };
+
+  const handleLater = () => {
+    setShowMirrorPrompt(false);
   };
 
   return (
@@ -65,8 +104,19 @@ export const EnhancedTruthSpark = ({ onOpenMirror }: EnhancedTruthSparkProps) =>
             onClick={handleSealToJournal}
             className="flex-1"
           >
+            <BookOpen className="h-3 w-3 mr-1" />
             Seal to Journal
           </Button>
+          
+          <Link to="/journal">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+            >
+              Open Journal
+            </Button>
+          </Link>
           
           {showMirrorPrompt && (
             <motion.div
@@ -80,10 +130,7 @@ export const EnhancedTruthSpark = ({ onOpenMirror }: EnhancedTruthSparkProps) =>
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    onClick={() => {
-                      onOpenMirror(recentJournalEntry);
-                      setShowMirrorPrompt(false);
-                    }}
+                    onClick={handleYesReflect}
                     disabled={loading}
                   >
                     <Eye className="h-3 w-3 mr-1" />
@@ -92,7 +139,7 @@ export const EnhancedTruthSpark = ({ onOpenMirror }: EnhancedTruthSparkProps) =>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setShowMirrorPrompt(false)}
+                    onClick={handleLater}
                   >
                     Later
                   </Button>

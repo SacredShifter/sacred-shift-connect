@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useDailyRoutine } from '@/providers/DailyRoutineProvider';
-import { DailyPrompts } from '@/components/DailyRitual/DailyPrompts';
-import { ModeSelector } from '@/components/DailyRitual/ModeSelector';
+import { TodaysPracticeInterface } from '@/components/DailyRitual/TodaysPracticeInterface';
+import { StreamlinedPracticeCard } from '@/components/DailyRitual/StreamlinedPracticeCard';
 import { StreakBadgeDisplay } from '@/components/DailyRitual/StreakBadgeDisplay';
-import { DailyRitualCard } from '@/components/DailyRitual/DailyRitualCard';
+import { ModeSelector } from '@/components/DailyRitual/ModeSelector';
 import { 
-  Compass, 
   Calendar, 
   Trophy, 
   BookOpen,
@@ -38,102 +37,60 @@ const DailyRitual = () => {
         style={{ animation: 'consciousness-breathe 10s ease-in-out infinite reverse' }}
       />
       
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <Link to="/dashboard">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Dashboard
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent font-sacred">
-                  Daily Sacred Ritual
-                </h1>
-                <p className="text-muted-foreground mt-2 font-codex">
-                  Your daily initiation into consciousness evolution
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              {state.streak > 0 && (
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  {state.streak} day streak
-                </Badge>
-              )}
-              <Badge variant="secondary" className="bg-resonance/10 text-resonance border-resonance/30">
-                <Target className="w-3 h-3 mr-1" />
-                {state.mode === 'guided' ? 'Guided Journey' : 'Free Exploration'}
-              </Badge>
+          <div className="flex items-center gap-4 mb-6">
+            <Link to="/dashboard">
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+                Daily Practices
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Evidence-based consciousness evolution
+              </p>
             </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-2xl font-bold text-primary">{state.streak}</div>
-                    <div className="text-sm text-muted-foreground">Current Streak</div>
-                  </div>
-                  <Sparkles className="w-6 h-6 text-primary/60" />
-                </div>
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <Card className="bg-gradient-to-r from-blue-500/10 to-blue-500/5 border-blue-500/20">
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-blue-600">{state.streak}</div>
+                <div className="text-xs text-muted-foreground">Day Streak</div>
               </CardContent>
             </Card>
-
-            <Card className="bg-gradient-to-r from-truth/10 to-truth/5 border-truth/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-2xl font-bold text-truth">{state.longestStreak}</div>
-                    <div className="text-sm text-muted-foreground">Best Streak</div>
-                  </div>
-                  <Trophy className="w-6 h-6 text-truth/60" />
+            <Card className="bg-gradient-to-r from-green-500/10 to-green-500/5 border-green-500/20">
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {state.currentFlow?.steps.filter(s => s.completed).length || 0}
                 </div>
+                <div className="text-xs text-muted-foreground">Completed</div>
               </CardContent>
             </Card>
-
-            <Card className="bg-gradient-to-r from-resonance/10 to-resonance/5 border-resonance/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-2xl font-bold text-resonance">{state.badges.length}</div>
-                    <div className="text-sm text-muted-foreground">Sacred Badges</div>
-                  </div>
-                  <BookOpen className="w-6 h-6 text-resonance/60" />
+            <Card className="bg-gradient-to-r from-purple-500/10 to-purple-500/5 border-purple-500/20">
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {state.currentFlow?.steps.length || 0}
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-purpose/10 to-purpose/5 border-purpose/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-2xl font-bold text-purpose">
-                      {state.currentFlow?.steps?.filter(s => s.completed).length || 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Completed Steps</div>
-                  </div>
-                  <Calendar className="w-6 h-6 text-purpose/60" />
-                </div>
+                <div className="text-xs text-muted-foreground">Total Practices</div>
               </CardContent>
             </Card>
           </div>
         </motion.div>
 
-        {/* Main Content Tabs */}
+        {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="today" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               Today
@@ -142,9 +99,9 @@ const DailyRitual = () => {
               <Trophy className="w-4 h-4" />
               Progress
             </TabsTrigger>
-            <TabsTrigger value="flow" className="flex items-center gap-2">
+            <TabsTrigger value="all" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
-              Full Flow
+              All Practices
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -159,11 +116,11 @@ const DailyRitual = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <DailyPrompts />
+              <TodaysPracticeInterface />
             </motion.div>
           </TabsContent>
 
-          {/* Progress & Badges Tab */}
+          {/* Progress Tab */}
           <TabsContent value="progress" className="space-y-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -174,8 +131,8 @@ const DailyRitual = () => {
             </motion.div>
           </TabsContent>
 
-          {/* Full Flow Tab */}
-          <TabsContent value="flow" className="space-y-8">
+          {/* All Practices Tab */}
+          <TabsContent value="all" className="space-y-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -187,7 +144,7 @@ const DailyRitual = () => {
                   Sacred Awakening Flow
                 </h2>
                 <p className="text-muted-foreground font-codex">
-                  A 21-day journey to consciousness evolution and truth alignment
+                  Science-backed daily rituals for safe consciousness evolution
                 </p>
               </div>
 
@@ -200,10 +157,9 @@ const DailyRitual = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <DailyRitualCard 
+                      <StreamlinedPracticeCard 
                         step={step} 
                         isToday={step.id === state.todaysStep?.id}
-                        showWhyExpanded={false}
                       />
                     </motion.div>
                   ))}

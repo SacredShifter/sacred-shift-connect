@@ -22,6 +22,7 @@ import SacredScreensaver from "@/components/SacredScreensaver";
 
 import Dashboard from './pages/Dashboard';
 import DailyRitual from './pages/DailyRitual';
+import BaselineScanFlowFull from '@/components/BaselineScan/BaselineScanFlowFull';
 import Index from "./pages/Index";
 import Feed from "./pages/Feed";
 import Messages from "./pages/Messages";
@@ -30,6 +31,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Journal from "./pages/Journal";
 import VideoLibrary from "./pages/VideoLibrary";
+import SacredLibrarySimple from "./pages/SacredLibrarySimple";
 import VideoStudio from "./pages/VideoStudio";
 import CollectiveAkashicConstellationPage from "./pages/CollectiveAkashicConstellation";
 import RegistryEntry from "./pages/RegistryEntry";
@@ -58,6 +60,7 @@ import { DevSitemap } from './components/SacredSitemap/DevSitemap';
 import { UserSitemap } from './components/SacredSitemap/UserSitemap';
 import Ethos from './pages/Ethos';
 import DailyPractice from './pages/DailyPractice';
+import PulseFiPreorder from './pages/PulseFiPreorder';
 
 
 function App() {
@@ -140,6 +143,7 @@ function App() {
                   <Route path="/" element={<Index />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/daily-ritual" element={<DailyRitual />} />
+                  <Route path="/baseline-scan" element={<BaselineScanFlowFull />} />
                   
                   {/* Redirects for old routes */}
                   <Route path="/youtube" element={<Navigate to="/library" replace />} />
@@ -169,6 +173,7 @@ function App() {
                   
                   {/* Library Routes */}
                   <Route path="/library" element={<VideoLibrary />} />
+                  <Route path="/sacred-library" element={<SacredLibrarySimple />} />
                   <Route path="/video-studio" element={<VideoStudio />} />
                   
                   {/* Help & Docs Routes */}
@@ -202,6 +207,7 @@ function App() {
         <Route path="/shift" element={<Shift />} />
         <Route path="/features-coming-soon" element={<FeaturesComingSoon />} />
         <Route path="/sacred-resonance" element={<SacredResonanceDiscovery />} />
+        <Route path="/pulsefi-preorder" element={<PulseFiPreorder />} />
                   <Route path="/dev/sitemap" element={<DevSitemap />} />
                   <Route path="/ethos" element={<Ethos />} />
                 </Route>

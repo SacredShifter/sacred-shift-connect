@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Grid, Flower, Plus, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { Grid, Flower, Plus, BookOpen, ChevronDown, ChevronUp, Sparkles, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { YouTubeLibrary } from '@/components/YouTubeLibrary/YouTubeLibrary';
 import { PetalLotus, ContentPlatform } from '@/components/PetalLotus';
 import { ContentManager } from '@/components/ContentManager';
@@ -38,6 +39,44 @@ const VideoLibrary: React.FC = () => {
               Immerse yourself in our collection of transformative content. 
               Explore guided journeys, resonance science, and consciousness-expanding videos.
             </p>
+
+            {/* Sacred Library Upgrade Banner */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200/30 rounded-lg p-6 mb-8 max-w-4xl mx-auto"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-purple-500/20 rounded-full">
+                    <Sparkles className="w-8 h-8 text-purple-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-purple-900 mb-2">
+                      🌟 Sacred Library - Now Available! 🌟
+                    </h3>
+                    <p className="text-purple-700 mb-3">
+                      Experience the next evolution of consciousness development with AI-powered resonance scoring, 
+                      sacred timing integration, collective wisdom sharing, and immersive multi-sensory experiences.
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-sm text-purple-600">
+                      <span className="bg-purple-100 px-2 py-1 rounded">AI Resonance Engine</span>
+                      <span className="bg-purple-100 px-2 py-1 rounded">Sacred Timing</span>
+                      <span className="bg-purple-100 px-2 py-1 rounded">Collective Wisdom</span>
+                      <span className="bg-purple-100 px-2 py-1 rounded">Consciousness Tracking</span>
+                      <span className="bg-purple-100 px-2 py-1 rounded">Living Ecosystem</span>
+                    </div>
+                  </div>
+                </div>
+                <Link to="/sacred-library">
+                  <Button className="bg-purple-600 hover:bg-purple-700 text-white gap-2">
+                    Enter Sacred Library
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+            </motion.div>
 
             {/* View Mode Toggle */}
             <div className="flex justify-center gap-2 mb-8">

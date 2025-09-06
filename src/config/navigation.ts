@@ -17,14 +17,15 @@ import {
   Activity, 
   User, 
   Settings, 
-  Heart, 
+  Heart,
+  Brain, 
   LogOut,
   Shield,
-  Brain,
   FlaskConical,
   FileSearch,
   BarChart3,
-  Waves
+  Waves,
+  Cpu
 } from "lucide-react";
 
 export type Role = "seeker" | "creator" | "admin";
@@ -179,9 +180,16 @@ export const NAV_CONFIG: NavGroup[] = [
         tooltip: "Multi-platform content curation hub with sacred geometry visualization"
       },
       { 
+        id: "sacred-library", 
+        label: "Sacred Library", 
+        icon: Sparkles, 
+        path: "/sacred-library",
+        tooltip: "Living Temple of Consciousness - AI-powered resonance, sacred timing, and collective wisdom"
+      },
+      { 
         id: "sacred-resonance", 
         label: "Sacred Resonance", 
-        icon: Sparkles, 
+        icon: Brain, 
         path: "/sacred-resonance",
         tooltip: "AI-powered content discovery through consciousness resonance and sacred geometry"
       },
@@ -227,6 +235,20 @@ export const NAV_CONFIG: NavGroup[] = [
         path: "/status",
         featureFlag: "status.enabled",
         tooltip: "System status and mesh connectivity"
+      },
+    ]
+  },
+  {
+    id: "grp-hardware",
+    label: "Hardware",
+    defaultOpen: true,
+    children: [
+      { 
+        id: "pulsefi-preorder", 
+        label: "Pulse-Fi Pre-Order", 
+        icon: Cpu, 
+        path: "/pulsefi-preorder",
+        tooltip: "Secure your access to resonance-driven security and sound systems"
       },
     ]
   },

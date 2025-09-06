@@ -68,6 +68,7 @@ const CosmicGrid: React.FC<CosmicGridProps> = ({ safeRadius }) => {
         uOpacity: { value: 0.3 }
       },
       vertexShader: `
+        precision mediump float;
         varying vec2 vUv;
         varying vec3 vWorldPosition;
         
@@ -79,6 +80,7 @@ const CosmicGrid: React.FC<CosmicGridProps> = ({ safeRadius }) => {
         }
       `,
       fragmentShader: `
+        precision mediump float;
         uniform float uTime;
         uniform float uSafeRadius;
         uniform float uGridScale;
@@ -291,6 +293,7 @@ const FractalParticleSystem: React.FC<ParticleSystemProps> = ({
         uLumaCap: { value: lumaCap }
       },
       vertexShader: `
+        precision mediump float;
         attribute float phase;
         attribute float size;
         
@@ -320,6 +323,7 @@ const FractalParticleSystem: React.FC<ParticleSystemProps> = ({
         }
       `,
       fragmentShader: `
+        precision mediump float;
         uniform float uExposure;
         uniform float uLumaCap;
         

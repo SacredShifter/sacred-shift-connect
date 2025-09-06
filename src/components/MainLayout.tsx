@@ -7,7 +7,6 @@ import { NotificationDropdown } from "@/components/NotificationDropdown";
 import { SovereignMeshHeader } from "@/components/SovereignMeshHeader";
 import { SacredBreadcrumbs } from "@/components/SacredSitemap/SacredBreadcrumbs";
 import { SacredBottomToolbar } from "@/components/SacredBottomToolbar";
-import GestureNavigation from "@/components/Navigation/GestureNavigation";
 
 
 export const MainLayout = () => {
@@ -50,12 +49,6 @@ export const MainLayout = () => {
           </main>
         </SidebarInset>
         <SacredBottomToolbar />
-        <GestureNavigation 
-          onNavigate={(route) => console.log('Navigate to:', route)}
-          onSearch={() => console.log('Search triggered')}
-          onFavorite={() => console.log('Favorite triggered')}
-          onProfile={() => console.log('Profile triggered')}
-        />
       </div>
     </SidebarProvider>
   );

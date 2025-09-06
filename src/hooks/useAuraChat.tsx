@@ -100,13 +100,14 @@ export function useAuraChat(adminMode: boolean = false) {
         throw new Error(`Aura Error: ${error.message}`);
       }
 
-      // Dismiss thinking toast
-      thinkingToast.dismiss();
-
       if (error) {
         console.error('Supabase function error:', error);
+        thinkingToast.dismiss();
         throw new Error(`Function error: ${error.message}`);
       }
+
+      // Dismiss thinking toast
+      thinkingToast.dismiss();
 
       if (!data || !data.success) {
         console.error('Aura returned unsuccessful response:', data);

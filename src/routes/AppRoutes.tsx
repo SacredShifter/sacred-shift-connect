@@ -6,6 +6,9 @@ import { Routes, Route } from 'react-router-dom';
 import { GAADashboard } from '@/components/gaa/GAADashboard';
 import { CosmicVisualization } from '@/components/gaa/CosmicVisualization';
 import { SessionMetrics } from '@/components/gaa/SessionMetrics';
+import SacredVoiceCallingDemo from '@/pages/SacredVoiceCallingDemo';
+import TransferHub from '@/routes/transfer';
+import GuardianSacredResonanceChamber from '@/pages/GuardianSacredResonanceChamber';
 
 // Mock data for standalone routes
 const mockCosmicData = [
@@ -86,6 +89,9 @@ export const AppRoutes: React.FC = () => {
       <Route path="/gaa/archetypes" element={<TarotMode />} />
       <Route path="/gaa/cosmic" element={<CosmicPage />} />
       <Route path="/gaa/metrics" element={<MetricsPage />} />
+      <Route path="/sacred-voice-calling" element={<SacredVoiceCallingDemo />} />
+      <Route path="/transfer" element={<TransferHub />} />
+      <Route path="/guardian-chamber" element={<GuardianSacredResonanceChamber />} />
       <Route path="*" element={<GAADashboard />} />
     </Routes>
   );

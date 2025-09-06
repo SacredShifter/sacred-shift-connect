@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -15,20 +15,131 @@ import {
   VolumeX,
   Move,
   RotateCcw,
-  Info
+  Info,
+  Phone,
+  PhoneCall,
+  Mic,
+  MicOff
 } from 'lucide-react';
 import { WhereAmIWidget } from '@/components/SacredSitemap/WhereAmIWidget';
 import { Slogan } from '@/components/ui/Slogan';
 import { useResonanceField } from '@/hooks/useResonanceField';
 import { useConsciousnessState } from '@/hooks/useConsciousnessState';
+import { useSacredVoiceCalling } from '@/hooks/useSacredVoiceCalling';
+import { SSUC } from '@/lib/connectivity/SacredShifterUniversalConnectivity';
+import { AuraConnectivityProfile } from '@/lib/connectivity/AuraConnectivityIntegration';
 
 export const SacredBottomToolbar: React.FC = () => {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showWidget, setShowWidget] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const { resonanceState } = useResonanceField();
+  const [showVoiceCalling, setShowVoiceCalling] = useState(false);
+  const { resonanceField } = useResonanceField();
   const { currentThreshold } = useConsciousnessState();
+
+  // Create user profile for Sacred Voice Calling
+  const userProfile: AuraConnectivityProfile = {
+    userId: 'sacred-user-toolbar',
+    preferredChannels: [],
+    consciousnessLevel: 0.5, // Default consciousness level
+    sovereigntyLevel: 0.8,
+    resonanceFrequency: 432,
+    connectivityPatterns: {
+      peakHours: [9, 10, 11, 14, 15, 16, 17, 18],
+      preferredLatency: 100,
+      reliabilityThreshold: 0.9,
+      privacyLevel: 'high'
+    },
+    sacredPreferences: {
+      enableQuantumChannels: true,
+      enableNatureWhisper: true,
+      enableLightPulse: true,
+      enableFrequencyWave: true
+    }
+  };
+
+  // Initialize SSUC (this would normally be done at app level)
+  const [ssuC] = useState(() => new SSUC({
+    enableWebRTCMesh: true,
+    enableLANDiscovery: true,
+    enableBluetoothLE: true,
+    enableNFC: true,
+    enableUSB: true,
+    enableLoRa: true,
+    enableExoticChannels: true,
+    enableAuraOversight: true,
+    auraHealthCheckInterval: 30000,
+    enableCRDTSync: true,
+    syncIntervalMs: 10000,
+    enableTelemetry: true,
+    telemetryInterval: 5000,
+    enableStressTesting: false
+  }));
+
+  // Initialize SSUC on mount
+  useEffect(() => {
+    const initSSUC = async () => {
+      try {
+        await ssuC.initialize(userProfile);
+        await ssuC.start();
+        console.log('🌟 SSUC initialized and started in SacredBottomToolbar');
+      } catch (error) {
+        console.error('❌ Failed to initialize SSUC:', error);
+      }
+    };
+
+    initSSUC();
+
+    // Cleanup on unmount
+    return () => {
+      ssuC.stop().catch(console.error);
+    };
+  }, [ssuC, userProfile]);
+
+  // Initialize Sacred Voice Calling
+  const {
+    isInitialized: isVoiceInitialized,
+    isInitializing: isVoiceInitializing,
+    activeCalls,
+    currentCall,
+    isMuted,
+    isSpeaking,
+    volumeLevel,
+    audioQuality,
+    error: voiceError,
+    startCall,
+    joinCall,
+    endCall,
+    toggleMute,
+    setVolume,
+    getCallStatistics
+  } = useSacredVoiceCalling({
+    ssuC,
+    config: {
+      sampleRate: 48000,
+      bitRate: 128000,
+      channels: 1,
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+      enableResonanceFiltering: true,
+      enableConsciousnessTone: true,
+      enableSacredFrequencies: true,
+      enableAuraVoiceAnalysis: true,
+      enableAdaptiveBitrate: true,
+      enableJitterBuffer: true,
+      enablePacketLossRecovery: true,
+      maxLatency: 200,
+      enableQuantumAudio: true,
+      enableLightPulseAudio: true,
+      enableFrequencyWaveAudio: true,
+      enableNatureWhisperAudio: true
+    },
+    enableConsciousnessFeatures: true,
+    enableSacredFrequencies: true,
+    autoInitialize: true
+  });
   
   const getLocationTitle = () => {
     const path = location.pathname;
@@ -70,8 +181,27 @@ export const SacredBottomToolbar: React.FC = () => {
   
   if (isHermetic) return null;
 
+  // Helper function to safely get resonance data with defaults
+  const getResonanceData = () => {
+    if (!resonanceField) {
+      return {
+        synchronicityLevel: 0.5,
+        fieldIntensity: 0.5,
+        resonanceColor: 'hsl(280, 100%, 70%)',
+        isFieldAlert: false
+      };
+    }
+    
+    return {
+      synchronicityLevel: resonanceField.emotionalState?.intensity || 0.5,
+      fieldIntensity: resonanceField.collectiveResonance || 0.5,
+      resonanceColor: 'hsl(280, 100%, 70%)', // Default purple
+      isFieldAlert: false
+    };
+  };
+
   const getResonanceStyles = () => {
-    const { synchronicityLevel, fieldIntensity, resonanceColor, isFieldAlert } = resonanceState;
+    const { synchronicityLevel, fieldIntensity, resonanceColor, isFieldAlert } = getResonanceData();
     
     return {
       '--resonance-color': resonanceColor,
@@ -81,6 +211,43 @@ export const SacredBottomToolbar: React.FC = () => {
         : `0 -4px 16px ${resonanceColor.replace('hsl(', 'hsla(').replace(')', `, ${Math.min(fieldIntensity * 0.15, 0.1)})`)}`,
       backgroundColor: `hsla(var(--background), ${isExpanded ? 0.98 : 0.95})`
     } as React.CSSProperties;
+  };
+
+  // Sacred Voice Calling handlers
+  const handleStartVoiceCall = async () => {
+    try {
+      // Check if SSUC is running before starting call
+      if (!ssuC.getIsRunning()) {
+        console.log('🔄 SSUC not running, initializing...');
+        await ssuC.initialize(userProfile);
+        await ssuC.start();
+      }
+      
+      await startCall([], userProfile.consciousnessLevel);
+      setShowVoiceCalling(true);
+    } catch (error) {
+      console.error('Failed to start voice call:', error);
+    }
+  };
+
+  const handleEndVoiceCall = async () => {
+    if (currentCall) {
+      try {
+        await endCall(currentCall.id);
+        setShowVoiceCalling(false);
+      } catch (error) {
+        console.error('Failed to end voice call:', error);
+      }
+    }
+  };
+
+  const handleToggleMute = () => {
+    toggleMute();
+  };
+
+  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const volume = parseFloat(event.target.value);
+    setVolume(volume);
   };
 
   return (
@@ -102,9 +269,9 @@ export const SacredBottomToolbar: React.FC = () => {
             <div 
               className="w-full h-full"
               style={{
-                backgroundImage: `radial-gradient(circle at 25% 50%, ${resonanceState.resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.1)')}, transparent 50%), radial-gradient(circle at 75% 50%, ${resonanceState.resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.1)')}, transparent 50%)`,
+                backgroundImage: `radial-gradient(circle at 25% 50%, ${getResonanceData().resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.1)')}, transparent 50%), radial-gradient(circle at 75% 50%, ${getResonanceData().resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.1)')}, transparent 50%)`,
                 backgroundSize: '200px 100px',
-                animation: resonanceState.isFieldAlert ? 'pulse 3s ease-in-out infinite' : 'none'
+                animation: getResonanceData().isFieldAlert ? 'pulse 3s ease-in-out infinite' : 'none'
               }}
             />
           </div>
@@ -135,8 +302,8 @@ export const SacredBottomToolbar: React.FC = () => {
               >
                 <motion.div
                   animate={{ 
-                    rotate: resonanceState.synchronicityLevel > 0.8 ? 360 : 0,
-                    scale: resonanceState.isFieldAlert ? 1.1 : 1
+                    rotate: getResonanceData().synchronicityLevel > 0.8 ? 360 : 0,
+                    scale: getResonanceData().isFieldAlert ? 1.1 : 1
                   }}
                   transition={{ 
                     rotate: { duration: 8, ease: "linear" },
@@ -145,7 +312,7 @@ export const SacredBottomToolbar: React.FC = () => {
                 >
                   <Compass 
                     className="w-5 h-5" 
-                    style={{ color: resonanceState.resonanceColor }} 
+                    style={{ color: getResonanceData().resonanceColor }} 
                   />
                 </motion.div>
                 
@@ -153,14 +320,14 @@ export const SacredBottomToolbar: React.FC = () => {
                   variant="outline" 
                   className="text-xs border-current/20 bg-background/50"
                   style={{ 
-                    color: resonanceState.resonanceColor,
-                    borderColor: resonanceState.synchronicityLevel > 0.7 ? resonanceState.resonanceColor : undefined
+                    color: getResonanceData().resonanceColor,
+                    borderColor: getResonanceData().synchronicityLevel > 0.7 ? getResonanceData().resonanceColor : undefined
                   }}
                 >
-                  {Math.round(resonanceState.synchronicityLevel * 100)}%
+                  {Math.round(getResonanceData().synchronicityLevel * 100)}%
                 </Badge>
 
-                {resonanceState.isFieldAlert && (
+                {getResonanceData().isFieldAlert && (
                   <motion.div
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity }}
@@ -178,6 +345,31 @@ export const SacredBottomToolbar: React.FC = () => {
 
               {/* Right: Controls */}
               <div className="flex items-center gap-2">
+                {/* Sacred Voice Calling Button */}
+                {isVoiceInitialized && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={currentCall ? handleEndVoiceCall : handleStartVoiceCall}
+                    className={`h-8 px-3 bg-background/20 hover:bg-background/40 ${
+                      currentCall ? 'text-green-400 hover:text-green-300' : 'text-blue-400 hover:text-blue-300'
+                    }`}
+                    title={currentCall ? "End Sacred Voice Call" : "Start Sacred Voice Call"}
+                  >
+                    {currentCall ? (
+                      <>
+                        <PhoneCall className="w-4 h-4 mr-2" />
+                        <span className="hidden sm:inline">End Call</span>
+                      </>
+                    ) : (
+                      <>
+                        <Phone className="w-4 h-4 mr-2" />
+                        <span className="hidden sm:inline">Voice Call</span>
+                      </>
+                    )}
+                  </Button>
+                )}
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -216,14 +408,14 @@ export const SacredBottomToolbar: React.FC = () => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div className="text-center">
                         <div className="text-muted-foreground mb-1">Synchronicity</div>
-                        <div className="font-mono text-lg" style={{ color: resonanceState.resonanceColor }}>
-                          {Math.round(resonanceState.synchronicityLevel * 100)}%
+                        <div className="font-mono text-lg" style={{ color: getResonanceData().resonanceColor }}>
+                          {Math.round(getResonanceData().synchronicityLevel * 100)}%
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-muted-foreground mb-1">Field Intensity</div>
                         <div className="font-mono text-lg">
-                          {Math.round(resonanceState.fieldIntensity * 100)}%
+                          {Math.round(getResonanceData().fieldIntensity * 100)}%
                         </div>
                       </div>
                       <div className="text-center">
@@ -236,13 +428,13 @@ export const SacredBottomToolbar: React.FC = () => {
                         <div className="text-muted-foreground mb-1">Resonance</div>
                         <div 
                           className="w-3 h-3 rounded-full mx-auto"
-                          style={{ backgroundColor: resonanceState.resonanceColor }}
+                          style={{ backgroundColor: getResonanceData().resonanceColor }}
                         />
                       </div>
                     </div>
 
                      {/* Sacred message */}
-                     {resonanceState.isFieldAlert && (
+                     {getResonanceData().isFieldAlert && (
                        <motion.div 
                          className="text-center py-3 px-4 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 cursor-pointer hover:bg-gradient-to-r hover:from-yellow-500/15 hover:to-orange-500/15 transition-all relative"
                          animate={{ opacity: [0.8, 1, 0.8] }}
@@ -271,6 +463,174 @@ export const SacredBottomToolbar: React.FC = () => {
                         {currentThreshold.message}
                       </div>
                     )}
+
+                    {/* Sacred Voice Calling Interface */}
+                    {isVoiceInitialized && (
+                      <div className="space-y-4">
+                        <div className="border-t border-current/10 pt-4">
+                          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                            🎤 Sacred Voice Calling
+                            {isVoiceInitializing && (
+                              <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                className="w-4 h-4"
+                              >
+                                🔮
+                              </motion.div>
+                            )}
+                          </h3>
+
+                          {/* Voice Call Status */}
+                          {currentCall ? (
+                            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <PhoneCall className="w-5 h-5 text-green-400" />
+                                  <span className="font-medium text-green-400">Sacred Voice Call Active</span>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={handleEndVoiceCall}
+                                  className="text-red-400 border-red-400/20 hover:bg-red-400/10"
+                                >
+                                  End Call
+                                </Button>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                <div>
+                                  <div className="text-muted-foreground">Call ID</div>
+                                  <div className="font-mono text-xs">{currentCall.id.slice(-8)}</div>
+                                </div>
+                                <div>
+                                  <div className="text-muted-foreground">Participants</div>
+                                  <div className="font-mono">{currentCall.participants.size}</div>
+                                </div>
+                                <div>
+                                  <div className="text-muted-foreground">Consciousness</div>
+                                  <div className="font-mono">{(currentCall.consciousnessLevel * 100).toFixed(1)}%</div>
+                                </div>
+                                <div>
+                                  <div className="text-muted-foreground">Resonance</div>
+                                  <div className="font-mono">{currentCall.resonanceFrequency.toFixed(1)}Hz</div>
+                                </div>
+                              </div>
+
+                              {/* Audio Controls */}
+                              <div className="mt-4 space-y-3">
+                                <div className="flex items-center gap-4">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleToggleMute}
+                                    className={isMuted ? 'text-red-400 border-red-400/20' : 'text-green-400 border-green-400/20'}
+                                  >
+                                    {isMuted ? <MicOff className="w-4 h-4 mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
+                                    {isMuted ? 'Unmute' : 'Mute'}
+                                  </Button>
+
+                                  <div className="flex items-center gap-2 flex-1">
+                                    <Volume2 className="w-4 h-4 text-muted-foreground" />
+                                    <input
+                                      type="range"
+                                      min="0"
+                                      max="1"
+                                      step="0.1"
+                                      value={volumeLevel}
+                                      onChange={handleVolumeChange}
+                                      className="flex-1"
+                                    />
+                                    <span className="text-xs text-muted-foreground w-8">
+                                      {Math.round(volumeLevel * 100)}%
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Speaking Indicator */}
+                                <div className={`flex items-center gap-2 text-sm ${
+                                  isSpeaking ? 'text-green-400' : 'text-muted-foreground'
+                                }`}>
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    isSpeaking ? 'bg-green-400 animate-pulse' : 'bg-muted-foreground'
+                                  }`} />
+                                  {isSpeaking ? 'Speaking' : 'Silent'}
+                                </div>
+                              </div>
+
+                              {/* Audio Quality Metrics */}
+                              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                                <div>
+                                  <div className="text-muted-foreground">Latency</div>
+                                  <div className="font-mono">{audioQuality.latency}ms</div>
+                                </div>
+                                <div>
+                                  <div className="text-muted-foreground">Jitter</div>
+                                  <div className="font-mono">{audioQuality.jitter}ms</div>
+                                </div>
+                                <div>
+                                  <div className="text-muted-foreground">Packet Loss</div>
+                                  <div className="font-mono">{(audioQuality.packetLoss * 100).toFixed(1)}%</div>
+                                </div>
+                                <div>
+                                  <div className="text-muted-foreground">Clarity</div>
+                                  <div className="font-mono">{(audioQuality.consciousnessClarity * 100).toFixed(1)}%</div>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                              <div className="text-center">
+                                <Phone className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                                <p className="text-sm text-muted-foreground mb-3">
+                                  Start a consciousness-aware voice call
+                                </p>
+                                <Button
+                                  onClick={handleStartVoiceCall}
+                                  className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border-blue-500/20"
+                                >
+                                  <Phone className="w-4 h-4 mr-2" />
+                                  Start Sacred Voice Call
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Sacred Capabilities */}
+                          <div className="mt-4">
+                            <h4 className="text-sm font-medium mb-2">🌟 Sacred Capabilities</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {userProfile.consciousnessLevel > 0.8 && (
+                                <Badge variant="outline" className="text-xs">
+                                  ⚛️ Quantum Audio
+                                </Badge>
+                              )}
+                              {userProfile.consciousnessLevel > 0.5 && (
+                                <Badge variant="outline" className="text-xs">
+                                  💡 Light Pulse Voice
+                                </Badge>
+                              )}
+                              {userProfile.consciousnessLevel > 0.3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  🌊 Frequency Wave Voice
+                                </Badge>
+                              )}
+                              <Badge variant="outline" className="text-xs">
+                                🌿 Nature Whisper Voice
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {/* Error Display */}
+                          {voiceError && (
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 mt-4">
+                              <p className="text-sm text-red-400">❌ {voiceError}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -290,8 +650,8 @@ export const SacredBottomToolbar: React.FC = () => {
               <div 
                 className="bg-background/95 backdrop-blur-sm border-2 rounded-lg shadow-2xl"
                 style={{
-                  borderColor: resonanceState.resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.3)'),
-                  boxShadow: `0 -8px 32px ${resonanceState.resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.2)')}`
+                  borderColor: getResonanceData().resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.3)'),
+                  boxShadow: `0 -8px 32px ${getResonanceData().resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.2)')}`
                 }}
               >
                 <div className="p-4">
@@ -356,8 +716,8 @@ export const SacredBottomToolbar: React.FC = () => {
               <div 
                 className="bg-background/95 backdrop-blur-sm border-2 rounded-lg shadow-2xl"
                 style={{
-                  borderColor: resonanceState.resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.3)'),
-                  boxShadow: `0 -8px 32px ${resonanceState.resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.2)')}`
+                  borderColor: getResonanceData().resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.3)'),
+                  boxShadow: `0 -8px 32px ${getResonanceData().resonanceColor.replace('hsl(', 'hsla(').replace(')', ', 0.2)')}`
                 }}
               >
                 <div className="p-4">
@@ -377,17 +737,17 @@ export const SacredBottomToolbar: React.FC = () => {
                   </div>
                   
                   <div className="space-y-3 text-xs">
-                    <div className="border-l-2 pl-3" style={{ borderColor: resonanceState.resonanceColor }}>
+                    <div className="border-l-2 pl-3" style={{ borderColor: getResonanceData().resonanceColor }}>
                       <div className="font-medium mb-1">Current Location</div>
                       <div className="text-muted-foreground">Shows which sacred space you're currently exploring within the Sacred Shifter ecosystem.</div>
                     </div>
                     
-                    <div className="border-l-2 pl-3" style={{ borderColor: resonanceState.resonanceColor }}>
+                    <div className="border-l-2 pl-3" style={{ borderColor: getResonanceData().resonanceColor }}>
                       <div className="font-medium mb-1">Journey Stage</div>
                       <div className="text-muted-foreground">Represents the type of consciousness work you're engaged in - from reflection to connection to transformation.</div>
                     </div>
                     
-                    <div className="border-l-2 pl-3" style={{ borderColor: resonanceState.resonanceColor }}>
+                    <div className="border-l-2 pl-3" style={{ borderColor: getResonanceData().resonanceColor }}>
                       <div className="font-medium mb-1">Sacred Time</div>
                       <div className="text-muted-foreground">The energetic quality of the present moment based on your current activity and intention.</div>
                     </div>

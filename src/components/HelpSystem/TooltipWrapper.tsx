@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, forwardRef } from 'react';
 import {
   Tooltip,
   TooltipContent,
@@ -14,13 +14,13 @@ interface TooltipWrapperProps {
   disabled?: boolean;
 }
 
-export function TooltipWrapper({ 
+export const TooltipWrapper = forwardRef<HTMLDivElement, TooltipWrapperProps>(({ 
   children, 
   content, 
   side = "top", 
   delayDuration = 300,
   disabled = false 
-}: TooltipWrapperProps) {
+}, ref) => {
   if (disabled) {
     return <>{children}</>;
   }
@@ -29,7 +29,9 @@ export function TooltipWrapper({
     <TooltipProvider delayDuration={delayDuration}>
       <Tooltip>
         <TooltipTrigger asChild>
-          {children}
+          <div ref={ref}>
+            {children}
+          </div>
         </TooltipTrigger>
         <TooltipContent side={side} className="max-w-xs">
           <p className="text-sm">{content}</p>
@@ -37,4 +39,6 @@ export function TooltipWrapper({
       </Tooltip>
     </TooltipProvider>
   );
-}
+});
+
+TooltipWrapper.displayName = "TooltipWrapper";

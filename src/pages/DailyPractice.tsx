@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDailyRoutine } from '@/providers/DailyRoutineProvider';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { GuidedPracticeFlow } from '@/components/practice/GuidedPracticeFlow';
+import { TodaysPracticeInterface } from '@/components/DailyRitual/TodaysPracticeInterface';
 
 export default function DailyPractice() {
   const navigate = useNavigate();
@@ -25,17 +25,6 @@ export default function DailyPractice() {
     );
   }
 
-  const { state } = dailyRoutine;
-
-  const handleCompletePractice = (reflection?: string) => {
-    dailyRoutine.completeStep(todaysStep.id, reflection);
-    navigate('/dashboard');
-  };
-
-  const handleExit = () => {
-    navigate('/dashboard');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -49,29 +38,24 @@ export default function DailyPractice() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/dashboard')}
             className="rounded-full"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-foreground">Today's Sacred Practice</h1>
-            <p className="text-muted-foreground">{todaysStep.id} • {new Date().toLocaleDateString()}</p>
+            <p className="text-muted-foreground">{new Date().toLocaleDateString()}</p>
           </div>
         </motion.div>
 
-        {/* Guided Practice Flow */}
+        {/* Streamlined Practice Interface */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
-          <GuidedPracticeFlow
-            step={todaysStep}
-            streak={state.streak}
-            onComplete={handleCompletePractice}
-            onExit={handleExit}
-          />
+          <TodaysPracticeInterface />
         </motion.div>
       </div>
     </div>
