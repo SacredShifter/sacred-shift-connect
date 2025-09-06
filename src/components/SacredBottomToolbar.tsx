@@ -23,7 +23,9 @@ import {
   Users,
   Home,
   MessageCircle,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  AlertTriangle,
+  Shield
 } from 'lucide-react';
 import { WhereAmIWidget } from '@/components/SacredSitemap/WhereAmIWidget';
 import { Slogan } from '@/components/ui/Slogan';
@@ -34,15 +36,24 @@ import { SSUC } from '@/lib/connectivity/SacredShifterUniversalConnectivity';
 import { AuraConnectivityProfile } from '@/lib/connectivity/AuraConnectivityIntegration';
 import RecipientPicker from '@/components/SacredCalling/RecipientPicker';
 import CallPreview from '@/components/SacredCalling/CallPreview';
+import { ICEContactManager } from '@/components/ICE/ICEContactManager';
+import { SacredICECalling } from '@/lib/connectivity/SacredICECalling';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 export const SacredBottomToolbar: React.FC = () => {
   const location = useLocation();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showWidget, setShowWidget] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showVoiceCalling, setShowVoiceCalling] = useState(false);
   const [showRecipientPicker, setShowRecipientPicker] = useState(false);
   const [showCallPreview, setShowCallPreview] = useState(false);
+  const [showICEManager, setShowICEManager] = useState(false);
+  const [iceActivating, setIceActivating] = useState(false);
+  const [sacredICECalling, setSacredICECalling] = useState<SacredICECalling | null>(null);
   const [selectedRecipient, setSelectedRecipient] = useState<{
     id: string;
     name: string;
@@ -194,6 +205,77 @@ export const SacredBottomToolbar: React.FC = () => {
       averageResonanceFrequency: 0
     })
   } = voiceCalling || {};
+
+  // Initialize Sacred ICE Calling
+  useEffect(() => {
+    if (user?.id && voiceCalling && !sacredICECalling) {
+      try {
+        const iceInstance = new SacredICECalling(ssuC, voiceCalling);
+        setSacredICECalling(iceInstance);
+        console.log('🚨 Sacred ICE Calling initialized');
+      } catch (error) {
+        console.error('❌ Failed to initialize ICE calling:', error);
+      }
+    }
+  }, [user?.id, voiceCalling, ssuC, sacredICECalling]);
+
+  // ICE Emergency Handler - Long press for 2 seconds
+  const handleICEEmergency = async () => {
+    if (!user?.id || !sacredICECalling || iceActivating) return;
+
+    try {
+      setIceActivating(true);
+      
+      const result = await sacredICECalling.triggerEmergencyCall(
+        user.id,
+        "🚨 EMERGENCY: I need immediate assistance! Please respond as soon as possible.",
+        true // Share location
+      );
+
+      if (result.success) {
+        toast({
+          title: "🚨 Emergency Alert Sent",
+          description: `Contacted ${result.activations.length} emergency contacts`,
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: "❌ Emergency Alert Failed",
+          description: result.errors.join(', ') || "No emergency contacts configured",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('❌ ICE emergency failed:', error);
+      toast({
+        title: "❌ Emergency System Error",
+        description: "Please call emergency services directly",
+        variant: "destructive"
+      });
+    } finally {
+      setIceActivating(false);
+    }
+  };
+
+  // ICE Long Press Handler
+  const [icePressed, setIcePressed] = useState(false);
+  const [icePressTimer, setIcePressTimer] = useState<NodeJS.Timeout | null>(null);
+
+  const handleICEPressStart = () => {
+    setIcePressed(true);
+    const timer = setTimeout(() => {
+      handleICEEmergency();
+    }, 2000); // 2 second long press
+    setIcePressTimer(timer);
+  };
+
+  const handleICEPressEnd = () => {
+    setIcePressed(false);
+    if (icePressTimer) {
+      clearTimeout(icePressTimer);
+      setIcePressTimer(null);
+    }
+  };
   
   const getLocationTitle = () => {
     const path = location.pathname;
@@ -501,6 +583,43 @@ export const SacredBottomToolbar: React.FC = () => {
                   {currentCall ? <PhoneCall className="w-4 h-4" /> : <Phone className="w-4 h-4" />}
                 </Button>
 
+                {/* ICE Emergency Button - Long press to activate */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onMouseDown={handleICEPressStart}
+                  onMouseUp={handleICEPressEnd}
+                  onMouseLeave={handleICEPressEnd}
+                  onTouchStart={handleICEPressStart}
+                  onTouchEnd={handleICEPressEnd}
+                  className={`h-8 px-2 relative overflow-hidden ${
+                    iceActivating 
+                      ? 'text-red-100 bg-red-500 animate-pulse' 
+                      : icePressed 
+                        ? 'text-red-400 bg-red-500/30' 
+                        : 'text-red-500 hover:text-red-400 bg-background/20 hover:bg-red-500/10'
+                  }`}
+                  title="Emergency Contact (ICE) - Hold for 2 seconds to activate"
+                  disabled={iceActivating || !user?.id}
+                >
+                  {iceActivating ? (
+                    <AlertTriangle className="w-4 h-4 animate-pulse" />
+                  ) : (
+                    <Shield className="w-4 h-4" />
+                  )}
+                  
+                  {/* Progress indicator for long press */}
+                  {icePressed && !iceActivating && (
+                    <motion.div
+                      className="absolute inset-0 bg-red-500/20"
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 2, ease: "linear" }}
+                      style={{ transformOrigin: "left" }}
+                    />
+                  )}
+                </Button>
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -777,6 +896,78 @@ export const SacredBottomToolbar: React.FC = () => {
                               <p className="text-sm text-red-400">❌ {voiceError}</p>
                             </div>
                           )}
+                        </div>
+
+                        {/* Sacred ICE (Emergency Contacts) Manager */}
+                        <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-4 mt-4">
+                          <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                            🚨 Emergency Contacts (ICE)
+                            <Badge variant="outline" className="text-xs">
+                              In Case of Emergency
+                            </Badge>
+                          </h3>
+                          
+                          <div className="space-y-3">
+                            <p className="text-xs text-muted-foreground">
+                              Configure trusted contacts who can be reached instantly during emergencies,
+                              bypassing all sovereignty and consciousness filters.
+                            </p>
+                            
+                            <div className="flex gap-2">
+                              <ICEContactManager 
+                                currentUserConsciousness={userProfile.consciousnessLevel}
+                                currentUserSovereignty={userProfile.sovereigntyLevel}
+                              />
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onMouseDown={handleICEPressStart}
+                                onMouseUp={handleICEPressEnd}
+                                onMouseLeave={handleICEPressEnd}
+                                onTouchStart={handleICEPressStart}
+                                onTouchEnd={handleICEPressEnd}
+                                className={`relative ${
+                                  iceActivating 
+                                    ? 'text-red-100 bg-red-500 animate-pulse' 
+                                    : icePressed 
+                                      ? 'text-red-100 bg-red-600' 
+                                      : 'text-red-500 border-red-500/30 hover:bg-red-500/10'
+                                }`}
+                                disabled={iceActivating || !user?.id}
+                              >
+                                {iceActivating ? (
+                                  <>
+                                    <AlertTriangle className="w-4 h-4 mr-2 animate-pulse" />
+                                    Activating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Shield className="w-4 h-4 mr-2" />
+                                    Test Emergency
+                                  </>
+                                )}
+                                
+                                {/* Long press progress indicator */}
+                                {icePressed && !iceActivating && (
+                                  <motion.div
+                                    className="absolute inset-0 bg-red-500/30 rounded"
+                                    initial={{ scaleX: 0 }}
+                                    animate={{ scaleX: 1 }}
+                                    transition={{ duration: 2, ease: "linear" }}
+                                    style={{ transformOrigin: "left" }}
+                                  />
+                                )}
+                              </Button>
+                            </div>
+                            
+                            <div className="text-xs text-amber-600 bg-amber-500/10 border border-amber-500/20 rounded p-2">
+                              <strong>Hold for 2 seconds to activate emergency contact system.</strong>
+                              <br />
+                              This will immediately contact all configured emergency contacts via Sacred Shifter WebRTC, 
+                              SMS, and email with your location and emergency message.
+                            </div>
+                          </div>
                         </div>
                       </div>
                   </div>

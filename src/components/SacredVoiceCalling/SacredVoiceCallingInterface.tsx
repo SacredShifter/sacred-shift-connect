@@ -1,325 +1,424 @@
-// Sacred Voice Calling Interface Component
-// Consciousness-aware voice calling UI that transcends traditional telephony
+// Sacred Voice Calling Interface
+// Connects RecipientPicker → CallPreview → SacredVoiceCalling flow
+// Implements the complete WebRTC calling experience with consciousness awareness
 
-import React, { useState, useEffect } from 'react';
-import { useSacredVoiceCalling, SacredVoiceCallButton, SacredVoiceCallStatus } from '@/hooks/useSacredVoiceCalling';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  Phone, 
+  PhoneCall, 
+  PhoneOff, 
+  Mic, 
+  MicOff, 
+  Video, 
+  VideoOff,
+  Users,
+  Settings,
+  X,
+  CheckCircle,
+  AlertTriangle,
+  Zap,
+  Heart,
+  Shield
+} from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { RecipientPicker } from '@/components/SacredCalling/RecipientPicker';
+import { CallPreview } from '@/components/SacredCalling/CallPreview';
+import { SacredVoiceCalling } from '@/lib/connectivity/SacredVoiceCalling';
 import { SSUC } from '@/lib/connectivity/SacredShifterUniversalConnectivity';
-import { AuraConnectivityProfile } from '@/lib/connectivity/AuraConnectivityIntegration';
+
+interface SacredRecipient {
+  id: string;
+  name: string;
+  avatar?: string;
+  consciousnessLevel: number;
+  sovereigntyLevel: number;
+  resonanceFrequency: number;
+  circleId?: string;
+  circleName?: string;
+  isOnline: boolean;
+  lastSeen: string;
+  sacredCapabilities: string[];
+  resonanceMatch: number;
+  isCallable: boolean;
+  callabilityReason?: string;
+}
 
 interface SacredVoiceCallingInterfaceProps {
-  ssuC: SSUC;
-  userProfile: AuraConnectivityProfile;
   className?: string;
 }
 
-export function SacredVoiceCallingInterface({
-  ssuC,
-  userProfile,
+export const SacredVoiceCallingInterface: React.FC<SacredVoiceCallingInterfaceProps> = ({
   className = ''
-}: SacredVoiceCallingInterfaceProps) {
-  const [participantIds, setParticipantIds] = useState<string[]>([]);
-  const [consciousnessLevel, setConsciousnessLevel] = useState(userProfile.consciousnessLevel);
+}) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  
+  // State management
+  const [isRecipientPickerOpen, setIsRecipientPickerOpen] = useState(false);
+  const [isCallPreviewOpen, setIsCallPreviewOpen] = useState(false);
+  const [selectedRecipient, setSelectedRecipient] = useState<SacredRecipient | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
-  const [currentCallId, setCurrentCallId] = useState<string>();
+  const [callId, setCallId] = useState<string | null>(null);
+  const [callDuration, setCallDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(false);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  
+  // Consciousness and sovereignty levels (would come from user profile)
+  const [currentUserConsciousness] = useState(0.7);
+  const [currentUserSovereignty] = useState(0.8);
+  const [currentUserResonance] = useState(432);
+  
+  // Sacred Voice Calling system
+  const [sacredVoiceCalling, setSacredVoiceCalling] = useState<SacredVoiceCalling | null>(null);
+  const [ssuC, setSsuC] = useState<SSUC | null>(null);
 
-  const {
-    isInitialized,
-    isInitializing,
-    activeCalls,
-    currentCall,
-    isMuted,
-    isSpeaking,
-    volumeLevel,
-    audioQuality,
-    error,
-    startCall,
-    joinCall,
-    endCall,
-    toggleMute,
-    setVolume,
-    getCallStatistics
-  } = useSacredVoiceCalling({
-    ssuC,
-    enableConsciousnessFeatures: true,
-    enableSacredFrequencies: true,
-    autoInitialize: true
-  });
+  // Initialize Sacred Voice Calling system
+  useEffect(() => {
+    const initializeVoiceCalling = async () => {
+      try {
+        // Initialize SSUC
+        const ssuCInstance = new SSUC();
+        await ssuCInstance.initialize();
+        setSsuC(ssuCInstance);
 
-  // Handle call start
-  const handleCallStart = async (participantIds: string[], consciousnessLevel: number) => {
-    try {
-      const callId = await startCall(participantIds, consciousnessLevel);
-      setCurrentCallId(callId);
-      setIsCallActive(true);
-    } catch (error) {
-      console.error('Failed to start call:', error);
+        // Initialize Sacred Voice Calling
+        const voiceCallingConfig = {
+          sampleRate: 48000,
+          bitRate: 128000,
+          channels: 2,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          enableResonanceFiltering: true,
+          enableConsciousnessTone: true,
+          enableSacredFrequencies: true,
+          enableAuraVoiceAnalysis: true,
+          enableAdaptiveBitrate: true,
+          enableJitterBuffer: true,
+          enablePacketLossRecovery: true,
+          maxLatency: 200,
+          enableQuantumAudio: true,
+          enableLightPulseAudio: true,
+          enableFrequencyWaveAudio: true,
+          enableNatureWhisperAudio: true
+        };
+
+        const voiceCallingInstance = new SacredVoiceCalling(ssuCInstance, voiceCallingConfig);
+        await voiceCallingInstance.initialize();
+        setSacredVoiceCalling(voiceCallingInstance);
+
+        console.log('🎤 Sacred Voice Calling Interface initialized');
+      } catch (error) {
+        console.error('❌ Failed to initialize Sacred Voice Calling:', error);
+        toast({
+          title: "Initialization Error",
+          description: "Failed to initialize voice calling system",
+          variant: "destructive"
+        });
+      }
+    };
+
+    if (user) {
+      initializeVoiceCalling();
     }
-  };
+
+    return () => {
+      if (sacredVoiceCalling) {
+        sacredVoiceCalling.shutdown();
+      }
+      if (ssuC) {
+        ssuC.shutdown();
+      }
+    };
+  }, [user, toast]);
+
+  // Call duration timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isCallActive && isConnected) {
+      interval = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isCallActive, isConnected]);
+
+  // Handle recipient selection
+  const handleRecipientSelected = useCallback((recipient: SacredRecipient) => {
+    setSelectedRecipient(recipient);
+    setIsRecipientPickerOpen(false);
+    setIsCallPreviewOpen(true);
+  }, []);
+
+  // Handle call initiation
+  const handleStartCall = useCallback(async (recipient: SacredRecipient) => {
+    if (!sacredVoiceCalling) {
+      toast({
+        title: "Error",
+        description: "Voice calling system not initialized",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsCallPreviewOpen(false);
+      setIsCallActive(true);
+      
+      // Get user media
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+      
+      setLocalStream(stream);
+      
+      // Initiate call
+      const newCallId = await sacredVoiceCalling.initiateCall([recipient.id], currentUserConsciousness);
+      setCallId(newCallId);
+      
+      toast({
+        title: "Call Initiated",
+        description: `Calling ${recipient.name}...`
+      });
+      
+    } catch (error) {
+      console.error('❌ Failed to start call:', error);
+      toast({
+        title: "Call Failed",
+        description: "Could not start call. Please check permissions.",
+        variant: "destructive"
+      });
+      setIsCallActive(false);
+    }
+  }, [sacredVoiceCalling, currentUserConsciousness, toast]);
 
   // Handle call end
-  const handleCallEnd = async (callId: string) => {
-    try {
-      await endCall(callId);
-      setCurrentCallId(undefined);
-      setIsCallActive(false);
-    } catch (error) {
-      console.error('Failed to end call:', error);
+  const handleEndCall = useCallback(async () => {
+    if (sacredVoiceCalling && callId) {
+      try {
+        await sacredVoiceCalling.endCall(callId);
+        
+        // Stop local stream
+        if (localStream) {
+          localStream.getTracks().forEach(track => track.stop());
+        }
+        
+        setIsCallActive(false);
+        setCallId(null);
+        setCallDuration(0);
+        setLocalStream(null);
+        setRemoteStream(null);
+        setIsConnected(false);
+        setSelectedRecipient(null);
+        
+        toast({
+          title: "Call Ended",
+          description: "Call has been ended"
+        });
+      } catch (error) {
+        console.error('❌ Failed to end call:', error);
+      }
     }
-  };
+  }, [sacredVoiceCalling, callId, localStream, toast]);
 
   // Handle mute toggle
-  const handleMuteToggle = () => {
-    toggleMute();
+  const handleToggleMute = useCallback(() => {
+    if (localStream) {
+      const audioTracks = localStream.getAudioTracks();
+      audioTracks.forEach(track => {
+        track.enabled = isMuted;
+      });
+      setIsMuted(!isMuted);
+    }
+  }, [localStream, isMuted]);
+
+  // Handle video toggle
+  const handleToggleVideo = useCallback(() => {
+    if (localStream) {
+      const videoTracks = localStream.getVideoTracks();
+      videoTracks.forEach(track => {
+        track.enabled = isVideoEnabled;
+      });
+      setIsVideoEnabled(!isVideoEnabled);
+    }
+  }, [localStream, isVideoEnabled]);
+
+  // Format call duration
+  const formatCallDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Handle volume change
-  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const volume = parseFloat(event.target.value);
-    setVolume(volume);
-  };
-
-  // Handle consciousness level change
-  const handleConsciousnessChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const level = parseFloat(event.target.value);
-    setConsciousnessLevel(level);
-  };
-
-  // Get call statistics
-  const statistics = getCallStatistics();
-
-  if (isInitializing) {
+  if (!user) {
     return (
-      <div className={`sacred-voice-calling-interface ${className}`}>
-        <div className="loading">
-          <div className="sacred-spinner">🔮</div>
-          <p>Initializing Sacred Voice Calling...</p>
+      <Card className={`p-6 text-center ${className}`}>
+        <div className="flex items-center justify-center mb-4">
+          <Shield className="w-8 h-8 text-muted-foreground" />
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={`sacred-voice-calling-interface ${className}`}>
-        <div className="error">
-          <h3>❌ Sacred Voice Calling Error</h3>
-          <p>{error}</p>
-          <button onClick={() => window.location.reload()}>
-            🔄 Retry
-          </button>
-        </div>
-      </div>
+        <h3 className="text-lg font-semibold mb-2">Authentication Required</h3>
+        <p className="text-muted-foreground">
+          Please sign in to access sacred voice calling features
+        </p>
+      </Card>
     );
   }
 
   return (
-    <div className={`sacred-voice-calling-interface ${className}`}>
-      <div className="sacred-header">
-        <h2>🎤 Sacred Voice Calling</h2>
-        <p>Consciousness-aware voice communication that transcends traditional telephony</p>
-      </div>
-
-      {/* Call Statistics */}
-      <div className="call-statistics">
-        <h3>📊 Call Statistics</h3>
-        <div className="stats-grid">
-          <div className="stat">
-            <span className="label">Total Calls:</span>
-            <span className="value">{statistics.totalCalls}</span>
+    <div className={`space-y-4 ${className}`}>
+      {/* Header */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Phone className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">Sacred Voice Calling</h2>
+              <p className="text-sm text-muted-foreground">
+                Consciousness-aware voice communication
+              </p>
+            </div>
           </div>
-          <div className="stat">
-            <span className="label">Active Calls:</span>
-            <span className="value">{statistics.activeCalls}</span>
-          </div>
-          <div className="stat">
-            <span className="label">Avg Duration:</span>
-            <span className="value">{Math.round(statistics.averageDuration / 1000)}s</span>
-          </div>
-          <div className="stat">
-            <span className="label">Avg Consciousness:</span>
-            <span className="value">{(statistics.averageConsciousnessLevel * 100).toFixed(1)}%</span>
-          </div>
-          <div className="stat">
-            <span className="label">Avg Resonance:</span>
-            <span className="value">{statistics.averageResonanceFrequency.toFixed(1)}Hz</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Call Controls */}
-      <div className="call-controls">
-        <h3>🔮 Call Controls</h3>
-        
-        {/* Consciousness Level Slider */}
-        <div className="control-group">
-          <label htmlFor="consciousness-level">
-            Consciousness Level: {(consciousnessLevel * 100).toFixed(1)}%
-          </label>
-          <input
-            id="consciousness-level"
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            value={consciousnessLevel}
-            onChange={handleConsciousnessChange}
-            className="consciousness-slider"
-          />
-          <div className="consciousness-labels">
-            <span>Basic</span>
-            <span>Awakened</span>
-            <span>Enlightened</span>
-          </div>
-        </div>
-
-        {/* Participant IDs Input */}
-        <div className="control-group">
-          <label htmlFor="participant-ids">
-            Participant IDs (comma-separated):
-          </label>
-          <input
-            id="participant-ids"
-            type="text"
-            value={participantIds.join(', ')}
-            onChange={(e) => setParticipantIds(e.target.value.split(',').map(id => id.trim()).filter(Boolean))}
-            placeholder="sacred-soul-123, sacred-soul-456"
-            className="participant-input"
-          />
-        </div>
-
-        {/* Call Button */}
-        <div className="call-button-container">
-          <SacredVoiceCallButton
-            onCallStart={handleCallStart}
-            onCallEnd={handleCallEnd}
-            isCallActive={isCallActive}
-            callId={currentCallId}
-            className="sacred-call-button"
-          />
-        </div>
-      </div>
-
-      {/* Current Call Status */}
-      {currentCall && (
-        <div className="current-call">
-          <SacredVoiceCallStatus
-            call={currentCall}
-            className="call-status"
-          />
-        </div>
-      )}
-
-      {/* Audio Controls */}
-      {isCallActive && (
-        <div className="audio-controls">
-          <h3>🎵 Audio Controls</h3>
           
-          {/* Mute Button */}
-          <button
-            onClick={handleMuteToggle}
-            className={`mute-button ${isMuted ? 'muted' : 'unmuted'}`}
-          >
-            {isMuted ? '🔇 Unmute' : '🎤 Mute'}
-          </button>
-
-          {/* Volume Slider */}
-          <div className="volume-control">
-            <label htmlFor="volume">
-              Volume: {(volumeLevel * 100).toFixed(0)}%
-            </label>
-            <input
-              id="volume"
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={volumeLevel}
-              onChange={handleVolumeChange}
-              className="volume-slider"
-            />
-          </div>
-
-          {/* Speaking Indicator */}
-          <div className={`speaking-indicator ${isSpeaking ? 'speaking' : 'silent'}`}>
-            {isSpeaking ? '🗣️ Speaking' : '🤫 Silent'}
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">
+              {currentUserConsciousness * 100}% consciousness
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {currentUserSovereignty * 100}% sovereignty
+            </Badge>
           </div>
         </div>
+      </Card>
+
+      {/* Call Interface */}
+      {isCallActive ? (
+        <Card className="p-6">
+          <div className="text-center space-y-4">
+            {/* Call Status */}
+            <div className="flex items-center justify-center gap-2">
+              {isConnected ? (
+                <CheckCircle className="w-5 h-5 text-green-400" />
+              ) : (
+                <AlertTriangle className="w-5 h-5 text-yellow-400" />
+              )}
+              <span className="text-sm font-medium">
+                {isConnected ? 'Connected' : 'Connecting...'}
+              </span>
+            </div>
+
+            {/* Call Duration */}
+            {isConnected && (
+              <div className="text-2xl font-mono">
+                {formatCallDuration(callDuration)}
+              </div>
+            )}
+
+            {/* Remote User Info */}
+            {selectedRecipient && (
+              <div className="flex items-center justify-center gap-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={selectedRecipient.avatar} />
+                  <AvatarFallback>
+                    {selectedRecipient.name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-left">
+                  <div className="font-semibold">{selectedRecipient.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {selectedRecipient.circleName}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Call Controls */}
+            <div className="flex items-center justify-center gap-4">
+              <Button
+                variant={isMuted ? "destructive" : "outline"}
+                size="sm"
+                onClick={handleToggleMute}
+              >
+                {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </Button>
+              
+              <Button
+                variant={isVideoEnabled ? "default" : "outline"}
+                size="sm"
+                onClick={handleToggleVideo}
+              >
+                {isVideoEnabled ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
+              </Button>
+              
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleEndCall}
+              >
+                <PhoneOff className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ) : (
+        /* Call Initiation */
+        <Card className="p-6">
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Zap className="w-6 h-6 text-primary" />
+              <h3 className="text-lg font-semibold">Initiate Sacred Call</h3>
+            </div>
+            
+            <p className="text-muted-foreground mb-6">
+              Connect with souls through consciousness-aware voice communication
+            </p>
+            
+            <Button
+              onClick={() => setIsRecipientPickerOpen(true)}
+              className="w-full"
+              size="lg"
+            >
+              <PhoneCall className="w-4 h-4 mr-2" />
+              Select Sacred Recipient
+            </Button>
+          </div>
+        </Card>
       )}
 
-      {/* Audio Quality Metrics */}
-      <div className="audio-quality-metrics">
-        <h3>📈 Audio Quality</h3>
-        <div className="quality-grid">
-          <div className="quality-metric">
-            <span className="label">Latency:</span>
-            <span className="value">{audioQuality.latency}ms</span>
-          </div>
-          <div className="quality-metric">
-            <span className="label">Jitter:</span>
-            <span className="value">{audioQuality.jitter}ms</span>
-          </div>
-          <div className="quality-metric">
-            <span className="label">Packet Loss:</span>
-            <span className="value">{(audioQuality.packetLoss * 100).toFixed(1)}%</span>
-          </div>
-          <div className="quality-metric">
-            <span className="label">Consciousness Clarity:</span>
-            <span className="value">{(audioQuality.consciousnessClarity * 100).toFixed(1)}%</span>
-          </div>
-          <div className="quality-metric">
-            <span className="label">Resonance Harmony:</span>
-            <span className="value">{(audioQuality.resonanceHarmony * 100).toFixed(1)}%</span>
-          </div>
-        </div>
-      </div>
+      {/* Recipient Picker Modal */}
+      <RecipientPicker
+        isOpen={isRecipientPickerOpen}
+        onClose={() => setIsRecipientPickerOpen(false)}
+        onRecipientSelected={handleRecipientSelected}
+        currentUserConsciousness={currentUserConsciousness}
+        currentUserSovereignty={currentUserSovereignty}
+      />
 
-      {/* Sacred Capabilities */}
-      <div className="sacred-capabilities">
-        <h3>🌟 Sacred Capabilities</h3>
-        <div className="capabilities-list">
-          {userProfile.consciousnessLevel > 0.8 && (
-            <div className="capability quantum">
-              <span className="icon">⚛️</span>
-              <span className="name">Quantum Audio</span>
-              <span className="description">Instant consciousness transfer</span>
-            </div>
-          )}
-          {userProfile.consciousnessLevel > 0.5 && (
-            <div className="capability light">
-              <span className="icon">💡</span>
-              <span className="name">Light Pulse Voice</span>
-              <span className="description">Visual voice communication</span>
-            </div>
-          )}
-          {userProfile.consciousnessLevel > 0.3 && (
-            <div className="capability frequency">
-              <span className="icon">🌊</span>
-              <span className="name">Frequency Wave Voice</span>
-              <span className="description">Audio resonance communication</span>
-            </div>
-          )}
-          <div className="capability nature">
-            <span className="icon">🌿</span>
-            <span className="name">Nature Whisper Voice</span>
-            <span className="description">Environmental voice communication</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Sacred Engineering Philosophy */}
-      <div className="sacred-philosophy">
-        <h3>🔮 Sacred Engineering Philosophy</h3>
-        <blockquote>
-          "Where a Telco sees 'users' on a billing sheet, Sacred Shifter sees souls on a resonance field.
-          Where a Telco builds towers, Sacred Shifter builds universes."
-        </blockquote>
-        <p>
-          Our voice calling system transcends traditional telephony through consciousness-aware audio processing,
-          sacred frequency enhancement, and universal connectivity across every possible channel.
-        </p>
-      </div>
+      {/* Call Preview Modal */}
+      <CallPreview
+        isOpen={isCallPreviewOpen}
+        recipient={selectedRecipient}
+        onClose={() => setIsCallPreviewOpen(false)}
+        onStartCall={handleStartCall}
+        currentUserConsciousness={currentUserConsciousness}
+        currentUserSovereignty={currentUserSovereignty}
+        currentUserResonance={currentUserResonance}
+      />
     </div>
   );
-}
+};
 
 export default SacredVoiceCallingInterface;

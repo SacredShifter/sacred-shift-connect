@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { FeaturedContentSection } from '@/components/FeaturedContentSection';
+import { FelonyPrincipleDisplay } from '@/components/Sacred/FelonyPrincipleDisplay';
 import { 
   MessageCircle, 
   BookOpen, 
@@ -267,6 +268,16 @@ const Index = () => {
             This is not social media. It is a living mandala where geometry, breath, sound, 
             and collective intention become technology for remembering who we are.
           </p>
+        </div>
+
+        {/* Felony Principle Display */}
+        <div className="mb-12">
+          <FelonyPrincipleDisplay 
+            context="general" 
+            showDetails={true} 
+            isCollapsible={true}
+            className="max-w-4xl mx-auto"
+          />
         </div>
 
 

@@ -163,19 +163,30 @@ export class SacredShifterUniversalConnectivity {
 
     // Use Aura to select optimal channel if available
     if (this.auraIntegration) {
-      const availableChannels = this.orchestrator.getActiveChannels();
-      const channelHealth = this.orchestrator.getChannelHealth();
-      
-      const decision = this.auraIntegration.makeConnectivityDecision(
-        message,
-        availableChannels,
-        channelHealth
-      );
+      try {
+        const availableChannels = this.orchestrator.getActiveChannels();
+        const channelHealth = this.orchestrator.getChannelHealth();
+        
+        // Defensive check for valid data
+        if (!availableChannels || !Array.isArray(availableChannels)) {
+          console.warn('⚠️ No active channels available, using default channel');
+          message.channel = 'webrtc';
+        } else {
+          const decision = this.auraIntegration.makeConnectivityDecision(
+            message,
+            availableChannels,
+            channelHealth
+          );
 
-      // Override message channel with Aura's decision
-      message.channel = decision.channel;
-      
-      console.log(`🔮 Aura selected channel: ${decision.channel} (confidence: ${decision.confidence.toFixed(2)})`);
+          // Override message channel with Aura's decision
+          message.channel = decision.channel;
+          
+          console.log(`🔮 Aura selected channel: ${decision.channel} (confidence: ${decision.confidence.toFixed(2)})`);
+        }
+      } catch (error) {
+        console.warn('⚠️ Aura integration failed, using default channel:', error);
+        message.channel = 'webrtc';
+      }
     }
 
     await this.orchestrator.sendMessage(message);

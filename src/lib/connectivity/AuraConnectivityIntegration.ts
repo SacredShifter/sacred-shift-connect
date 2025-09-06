@@ -161,6 +161,33 @@ export class AuraConnectivityIntegration {
     availableChannels: ConnectivityChannel[],
     channelHealth: Map<ConnectivityChannel, ConnectivityHealth>
   ): AuraConnectivityDecision {
+    // Defensive code: handle undefined or invalid inputs
+    if (!availableChannels || !Array.isArray(availableChannels)) {
+      console.error('❌ No connectivity candidates provided or invalid format');
+      return {
+        channel: 'webrtc' as ConnectivityChannel,
+        reason: 'Fallback due to no available channels',
+        confidence: 0.1,
+        alternatives: [],
+        expectedLatency: 1000,
+        expectedReliability: 0.1,
+        consciousnessAlignment: 0.1
+      };
+    }
+
+    if (!channelHealth || !(channelHealth instanceof Map)) {
+      console.error('❌ Invalid channel health data provided');
+      return {
+        channel: 'webrtc' as ConnectivityChannel,
+        reason: 'Fallback due to invalid health data',
+        confidence: 0.1,
+        alternatives: [],
+        expectedLatency: 1000,
+        expectedReliability: 0.1,
+        consciousnessAlignment: 0.1
+      };
+    }
+
     // Score each available channel based on consciousness factors
     const channelScores = new Map<ConnectivityChannel, number>();
 

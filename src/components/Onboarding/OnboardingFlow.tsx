@@ -10,6 +10,7 @@ import { ToolsIntroduction } from './ToolsIntroduction';
 import { GaiaAnchor } from './GaiaAnchor';
 import { SovereigntyReminder } from './SovereigntyReminder';
 import { AuraIntroduction } from './AuraIntroduction';
+import { FelonyPrincipleIntroduction } from './FelonyPrincipleIntroduction';
 import { FirstStepInvitation } from './FirstStepInvitation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,6 +37,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ isVisible, onCom
     'gaia-anchor',
     'sovereignty',
     'aura-introduction',
+    'felony-principle',
     'first-step'
   ];
 
@@ -107,6 +109,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ isVisible, onCom
         return <SovereigntyReminder {...stepProps} />;
       case 'aura-introduction':
         return <AuraIntroduction {...stepProps} />;
+      case 'felony-principle':
+        return <FelonyPrincipleIntroduction {...stepProps} />;
       case 'first-step':
         return <FirstStepInvitation selectedPath={selectedPath} {...stepProps} />;
       default:

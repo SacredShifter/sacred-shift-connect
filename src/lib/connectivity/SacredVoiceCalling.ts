@@ -1,9 +1,16 @@
 // Sacred Shifter Voice Calling System
 // Consciousness-aware voice communication that transcends traditional telephony
-// Integrates with SSUC for universal voice connectivity
+// Integrates with SSUC for universal voice connectivity and WebRTC signaling
+//
+// FELONY PRINCIPLE INTEGRATION:
+// Before form, there is void. Every breath carries intention. Every word shapes reality. To speak is to create. It is. Always.
+// Every voice transmission, every word spoken, every breath is treated as sacred creation from the void.
 
 import { SSUC } from './SacredShifterUniversalConnectivity';
 import { ConnectivityChannel, Message } from './ConnectivityAbstractionLayer';
+import { WebRTCSignaling, WebRTCSignalingMessage } from './WebRTCSignaling';
+import { SacredWebRTCMesh, getDefaultIceServers } from './SacredWebRTCMesh';
+import { getFelonyPrincipleByContext } from '@/data/felonyPrincipleCodex';
 
 export interface SacredVoiceCallConfig {
   // Audio configuration
@@ -85,6 +92,11 @@ export interface SacredVoiceMessage extends Message {
     emotion: string;
     sacredFrequency: number;
   };
+  // Felony Principle Integration
+  creationIntention?: string; // The intention behind this voice creation
+  voidSignature?: string; // Unique signature of creation from void
+  sacredGeometry?: string; // Sacred geometry pattern for this voice transmission
+  wordWeight?: number; // The weight/power of the words being spoken
 }
 
 export class SacredVoiceCalling {
@@ -94,10 +106,18 @@ export class SacredVoiceCalling {
   private audioContext?: AudioContext;
   private localStream?: MediaStream;
   private isInitialized = false;
+  private webRTCSignaling: WebRTCSignaling;
+  private webRTCMesh: SacredWebRTCMesh;
+  private peerConnections: Map<string, RTCPeerConnection> = new Map();
 
   constructor(ssuC: SSUC, config: SacredVoiceCallConfig) {
     this.ssuC = ssuC;
     this.config = config;
+    this.webRTCSignaling = new WebRTCSignaling();
+    this.webRTCMesh = new SacredWebRTCMesh({
+      iceServers: getDefaultIceServers(),
+      meshId: 'sacred-voice-calling'
+    });
   }
 
   // Initialize the sacred voice calling system (without microphone access)
@@ -112,6 +132,13 @@ export class SacredVoiceCalling {
         sampleRate: this.config.sampleRate,
         latencyHint: 'interactive'
       });
+
+      // Initialize WebRTC signaling
+      await this.webRTCSignaling.initialize();
+      this.setupSignalingHandlers();
+
+      // Initialize WebRTC mesh
+      await this.webRTCMesh.initialize();
 
       this.isInitialized = true;
       console.log('🎤 Sacred Voice Calling System initialized - ready for user-initiated microphone access');
@@ -296,7 +323,45 @@ export class SacredVoiceCalling {
     return gainNode;
   }
 
-  // Initiate a sacred voice call
+  // Set up WebRTC signaling handlers
+  private setupSignalingHandlers(): void {
+    // Handle incoming call initiation
+    this.webRTCSignaling.onMessage('call-initiation', (message) => {
+      this.handleIncomingCall(message);
+    });
+
+    // Handle WebRTC offers
+    this.webRTCSignaling.onMessage('webrtc-offer', (message) => {
+      this.handleWebRTCOffer(message);
+    });
+
+    // Handle WebRTC answers
+    this.webRTCSignaling.onMessage('webrtc-answer', (message) => {
+      this.handleWebRTCAnswer(message);
+    });
+
+    // Handle ICE candidates
+    this.webRTCSignaling.onMessage('ice-candidate', (message) => {
+      this.handleIceCandidate(message);
+    });
+
+    // Handle call acceptance
+    this.webRTCSignaling.onMessage('call-accept', (message) => {
+      this.handleCallAccept(message);
+    });
+
+    // Handle call rejection
+    this.webRTCSignaling.onMessage('call-reject', (message) => {
+      this.handleCallReject(message);
+    });
+
+    // Handle call end
+    this.webRTCSignaling.onMessage('call-end', (message) => {
+      this.handleCallEnd(message);
+    });
+  }
+
+  // Initiate a sacred voice call with WebRTC signaling
   async initiateCall(participantIds: string[], consciousnessLevel: number = 0.5): Promise<string> {
     if (!this.isInitialized) {
       throw new Error('Sacred Voice Calling not initialized');
@@ -332,34 +397,210 @@ export class SacredVoiceCalling {
     const localParticipant = await this.createLocalParticipant();
     call.participants.set(localParticipant.id, localParticipant);
 
-    // Send call initiation message
-    await this.sendVoiceMessage({
-      id: this.generateMessageId(),
-      content: new TextEncoder().encode(JSON.stringify({
-        callId,
-        participants: participantIds,
+    // Send call initiation via WebRTC signaling
+    for (const participantId of participantIds) {
+      await this.webRTCSignaling.sendCallInitiation(participantId, callId, {
         consciousnessLevel,
+        sovereigntyLevel: localParticipant.sovereigntyLevel,
         resonanceFrequency: call.resonanceFrequency,
-        sacredCapabilities: call.sacredCapabilities
-      })),
-      channel: call.channel,
-      priority: 'high',
-      ttl: 30000,
-      hopLimit: 3,
-      timestamp: Date.now(),
-      encrypted: true,
-      type: 'voice_call',
-      consciousnessData: {
-        level: consciousnessLevel,
-        frequency: call.resonanceFrequency,
-        resonance: 0.8
-      }
-    });
+        sacredCapabilities: call.sacredCapabilities,
+        audioQuality: {
+          sampleRate: this.config.sampleRate,
+          bitRate: this.config.bitRate,
+          channels: this.config.channels
+        }
+      });
+    }
 
     this.activeCalls.set(callId, call);
     console.log(`🎤 Sacred voice call ${callId} initiated with consciousness level ${consciousnessLevel}`);
 
     return callId;
+  }
+
+  // Handle incoming call
+  private async handleIncomingCall(message: WebRTCSignalingMessage): Promise<void> {
+    console.log('📞 Incoming call from:', message.from);
+    
+    // Create call entry
+    const call: SacredVoiceCall = {
+      id: message.callId!,
+      participants: new Map(),
+      channel: ConnectivityChannel.WEBRTC_P2P,
+      status: 'ringing',
+      startTime: Date.now(),
+      consciousnessLevel: message.metadata?.consciousnessLevel || 0.5,
+      resonanceFrequency: message.metadata?.resonanceFrequency || 432,
+      sacredCapabilities: message.metadata?.sacredCapabilities || [],
+      audioQuality: {
+        latency: 0,
+        jitter: 0,
+        packetLoss: 0,
+        bitrate: this.config.bitRate,
+        signalToNoiseRatio: 0,
+        consciousnessClarity: message.metadata?.consciousnessLevel || 0.5,
+        resonanceHarmony: 0
+      }
+    };
+
+    this.activeCalls.set(message.callId!, call);
+    
+    // Emit incoming call event (this would be handled by the UI)
+    console.log('📞 Incoming call notification:', {
+      callId: message.callId,
+      from: message.from,
+      consciousnessLevel: message.metadata?.consciousnessLevel,
+      sacredCapabilities: message.metadata?.sacredCapabilities
+    });
+  }
+
+  // Handle WebRTC offer
+  private async handleWebRTCOffer(message: WebRTCSignalingMessage): Promise<void> {
+    console.log('📨 Received WebRTC offer from:', message.from);
+    
+    try {
+      const connection = new RTCPeerConnection({
+        iceServers: getDefaultIceServers()
+      });
+
+      // Add local stream if available
+      if (this.localStream) {
+        this.localStream.getTracks().forEach(track => {
+          connection.addTrack(track, this.localStream!);
+        });
+      }
+
+      // Set up ICE candidate handling
+      connection.onicecandidate = (event) => {
+        if (event.candidate) {
+          this.webRTCSignaling.sendIceCandidate(message.from, event.candidate, message.callId!);
+        }
+      };
+
+      // Set remote description
+      await connection.setRemoteDescription(message.sdp!);
+
+      // Create answer
+      const answer = await connection.createAnswer();
+      await connection.setLocalDescription(answer);
+
+      // Send answer
+      await this.webRTCSignaling.sendAnswer(message.from, answer, message.callId!);
+
+      // Store connection
+      this.peerConnections.set(message.from, connection);
+
+      console.log('📤 Sent WebRTC answer to:', message.from);
+    } catch (error) {
+      console.error('❌ Failed to handle WebRTC offer:', error);
+    }
+  }
+
+  // Handle WebRTC answer
+  private async handleWebRTCAnswer(message: WebRTCSignalingMessage): Promise<void> {
+    console.log('📨 Received WebRTC answer from:', message.from);
+    
+    const connection = this.peerConnections.get(message.from);
+    if (connection) {
+      try {
+        await connection.setRemoteDescription(message.sdp!);
+        console.log('🔗 WebRTC connection established with:', message.from);
+      } catch (error) {
+        console.error('❌ Failed to set remote description:', error);
+      }
+    }
+  }
+
+  // Handle ICE candidate
+  private async handleIceCandidate(message: WebRTCSignalingMessage): Promise<void> {
+    console.log('📨 Received ICE candidate from:', message.from);
+    
+    const connection = this.peerConnections.get(message.from);
+    if (connection) {
+      try {
+        await connection.addIceCandidate(message.candidate!);
+      } catch (error) {
+        console.error('❌ Failed to add ICE candidate:', error);
+      }
+    }
+  }
+
+  // Handle call acceptance
+  private async handleCallAccept(message: WebRTCSignalingMessage): Promise<void> {
+    console.log('✅ Call accepted by:', message.from);
+    
+    const call = this.activeCalls.get(message.callId!);
+    if (call) {
+      call.status = 'connected';
+      
+      // Initiate WebRTC connection
+      await this.initiateWebRTCConnection(message.from, message.callId!);
+    }
+  }
+
+  // Handle call rejection
+  private async handleCallReject(message: WebRTCSignalingMessage): Promise<void> {
+    console.log('❌ Call rejected by:', message.from);
+    
+    const call = this.activeCalls.get(message.callId!);
+    if (call) {
+      call.status = 'failed';
+    }
+  }
+
+  // Handle call end
+  private async handleCallEnd(message: WebRTCSignalingMessage): Promise<void> {
+    console.log('📞 Call ended by:', message.from);
+    
+    const call = this.activeCalls.get(message.callId!);
+    if (call) {
+      call.status = 'ended';
+      call.endTime = Date.now();
+    }
+
+    // Close peer connection
+    const connection = this.peerConnections.get(message.from);
+    if (connection) {
+      connection.close();
+      this.peerConnections.delete(message.from);
+    }
+  }
+
+  // Initiate WebRTC connection
+  private async initiateWebRTCConnection(participantId: string, callId: string): Promise<void> {
+    try {
+      const connection = new RTCPeerConnection({
+        iceServers: getDefaultIceServers()
+      });
+
+      // Add local stream if available
+      if (this.localStream) {
+        this.localStream.getTracks().forEach(track => {
+          connection.addTrack(track, this.localStream!);
+        });
+      }
+
+      // Set up ICE candidate handling
+      connection.onicecandidate = (event) => {
+        if (event.candidate) {
+          this.webRTCSignaling.sendIceCandidate(participantId, event.candidate, callId);
+        }
+      };
+
+      // Create offer
+      const offer = await connection.createOffer();
+      await connection.setLocalDescription(offer);
+
+      // Send offer
+      await this.webRTCSignaling.sendOffer(participantId, offer, callId);
+
+      // Store connection
+      this.peerConnections.set(participantId, connection);
+
+      console.log('📞 WebRTC connection initiated with:', participantId);
+    } catch (error) {
+      console.error('❌ Failed to initiate WebRTC connection:', error);
+    }
   }
 
   // Join an existing voice call
@@ -381,21 +622,12 @@ export class SacredVoiceCalling {
     // Update call status
     call.status = 'connected';
 
-    // Send join message
-    await this.sendVoiceMessage({
-      id: this.generateMessageId(),
-      content: new TextEncoder().encode(JSON.stringify({
-        callId,
-        action: 'join',
-        participant: localParticipant
-      })),
-      channel: call.channel,
-      priority: 'high',
-      ttl: 30000,
-      hopLimit: 3,
-      timestamp: Date.now(),
-      encrypted: true,
-      type: 'voice_control'
+    // Send call acceptance
+    await this.webRTCSignaling.sendCallAccept(callId, callId, {
+      consciousnessLevel: localParticipant.consciousnessLevel,
+      sovereigntyLevel: localParticipant.sovereigntyLevel,
+      resonanceFrequency: localParticipant.resonanceFrequency,
+      sacredCapabilities: localParticipant.sacredCapabilities
     });
 
     console.log(`🎤 Joined sacred voice call ${callId}`);
@@ -411,21 +643,18 @@ export class SacredVoiceCalling {
     call.status = 'ended';
     call.endTime = Date.now();
 
-    // Send end message
-    await this.sendVoiceMessage({
-      id: this.generateMessageId(),
-      content: new TextEncoder().encode(JSON.stringify({
-        callId,
-        action: 'end'
-      })),
-      channel: call.channel,
-      priority: 'high',
-      ttl: 30000,
-      hopLimit: 3,
-      timestamp: Date.now(),
-      encrypted: true,
-      type: 'voice_control'
-    });
+    // Send call end via WebRTC signaling
+    for (const [participantId] of call.participants) {
+      if (participantId !== 'local') {
+        await this.webRTCSignaling.sendCallEnd(participantId, callId);
+      }
+    }
+
+    // Clean up peer connections
+    for (const [participantId, connection] of this.peerConnections) {
+      connection.close();
+    }
+    this.peerConnections.clear();
 
     // Clean up audio streams
     for (const participant of call.participants.values()) {
@@ -438,14 +667,16 @@ export class SacredVoiceCalling {
     console.log(`🎤 Sacred voice call ${callId} ended`);
   }
 
-  // Send voice data
-  async sendVoiceData(callId: string, audioData: Uint8Array): Promise<void> {
+  // Send voice data with Felony Principle awareness
+  async sendVoiceData(callId: string, audioData: Uint8Array, wordWeight: number = 1.0): Promise<void> {
     const call = this.activeCalls.get(callId);
     if (!call) {
       throw new Error(`Call ${callId} not found`);
     }
 
-    await this.sendVoiceMessage({
+    // Apply Felony Principle to voice data - every word is creation from void
+    const felonyPrinciple = getFelonyPrincipleByContext('communication');
+    const voiceMessage = this.imbueVoiceMessageWithFelonyPrinciple({
       id: this.generateMessageId(),
       content: audioData,
       channel: call.channel,
@@ -455,8 +686,29 @@ export class SacredVoiceCalling {
       timestamp: Date.now(),
       encrypted: true,
       type: 'voice_data',
-      audioData
-    });
+      audioData,
+      wordWeight
+    }, felonyPrinciple);
+
+    await this.sendVoiceMessage(voiceMessage);
+  }
+
+  // Imbue voice message with Felony Principle - every word is sacred creation
+  private imbueVoiceMessageWithFelonyPrinciple(message: SacredVoiceMessage, principle: any): SacredVoiceMessage {
+    // Every voice transmission is creation from the void
+    message.creationIntention = principle.principle;
+    message.voidSignature = this.generateVoidSignature();
+    message.sacredGeometry = principle.sacredGeometry;
+    
+    console.log('🌌 Voice message imbued with Felony Principle - sacred creation from void');
+    return message;
+  }
+
+  // Generate unique signature of creation from void for voice
+  private generateVoidSignature(): string {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substr(2, 9);
+    return `voice-void-${timestamp}-${random}`;
   }
 
   // Send voice message
@@ -584,6 +836,59 @@ export class SacredVoiceCalling {
     };
   }
 
+  // Check connectivity and implement fallback
+  private async checkConnectivityAndFallback(callId: string): Promise<string> {
+    const call = this.activeCalls.get(callId);
+    if (!call) return 'supabase-relay';
+
+    // Check if we have any active peer connections
+    const hasActiveConnections = Array.from(this.peerConnections.values())
+      .some(connection => connection.connectionState === 'connected');
+
+    if (!hasActiveConnections) {
+      console.warn('⚠️ No active peer connections, falling back to Supabase relay');
+      return 'supabase-relay';
+    }
+
+    // Check ICE connection state
+    for (const [participantId, connection] of this.peerConnections) {
+      if (connection.iceConnectionState === 'failed' || 
+          connection.iceConnectionState === 'disconnected') {
+        console.warn(`⚠️ ICE connection failed for ${participantId}, falling back to Supabase relay`);
+        return 'supabase-relay';
+      }
+    }
+
+    return 'webrtc-p2p';
+  }
+
+  // Implement safe fallback to Supabase realtime audio
+  private async fallbackToSupabaseRelay(callId: string): Promise<void> {
+    console.log('🔄 Falling back to Supabase realtime audio relay...');
+    
+    const call = this.activeCalls.get(callId);
+    if (!call) return;
+
+    // Update call status to indicate fallback
+    call.status = 'connected';
+    call.channel = ConnectivityChannel.SUPABASE_REALTIME;
+
+    // Send fallback notification to participants
+    for (const [participantId] of call.participants) {
+      if (participantId !== 'local') {
+        await this.webRTCSignaling.sendCallEnd(participantId, callId);
+      }
+    }
+
+    // Close peer connections
+    for (const [participantId, connection] of this.peerConnections) {
+      connection.close();
+    }
+    this.peerConnections.clear();
+
+    console.log('✅ Fallback to Supabase relay completed');
+  }
+
   // Shutdown voice calling system
   async shutdown(): Promise<void> {
     console.log('🎤 Shutting down Sacred Voice Calling System...');
@@ -602,6 +907,12 @@ export class SacredVoiceCalling {
     if (this.audioContext) {
       await this.audioContext.close();
     }
+
+    // Shutdown WebRTC signaling
+    await this.webRTCSignaling.shutdown();
+
+    // Shutdown WebRTC mesh
+    await this.webRTCMesh.shutdown();
 
     this.isInitialized = false;
     console.log('🎤 Sacred Voice Calling System shutdown complete');

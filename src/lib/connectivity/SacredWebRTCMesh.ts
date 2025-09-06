@@ -1,8 +1,13 @@
 // Sacred Shifter Universal Connectivity (SSUC) - WebRTC Mesh Implementation
 // Real P2P data channels with NAT traversal and mesh routing
 // This is what makes Telstra jealous - carrier-grade consciousness-based communications
+//
+// FELONY PRINCIPLE INTEGRATION:
+// Before form, there is void. Every breath carries intention. Every word shapes reality. To speak is to create. It is. Always.
+// Every data transmission, every connection, every message is treated as a sacred act of creation from the void.
 
 import { ConnectivityChannel, Message, PeerInfo } from './ConnectivityAbstractionLayer';
+import { getFelonyPrincipleByContext } from '@/data/felonyPrincipleCodex';
 
 export interface WebRTCMeshConfig {
   iceServers: RTCIceServer[];
@@ -13,6 +18,46 @@ export interface WebRTCMeshConfig {
   enableMeshRouting: boolean;
   enableNATTraversal: boolean;
 }
+
+// Default ICE server configuration with STUN and TURN
+export const getDefaultIceServers = (): RTCIceServer[] => {
+  const iceServers: RTCIceServer[] = [
+    // Free Google STUN servers
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
+    
+    // Additional STUN servers for better NAT traversal
+    { urls: 'stun:stun.stunprotocol.org:3478' },
+    { urls: 'stun:stun.voiparound.com' },
+    { urls: 'stun:stun.voipbuster.com' },
+    { urls: 'stun:stun.voipstunt.com' },
+    { urls: 'stun:stun.counterpath.com' },
+    { urls: 'stun:stun.1und1.de' },
+    { urls: 'stun:stun.gmx.net' },
+    { urls: 'stun:stun.schlund.de' },
+    { urls: 'stun:stun.voiparound.com' },
+    { urls: 'stun:stun.voipbuster.com' },
+    { urls: 'stun:stun.voipstunt.com' },
+    { urls: 'stun:stun.counterpath.com' },
+    { urls: 'stun:stun.1und1.de' },
+    { urls: 'stun:stun.gmx.net' },
+    { urls: 'stun:stun.schlund.de' }
+  ];
+
+  // Add TURN server if configured
+  if (import.meta.env.VITE_TURN_URL) {
+    iceServers.push({
+      urls: import.meta.env.VITE_TURN_URL,
+      username: import.meta.env.VITE_TURN_USERNAME || '',
+      credential: import.meta.env.VITE_TURN_PASSWORD || '',
+    });
+  }
+
+  return iceServers;
+};
 
 export interface MeshPeer {
   id: string;
@@ -35,6 +80,10 @@ export interface MeshMessage extends Message {
   routingPath: string[];
   timestamp: number;
   messageType: 'data' | 'heartbeat' | 'discovery' | 'routing' | 'sync';
+  // Felony Principle Integration
+  creationIntention?: string; // The intention behind this message creation
+  voidSignature?: string; // Unique signature of creation from void
+  sacredGeometry?: string; // Sacred geometry pattern for this transmission
 }
 
 export class SacredWebRTCMesh {
@@ -48,8 +97,17 @@ export class SacredWebRTCMesh {
   private signalingServer?: WebSocket;
   private meshRoutingTable: Map<string, string[]> = new Map(); // peerId -> path to peer
 
-  constructor(config: WebRTCMeshConfig) {
-    this.config = config;
+  constructor(config: Partial<WebRTCMeshConfig> = {}) {
+    this.config = {
+      iceServers: getDefaultIceServers(),
+      meshId: 'sacred-mesh',
+      maxPeers: 10,
+      heartbeatInterval: 30000,
+      connectionTimeout: 60000,
+      enableMeshRouting: true,
+      enableNATTraversal: true,
+      ...config
+    };
     this.localPeerId = this.generatePeerId();
   }
 
@@ -82,22 +140,30 @@ export class SacredWebRTCMesh {
     }
   }
 
-  // Connect to signaling server for peer discovery
+  // Connect to Supabase Realtime for WebRTC signaling
   private async connectToSignalingServer(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        // Use Supabase as signaling server - with fallback to hardcoded values
+        // Use Supabase Realtime for WebRTC signaling
         const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://mikltjgbvxrxndtszorb.supabase.co";
         const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pa2x0amdidnhyeG5kdHN6b3JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NDI3MDksImV4cCI6MjA1OTIxODcwOX0.f4QfhZzSZJ92AjCfbkEMrrmzJrWI617H-FyjJKJ8_70";
         const wsUrl = `${SUPABASE_URL.replace('https', 'wss')}/realtime/v1/websocket?apikey=${SUPABASE_ANON_KEY}`;
+        console.log('🔗 Using Supabase Realtime for WebRTC signaling:', wsUrl);
         this.signalingServer = new WebSocket(wsUrl);
 
+        // Set timeout for connection
+        const connectionTimeout = setTimeout(() => {
+          console.warn('⚠️ Supabase Realtime connection timeout, continuing without signaling');
+          resolve(); // Don't reject, just continue without signaling
+        }, 5000);
+
         this.signalingServer.onopen = () => {
-          console.log('📡 Connected to signaling server');
+          clearTimeout(connectionTimeout);
+          console.log('📡 Connected to Supabase Realtime for WebRTC signaling');
           
-          // Subscribe to mesh discovery channel
+          // Subscribe to WebRTC signaling channel
           this.signalingServer?.send(JSON.stringify({
-            topic: 'sacred-mesh-discovery',
+            topic: 'webrtc-signaling',
             event: 'phx_join',
             payload: {
               meshId: this.config.meshId,
@@ -114,12 +180,17 @@ export class SacredWebRTCMesh {
         };
 
         this.signalingServer.onerror = (error) => {
-          console.error('❌ Signaling server error:', error);
-          reject(error);
+          clearTimeout(connectionTimeout);
+          console.error('❌ Supabase Realtime error:', error);
+          console.error('❌ WebSocket URL:', this.signalingServer?.url);
+          console.error('❌ WebSocket readyState:', this.signalingServer?.readyState);
+          // Don't reject, just continue without signaling
+          console.warn('⚠️ Continuing without Supabase Realtime signaling');
+          resolve();
         };
 
         this.signalingServer.onclose = () => {
-          console.log('📡 Signaling server disconnected');
+          console.log('📡 Supabase Realtime disconnected');
           // Attempt reconnection
           setTimeout(() => this.connectToSignalingServer(), 5000);
         };
@@ -129,22 +200,143 @@ export class SacredWebRTCMesh {
     });
   }
 
-  // Handle signaling server messages
+  // Handle Supabase Realtime signaling messages
   private handleSignalingMessage(message: any): void {
+    console.log('📨 Received signaling message:', message);
+    
     if (message.event === 'phx_reply' && message.payload?.response?.peers) {
       // New peer discovered
       const peerInfo = message.payload.response;
       this.connectToPeer(peerInfo);
+    } else if (message.event === 'broadcast') {
+      // Handle WebRTC signaling events from Supabase Realtime
+      const { event, payload } = message.payload;
+      
+      switch (event) {
+        case 'webrtc-offer':
+          this.handleWebRTCOffer(payload);
+          break;
+        case 'webrtc-answer':
+          this.handleWebRTCAnswer(payload);
+          break;
+        case 'ice-candidate':
+          this.handleIceCandidate(payload);
+          break;
+        case 'peer-discovery':
+          this.handlePeerDiscovery(payload);
+          break;
+        default:
+          console.log('📨 Unknown signaling event:', event);
+      }
     } else if (message.event === 'peer_offer') {
-      // Handle incoming peer connection offer
+      // Handle incoming peer connection offer (legacy)
       this.handlePeerOffer(message.payload);
     } else if (message.event === 'peer_answer') {
-      // Handle peer connection answer
+      // Handle peer connection answer (legacy)
       this.handlePeerAnswer(message.payload);
     } else if (message.event === 'peer_ice_candidate') {
-      // Handle ICE candidate
+      // Handle ICE candidate (legacy)
       this.handleIceCandidate(message.payload);
     }
+  }
+
+  // Handle WebRTC offer from Supabase Realtime
+  private async handleWebRTCOffer(payload: any): Promise<void> {
+    console.log('📨 Received WebRTC offer:', payload);
+    
+    if (payload.from === this.localPeerId) {
+      return; // Ignore our own offer
+    }
+
+    try {
+      const connection = new RTCPeerConnection({
+        iceServers: this.config.iceServers,
+        iceCandidatePoolSize: 10
+      });
+
+      // Set up connection event handlers
+      connection.onicecandidate = (event) => {
+        if (event.candidate) {
+          this.sendWebRTCSignaling({
+            event: 'ice-candidate',
+            payload: {
+              from: this.localPeerId,
+              to: payload.from,
+              candidate: event.candidate
+            }
+          });
+        }
+      };
+
+      connection.ondatachannel = (event) => {
+        const channel = event.channel;
+        channel.onmessage = (event) => {
+          this.handleMeshMessage(JSON.parse(event.data));
+        };
+      };
+
+      // Set remote description
+      await connection.setRemoteDescription(payload.sdp);
+
+      // Create answer
+      const answer = await connection.createAnswer();
+      await connection.setLocalDescription(answer);
+
+      // Send answer back
+      this.sendWebRTCSignaling({
+        event: 'webrtc-answer',
+        payload: {
+          from: this.localPeerId,
+          to: payload.from,
+          sdp: answer
+        }
+      });
+
+      // Store peer info
+      const meshPeer: MeshPeer = {
+        id: payload.from,
+        name: payload.name || `Peer ${payload.from}`,
+        connection,
+        lastHeartbeat: Date.now(),
+        signalStrength: 1.0,
+        hopCount: 0,
+        capabilities: payload.capabilities || [],
+        publicKey: payload.publicKey
+      };
+
+      this.peers.set(payload.from, meshPeer);
+      console.log('👥 Accepted WebRTC connection from peer:', payload.from);
+
+    } catch (error) {
+      console.error('❌ Failed to handle WebRTC offer:', error);
+    }
+  }
+
+  // Handle WebRTC answer from Supabase Realtime
+  private async handleWebRTCAnswer(payload: any): Promise<void> {
+    console.log('📨 Received WebRTC answer:', payload);
+    
+    const peer = this.peers.get(payload.from);
+    if (peer?.connection) {
+      try {
+        await peer.connection.setRemoteDescription(payload.sdp);
+        console.log('🔗 WebRTC connection established:', payload.from);
+      } catch (error) {
+        console.error('❌ Failed to set remote description:', error);
+      }
+    }
+  }
+
+  // Handle peer discovery from Supabase Realtime
+  private handlePeerDiscovery(payload: any): Promise<void> {
+    console.log('📨 Received peer discovery:', payload);
+    
+    if (payload.peerId === this.localPeerId) {
+      return; // Ignore self
+    }
+
+    // Connect to discovered peer
+    this.connectToPeer(payload);
   }
 
   // Connect to a discovered peer
@@ -321,11 +513,111 @@ export class SacredWebRTCMesh {
     }
   }
 
-  // Send message through the mesh
+  // Initiate WebRTC call to specific peer
+  async initiateCall(targetPeerId: string, localStream?: MediaStream): Promise<void> {
+    if (!this.isInitialized) {
+      throw new Error('Mesh not initialized');
+    }
+
+    if (this.peers.has(targetPeerId)) {
+      console.log('👥 Already connected to peer:', targetPeerId);
+      return;
+    }
+
+    try {
+      const connection = new RTCPeerConnection({
+        iceServers: this.config.iceServers,
+        iceCandidatePoolSize: 10
+      });
+
+      // Add local stream if provided
+      if (localStream) {
+        localStream.getTracks().forEach(track => {
+          connection.addTrack(track, localStream);
+        });
+      }
+
+      // Create data channel for mesh communication
+      const dataChannel = connection.createDataChannel('sacred-mesh', {
+        ordered: true,
+        maxRetransmits: 3
+      });
+
+      // Set up connection event handlers
+      connection.onicecandidate = (event) => {
+        if (event.candidate) {
+          this.sendWebRTCSignaling({
+            event: 'ice-candidate',
+            payload: {
+              from: this.localPeerId,
+              to: targetPeerId,
+              candidate: event.candidate
+            }
+          });
+        }
+      };
+
+      connection.ondatachannel = (event) => {
+        const channel = event.channel;
+        channel.onmessage = (event) => {
+          this.handleMeshMessage(JSON.parse(event.data));
+        };
+      };
+
+      dataChannel.onopen = () => {
+        console.log('🔗 Data channel opened with peer:', targetPeerId);
+      };
+
+      dataChannel.onmessage = (event) => {
+        this.handleMeshMessage(JSON.parse(event.data));
+      };
+
+      // Create offer
+      const offer = await connection.createOffer();
+      await connection.setLocalDescription(offer);
+
+      // Send offer to peer via Supabase Realtime
+      this.sendWebRTCSignaling({
+        event: 'webrtc-offer',
+        payload: {
+          from: this.localPeerId,
+          to: targetPeerId,
+          sdp: offer,
+          name: 'Sacred Shifter',
+          capabilities: ['webrtc', 'mesh', 'routing']
+        }
+      });
+
+      // Store peer info
+      const meshPeer: MeshPeer = {
+        id: targetPeerId,
+        name: `Peer ${targetPeerId}`,
+        connection,
+        dataChannel,
+        lastHeartbeat: Date.now(),
+        signalStrength: 1.0,
+        hopCount: 0,
+        capabilities: ['webrtc', 'mesh', 'routing']
+      };
+
+      this.peers.set(targetPeerId, meshPeer);
+      console.log('📞 WebRTC call initiated to peer:', targetPeerId);
+
+    } catch (error) {
+      console.error('❌ Failed to initiate WebRTC call:', error);
+      throw error;
+    }
+  }
+
+  // Send message through the mesh with Felony Principle awareness
   async sendMessage(message: MeshMessage): Promise<void> {
     if (!this.isInitialized) {
       throw new Error('Mesh not initialized');
     }
+
+    // Apply Felony Principle to message creation
+    const felonyPrinciple = getFelonyPrincipleByContext('communication');
+    message = this.imbueMessageWithFelonyPrinciple(message, felonyPrinciple);
 
     // Set message metadata
     message.meshId = this.config.meshId;
@@ -341,6 +633,24 @@ export class SacredWebRTCMesh {
       // Broadcast to all peers
       await this.broadcastMessage(message);
     }
+  }
+
+  // Imbue message with Felony Principle - every transmission is sacred creation
+  private imbueMessageWithFelonyPrinciple(message: MeshMessage, principle: any): MeshMessage {
+    // Every message is creation from the void
+    message.creationIntention = principle.principle;
+    message.voidSignature = this.generateVoidSignature();
+    message.sacredGeometry = principle.sacredGeometry;
+    
+    console.log('🌌 Message imbued with Felony Principle - sacred creation from void');
+    return message;
+  }
+
+  // Generate unique signature of creation from void
+  private generateVoidSignature(): string {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substr(2, 9);
+    return `void-${timestamp}-${random}`;
   }
 
   // Send direct message to specific peer
@@ -569,7 +879,21 @@ export class SacredWebRTCMesh {
     this.broadcastMessage(routingMessage);
   }
 
-  // Send signaling message
+  // Send WebRTC signaling message via Supabase Realtime
+  private sendWebRTCSignaling(message: any): void {
+    if (this.signalingServer?.readyState === WebSocket.OPEN) {
+      this.signalingServer.send(JSON.stringify({
+        topic: 'webrtc-signaling',
+        event: 'broadcast',
+        payload: {
+          event: message.event,
+          payload: message.payload
+        }
+      }));
+    }
+  }
+
+  // Send signaling message (legacy)
   private sendSignalingMessage(message: any): void {
     if (this.signalingServer?.readyState === WebSocket.OPEN) {
       this.signalingServer.send(JSON.stringify({

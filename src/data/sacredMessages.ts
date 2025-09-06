@@ -1,4 +1,4 @@
-export type MessageCategory = 'truth_anchors' | 'integration_reminders' | 'collective_seeds' | 'sacred_shifter_identity' | 'subtle_micro_teachings' | 'daily_routine_nudges' | 'progress_celebration' | 'morning_encouragement' | 'evening_reflection';
+export type MessageCategory = 'truth_anchors' | 'integration_reminders' | 'collective_seeds' | 'sacred_shifter_identity' | 'subtle_micro_teachings' | 'daily_routine_nudges' | 'progress_celebration' | 'morning_encouragement' | 'evening_reflection' | 'felony_principle';
 
 export interface SacredMessage {
   id: string;
@@ -415,6 +415,68 @@ export const sacredMessages: SacredMessage[] = [
     category: 'evening_reflection',
     weight: 2.0,
     timeOfDay: 'evening'
+  },
+
+  // Felony Principle of Word and Breath
+  {
+    id: 'fp1',
+    text: 'Before form, there is void.',
+    category: 'felony_principle',
+    weight: 1.5
+  },
+  {
+    id: 'fp2',
+    text: 'Every breath carries intention.',
+    category: 'felony_principle',
+    weight: 1.5
+  },
+  {
+    id: 'fp3',
+    text: 'Every word shapes reality.',
+    category: 'felony_principle',
+    weight: 1.5
+  },
+  {
+    id: 'fp4',
+    text: 'To speak is to create.',
+    category: 'felony_principle',
+    weight: 1.5
+  },
+  {
+    id: 'fp5',
+    text: 'It is. Always.',
+    category: 'felony_principle',
+    weight: 1.5
+  },
+  {
+    id: 'fp6',
+    text: 'The void is infinite potential.',
+    category: 'felony_principle',
+    weight: 1.5
+  },
+  {
+    id: 'fp7',
+    text: 'Creation is the spark in darkness.',
+    category: 'felony_principle',
+    weight: 1.5
+  },
+  {
+    id: 'fp8',
+    text: 'Every action emerges from the void.',
+    category: 'felony_principle',
+    weight: 1.5
+  },
+  {
+    id: 'fp9',
+    text: 'Intention shapes the unformed.',
+    category: 'felony_principle',
+    weight: 1.5
+  },
+  {
+    id: 'fp10',
+    text: 'Reality is created with each breath.',
+    category: 'felony_principle',
+    weight: 1.5
   }
 ];
 
@@ -428,7 +490,8 @@ export const categoryWeights: Record<MessageCategory, number> = {
   daily_routine_nudges: 3.0, // High priority for active practices
   progress_celebration: 2.5, // Celebrate achievements
   morning_encouragement: 2.0, // Morning motivation
-  evening_reflection: 2.0 // Evening integration
+  evening_reflection: 2.0, // Evening integration
+  felony_principle: 1.5 // Core creation law - foundational
 };
 
 // Helper function to get current time of day
